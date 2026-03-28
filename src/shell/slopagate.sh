@@ -211,6 +211,23 @@ SLOP_TOOLS_JSON="[
         }
       }
     }
+  },
+  {
+    \"type\": \"function\",
+    \"function\": {
+      \"name\": \"edit\",
+      \"description\": \"Edit a file to insert text starting at a line, or replace text in a range\",
+      \"parameters\": {
+        \"type\": \"object\",
+        \"properties\": {
+          \"file_name\": { \"type\": \"string\" },
+          \"content\": { \"type\": \"string\" },
+          \"start_line\": { \"type\": \"integer\" },
+          \"end_line\": { \"type\": \"integer\" }
+        }
+      },
+      \"required\": [ \"file_name\", \"content\", \"start_line\" ]
+    }
   }
 ]"
 SLOP_TOOLS_JSON=$(printf "%s" "$SLOP_TOOLS_JSON" | jq -c)
@@ -288,34 +305,7 @@ handle_model_tool() {
     color_muted "$(printf "Running shell command \"%s %s\"" "$call_command" "$call_args")"
     echo -e "\n"
 
-    local call_result=$($call_command $call_args 2>&1 | printf "%q")
-
-  elif [[ "$call_name" = "read" ]]; then
-    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
-    local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
-    local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
-
-    color_muted "$(printf "Reading \"%s\"" "$call_file")"
-    echo -e "\n"
-    
-    if [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
-      local call_result=$(cat $call_file 2>&1)
-    elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
-      local call_result=$(tail --lines="-$call_sline" $call_file 2>&1)
-    elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
-      local call_result=$(head --lines="$call_eline" $call_file 2>&1)
-    else
-      local read_len=$call_eline - $call_sline
-      local call_result=$(tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
-    fi
-    
-  elif [[ "$call_name" = "backup" ]]; then
-    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
-
-    color_muted $(printf "Backing up \"%s\"" "$call_file")
-    echo -e "\n"
-
-    local call_result=$(cp "$call_file" "$call_file.bak")
+    call_result=$($call_command $call_args 2>&1 | printf "%q")
 
   elif [[ "$call_name" = "ls" ]]; then
     call_directory=""
@@ -326,11 +316,60 @@ handle_model_tool() {
     
     color_muted $(printf "Listing \"%s\"" "$call_directory")
     echo -e "\n"
-    local call_result=$(ls "$call_directory")
+    call_result=$(ls "$call_directory")
+
+  elif [[ "$call_name" = "read" ]]; then
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
+    local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
+    local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
+
+    color_muted "$(printf "Reading \"%s\"" "$call_file")"
+    echo -e "\n"
+    
+    if [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
+      call_result=$(cat $call_file 2>&1)
+    elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
+      call_result=$(tail --lines="-$call_sline" $call_file 2>&1)
+    elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
+      call_result=$(head --lines="$call_eline" $call_file 2>&1)
+    else
+      local read_len=$call_eline - $call_sline
+      call_result=$(tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
+    fi
+    
+  elif [[ "$call_name" = "edit" ]]; then
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
+    local call_content=$(printf "%s" "$call_arguments" | jq -r '.file_content')
+    local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
+    local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
+
+    color_muted "$(printf "Editing \"%s\"" "$call_file")"
+    echo -e "\n"
+
+    if [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
+      head --lines="$call_sline" "$call_file" > .sloptmp/edit
+      printf "%s" "$call_content" >> .sloptmp/edit
+      tail --lines="-$call_sline" "$call_file" >> .sloptmp/edit
+      cat .sloptmp/edit > "$call_file"
+      rm .sloptmp/edit
+      call_results=""
+      # TODO: replace between start & end with content
+    fi
+    
+    
+  elif [[ "$call_name" = "backup" ]]; then
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
+
+    color_muted $(printf "Backing up \"%s\"" "$call_file")
+    echo -e "\n"
+
+    call_result=$(cp "$call_file" "$call_file.bak")
   fi
   
-  call_result=$(printf "%s" "$call_result" | jq -Rasr)
-  printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
+  if [[ -n "$call_result" ]]; then
+    call_result=$(printf "%s" "$call_result" | jq -Rasr)
+    printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
+  fi
 }
 
 handle_model_response() {
@@ -354,12 +393,15 @@ handle_model_response() {
     # [{ id, function: { index, name, arguments } }, ...]
     touch .sloptmp/tools
     printf "%s" "$message_tools" | jq -c '.[]' | while IFS="" read -r tool_call; do
+      printf "Tool call: %s\n" "$tool_call"
       handle_model_tool "$tool_call"
     done
     local tools_output=$(cat .sloptmp/tools)
     if [[ -n "$tools_output" ]]; then
-      local tools_commas=$(cat .sloptmp/tools | string_join ',')
+      local tools_commas=$(printf "%s" "$tools_output" | string_join ',')
+      printf "Tool output: %s\n" "$tools_output"
       local tools_msgs=$(printf "%s" "$tools_commas" | jq -c)
+      printf "Formatted tool output for server.\n"
       RESPONSE=$(send_raw_ollama_message "$tools_msgs")
       handle_curl_response "$RESPONSE"
       rm .sloptmp/tools
