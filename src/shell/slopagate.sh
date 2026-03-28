@@ -51,7 +51,16 @@ EOF
 fi
 
 
-## Title banner
+## Color utils & title banner
+
+color_bold() {
+  printf '\033[1;37m%s\033[0m' "$1"
+}
+
+color_muted() {
+  printf '\033[1;30m%s\033[0m' "$1"
+}
+
 
 title_banner() {
 cat <<EOF
@@ -71,18 +80,15 @@ cat <<EOF
 EOF
 }
 
-title_banner
+color_bold "$(title_banner)"
+printf "\n\n"
 
 
 ## Config
 
 
-# TODO: -s|--session option that lets you resume from ~/.config/slopagate/history/
-SLOP_SESSION_HISTORY=""
-
-
-if [[ -z "$SLOP_VERBOSE" ]]; then
-  SLOP_VERBOSE=""
+if [[ -n "$SLOP_VERBOSE" ]]; then
+  set -e
 fi
 
 if [[ -z "$SLOP_PORT" ]]; then
@@ -120,8 +126,9 @@ if [[ -f ./.SLOP.md ]]; then
   printf "Reading .SLOP.md...\n"
   SLOP_PROMPT=$(cat ~/.SLOP.md)
 fi
-SLOP_PROMPT=${SLOP_PROMPT//$'\n'/\\n} # Escape newlines
-SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | sed -e 's/"/\\"/g') # Escape double quotes
+SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | jq -Rasr '.')
+#SLOP_PROMPT=${SLOP_PROMPT//$'\n'/\\n} # Escape newlines
+#SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | sed -e 's/"/\\"/g') # Escape double quotes
 
 # Set up temp dir
 mkdir .sloptmp
@@ -130,8 +137,16 @@ trap "rm -rf .sloptmp" EXIT
 # 16-character random alphanumeric, based on 100 bytes from /dev/urandom that get shuffled. It's not
 # secure or 100% unique, but it's solidly "good enough" for me.
 SLOP_CHAT_ID=$(head -c 100 /dev/urandom | shuf | tr -dc A-Za-z0-9 | cut -c 1-16)
-eval SLOP_CHAT_LOG="~/.config/slopagate/history/${SLOP_CHAT_ID}"
-touch "${SLOP_CHAT_LOG}"
+eval SLOP_SESSION_HISTORY="~/.config/slopagate/history/${SLOP_CHAT_ID}"
+#eval SLOP_CHAT_LOG="~/.config/slopagate/history/${SLOP_CHAT_ID}"
+#touch "${SLOP_CHAT_LOG}"
+
+# TODO: -s|--session option that lets you resume from ~/.config/slopagate/history/
+#SLOP_SESSION_HISTORY=".slop_history"
+if [[ ! -f "$SLOP_SESSION_HISTORY" ]]; then
+  touch "$SLOP_SESSION_HISTORY"
+fi
+
 
 # TODO: read tools from ./slop/tools/*.sh and ~/.config/slopagate/tools/*.sh
 #
@@ -187,7 +202,7 @@ SLOP_TOOLS_JSON="[
   {
     \"type\": \"function\",
     \"function\": {
-      \"name\": \"list-directory\",
+      \"name\": \"ls\",
       \"description\": \"List the contents of a directory, or the current one\",
       \"parameters\": {
         \"type\": \"object\",
@@ -201,12 +216,11 @@ SLOP_TOOLS_JSON="[
 SLOP_TOOLS_JSON=$(printf "%s" "$SLOP_TOOLS_JSON" | jq -c)
 
 
-
 ## Implementation
 
 log() {
   if [[ "$SLOP_VERBOSE" ]]; then
-    printf "%s" "$1"
+    printf "%s\n" "$1" >> slop.log
   fi
 }
 
@@ -223,21 +237,17 @@ string_join() {
   printf "%s" "$ret"
 }
 
-color_bold() {
-  printf '\033[1;37m%s\033[0m' "$1"
-}
-
-color_muted() {
-  printf '\033[1;30m%s\033[0m' "$1"
-}
-
 
 send_raw_ollama_message() {
     local msg="$1"
-    local ctx_msg="$SLOP_SESSION_HISTORY,$msg"
-    if [[ -z "$SLOP_SESSION_HISTORY" ]]; then
-      ctx_msg="$msg"
+    if [[ -z "$msg" ]]; then
+      printf "ERROR: can't send a blank messages payload!"
+      exit 1;
     fi
+    
+    local session_hist="$(cat "$SLOP_SESSION_HISTORY")"
+    local ctx_msg="$session_hist$msg"
+    printf "%s\n" "$ctx_msg," > "$SLOP_SESSION_HISTORY"
 
     local JSON_PAYLOAD="{
       \"model\": \"$SLOP_MODEL\",
@@ -247,16 +257,8 @@ send_raw_ollama_message() {
       \"tools\": $SLOP_TOOLS_JSON
     }"
     
-    log $(printf "%s\n" "$JSON_PAYLOAD")
-    
-    if [[ -n "$SLOP_SESSION_HISTORY" ]]; then
-      SLOP_SESSION_HISTORY="$SLOP_SESSION_HISTORY,$(printf "%s" "$msg" | jq -c)"
-    else
-      SLOP_SESSION_HISTORY="(printf "%s" "$msg" | jq -c)"
-    fi
-    
+    printf "%s\n" "$JSON_PAYLOAD" > "json_log.json"
     RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$SLOP_CONNECTION")
-    log $(printf "%s\n" "$RESPONSE")
     printf "%s" "$RESPONSE"
 }
 
@@ -265,82 +267,93 @@ send_ollama_message() {
     local msg_val="$2"
 
     local msg="{ \"role\": \"$msg_role\", \"content\": $(printf "%s" "$msg_val" | jq -Rsa '.') }"
-    printf "%s\n" "$msg" >> "$SLOP_CHAT_LOG"
+    #printf "%s\n" "$msg" >> "$SLOP_CHAT_LOG"
     
     printf "%s" $(send_raw_ollama_message "$msg")
 }
 
 
+# Tools implementations
 handle_model_tool() {
   local tool_call="$1"
   local call_id=$(printf "%s" "$tool_call" | jq -r '.id')
   local call_name=$(printf "%s" "$tool_call" | jq -r '.function.name')
-  local call_arguments=$(printf "%s" "$tool_call" | jq -r '.function.arguments')
-  
-  log $(printf "Tool arguments: %s\n" "$call_arguments")
+  local call_arguments=$(printf "%s" "$tool_call" | jq -rc '.function.arguments')
+  local call_result=""
   
   if [[ "$call_name" = "shell" ]]; then
     local call_command=$(printf "%s" "$call_arguments" | jq -r '.command')
     local call_args=$(printf "%s" "$call_arguments" | jq -r '.arguments')
 
-    color_muted "$(printf "\rRunning shell command \"%s %s\"\n" "$call_command" "$call_args")"
+    color_muted "$(printf "Running shell command \"%s %s\"" "$call_command" "$call_args")"
+    echo -e "\n"
 
-    local call_result=$($call_command $call_args 2>&1 | printf "%q" | jq -Rsar '.')
-    printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_result" >> .sloptmp/tools
+    local call_result=$($call_command $call_args 2>&1 | printf "%q")
 
   elif [[ "$call_name" = "read" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
     local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
     local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
 
-    color_muted "$(printf "\rReading \"%s\"\n" "$call_file")"
+    color_muted "$(printf "Reading \"%s\"" "$call_file")"
+    echo -e "\n"
     
-    if [[ $call_sline = "null" && $call_eline = "null" ]]; then
-      local call_result=$(cat $call_file 2>&1 | jq -Rsar '.')
-      printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n" "$call_name" "$call_result" >> .sloptmp/tools
+    if [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
+      local call_result=$(cat $call_file 2>&1)
+    elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
+      local call_result=$(tail --lines="-$call_sline" $call_file 2>&1)
+    elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
+      local call_result=$(head --lines="$call_eline" $call_file 2>&1)
+    else
+      local read_len=$call_eline - $call_sline
+      local call_result=$(tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     fi
     
   elif [[ "$call_name" = "backup" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
 
-    color_muted $(printf "\Backing up \"%s\"\n" "$call_file")
-    local call_result=$(cp "$call_file" "$call_file.bak")
-    printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n" "$call_name" "$call_result" >> .sloptmp/tools
+    color_muted $(printf "Backing up \"%s\"" "$call_file")
+    echo -e "\n"
 
-  elif [[ "$call_name" = "list-directory" ]]; then
-    local call_directory=""
+    local call_result=$(cp "$call_file" "$call_file.bak")
+
+  elif [[ "$call_name" = "ls" ]]; then
+    call_directory=""
     call_directory=$(printf "%s" "$call_arguments" | jq -r '.directory')
-    if [[ ! -n "$call_directory" || "$call_directory" = "null" ]]; then
+    if [[ -z "$call_directory" || "$call_directory" = "null" ]]; then
       call_directory="."
     fi
     
-    color_muted $(printf "\rListing \"%s\"\n" "$call_directory")
-    
-    # TODO: doesn't work :( jq dies
-    local call_result=$(ls "$call_directory" | jq -Rsar '.')
-    printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_result" >> .sloptmp/tools
+    color_muted $(printf "Listing \"%s\"" "$call_directory")
+    echo -e "\n"
+    local call_result=$(ls "$call_directory")
   fi
+  
+  call_result=$(printf "%s" "$call_result" | jq -Rasr)
+  printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
 }
 
 handle_model_response() {
   local line="$1"
   
-  log $(printf "line=%s\n" "$line")
-  local line_content=$(printf "%s" "$line" | jq -r '.message.content')
+  printf "%s" "$line" >> json_log.json
+
+  local line_message=$(printf "%s" "$line" | jq -ec '.message')
+  if [[ -z "$line_message" ]]; then
+    return
+  fi
+  printf "%s,\n" "$line_message" >> "$SLOP_SESSION_HISTORY"
+
+  local line_content=$(printf "%s" "$line_message" | jq -r '.content')
   if [[ -n "$line_content" ]]; then
-    printf "%s\n" $(printf "%s" "$line" | jq -e '.message') >> "$SLOP_CHAT_LOG"
     echo -e "$line_content" | vendor/glow/glow
-  #else
-    #printf "%s\n" "$line"
   fi
 
-  local message_tools=$(printf "%s" "$line" | jq -c '.message.tool_calls')
+  local message_tools=$(printf "%s" "$line_message" | jq -c '.tool_calls')
   if [[ "$message_tools" && "$message_tools" != "null" ]]; then
     # [{ id, function: { index, name, arguments } }, ...]
     touch .sloptmp/tools
-    log $(printf "Received tool calls: %s\n" "$message_tools")
     printf "%s" "$message_tools" | jq -c '.[]' | while IFS="" read -r tool_call; do
-      log $(printf "Handling tool call: %s\n" "$tool_call")
       handle_model_tool "$tool_call"
     done
     local tools_output=$(cat .sloptmp/tools)
@@ -376,7 +389,8 @@ handle_user_command() {
   local script=""
   if [[ "$command" = "clear" ]]; then
     clear
-    title_banner
+    color_bold "$(title_banner)"
+    printf "\n\n"
     return
   elif [[ "$command" = "quit" ]]; then
     exit 0
@@ -408,9 +422,8 @@ handle_user_input() {
     #local spin_pid=$(loading_spinner "Thinking..." &)
     # TODO: once we have chat history sent in each message for context, no need to inject the
     # slop prompt into every message
-    RESPONSE=$(send_ollama_message "user" "$SLOP_PROMPT\n\n$user_input")
+    RESPONSE=$(send_ollama_message "user" "$user_input")
     #kill "$spin_pid" 2>/dev/null # kill the spinner if we're still going, ignore a "not found"
-    log $(printf "RESPONSE=%s" "$RESPONSE")
     handle_curl_response "$RESPONSE"
   fi
 }
@@ -420,11 +433,15 @@ handle_user_input() {
 ## Main REPL
 
 printf "" > json_log.json
+
+SYSTEM_RESP=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROMPT }")
+
 printf "Started session %s. Welcome to slopagate.\n\n" "$SLOP_CHAT_ID"
 
 while true; do
   printf "\n"
-  read -e -p "> " user_prompt
+  #read -e -p "$(color_bold "> ")" user_prompt
+  read -e -p "$(color_bold "❯ ")" user_prompt
   printf "\n"
   handle_user_input "$user_prompt"
 done

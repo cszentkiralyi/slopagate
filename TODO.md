@@ -1,5 +1,10 @@
 # TODO
 
-- [ ] Chat history in Ollama payloads for context
-- [ ] Track user/model JSON message history to include in chats for context
+- [x] Chat history in Ollama payloads for context
+  - I don't think my current off-the-cuff implementation is working
+- [x] Track user/model JSON message history to include in chats for context
+- [ ] Tools
+  - [ ] `edit`: range-based insert/replace
+  - [ ] `ls`: add `-l` flag support or something
+- [ ] Up/down history
 - [ ] Loading/thinking animation or indicator

@@ -17,6 +17,3 @@ Assume your slopagate session is hosted in the root directory of a project. If t
 user refers to the project, some code, or a file, assume it is somewhere in the
 current working directory. If the user wants you to create something it is likely
 they mean to save it to disk instead of sending it back to the user.
-
-Before you ever modify a file always create a `file.bak` (replacing "file" with the
- real file's name) backup using the `backup` tool.
