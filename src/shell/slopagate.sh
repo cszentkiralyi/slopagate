@@ -74,12 +74,6 @@ EOF
 title_banner
 
 
-
-LOADING_ANIM_CHARS=('[    ]' '[=   ]' '[==  ]' '[=== ]' '[ ===]' '[  ==]' '[   =]')
-LOADING_ANIM_DELAY=0.2
-
-
-
 ## Config
 
 
@@ -230,30 +224,13 @@ string_join() {
 }
 
 color_bold() {
-  printf "\033[1;37%s\033[0m" "$1"
+  printf '\033[1;37m%s\033[0m' "$1"
 }
 
 color_muted() {
-  printf "\033[1;30%s\033[0m" "$1"
+  printf '\033[1;30m%s\033[0m' "$1"
 }
 
-
-loading_spinner() {
-  printf "Entered loop"
-  local anim_idx=0
-
-  while true; do
-    printf "Iteration"
-    printf "\r%s %s" "${LOADING_ANIM_CHARS[$anim_idx]}" "$1"
-    anim_idx=$anim_idx+1
-    if [[ "$anim_idx" -ge "${#LOADING_ANIM_CHARS[@]}" ]]; then
-      anim_idx=0
-    fi
-    printf "sleep"
-    sleep "${LOADING_ANIM_DELAY}s"
-    printf "wake"
-  done
-}
 
 send_raw_ollama_message() {
     local msg="$1"
@@ -306,7 +283,7 @@ handle_model_tool() {
     local call_command=$(printf "%s" "$call_arguments" | jq -r '.command')
     local call_args=$(printf "%s" "$call_arguments" | jq -r '.arguments')
 
-    color_muted "$("\rRunning shell command \"%s %s\"\n\n" "$call_command" "$call_args")"
+    color_muted "$(printf "\rRunning shell command \"%s %s\"\n" "$call_command" "$call_args")"
 
     local call_result=$($call_command $call_args 2>&1 | printf "%q" | jq -Rsar '.')
     printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_result" >> .sloptmp/tools
@@ -316,7 +293,7 @@ handle_model_tool() {
     local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
     local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
 
-    color_muted "$(printf "\rReading \"%s\"\n\n" "$call_file")"
+    color_muted "$(printf "\rReading \"%s\"\n" "$call_file")"
     
     if [[ $call_sline = "null" && $call_eline = "null" ]]; then
       local call_result=$(cat $call_file 2>&1 | jq -Rsar '.')
@@ -326,19 +303,21 @@ handle_model_tool() {
   elif [[ "$call_name" = "backup" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
 
-    printf "\Backing up \"%s\"\n\n" "$call_file"
+    color_muted $(printf "\Backing up \"%s\"\n" "$call_file")
     local call_result=$(cp "$call_file" "$call_file.bak")
     printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n" "$call_name" "$call_result" >> .sloptmp/tools
 
   elif [[ "$call_name" = "list-directory" ]]; then
-    local call_directory=$(printf "%s" "$call_arguments" | jq -r '.directory')
-    if [[ -z "$call_directory" ]]; then
+    local call_directory=""
+    call_directory=$(printf "%s" "$call_arguments" | jq -r '.directory')
+    if [[ ! -n "$call_directory" || "$call_directory" = "null" ]]; then
       call_directory="."
     fi
     
-    log $(printf "\rListing \"%s\"\n\n" "$call_directory")
+    color_muted $(printf "\rListing \"%s\"\n" "$call_directory")
     
-    local call_result = $(ls "$call_directory")
+    # TODO: doesn't work :( jq dies
+    local call_result=$(ls "$call_directory" | jq -Rsar '.')
     printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_result" >> .sloptmp/tools
   fi
 }
@@ -350,7 +329,7 @@ handle_model_response() {
   local line_content=$(printf "%s" "$line" | jq -r '.message.content')
   if [[ -n "$line_content" ]]; then
     printf "%s\n" $(printf "%s" "$line" | jq -e '.message') >> "$SLOP_CHAT_LOG"
-    echo -e "$line_content"
+    echo -e "$line_content" | vendor/glow/glow
   #else
     #printf "%s\n" "$line"
   fi
