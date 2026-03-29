@@ -58,7 +58,7 @@ color_bold() {
 }
 
 color_system() {
-  printf '\033[38:5:241m%s\033[0m' "$1"
+  printf '\033[38:5:243m%s\033[0m' "$1"
 }
 
 color_muted() {
@@ -327,7 +327,7 @@ handle_model_tool() {
     
     # TODO: this keeps printing "Listing" with no inner quotes at all?? no $call_directory either
     # but the quotes thing is absolutely terrifying. Where do they go?
-    color_muted $(printf "Listing \"%s\"" "$call_directory")
+    color_muted "$(printf "Listing \"%s\"" "$call_directory")"
     echo -e "\n"
     call_result=$(ls "$call_directory")
 
@@ -413,19 +413,19 @@ handle_model_response() {
   local message_tools=$(printf "%s" "$line_message" | jq -c '.tool_calls')
   if [[ "$message_tools" && "$message_tools" != "null" ]]; then
     # [{ id, function: { index, name, arguments } }, ...]
-    if [[ -f .sloptmp/tools ]]; then
-      mv .sloptmp/tools .sloptmp/tools.old
+    if [[ ! -f .sloptmp/tools ]]; then
+      touch .sloptmp/tools
     fi
-    touch .sloptmp/tools
+    echo "" > .sloptmp/tools
     printf "%s" "$message_tools" | jq -c '.[]' | while IFS="" read -r tool_call; do
       handle_model_tool "$tool_call"
     done
     if [[ -s .sloptmp/tools ]]; then
       # MUST cat directory into string_join, var=$(cat ...) and then echo/printf-ing didn't work
       local tools_commas=$(cat .sloptmp/tools | string_join ',')
+      rm .sloptmp/tools
       RESPONSE=$(send_raw_ollama_message "$tools_commas")
       handle_curl_response "$RESPONSE"
-      rm .sloptmp/tools
     else
       printf "Tools output file appears to be empty, preserving .sloptmp/tools for posterity\n"
     fi
