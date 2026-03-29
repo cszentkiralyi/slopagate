@@ -57,6 +57,10 @@ color_bold() {
   printf '\033[1;37m%s\033[0m' "$1"
 }
 
+color_system() {
+  printf '\033[38:5:241m%s\033[0m' "$1"
+}
+
 color_muted() {
   printf '\033[1;30m%s\033[0m' "$1"
 }
@@ -101,11 +105,13 @@ if [[ -z "$SLOP_ENDPOINT" ]]; then
   SLOP_ENDPOINT="/api/chat"
 fi
 SLOP_CONNECTION="${SLOP_HOST}:${SLOP_PORT}${SLOP_ENDPOINT}"
-printf "Connection string: %s\n" "$SLOP_CONNECTION"
+color_system "$(printf "Endpoint: %s" "$SLOP_CONNECTION")"
+printf "\n"
 if [[ -z "$SLOP_MODEL" ]]; then
   SLOP_MODEL="qwen3.5:4b-32k" # Or any other model
 fi
-printf "Model chosen: %s\n" "$SLOP_MODEL"
+color_system "$(printf "Model: %s" "$SLOP_MODEL")"
+printf "\n"
 
 # Creates config directories
 mkdir -p ~/.config/slopagate/
@@ -115,15 +121,18 @@ SLOP_PROMPT=""
 
 # Read prompts from files, overriding if they exist
 if [[ -f ~/.config/slopagate/SLOP.md ]]; then
-  printf "Reading ~/.config/slopagate/...\n"
+  color_system "Loading ~/.config/slopagate/..."
+  printf "\n"
   SLOP_PROMPT=$(cat ~/.config/slopagate/slop.md)
 fi
 if [[ -f ./.slop/SLOP.md ]]; then
-  printf "Reading .slop/...\n"
+  color_system "Loading .slop/..."
+  printf "\n"
   SLOP_PROMPT=$(cat ./.slop/SLOP.md)
 fi
 if [[ -f ./.SLOP.md ]]; then
-  printf "Reading .SLOP.md...\n"
+  color_system "Loading .SLOP.md..."
+  printf "\n"
   SLOP_PROMPT=$(cat ~/.SLOP.md)
 fi
 SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | jq -Rasr '.')
@@ -131,7 +140,9 @@ SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | jq -Rasr '.')
 #SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | sed -e 's/"/\\"/g') # Escape double quotes
 
 # Set up temp dir
-mkdir .sloptmp
+if [[ ! -d .sloptmp ]]; then
+  mkdir .sloptmp
+fi
 trap "rm -rf .sloptmp" EXIT
 
 # 16-character random alphanumeric, based on 100 bytes from /dev/urandom that get shuffled. It's not
@@ -168,6 +179,20 @@ fi
 #      }
 #    }
 #  },
+#  {
+#    \"type\": \"function\",
+#    \"function\": {
+#      \"name\": \"backup\",
+#      \"description\": \"Back up a file\",
+#      \"parameters\": {
+#        \"type\": \"object\",
+#        \"properties\": {
+#          \"file_name\": { \"type\": \"string\" }
+#        },
+#        \"required\": [ \"file_name\" ]
+#      }
+#    }
+#  },
 SLOP_TOOLS_JSON="[
   {
     \"type\": \"function\",
@@ -177,25 +202,11 @@ SLOP_TOOLS_JSON="[
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
-          \"file_name\": { \"type\": \"string\" },
+          \"file_path\": { \"type\": \"string\" },
           \"start_line\": { \"type\": \"integer\" },
           \"end_line\": { \"type\": \"integer\" }
         },
-        \"required\": [ \"file_name\" ]
-      }
-    }
-  },
-  {
-    \"type\": \"function\",
-    \"function\": {
-      \"name\": \"backup\",
-      \"description\": \"Back up a file\",
-      \"parameters\": {
-        \"type\": \"object\",
-        \"properties\": {
-          \"file_name\": { \"type\": \"string\" }
-        },
-        \"required\": [ \"file_name\" ]
+        \"required\": [ \"file_path\" ]
       }
     }
   },
@@ -220,13 +231,13 @@ SLOP_TOOLS_JSON="[
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
-          \"file_name\": { \"type\": \"string\" },
+          \"file_path\": { \"type\": \"string\" },
           \"content\": { \"type\": \"string\" },
           \"start_line\": { \"type\": \"integer\" },
           \"end_line\": { \"type\": \"integer\" }
         }
       },
-      \"required\": [ \"file_name\", \"content\", \"start_line\" ]
+      \"required\": [ \"file_path\", \"content\", \"start_line\" ]
     }
   }
 ]"
@@ -276,6 +287,7 @@ send_raw_ollama_message() {
     
     printf "%s\n" "$JSON_PAYLOAD" > "json_log.json"
     RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$SLOP_CONNECTION")
+    printf "%s\n" "$RESPONSE" >> "json_log.json"
     printf "%s" "$RESPONSE"
 }
 
@@ -284,7 +296,6 @@ send_ollama_message() {
     local msg_val="$2"
 
     local msg="{ \"role\": \"$msg_role\", \"content\": $(printf "%s" "$msg_val" | jq -Rsa '.') }"
-    #printf "%s\n" "$msg" >> "$SLOP_CHAT_LOG"
     
     printf "%s" $(send_raw_ollama_message "$msg")
 }
@@ -314,45 +325,58 @@ handle_model_tool() {
       call_directory="."
     fi
     
+    # TODO: this keeps printing "Listing" with no inner quotes at all?? no $call_directory either
+    # but the quotes thing is absolutely terrifying. Where do they go?
     color_muted $(printf "Listing \"%s\"" "$call_directory")
     echo -e "\n"
     call_result=$(ls "$call_directory")
 
   elif [[ "$call_name" = "read" ]]; then
-    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
     local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
 
     color_muted "$(printf "Reading \"%s\"" "$call_file")"
     echo -e "\n"
     
-    if [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
+    if [[ ! -f "$call_file" ]]; then
+      call_result=$(printf "\"%s\": not found" "$call_file")
+    elif [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
       call_result=$(cat $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
       call_result=$(tail --lines="-$call_sline" $call_file 2>&1)
     elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
       call_result=$(head --lines="$call_eline" $call_file 2>&1)
-    else
+    elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
       local read_len=$call_eline - $call_sline
       call_result=$(tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
+    else
+      printf "Tool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
+      exit 1
     fi
     
   elif [[ "$call_name" = "edit" ]]; then
-    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     local call_content=$(printf "%s" "$call_arguments" | jq -r '.file_content')
     local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
     local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
 
     color_muted "$(printf "Editing \"%s\"" "$call_file")"
     echo -e "\n"
+    
 
     if [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
-      head --lines="$call_sline" "$call_file" > .sloptmp/edit
+      if [[ -f "$call_file" ]]; then
+        head --lines="$call_sline" "$call_file" > .sloptmp/edit
+      fi
       printf "%s" "$call_content" >> .sloptmp/edit
-      tail --lines="-$call_sline" "$call_file" >> .sloptmp/edit
+      if [[ -f "$call_file" ]]; then
+        tail --lines="-$call_sline" "$call_file" >> .sloptmp/edit
+      fi
       cat .sloptmp/edit > "$call_file"
       rm .sloptmp/edit
-      call_results=""
+      call_results=$(printf "\"%s\": wrote changes" "$call_file")
+
       # TODO: replace between start & end with content
     fi
     
@@ -374,8 +398,6 @@ handle_model_tool() {
 
 handle_model_response() {
   local line="$1"
-  
-  printf "%s" "$line" >> json_log.json
 
   local line_message=$(printf "%s" "$line" | jq -ec '.message')
   if [[ -z "$line_message" ]]; then
@@ -391,18 +413,17 @@ handle_model_response() {
   local message_tools=$(printf "%s" "$line_message" | jq -c '.tool_calls')
   if [[ "$message_tools" && "$message_tools" != "null" ]]; then
     # [{ id, function: { index, name, arguments } }, ...]
+    if [[ -f .sloptmp/tools ]]; then
+      mv .sloptmp/tools .sloptmp/tools.old
+    fi
     touch .sloptmp/tools
     printf "%s" "$message_tools" | jq -c '.[]' | while IFS="" read -r tool_call; do
-      printf "Tool call: %s\n" "$tool_call"
       handle_model_tool "$tool_call"
     done
-    local tools_output=$(cat .sloptmp/tools)
-    if [[ -n "$tools_output" ]]; then
-      local tools_commas=$(printf "%s" "$tools_output" | string_join ',')
-      printf "Tool output: %s\n" "$tools_output"
-      local tools_msgs=$(printf "%s" "$tools_commas" | jq -c)
-      printf "Formatted tool output for server.\n"
-      RESPONSE=$(send_raw_ollama_message "$tools_msgs")
+    if [[ -s .sloptmp/tools ]]; then
+      # MUST cat directory into string_join, var=$(cat ...) and then echo/printf-ing didn't work
+      local tools_commas=$(cat .sloptmp/tools | string_join ',')
+      RESPONSE=$(send_raw_ollama_message "$tools_commas")
       handle_curl_response "$RESPONSE"
       rm .sloptmp/tools
     else
@@ -476,9 +497,13 @@ handle_user_input() {
 
 printf "" > json_log.json
 
+color_system "Connecting..."
+
 SYSTEM_RESP=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROMPT }")
 
-printf "Started session %s. Welcome to slopagate.\n\n" "$SLOP_CHAT_ID"
+printf "\r"
+color_bold "$(printf "Started session %s.\n\n" "$SLOP_CHAT_ID")"
+printf "\n\n"
 
 while true; do
   printf "\n"
