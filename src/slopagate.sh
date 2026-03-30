@@ -1,5 +1,4 @@
 #!/bin/bash
-# slopagate.sh
 
 if [[ "$1" = "help" ]]; then
   cat <<EOF
@@ -16,14 +15,18 @@ Environment Variables:
   SLOP_HOST       Provider host (default: http://127.0.0.1).
   SLOP_ENDPOINT   Provider path (default: /api/chat).
   SLOP_MODEL      Model name (default: gemma3:4b).
+  
+System Prompts (in order of priority):
+  .slop/SYSTEM.md          Project system prompt.
+  ~/.slopagate/SYSTEM.md   Global system prompt.
 
-Configuration Files (in order of preference):
-  ./.SLOP.md                    Local template override.
-  ./.slop/SLOP.md               Project template override.
-  ~/.config/slopagate/SLOP.md   Personal base template.
+Project Files:
+  ~/.slopagate/SLOP.md   Global base instructions.
+  .slop/SLOP.md          Project override.
+  .SLOP.md               Local template override.
   
 Commands, Tools, and Agents
-  - Will be loaded from ./.slop or ~/.config/slopagate in that order
+  - Will be loaded from ./.slop or ~/.slopagate in that order
   - Commands are .sh files under commands/
   - Tools are .sh files under tools/
   - Agents are .md files under agents/
@@ -34,10 +37,10 @@ Prompt Commands
   
   !    Run a shell command
   /    Run a harness command (defined in the core, or a shell script in the
-       commands/ folder of .slop/, or ~/.config/slopagate)
+       commands/ folder of .slop/, or ~/.slopagate)
 
 Notes:
-  - History logs are stored in ~/.config/slopagate/history/<id> automatically.
+  - History logs are stored in ~/.slopagate/history/<id> automatically.
   
 Dependencies
   - jq
@@ -90,9 +93,10 @@ printf "\n\n"
 
 ## Config
 
+working_directory=$(pwd)
 
-if [[ -n "$SLOP_VERBOSE" ]]; then
-  set -e
+if [[ -z "$SLOP_PROJECT_DIR" ]]; then
+  SLOP_PROJECT_DIR="$working_directory/.slop"
 fi
 
 if [[ -z "$SLOP_PORT" ]]; then
@@ -113,50 +117,61 @@ fi
 color_system "$(printf "Model: %s" "$SLOP_MODEL")"
 printf "\n"
 
-# Creates config directories
-mkdir -p ~/.config/slopagate/
-mkdir -p ~/.config/slopagate/history
 
-SLOP_PROMPT=""
+if [[ -z "$SLOP_HISTORY_DIR" ]]; then
+  eval SLOP_HISTORY_DIR="~/.slopagate/history"
+fi
+mkdir -p "$SLOP_HISTORY_DIR"
+
+SLOP_SYSTEM_PROMPT=""
+SLOP_PROJECT_PROMPT=""
+
+if [[ -f ~/.slopagate/SYSTEM.md ]]; then
+  SLOP_SYSTEM_PROMPT=$(cat ~/.slopagate/SYSTEM.md)
+elif [[ -f .slop/SYSTEM.md ]]; then
+  SLOP_SYSTEM_PROMPT=$(cat .slop/SYSTEM.md)
+fi
+if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
+  SLOP_SYSTEM_PROMPT=$(printf "%s" "$SLOP_SYSTEM_PROMPT" | jq -Rasr '.')
+fi
 
 # Read prompts from files, overriding if they exist
-if [[ -f ~/.config/slopagate/SLOP.md ]]; then
-  color_system "Loading ~/.config/slopagate/..."
+if [[ -f ~/.slopagate/SLOP.md ]]; then
+  color_system "Loading ~/.slopagate/SLOP.md..."
   printf "\n"
-  SLOP_PROMPT=$(cat ~/.config/slopagate/slop.md)
+  SLOP_PROJECT_PROMPT=$(cat ~/.slopagate/SLOP.md)
 fi
 if [[ -f ./.slop/SLOP.md ]]; then
-  color_system "Loading .slop/..."
+  color_system "Loading .slop/SLOP.md..."
   printf "\n"
-  SLOP_PROMPT=$(cat ./.slop/SLOP.md)
+  SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.slop/SLOP.md)"
 fi
 if [[ -f ./.SLOP.md ]]; then
   color_system "Loading .SLOP.md..."
   printf "\n"
-  SLOP_PROMPT=$(cat ~/.SLOP.md)
+  SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.SLOP.md)"
 fi
-SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | jq -Rasr '.')
+SLOP_PROJECT_PROMPT=$(printf "%s" "$SLOP_PROJECT_PROMPT" | jq -Rasr '.')
 #SLOP_PROMPT=${SLOP_PROMPT//$'\n'/\\n} # Escape newlines
 #SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | sed -e 's/"/\\"/g') # Escape double quotes
-
-# Set up temp dir
-if [[ ! -d .sloptmp ]]; then
-  mkdir .sloptmp
-fi
-trap "rm -rf .sloptmp" EXIT
 
 # 16-character random alphanumeric, based on 100 bytes from /dev/urandom that get shuffled. It's not
 # secure or 100% unique, but it's solidly "good enough" for me.
 SLOP_CHAT_ID=$(head -c 100 /dev/urandom | shuf | tr -dc A-Za-z0-9 | cut -c 1-16)
-eval SLOP_SESSION_HISTORY="~/.config/slopagate/history/${SLOP_CHAT_ID}"
-#eval SLOP_CHAT_LOG="~/.config/slopagate/history/${SLOP_CHAT_ID}"
-#touch "${SLOP_CHAT_LOG}"
 
-# TODO: -s|--session option that lets you resume from ~/.config/slopagate/history/
-#SLOP_SESSION_HISTORY=".slop_history"
+eval SLOP_SESSION_HISTORY="${SLOP_HISTORY_DIR}/${SLOP_CHAT_ID}"
+# TODO: -s|--session option that lets you resume from ~/.slopagate/history/
 if [[ ! -f "$SLOP_SESSION_HISTORY" ]]; then
   touch "$SLOP_SESSION_HISTORY"
 fi
+
+# Set up temp dir
+if [[ ! -d ".sloptmp/$SLOP_CHAT_ID" ]]; then
+  mkdir -p ".sloptmp/$SLOP_CHAT_ID" 
+fi
+# On exit, remove our temp dir, and then .sloptmp if no other temp dirs remain
+trap "rm -r \".sloptmp/$SLOP_CHAT_ID\" && [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l) -gt 0 ]] || rmdir .sloptmp" EXIT
+
 
 
 # TODO: read tools from ./slop/tools/*.sh and ~/.config/slopagate/tools/*.sh
@@ -244,7 +259,7 @@ SLOP_TOOLS_JSON="[
 SLOP_TOOLS_JSON=$(printf "%s" "$SLOP_TOOLS_JSON" | jq -c)
 
 
-## Implementation
+## Utilities
 
 log() {
   if [[ "$SLOP_VERBOSE" ]]; then
@@ -301,7 +316,7 @@ send_ollama_message() {
 }
 
 
-# Tools implementations
+## Tools implementations
 handle_model_tool() {
   local tool_call="$1"
   local call_id=$(printf "%s" "$tool_call" | jq -r '.id')
@@ -325,11 +340,9 @@ handle_model_tool() {
       call_directory="."
     fi
     
-    # TODO: this keeps printing "Listing" with no inner quotes at all?? no $call_directory either
-    # but the quotes thing is absolutely terrifying. Where do they go?
     color_muted "$(printf "Listing \"%s\"" "$call_directory")"
     echo -e "\n"
-    call_result=$(ls "$call_directory")
+    call_result=$(ls -AF "$call_directory")
 
   elif [[ "$call_name" = "read" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
@@ -396,6 +409,8 @@ handle_model_tool() {
   fi
 }
 
+
+## REPL implementation
 handle_model_response() {
   local line="$1"
 
@@ -497,11 +512,17 @@ handle_user_input() {
 
 printf "" > json_log.json
 
-color_system "Connecting..."
+if [[ -n "$SLOP_SYSTEM_PROMPT" || -n "$SLOP_PROJECT_PROMPT" ]]; then
+  color_system "Connecting..."
+  if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
+    _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_SYSTEM_PROMPT }")
+  fi
+  if [[ -n "$SLOP_PROJECT_PROMPT" ]]; then
+    _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROJECT_PROMPT }")
+  fi
+  printf "\r"
+fi
 
-SYSTEM_RESP=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROMPT }")
-
-printf "\r"
 color_bold "$(printf "Started session %s.\n\n" "$SLOP_CHAT_ID")"
 printf "\n\n"
 
