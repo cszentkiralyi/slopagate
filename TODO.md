@@ -2,11 +2,13 @@
 
 ## Priority
 
-Implement `edit` tool.
+Overhaul `edit` tool.
 
-- Arguments: file_path, content, start_line, end_line
-- start + end means overwrite range with content
-- start-only means insert after start line
+- Arguments: file_path, old_str, new_str
+- Create file if needed
+- If old_str = "", just write new_str to the file
+- If old_str occurs more than once, error
+- Replace old_str with new_str
 
 Milestone prompt:
 
@@ -26,7 +28,7 @@ LLMs can handle the actual reading & summarization, the goal is to actually writ
 - [ ] Expand on / rewrite system prompt
 - [ ] Tool use
   - [x] Asking for a tool, then another tool, gives the first tool's response twice
-  - [ ] `edit`: range-based insert/replace
+  - [ ] `edit`: string replacement ~~range-based insert/replace~~
   - [ ] `ls`: add `-l` flag support or something, and the one that adds `/` after directory names
 - [ ] Context compaction (is this just making the LLM summarize the history into one back-and-forth JSON?)
 - [ ] Memory (required "edit" tool to be done)

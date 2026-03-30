@@ -170,7 +170,9 @@ if [[ ! -d ".sloptmp/$SLOP_CHAT_ID" ]]; then
   mkdir -p ".sloptmp/$SLOP_CHAT_ID" 
 fi
 # On exit, remove our temp dir, and then .sloptmp if no other temp dirs remain
-trap "rm -r \".sloptmp/$SLOP_CHAT_ID\" && [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l) -gt 0 ]] || rmdir .sloptmp" EXIT
+trap "printf \"Ending session %s\n\" \"$SLOP_CHAT_ID\" && \
+  rm -r \".sloptmp/$SLOP_CHAT_ID\" && \
+  [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l) -gt 0 ]] || rmdir .sloptmp" EXIT
 
 
 
@@ -208,12 +210,31 @@ trap "rm -r \".sloptmp/$SLOP_CHAT_ID\" && [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l
 #      }
 #    }
 #  },
+#
+# Edit v1
+#  {
+#    \"type\": \"function\",
+#    \"function\": {
+#      \"name\": \"edit\",
+#      \"description\": \"Edit a file to insert text starting at a line, or replace text in a range\",
+#      \"parameters\": {
+#        \"type\": \"object\",
+#        \"properties\": {
+#          \"file_path\": { \"type\": \"string\" },
+#          \"content\": { \"type\": \"string\" },
+#          \"start_line\": { \"type\": \"integer\" },
+#          \"end_line\": { \"type\": \"integer\" }
+#        }
+#      },
+#      \"required\": [ \"file_path\", \"content\", \"start_line\" ]
+#    }
+#  }
 SLOP_TOOLS_JSON="[
   {
     \"type\": \"function\",
     \"function\": {
       \"name\": \"read\",
-      \"description\": \"Read some or all of the text contents of a file\",
+      \"description\": \"Read a text file, either all at once or limited to a range of lines.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
@@ -229,7 +250,7 @@ SLOP_TOOLS_JSON="[
     \"type\": \"function\",
     \"function\": {
       \"name\": \"ls\",
-      \"description\": \"List the contents of a directory, or the current one\",
+      \"description\": \"List the contents of a given directory, or the current one.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
@@ -242,14 +263,13 @@ SLOP_TOOLS_JSON="[
     \"type\": \"function\",
     \"function\": {
       \"name\": \"edit\",
-      \"description\": \"Edit a file to insert text starting at a line, or replace text in a range\",
+      \"description\": \"Make edits to a text file by replacing 'old_str' with 'new_str' in the file. If the file doesn't exist it will be created.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
           \"file_path\": { \"type\": \"string\" },
-          \"content\": { \"type\": \"string\" },
-          \"start_line\": { \"type\": \"integer\" },
-          \"end_line\": { \"type\": \"integer\" }
+          \"old_str\": { \"type\": \"string\" },
+          \"new_str\": { \"type\": \"string\" }
         }
       },
       \"required\": [ \"file_path\", \"content\", \"start_line\" ]
@@ -353,22 +373,22 @@ handle_model_tool() {
     echo -e "\n"
     
     if [[ ! -f "$call_file" ]]; then
-      call_result=$(printf "\"%s\": not found" "$call_file")
+      call_result=$(printf "Error: path \"%s\" not found" "$call_file")
     elif [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
-      call_result=$(cat $call_file 2>&1)
+      call_result=$(cat -n $call_file)
     elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
-      call_result=$(tail --lines="-$call_sline" $call_file 2>&1)
+      call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1)
     elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
-      call_result=$(head --lines="$call_eline" $call_file 2>&1)
+      call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
       local read_len=$call_eline - $call_sline
-      call_result=$(tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
+      call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     else
       printf "Tool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
       exit 1
     fi
     
-  elif [[ "$call_name" = "edit" ]]; then
+  elif [[ "$call_name" = "edit_old" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     local call_content=$(printf "%s" "$call_arguments" | jq -r '.file_content')
     local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
@@ -392,7 +412,36 @@ handle_model_tool() {
 
       # TODO: replace between start & end with content
     fi
+  elif [[ "$call_name" = "edit" ]]; then
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
+    local call_old_str=$(printf "%s" "$call_arguments" | jq -r '.old_str')
+    local call_new_str=$(printf "%s" "$call_arguments" | jq -r '.new_str')
     
+    local action_str="Editing"
+    if [[ ! -f "$call_file" ]]; then
+      action_str="Creating"
+      touch "$call_file"
+    fi
+
+    color_muted "$(printf "%s \"%s\"" "$action_str" "$call_file")"
+    echo -e "\n"
+    
+    cp "$call_file" .sloptmp/edit
+    if [[ -n "$call_old_str" ]]; then
+      # Replace
+      local old_str="$(printf "%s" "$call_old_str" | sed -e 's#\/#\\/#g')"
+      local new_str="$(printf "%s" "$call_new_str" | sed -e 's#\/#\\/#g')"
+      perl -p -i -e -0777 "s/\Q$old_str\E/$new_str/"
+    else
+      # Append
+      printf "%s" "$call_new_str" >> .sloptmp/edit
+    fi
+    #diff -y "$call_file" .sloptmp/edit
+    #rm "$call_file" && mv .sloptmp/edit "$call_file"
+    mv "$call_file" "$call_file.old" & cp .sloptmp/edit "$call_file"
+    
+    call_result="$(printf "Edited \"%s\" successfully" "$call_file")"
+
     
   elif [[ "$call_name" = "backup" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_name')
