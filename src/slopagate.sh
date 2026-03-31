@@ -61,11 +61,11 @@ color_bold() {
 }
 
 color_system() {
-  printf '\033[38:5:243m%s\033[0m' "$1"
+  printf '\033[38:5:242m%s\033[0m' "$1"
 }
 
 color_muted() {
-  printf '\033[1;30m%s\033[0m' "$1"
+  printf '\033[38:5:245m%s\033[0m' "$1"
 }
 
 
@@ -152,15 +152,13 @@ if [[ -f ./.SLOP.md ]]; then
   SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.SLOP.md)"
 fi
 SLOP_PROJECT_PROMPT=$(printf "%s" "$SLOP_PROJECT_PROMPT" | jq -Rasr '.')
-#SLOP_PROMPT=${SLOP_PROMPT//$'\n'/\\n} # Escape newlines
-#SLOP_PROMPT=$(printf "%s" "$SLOP_PROMPT" | sed -e 's/"/\\"/g') # Escape double quotes
 
 # 16-character random alphanumeric, based on 100 bytes from /dev/urandom that get shuffled. It's not
 # secure or 100% unique, but it's solidly "good enough" for me.
 SLOP_CHAT_ID=$(head -c 100 /dev/urandom | shuf | tr -dc A-Za-z0-9 | cut -c 1-16)
 
 eval SLOP_SESSION_HISTORY="${SLOP_HISTORY_DIR}/${SLOP_CHAT_ID}"
-# TODO: -s|--session option that lets you resume from ~/.slopagate/history/
+# TODO: -s|--session option or something that lets you resume from ~/.slopagate/history/
 if [[ ! -f "$SLOP_SESSION_HISTORY" ]]; then
   touch "$SLOP_SESSION_HISTORY"
 fi
@@ -170,65 +168,16 @@ if [[ ! -d ".sloptmp/$SLOP_CHAT_ID" ]]; then
   mkdir -p ".sloptmp/$SLOP_CHAT_ID" 
 fi
 # On exit, remove our temp dir, and then .sloptmp if no other temp dirs remain
-trap "printf \"Ending session %s\n\" \"$SLOP_CHAT_ID\" && \
+trap "printf \"\nEnding session %s\n\" \"$SLOP_CHAT_ID\" && \
   rm -r \".sloptmp/$SLOP_CHAT_ID\" && \
   [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l) -gt 0 ]] || rmdir .sloptmp" EXIT
 
 
 
 # TODO: read tools from ./slop/tools/*.sh and ~/.config/slopagate/tools/*.sh
-#
-# Spec
 # - filename is {tool-name}.sh
 # - `--json-description` flag must return JSON for the tool, to add to SLOP_TOOLS_JSON
 
-#  {
-#    \"type\": \"function\",
-#    \"function\": {
-#      \"name\": \"shell\",
-#      \"description\": \"Run Linux shell commands in the current directory\",
-#      \"parameters\": {
-#        \"type\": \"object\",
-#        \"properties\": {
-#          \"command\": { \"type\": \"string\" }
-#        },
-#        \"required\": [ \"command\" ]
-#      }
-#    }
-#  },
-#  {
-#    \"type\": \"function\",
-#    \"function\": {
-#      \"name\": \"backup\",
-#      \"description\": \"Back up a file\",
-#      \"parameters\": {
-#        \"type\": \"object\",
-#        \"properties\": {
-#          \"file_name\": { \"type\": \"string\" }
-#        },
-#        \"required\": [ \"file_name\" ]
-#      }
-#    }
-#  },
-#
-# Edit v1
-#  {
-#    \"type\": \"function\",
-#    \"function\": {
-#      \"name\": \"edit\",
-#      \"description\": \"Edit a file to insert text starting at a line, or replace text in a range\",
-#      \"parameters\": {
-#        \"type\": \"object\",
-#        \"properties\": {
-#          \"file_path\": { \"type\": \"string\" },
-#          \"content\": { \"type\": \"string\" },
-#          \"start_line\": { \"type\": \"integer\" },
-#          \"end_line\": { \"type\": \"integer\" }
-#        }
-#      },
-#      \"required\": [ \"file_path\", \"content\", \"start_line\" ]
-#    }
-#  }
 SLOP_TOOLS_JSON="[
   {
     \"type\": \"function\",
@@ -388,30 +337,6 @@ handle_model_tool() {
       exit 1
     fi
     
-  elif [[ "$call_name" = "edit_old" ]]; then
-    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
-    local call_content=$(printf "%s" "$call_arguments" | jq -r '.file_content')
-    local call_sline=$(printf "%s" "$call_arguments" | jq -r '.start_line')
-    local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
-
-    color_muted "$(printf "Editing \"%s\"" "$call_file")"
-    echo -e "\n"
-    
-
-    if [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
-      if [[ -f "$call_file" ]]; then
-        head --lines="$call_sline" "$call_file" > .sloptmp/edit
-      fi
-      printf "%s" "$call_content" >> .sloptmp/edit
-      if [[ -f "$call_file" ]]; then
-        tail --lines="-$call_sline" "$call_file" >> .sloptmp/edit
-      fi
-      cat .sloptmp/edit > "$call_file"
-      rm .sloptmp/edit
-      call_results=$(printf "\"%s\": wrote changes" "$call_file")
-
-      # TODO: replace between start & end with content
-    fi
   elif [[ "$call_name" = "edit" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     local call_old_str=$(printf "%s" "$call_arguments" | jq -r '.old_str')
@@ -577,7 +502,6 @@ printf "\n\n"
 
 while true; do
   printf "\n"
-  #read -e -p "$(color_bold "> ")" user_prompt
   read -e -p "$(color_bold "❯ ")" user_prompt
   printf "\n"
   handle_user_input "$user_prompt"
