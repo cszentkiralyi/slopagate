@@ -153,7 +153,9 @@ if [[ -f ./.SLOP.md ]]; then
   printf "\n"
   SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.SLOP.md)"
 fi
-SLOP_PROJECT_PROMPT=$(printf "%s" "$SLOP_PROJECT_PROMPT" | jq -Rasr '.')
+if [[ -n "$SLOP_PROJECT_PROMPT" ]]; then
+  SLOP_PROJECT_PROMPT=$(printf "%s" "$SLOP_PROJECT_PROMPT" | jq -Rasr '.')
+fi
 
 # 16-character random alphanumeric, based on 100 bytes from /dev/urandom that get shuffled. It's not
 # secure or 100% unique, but it's solidly "good enough" for me.
@@ -344,25 +346,30 @@ handle_model_tool() {
     local call_old_str=$(printf "%s" "$call_arguments" | jq -r '.old_str')
     local call_new_str=$(printf "%s" "$call_arguments" | jq -r '.new_str')
     
-    local action_str="Editing"
+    local action_str="Edit"
     if [[ ! -f "$call_file" ]]; then
-      action_str="Creating"
+      action_str="Creat" # not a typo, -ing & -ed later
       touch "$call_file"
     fi
 
-    color_muted "$(printf "%s \"%s\"" "$action_str" "$call_file")"
+    color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
     echo -e "\n"
     
     cp "$call_file" .sloptmp/edit
-    if [[ -n "$call_old_str" ]]; then
+    if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace
+      set -x
       local old_str="$(printf "%s" "$call_old_str" | sed -e 's#\/#\\/#g')"
       local new_str="$(printf "%s" "$call_new_str" | sed -e 's#\/#\\/#g')"
-      if [[ "$(perl -n -e "print if /\Q$call_old_str\E/" "$call_file")" ]]; then
+      local old_match_count=$(perl -n -e "print \".\" if /\Q$old_str\E/" -0777 "$call_file" | wc -c)
+      if [[ "$old_match_count" = 1 ]]; then
         perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
+      elif [[ "$old_match_count" -gt 1 ]]; then
+        call_result="Error: old_str appears more than once in $call_file"
       else
         call_result="Error: old_str not found in $call_file"
       fi
+      set +x
     else
       # Append
       printf "%s" "$call_new_str" >> .sloptmp/edit
@@ -374,7 +381,7 @@ handle_model_tool() {
       printf "\n"
       rm "$call_file" && mv .sloptmp/edit "$call_file"
       
-      call_result="$(printf "Edited \"%s\" successfully" "$call_file")"
+      call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
     else
       rm .sloptmp/edit
     fi
