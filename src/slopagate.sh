@@ -14,7 +14,9 @@ Environment Variables:
   SLOP_PORT       Provider port (default: 11434).
   SLOP_HOST       Provider host (default: http://127.0.0.1).
   SLOP_ENDPOINT   Provider path (default: /api/chat).
-  SLOP_MODEL      Model name (default: gemma3:4b).
+  SLOP_MODEL      Model name (default: qwen3.5:4b-32k).
+  SLOP_HISTORY_DIR History directory (default: ~/.slopagate/history).
+  SLOP_PROJECT_DIR Project directory (default: ./.slop).
   
 System Prompts (in order of priority):
   .slop/SYSTEM.md          Project system prompt.
