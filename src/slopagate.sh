@@ -330,7 +330,7 @@ handle_model_tool() {
     elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
       call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
-      local read_len=$call_eline - $call_sline
+      local read_len=$(($call_eline-$call_sline))
       call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     else
       printf "Tool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
@@ -356,7 +356,7 @@ handle_model_tool() {
       # Replace
       local old_str="$(printf "%s" "$call_old_str" | sed -e 's#\/#\\/#g')"
       local new_str="$(printf "%s" "$call_new_str" | sed -e 's#\/#\\/#g')"
-      perl -p -i -e -0777 "s/\Q$old_str\E/$new_str/"
+      perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
     else
       # Append
       printf "%s" "$call_new_str" >> .sloptmp/edit
