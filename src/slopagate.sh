@@ -363,9 +363,8 @@ handle_model_tool() {
       # Append
       printf "%s" "$call_new_str" >> .sloptmp/edit
     fi
-    #diff -y "$call_file" .sloptmp/edit
-    #rm "$call_file" && mv .sloptmp/edit "$call_file"
-    mv "$call_file" "$call_file.old" && cp .sloptmp/edit "$call_file"
+    diff -y "$call_file" .sloptmp/edit
+    rm "$call_file" && mv .sloptmp/edit "$call_file"
     
     call_result="$(printf "Edited \"%s\" successfully" "$call_file")"
 
