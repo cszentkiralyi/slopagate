@@ -358,15 +358,26 @@ handle_model_tool() {
       # Replace
       local old_str="$(printf "%s" "$call_old_str" | sed -e 's#\/#\\/#g')"
       local new_str="$(printf "%s" "$call_new_str" | sed -e 's#\/#\\/#g')"
-      perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
+      if [[ "$(perl -n -e "print if /\Q$call_old_str\E/" "$call_file")" ]]; then
+        perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
+      else
+        call_result="Error: old_str not found in $call_file"
+      fi
     else
       # Append
       printf "%s" "$call_new_str" >> .sloptmp/edit
     fi
-    diff -y "$call_file" .sloptmp/edit
-    rm "$call_file" && mv .sloptmp/edit "$call_file"
-    
-    call_result="$(printf "Edited \"%s\" successfully" "$call_file")"
+
+    if [[ -z "$call_result" ]]; then
+      # TODO: truncation utility
+      diff -u --color "$call_file" .sloptmp/edit | head -n 12 
+      printf "\n"
+      rm "$call_file" && mv .sloptmp/edit "$call_file"
+      
+      call_result="$(printf "Edited \"%s\" successfully" "$call_file")"
+    else
+      rm .sloptmp/edit
+    fi
 
     
   elif [[ "$call_name" = "backup" ]]; then
