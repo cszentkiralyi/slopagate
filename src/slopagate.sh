@@ -220,6 +220,20 @@ SLOP_TOOLS_JSON="[
       }
     }
   },
+{
+    \"type\": \"function\",
+    \"function\": {
+      \"name\": \"grep\",
+      \"description\": \"Grep for a string in a file.\",
+      \"parameters\": {
+        \"type\": \"object\",
+        \"properties\": {
+          \"search_str\": { \"type\": \"string\" },
+          \"file_path\": { \"type\": \"string\" }
+        }
+      }
+    }
+  },
   {
     \"type\": \"function\",
     \"function\": {
@@ -324,6 +338,14 @@ handle_model_tool() {
     color_muted "$(printf "Listing \"%s\"" "$call_directory")"
     echo -e "\n"
     call_result=$(ls -AF "$call_directory")
+
+elif [[ "$call_name" = "grep" ]]; then
+    local search_str=$(printf "%s" "$call_arguments" | jq -r '.search_str')
+    local file_path=$(printf "%s" "$call_arguments" | jq -r '.file_path')
+    
+    color_muted "$(printf "Grep \"%s\" in \"%s\"" "$search_str" "$file_path")"
+    echo -e "\n"
+    call_result=$(grep -Fne "$search_str" "$file_path" 2>&1)
 
   elif [[ "$call_name" = "read" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
