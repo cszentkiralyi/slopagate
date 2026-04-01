@@ -52,6 +52,15 @@ const declutterChatHistory = (_) => {
       readsSeen = readsSeen.filter(read => chatIdx < read.idx + (MAX_TOOL_GAP * 2));
       if (readsSeen > MIN_TOOL_STREAK) {
         let topReads = {}, trashReads = [];
+
+        const isSupersetRange = (a, b) => b.range[0] <= a.range[0] && b.range[1] <= a.range[1];
+        const isLeewayRange = (a, b) => {
+          if (a.range[0] <= b.range[0] && a.range[1] <= b.range[1]) return false;
+          let idx = (a.range[0] < b.range[0]) ? 0 : 1;
+          if (a.range[idx] + MAX_READ_DELTA >= b.range[idx]) return true;
+          return false;
+        }
+
         readsSeen.forEach(read => {
           let prevTop = topReads[read.file];
           if (prevTop == null || (read.range == null && prevTop.range != null)) {
@@ -62,21 +71,11 @@ const declutterChatHistory = (_) => {
           if (!prevTop.range || !read.range) {
             trashReads.push(read);
             return;
-          // we're bigger both ways
-          } else if (prevTop.range[0] <= read.range[0] && prevTop.range[1] <= read.range[1]) {
+          } else if (isSupersetRange(read, prevTop) || isLeewayRange(read, prevTop)) {
             trashReads.push(prevTop);
             topReads[read.file] = read;
-            return;
           }
         });
-        if (trashReads.length) {
-          const removedMsgIds = new Set(trashReads.map(r => r.id));
-          const toRemove = [];
-
-          // Scan backwards through `decluttered` within the window
-          for (let i = 0; i >= 0 && i < MAX_TOOL_GAP * 2 && i < decluttered.length; i++) {
-            const read = decluttered[i];
-            const rangeOverlap = read.range[0] <= prevTop.range[1] && read.range[1] >= prevTop.range[0];
         if (trashReads.length) {
           const removedMsgIds = new Set(trashReads.map(r => r.id));
           const toRemove = [];
