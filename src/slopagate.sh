@@ -56,6 +56,17 @@ EOF
 fi
 
 
+if [[ -z "$SLOP_HISTORY_DIR" ]]; then
+  eval SLOP_HISTORY_DIR="~/.slopagate/history"
+fi
+mkdir -p "$SLOP_HISTORY_DIR"
+
+if [[ "$1" = "history" ]]; then
+  less "$SLOP_HISTORY_DIR/$2"
+  exit 0
+fi
+
+
 ## Color utils & title banner
 
 color_bold() {
@@ -118,12 +129,6 @@ if [[ -z "$SLOP_MODEL" ]]; then
 fi
 color_system "$(printf "Model: %s" "$SLOP_MODEL")"
 printf "\n"
-
-
-if [[ -z "$SLOP_HISTORY_DIR" ]]; then
-  eval SLOP_HISTORY_DIR="~/.slopagate/history"
-fi
-mkdir -p "$SLOP_HISTORY_DIR"
 
 SLOP_SYSTEM_PROMPT=""
 SLOP_PROJECT_PROMPT=""
