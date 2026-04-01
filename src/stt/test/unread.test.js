@@ -11,7 +11,7 @@ const jsonForUnread = (arr) => {
 };
 const jsonFromUnread = (s) => JSON.parse(`[${s}]`);
 
-test('unread doesn\' affect normal chat', () => {
+test('unread doesn\'t affect normal chat', () => {
   const inputArr = [
     { role: 'system', content: 'system prompt' },
     { role: 'user', content: 'user message' },
