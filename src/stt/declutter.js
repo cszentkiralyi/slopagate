@@ -68,10 +68,15 @@ const declutterChatHistory = (_) => {
             topReads[read.file] = read;
             return;
           }
-          // TODO: give some leeway, if one index of read.range is bigger than prevTop.range and
-          // the other index of read.range is no more than MAX_READ_DELTA smaller than prevTop.range,
-          // then we're the new topRead and the existing one is trash.
         });
+        if (trashReads.length) {
+          const removedMsgIds = new Set(trashReads.map(r => r.id));
+          const toRemove = [];
+
+          // Scan backwards through `decluttered` within the window
+          for (let i = 0; i >= 0 && i < MAX_TOOL_GAP * 2 && i < decluttered.length; i++) {
+            const read = decluttered[i];
+            const rangeOverlap = read.range[0] <= prevTop.range[1] && read.range[1] >= prevTop.range[0];
         if (trashReads.length) {
           const removedMsgIds = new Set(trashReads.map(r => r.id));
           const toRemove = [];
