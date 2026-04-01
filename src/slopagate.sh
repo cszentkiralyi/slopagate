@@ -174,7 +174,7 @@ fi
 # On exit, remove our temp dir, and then .sloptmp if no other temp dirs remain
 trap "printf \"\nEnding session %s\n\" \"$SLOP_CHAT_ID\" && \
   rm -r \".sloptmp/$SLOP_CHAT_ID\" && \
-  [[ \$(ls \"$SLOP_HISTORY_DIR\" | wc -l) -gt 0 ]] || rmdir .sloptmp" EXIT
+  [[ \"\$(ls \"$SLOP_HISTORY_DIR\" | wc -l)\" -gt 0 ]] || \"\$(rmdir .sloptmp)\" ]]" EXIT
 
 
 
@@ -355,34 +355,39 @@ handle_model_tool() {
     color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
     echo -e "\n"
     
-    cp "$call_file" .sloptmp/edit
     if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace
-      set -x
-      local old_str="$(printf "%s" "$call_old_str" | sed -e 's#\/#\\/#g')"
-      local new_str="$(printf "%s" "$call_new_str" | sed -e 's#\/#\\/#g')"
-      local old_match_count=$(perl -n -e "print \".\" if /\Q$old_str\E/" -0777 "$call_file" | wc -c)
+      if [[ -f .sloptmp/edit ]]; then
+        rm .sloptmp/edit
+      fi
+      cp "$call_file" .sloptmp/edit
+      local old_str="$(printf "%s" "$call_old_str")"
+      local new_str="$(printf "%s" "$call_new_str")"
+      # -F fixed string (not re), -z read as one line, -c count of matches only, -e expr follows
+      local old_match_count=$(grep -Fzce "$old_str" "$call_file")
       if [[ "$old_match_count" = 1 ]]; then
-        perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
+        #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
+        bin/stt "$call_file" "$call_old_str" "$call_new_str"
       elif [[ "$old_match_count" -gt 1 ]]; then
+        # Note on grep: because we slurp the whole file as one "line," we'll never match n>1 times
         call_result="Error: old_str appears more than once in $call_file"
       else
         call_result="Error: old_str not found in $call_file"
       fi
-      set +x
     else
       # Append
-      printf "%s" "$call_new_str" >> .sloptmp/edit
+      printf "$call_new_str" >> .sloptmp/edit
     fi
 
     if [[ -z "$call_result" ]]; then
       # TODO: truncation utility
-      diff -u --color "$call_file" .sloptmp/edit | head -n 12 
+      diff -u --color=always "$call_file" .sloptmp/edit | head -n 12
       printf "\n"
       rm "$call_file" && mv .sloptmp/edit "$call_file"
       
       call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
     else
+      printf "$call_result\n.sloptmp/edit preserved, pausing"
       rm .sloptmp/edit
     fi
 
@@ -398,8 +403,11 @@ handle_model_tool() {
   
   if [[ -n "$call_result" ]]; then
     call_result=$(printf "%s" "$call_result" | jq -Rasr)
-    printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
+  else
+    call_result='""'
   fi
+
+  printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
 }
 
 
@@ -468,6 +476,7 @@ handle_user_command() {
   elif [[ "$command" = "model" ]]; then
     # TODO: once we support command args, detect $2 and set the model to it
     printf "%s" "$SLOP_MODEL"
+    return
   elif [[ -f "./.slop/commands/$1.sh" ]]; then
     script="./.slop/commands/$1.sh"
   elif [[ -f "./.config/slopagate/commands/$1.sh" ]]; then
