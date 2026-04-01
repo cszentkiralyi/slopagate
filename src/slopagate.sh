@@ -182,7 +182,7 @@ if [[ ! -d "$SLOP_TMP_DIR" ]]; then
 fi
 # On exit, remove our temp dir, and then $SLOP_TMP_DIR if no other temp dirs remain
 trap "printf \"\nEnding session %s\n\" \"$SLOP_CHAT_ID\" && \
-  rm -r \"$SLOP_TMP_DIR/$SLOP_CHAT_ID\" && \
+  rm -r \"$SLOP_TMP_DIR\" && \
   [[ \"\$(ls \"$SLOP_HISTORY_DIR\" | wc -l)\" -gt 0 ]] || \"\$(rmdir $SLOP_TMP_DIR)\" ]]" EXIT
 
 
@@ -391,8 +391,22 @@ handle_model_tool() {
       touch "$call_file"
     fi
 
+    local old_line_count=0
+    local new_line_count=0
+    
+    # Count lines in old and new strings (for reporting)
+    if [[ -n "$call_old_str" ]]; then
+      old_line_count=$(printf "%s\n" "$call_old_str" | wc -l | cut -d ' ' -f 1)
+    fi
+    new_line_count=$(printf "%s\n" "$call_new_str" | wc -l | cut -d ' ' -f 1)
+
     color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
+    if [[ "$old_line_count" -gt 0 ]]; then
+      color_muted "$(printf " -%s" "$old_line_count")"
+    fi
+    color_muted "$(printf " +%s" "$new_line_count")"
     printf "\n"
+    
     
     if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace
