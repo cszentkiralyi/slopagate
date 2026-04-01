@@ -239,7 +239,7 @@ SLOP_TOOLS_JSON="[
     \"type\": \"function\",
     \"function\": {
       \"name\": \"edit\",
-      \"description\": \"Make edits to a text file by replacing 'old_str' with 'new_str' in the file. If the file doesn't exist it will be created.\",
+      \"description\": \"Make edits to a text file by replacing 'old_str' with 'new_str' in the file, the strings must differ. If the file doesn't exist it will be created.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
@@ -386,6 +386,11 @@ handle_model_tool() {
     local call_new_str=$(printf "%s" "$call_arguments" | jq -r '.new_str')
     
     local action_str="Edit"
+    
+    if [[ "$call_old_str" = "$call_new_str" ]]; then
+      action-str=""
+    fi
+
     if [[ ! -f "$call_file" ]]; then
       action_str="Creat" # not a typo, -ing & -ed later
       touch "$call_file"
@@ -394,19 +399,19 @@ handle_model_tool() {
     local old_line_count=0
     local new_line_count=0
     
-    # Count lines in old and new strings (for reporting)
-    if [[ -n "$call_old_str" ]]; then
-      old_line_count=$(printf "%s\n" "$call_old_str" | wc -l | cut -d ' ' -f 1)
-    fi
-    new_line_count=$(printf "%s\n" "$call_new_str" | wc -l | cut -d ' ' -f 1)
+    if [[ -n "$action_str" ]]; then
+      if [[ -n "$call_old_str" ]]; then
+        old_line_count=$(printf "%s\n" "$call_old_str" | wc -l | cut -d ' ' -f 1)
+      fi
+      new_line_count=$(printf "%s\n" "$call_new_str" | wc -l | cut -d ' ' -f 1)
 
-    color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
-    if [[ "$old_line_count" -gt 0 ]]; then
-      color_muted "$(printf " -%s" "$old_line_count")"
+      color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
+      if [[ "$old_line_count" -gt 0 ]]; then
+        color_muted "$(printf " -%s" "$old_line_count")"
+      fi
+      color_muted "$(printf " +%s" "$new_line_count")"
+      printf "\n"
     fi
-    color_muted "$(printf " +%s" "$new_line_count")"
-    printf "\n"
-    
     
     if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace
@@ -414,10 +419,10 @@ handle_model_tool() {
         rm "$SLOP_TMP_DIR/edit"
       fi
       cp "$call_file" "$SLOP_TMP_DIR/edit"
-      local old_str="$(printf "%s" "$call_old_str")"
-      local new_str="$(printf "%s" "$call_new_str")"
+      #local old_str="$(printf "%s" "$call_old_str")"
+      #local new_str="$(printf "%s" "$call_new_str")"
       # -F fixed string (not re), -z read as one line, -c count of matches only, -e expr follows
-      local old_match_count=$(grep -Fzce "$old_str" "$call_file")
+      local old_match_count=$(grep -Fzce "$call_old_str" "$call_file")
       if [[ "$old_match_count" = 1 ]]; then
         #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 "$SLOP_TMP_DIR/edit"
         bin/stt "$SLOP_TMP_DIR/edit" "$call_old_str" "$call_new_str"
@@ -425,9 +430,10 @@ handle_model_tool() {
         # Note on grep: because we slurp the whole file as one "line," we'll never match n>1 times
         call_result="Error: old_str appears more than once in $call_file"
       else
+        printf "Error: old_str not found in $call_file\n"
         call_result="Error: old_str not found in $call_file"
       fi
-    else
+    elif [[ "$action_str" = "Creat" ]]; then
       # Append
       printf "$call_new_str" >> "$SLOP_TMP_DIR/edit"
     fi
@@ -437,7 +443,10 @@ handle_model_tool() {
       printf "\n"
       rm "$call_file" && mv "$SLOP_TMP_DIR/edit" "$call_file"
       
-      call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
+      if [[ -n "$action_str" ]]; then
+        call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
+      else
+        call_result="Error: old_str and new_str must be different"
     else
       printf "$call_result\n$SLOP_TMP_DIR/edit preserved"
       #rm "$SLOP_TMP_DIR/edit"
