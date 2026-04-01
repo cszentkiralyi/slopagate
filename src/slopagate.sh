@@ -176,13 +176,14 @@ if [[ ! -f "$SLOP_SESSION_HISTORY" ]]; then
 fi
 
 # Set up temp dir
-if [[ ! -d ".sloptmp/$SLOP_CHAT_ID" ]]; then
-  mkdir -p ".sloptmp/$SLOP_CHAT_ID" 
+SLOP_TMP_DIR=".sloptmp/$SLOP_CHAT_ID" 
+if [[ ! -d "$SLOP_TMP_DIR" ]]; then
+  mkdir -p "$SLOP_TMP_DIR"
 fi
-# On exit, remove our temp dir, and then .sloptmp if no other temp dirs remain
+# On exit, remove our temp dir, and then $SLOP_TMP_DIR if no other temp dirs remain
 trap "printf \"\nEnding session %s\n\" \"$SLOP_CHAT_ID\" && \
-  rm -r \".sloptmp/$SLOP_CHAT_ID\" && \
-  [[ \"\$(ls \"$SLOP_HISTORY_DIR\" | wc -l)\" -gt 0 ]] || \"\$(rmdir .sloptmp)\" ]]" EXIT
+  rm -r \"$SLOP_TMP_DIR/$SLOP_CHAT_ID\" && \
+  [[ \"\$(ls \"$SLOP_HISTORY_DIR\" | wc -l)\" -gt 0 ]] || \"\$(rmdir $SLOP_TMP_DIR)\" ]]" EXIT
 
 
 
@@ -395,17 +396,17 @@ handle_model_tool() {
     
     if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace
-      if [[ -f .sloptmp/edit ]]; then
-        rm .sloptmp/edit
+      if [[ -f "$SLOP_TMP_DIR/edit" ]]; then
+        rm "$SLOP_TMP_DIR/edit"
       fi
-      cp "$call_file" .sloptmp/edit
+      cp "$call_file" "$SLOP_TMP_DIR/edit"
       local old_str="$(printf "%s" "$call_old_str")"
       local new_str="$(printf "%s" "$call_new_str")"
       # -F fixed string (not re), -z read as one line, -c count of matches only, -e expr follows
       local old_match_count=$(grep -Fzce "$old_str" "$call_file")
       if [[ "$old_match_count" = 1 ]]; then
-        #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
-        bin/stt .sloptmp/edit "$call_old_str" "$call_new_str"
+        #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 "$SLOP_TMP_DIR/edit"
+        bin/stt "$SLOP_TMP_DIR/edit" "$call_old_str" "$call_new_str"
       elif [[ "$old_match_count" -gt 1 ]]; then
         # Note on grep: because we slurp the whole file as one "line," we'll never match n>1 times
         call_result="Error: old_str appears more than once in $call_file"
@@ -414,18 +415,18 @@ handle_model_tool() {
       fi
     else
       # Append
-      printf "$call_new_str" >> .sloptmp/edit
+      printf "$call_new_str" >> "$SLOP_TMP_DIR/edit"
     fi
 
     if [[ -z "$call_result" ]]; then
-      diff -u --color=always "$call_file" .sloptmp/edit | src/util/truncate.sh 12 bottom
+      diff -u --color=always "$call_file" "$SLOP_TMP_DIR/edit" | src/util/truncate.sh 12 bottom
       printf "\n"
-      rm "$call_file" && mv .sloptmp/edit "$call_file"
+      rm "$call_file" && mv "$SLOP_TMP_DIR/edit" "$call_file"
       
       call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
     else
-      printf "$call_result\n.sloptmp/edit preserved, pausing"
-      rm .sloptmp/edit
+      printf "$call_result\n$SLOP_TMP_DIR/edit preserved"
+      #rm "$SLOP_TMP_DIR/edit"
     fi
 
     
@@ -444,7 +445,7 @@ handle_model_tool() {
     call_result='""'
   fi
 
-  printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> .sloptmp/tools
+  printf "{\"role\":\"tool\",\"tool_name\":\"%s\",\"id\":\"%s\",\"content\":%s}\n"  "$call_name" "$call_id" "$call_result" >> "$SLOP_TMP_DIR/tools"
 }
 
 
@@ -466,21 +467,21 @@ handle_model_response() {
   local message_tools=$(printf "%s" "$line_message" | jq -c '.tool_calls')
   if [[ "$message_tools" && "$message_tools" != "null" ]]; then
     # [{ id, function: { index, name, arguments } }, ...]
-    if [[ ! -f .sloptmp/tools ]]; then
-      touch .sloptmp/tools
+    if [[ ! -f "$SLOP_TMP_DIR/tools" ]]; then
+      touch "$SLOP_TMP_DIR/tools"
     fi
-    echo "" > .sloptmp/tools
+    echo "" > "$SLOP_TMP_DIR/tools"
     printf "%s" "$message_tools" | jq -c '.[]' | while IFS="" read -r tool_call; do
       handle_model_tool "$tool_call"
     done
-    if [[ -s .sloptmp/tools ]]; then
+    if [[ -s "$SLOP_TMP_DIR/tools" ]]; then
       # MUST cat directory into string_join, var=$(cat ...) and then echo/printf-ing didn't work
-      local tools_commas=$(cat .sloptmp/tools | string_join ',')
-      rm .sloptmp/tools
+      local tools_commas=$(cat "$SLOP_TMP_DIR/tools" | string_join ',')
+      rm "$SLOP_TMP_DIR/tools"
       RESPONSE=$(send_raw_ollama_message "$tools_commas")
       handle_curl_response "$RESPONSE"
     else
-      printf "Tools output file appears to be empty, preserving .sloptmp/tools for posterity\n"
+      printf "Tools output file appears to be empty, preserving $SLOP_TMP_DIR/tools for posterity\n"
     fi
   fi
 
