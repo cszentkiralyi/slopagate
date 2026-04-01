@@ -220,7 +220,7 @@ SLOP_TOOLS_JSON="[
       }
     }
   },
-{
+  {
     \"type\": \"function\",
     \"function\": {
       \"name\": \"grep\",
@@ -339,7 +339,7 @@ handle_model_tool() {
     echo -e "\n"
     call_result=$(ls -AF "$call_directory")
 
-elif [[ "$call_name" = "grep" ]]; then
+  elif [[ "$call_name" = "grep" ]]; then
     local search_str=$(printf "%s" "$call_arguments" | jq -r '.search_str')
     local file_path=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     
@@ -359,13 +359,13 @@ elif [[ "$call_name" = "grep" ]]; then
     elif [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
       call_result=$(cat -n $call_file)
     elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
-      printf ":+%s" "$call_sline"
+      color_muted "$(printf ":+%s" "$call_sline")"
       call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1)
     elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
-      printf ":-%s" "$call_eline"
+      color_muted "$(printf ":-%s" "$call_eline")"
       call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
-      printf ":%s-%s" "$call_sline" "$call_eline"
+      color_muted "$(printf ":%s-%s" "$call_sline" "$call_eline")"
       local read_len=$(($call_eline-$call_sline))
       call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     else

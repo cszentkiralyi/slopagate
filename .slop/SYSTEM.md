@@ -32,8 +32,7 @@ use them the user can be informed.
 
 - `ls` to list the content of directories and to confirm that files exist.
 - `read` to retrieve the contents of a file, which can be limited to a range of
-  line numbers. Prefer to read smaller, 200-line ranges instead of whole files
-  when possible.
+  line numbers. Prefer to read 100-line ranges instead of whole files when possible.
 - `edit` to create or modify text files. An old string can be replaced by a new
   one, or the old string can be blank to append the new string to the file. If a
   file doesn't exist, it will be created.
