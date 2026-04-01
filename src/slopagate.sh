@@ -372,10 +372,8 @@ handle_model_tool() {
       call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
       color_muted "$(printf ":%s-%s" "$call_sline" "$call_eline")"
-      local actual_sline=$(($call_sline + 1))
-      #local read_len=$(($call_eline-$call_sline))
-      call_result=$(cat -n "$call_file" | head --lines="-$call_eline" | tail --lines="+$actual_sline")
-      #call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
+      local read_len=$(($call_eline - $call_sline))
+      call_result=$(cat -n "$call_file" | head --lines="$call_eline" | tail --lines="$read_len")
     else
       printf "\nTool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
       exit 1
@@ -421,12 +419,9 @@ handle_model_tool() {
         rm "$SLOP_TMP_DIR/edit"
       fi
       cp "$call_file" "$SLOP_TMP_DIR/edit"
-      #local old_str="$(printf "%s" "$call_old_str")"
-      #local new_str="$(printf "%s" "$call_new_str")"
       # -F fixed string (not re), -z read as one line, -c count of matches only, -e expr follows
       local old_match_count=$(grep -Fzce "$call_old_str" "$call_file")
       if [[ "$old_match_count" = 1 ]]; then
-        #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 "$SLOP_TMP_DIR/edit"
         bin/stt "$SLOP_TMP_DIR/edit" "$call_old_str" "$call_new_str"
       elif [[ "$old_match_count" -gt 1 ]]; then
         # Note on grep: because we slurp the whole file as one "line," we'll never match n>1 times

@@ -5,6 +5,7 @@ const MIN_HISTORY_LENGTH = 8;
 
 const MIN_TOOL_STREAK = 2;
 const MAX_TOOL_GAP = 1;
+const MAX_READ_DELTA = 3;
 
 const declutterChatHistory = (_) => {
   const stdinContent = fs.readFileSync(0, 'utf-8');
@@ -60,19 +61,22 @@ const declutterChatHistory = (_) => {
           // already found one that reads the whole file
           if (!prevTop.range || !read.range) {
             trashReads.push(read);
+            return;
           // we're bigger both ways
           } else if (prevTop.range[0] <= read.range[0] && prevTop.range[1] <= read.range[1]) {
             trashReads.push(prevTop);
             topReads[read.file] = read;
+            return;
           }
-          // TODO: more
+          // TODO: give some leeway, if one index of read.range is bigger than prevTop.range and
+          // the other index of read.range is no more than MAX_READ_DELTA smaller than prevTop.range,
+          // then we're the new topRead and the existing one is trash.
         });
         if (trashReads.length) {
           const removedMsgIds = new Set(trashReads.map(r => r.id));
           const toRemove = [];
 
           // Scan backwards through `decluttered` within the window
-          //for (let i = chatIdx - MAX_TOOL_GAP * 2; i < chatIdx; i++) {
           for (let i = 0; i >= 0 && i < MAX_TOOL_GAP * 2 && i < decluttered.length; i++) {
             // Find tool calls with trash read IDs
             let idx = decluttered.length - i - 1;
@@ -92,8 +96,7 @@ const declutterChatHistory = (_) => {
 
           // Remove messages in reverse order to preserve indices
           for (const idx of toRemove.sort((a, b) => b - a)) {
-            // TODO: is splice efficient at all?
-            decluttered.splice(idx, 1);
+            decluttered.splice(idx, 1); // TODO: is splice efficient at all?
           }
         }
       }
