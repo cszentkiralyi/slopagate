@@ -388,7 +388,7 @@ handle_model_tool() {
     local action_str="Edit"
     
     if [[ "$call_old_str" = "$call_new_str" ]]; then
-      action-str=""
+      action_str=""
     fi
 
     if [[ ! -f "$call_file" ]]; then
