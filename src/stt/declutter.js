@@ -12,10 +12,9 @@ const declutterChatHistory = (_) => {
   if (!stdinContent) return 1;
 
   try {
-    let data = JSON.parse(`{"chat":[stdinContent]}`);
+    let data = JSON.parse(`{"chat":[${stdinContent}]}`);
     
     if (data.chat.length < MIN_HISTORY_LENGTH) {
-      console.log(stdinContent);
       return 0;
     }
     
@@ -66,41 +65,43 @@ const declutterChatHistory = (_) => {
             trashReads.push(prevTop);
             topReads[read.file] = read;
           }
+          // TODO: more
         });
         if (trashReads.length) {
           const removedMsgIds = new Set(trashReads.map(r => r.id));
           const toRemove = [];
 
           // Scan backwards through `decluttered` within the window
-          for (let i = chatIdx - MAX_TOOL_GAP * 2; i < chatIdx; i++) {
+          //for (let i = chatIdx - MAX_TOOL_GAP * 2; i < chatIdx; i++) {
+          for (let i = 0; i >= 0 && i < MAX_TOOL_GAP * 2 && i < decluttered.length; i++) {
             // Find tool calls with trash read IDs
-            if (decluttered[i] && decluttered[i].tool_calls) {
-              decluttered[i].tool_calls.forEach(tc => {
+            let idx = decluttered.length - i - 1;
+            let msg = decluttered[idx];
+            if (!msg) continue;
+            if (msg.role === 'assistant' && msg.tool_calls) {
+              msg.tool_calls.forEach(tc => {
                 if (removedMsgIds.has(tc.id)) {
-                  toRemove.push(i);
-                  removedMsgIds.delete(tc.id);
+                  msg.tool_calls.filter(x => x !== tc);
                 }
               });
-            }
             // Find tool responses for trash reads
-            if (decluttered[i]?.role === 'tool' && decluttered[i].id) {
-              const trashIdx = trashReads.findIndex(r => r.id === decluttered[i].id);
-              if (trashIdx !== -1) {
-                toRemove.push(i);
-              }
+            } else if (msg.role === 'tool' && removedMsgIds.has(msg.id)) {
+              toRemove.push(idx);
             }
           }
 
           // Remove messages in reverse order to preserve indices
           for (const idx of toRemove.sort((a, b) => b - a)) {
+            // TODO: is splice efficient at all?
             decluttered.splice(idx, 1);
-            chatIdx--;
           }
         }
       }
-
     }
-
+    
+    let result = JSON.stringify(decluttered);
+    result = result.substring(1, result.length - 2);
+    console.log(result);
 
   } catch (error) {
     console.error('Error:', error.message);
@@ -108,4 +109,4 @@ const declutterChatHistory = (_) => {
   }
 };
 
-export { declutterChatHistory };
+module.exports = { declutterChatHistory };

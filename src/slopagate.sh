@@ -437,7 +437,7 @@ handle_model_tool() {
       fi
     elif [[ "$action_str" = "Creat" ]]; then
       # Append
-      printf "$call_new_str" >> "$SLOP_TMP_DIR/edit"
+      printf "$call_new_str\n" >> "$SLOP_TMP_DIR/edit"
     fi
 
     if [[ -z "$call_result" ]]; then

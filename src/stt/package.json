@@ -7,6 +7,7 @@
   "type": "commonjs",
   "main": "stt.js",
   "scripts": {
+    "test": "node --test test/*.js",
     "build": "cd ../../ && make bin/stt"
   },
   "devDependencies": {
