@@ -8,7 +8,8 @@ Propagate slop with the lowest-common denominator: a shell script. It's no
 OpenCode or Claude Code, but it will sure impersonate one badly.
 
 Command:
-  help       Display this message
+  help       Display this message.
+  history    View a previous session's history.
 
 Environment Variables:
   SLOP_PORT          Provider port (default: 11434).
@@ -40,9 +41,6 @@ Prompt Commands
   !    Run a shell command
   /    Run a harness command (defined in the core, or a shell script in the
        commands/ folder of .slop/, or ~/.slopagate)
-
-Notes:
-  - History logs are stored in ~/.slopagate/history/<id> automatically.
   
 Dependencies
   - jq
@@ -62,7 +60,12 @@ fi
 mkdir -p "$SLOP_HISTORY_DIR"
 
 if [[ "$1" = "history" ]]; then
-  less "$SLOP_HISTORY_DIR/$2"
+  local history_file="$SLOP_HISTORY_DIR/$2"
+  if [ -t 1 ]; then
+    less "$history_file" # in a terminal
+  else
+    cat "$history_file"
+  fi
   exit 0
 fi
 
