@@ -60,7 +60,7 @@ fi
 mkdir -p "$SLOP_HISTORY_DIR"
 
 if [[ "$1" = "history" ]]; then
-  local history_file="$SLOP_HISTORY_DIR/$2"
+  history_file="$SLOP_HISTORY_DIR/$2"
   if [ -t 1 ]; then
     less "$history_file" # in a terminal
   else
@@ -372,8 +372,10 @@ handle_model_tool() {
       call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
       color_muted "$(printf ":%s-%s" "$call_sline" "$call_eline")"
-      local read_len=$(($call_eline-$call_sline))
-      call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
+      local actual_sline=$(($call_sline + 1))
+      #local read_len=$(($call_eline-$call_sline))
+      call_result=$(cat -n "$call_file" | head --lines="-$call_eline" | tail --lines="+$actual_sline")
+      #call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     else
       printf "\nTool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
       exit 1
@@ -447,6 +449,7 @@ handle_model_tool() {
         call_result="$(printf "%sed \"%s\" successfully" "$action_str" "$call_file")"
       else
         call_result="Error: old_str and new_str must be different"
+      fi
     else
       printf "$call_result\n$SLOP_TMP_DIR/edit preserved"
       #rm "$SLOP_TMP_DIR/edit"

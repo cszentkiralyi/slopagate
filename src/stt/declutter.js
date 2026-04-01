@@ -68,15 +68,34 @@ const declutterChatHistory = (_) => {
           }
         });
         if (trashReads.length) {
-          // TODO: go backwards through `decluttered` to remove tool calls and responses
-          // by ID for each trash read.
-          //
-          // We know we never have to go back further than (MAX_TOOL_GAP * 2) messages,
-          // and we can stop once we've taken care of all trashReads.
-          //
-          // Detecting messages to remove:
-          // - Tool call: msg.role === 'assistant' && msg.tool_calls[].id === trashReads[].id
-          // - Tool response: msg.role === 'tool' && msg.id === trashReads[].id
+          const removedMsgIds = new Set(trashReads.map(r => r.id));
+          const toRemove = [];
+
+          // Scan backwards through `decluttered` within the window
+          for (let i = chatIdx - MAX_TOOL_GAP * 2; i < chatIdx; i++) {
+            // Find tool calls with trash read IDs
+            if (decluttered[i] && decluttered[i].tool_calls) {
+              decluttered[i].tool_calls.forEach(tc => {
+                if (removedMsgIds.has(tc.id)) {
+                  toRemove.push(i);
+                  removedMsgIds.delete(tc.id);
+                }
+              });
+            }
+            // Find tool responses for trash reads
+            if (decluttered[i]?.role === 'tool' && decluttered[i].id) {
+              const trashIdx = trashReads.findIndex(r => r.id === decluttered[i].id);
+              if (trashIdx !== -1) {
+                toRemove.push(i);
+              }
+            }
+          }
+
+          // Remove messages in reverse order to preserve indices
+          for (const idx of toRemove.sort((a, b) => b - a)) {
+            decluttered.splice(idx, 1);
+            chatIdx--;
+          }
         }
       }
 
