@@ -331,23 +331,26 @@ handle_model_tool() {
     local call_eline=$(printf "%s" "$call_arguments" | jq -r '.end_line')
 
     color_muted "$(printf "Reading \"%s\"" "$call_file")"
-    echo -e "\n"
     
     if [[ ! -f "$call_file" ]]; then
       call_result=$(printf "Error: path \"%s\" not found" "$call_file")
     elif [[ "$call_sline" = "null" && "$call_eline" = "null" ]]; then
       call_result=$(cat -n $call_file)
     elif [[ "$call_sline" != "null" && "$call_eline" = "null" ]]; then
+      printf ":+%s" "$call_sline"
       call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1)
     elif [[ "$call_sline" = "null" && "$call_eline" != "null" ]]; then
+      printf ":-%s" "$call_eline"
       call_result=$(cat -n $call_file | head --lines="$call_eline" $call_file 2>&1)
     elif [[ "$call_sline" != "null" && "$call_eline" != "null" ]]; then
+      printf ":%s-%s" "$call_sline" "$call_eline"
       local read_len=$(($call_eline-$call_sline))
       call_result=$(cat -n $call_file | tail --lines="-$call_sline" $call_file 2>&1 | head --lines="$read_len" 2>&1)
     else
-      printf "Tool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
+      printf "\nTool \"%s\" encountered a fatal error: nonsensical arguments %s" "$call_name" "$call_arguments"
       exit 1
     fi
+    printf "\n"
     
   elif [[ "$call_name" = "edit" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
@@ -375,7 +378,7 @@ handle_model_tool() {
       local old_match_count=$(grep -Fzce "$old_str" "$call_file")
       if [[ "$old_match_count" = 1 ]]; then
         #perl -p -i -e "s/\Q$old_str\E/$new_str/" -0777 ".sloptmp/edit"
-        bin/stt "$call_file" "$call_old_str" "$call_new_str"
+        bin/stt .sloptmp/edit "$call_old_str" "$call_new_str"
       elif [[ "$old_match_count" -gt 1 ]]; then
         # Note on grep: because we slurp the whole file as one "line," we'll never match n>1 times
         call_result="Error: old_str appears more than once in $call_file"
