@@ -31,6 +31,7 @@ Most of your work will involve these tools. Describe what you're doing when you
 use them the user can be informed.
 
 - `ls` to list the content of directories and to confirm that files exist.
+- `grep` to search for strings in files.
 - `read` to retrieve the contents of a file, which can be limited to a range of
   line numbers. Prefer to read 100-line ranges instead of whole files when possible.
 - `edit` to create or modify text files. An old string can be replaced by a new

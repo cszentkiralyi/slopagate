@@ -224,12 +224,12 @@ SLOP_TOOLS_JSON="[
     \"type\": \"function\",
     \"function\": {
       \"name\": \"grep\",
-      \"description\": \"Grep for a string in a file.\",
+      \"description\": \"Search for a string in a file.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
-          \"search_str\": { \"type\": \"string\" },
-          \"file_path\": { \"type\": \"string\" }
+          \"file_path\": { \"type\": \"string\" },
+          \"search_str\": { \"type\": \"string\" }
         }
       }
     }
@@ -319,12 +319,12 @@ handle_model_tool() {
   local call_arguments=$(printf "%s" "$tool_call" | jq -rc '.function.arguments')
   local call_result=""
   
-  if [[ "$call_name" = "shell" ]]; then
+  if [[ "$call_name" = "shell__DISABLED_DO_NOT_USE" ]]; then
     local call_command=$(printf "%s" "$call_arguments" | jq -r '.command')
     local call_args=$(printf "%s" "$call_arguments" | jq -r '.arguments')
 
     color_muted "$(printf "Running shell command \"%s %s\"" "$call_command" "$call_args")"
-    echo -e "\n"
+    printf "\n"
 
     call_result=$($call_command $call_args 2>&1 | printf "%q")
 
@@ -336,16 +336,21 @@ handle_model_tool() {
     fi
     
     color_muted "$(printf "Listing \"%s\"" "$call_directory")"
-    echo -e "\n"
+    printf "\n"
     call_result=$(ls -AF "$call_directory")
 
   elif [[ "$call_name" = "grep" ]]; then
-    local search_str=$(printf "%s" "$call_arguments" | jq -r '.search_str')
-    local file_path=$(printf "%s" "$call_arguments" | jq -r '.file_path')
+    local call_search_str=$(printf "%s" "$call_arguments" | jq -r '.search_str')
+    local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
     
-    color_muted "$(printf "Grep \"%s\" in \"%s\"" "$search_str" "$file_path")"
-    echo -e "\n"
-    call_result=$(grep -Fne "$search_str" "$file_path" 2>&1)
+    color_muted "$(printf "Grep in \"%s\"" "$call_file")"
+    printf "\n"
+    
+    if [[ ! -f "$call_file" ]]; then
+      call_result=$(printf "Error: path \"%s\" not found" "$call_file")
+    else
+      call_result=$(grep -Fne "$call_search_str" "$call_file" 2>&1)
+    fi
 
   elif [[ "$call_name" = "read" ]]; then
     local call_file=$(printf "%s" "$call_arguments" | jq -r '.file_path')
@@ -386,7 +391,7 @@ handle_model_tool() {
     fi
 
     color_muted "$(printf "%sing \"%s\"" "$action_str" "$call_file")"
-    echo -e "\n"
+    printf "\n"
     
     if [[ "$action_str" = "Edit" && -n "$call_old_str" ]]; then
       # Replace

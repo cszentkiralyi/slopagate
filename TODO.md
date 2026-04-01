@@ -13,7 +13,7 @@ I'm not sure how they're being rolled back on the diffs. One edit operation can'
   - [x] Asking for a tool, then another tool, gives the first tool's response twice
   - [x] `edit`: string replacement ~~range-based insert/replace~~
   - [ ] `ls`: add `-l` flag support or something, and the one that adds `/` after directory names
-  - [ ] `grep`: create a new tool that's basically just `grep -En --exclude-from=".gitignore" "$1"`
+  - [x] `grep`: create a new tool that's basically just `grep -En --exclude-from=".gitignore" "$1"`
 - [ ] /system to refresh system prompts
 - [ ] Context compaction (is this just making the LLM summarize the history into one back-and-forth JSON?)
 - [ ] Memory (required "edit" tool to be done)
