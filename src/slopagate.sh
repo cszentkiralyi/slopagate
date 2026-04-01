@@ -380,8 +380,7 @@ handle_model_tool() {
     fi
 
     if [[ -z "$call_result" ]]; then
-      # TODO: truncation utility
-      diff -u --color=always "$call_file" .sloptmp/edit | head -n 12
+      diff -u --color=always "$call_file" .sloptmp/edit | src/util/truncate.sh 12 bottom
       printf "\n"
       rm "$call_file" && mv .sloptmp/edit "$call_file"
       

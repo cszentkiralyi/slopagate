@@ -1,4 +1,10 @@
+# Libraries, packages, etc
 vendor/glow/
-.sloptmp/
 **/node_modules/
+
+# Build artifacts
+bin/stt
+
+# Temp files from running
 json_log.json
+.sloptmp/
