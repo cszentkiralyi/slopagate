@@ -1,0 +1,15 @@
+{
+  "name": "stt",
+  "version": "1.0.0",
+  "description": "sufficient text tool",
+  "license": "MIT",
+  "author": "Chris Szentkiralyi <chris.szentkiralyi@gmail.com>",
+  "type": "commonjs",
+  "main": "stt.js",
+  "scripts": {
+    "build": "cd ../../ && make bin/stt"
+  },
+  "devDependencies": {
+    "esbuild": "0.27.4"
+  }
+}

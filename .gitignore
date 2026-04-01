@@ -1,5 +1,4 @@
-json_log
-.sloptmp/
 vendor/glow/
+.sloptmp/
+**/node_modules/
 json_log.json
-Makefile

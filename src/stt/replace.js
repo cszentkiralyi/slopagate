@@ -14,4 +14,4 @@ const replaceTextInFile = () => {
   return 1;
 };
 
-export default { replaceTextInFile };
+export { replaceTextInFile };
