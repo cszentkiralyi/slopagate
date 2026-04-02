@@ -2,8 +2,12 @@
 
 ## Priority
 
-Diffs sometimes show the LLM rolling back the correct edits they should have made, but didn't, so
-I'm not sure how they're being rolled back on the diffs. One edit operation can't do that.
+Finish "read" tool compaction.
+
+1. Finish `unread.js` so it passes all the tests
+2. Update `stt.js` so it accepts subcommands instead of always using `replace.js`
+3. Add "replace" and "unread" subcommands, rebuild binary
+4. Pipe raw history through "unread" before sending via curl or saving to disk
 
 ## Backlog
 

@@ -26,7 +26,7 @@ System Prompts (in order of priority):
 Project Files:
   ~/.slopagate/SLOP.md   Global base instructions.
   .slop/SLOP.md          Project override.
-  .SLOP.md               Local template override.
+  SLOP.md               Local template override.
   
 Commands, Tools, and Agents
   - Will be loaded from ./.slop or ~/.slopagate in that order
@@ -156,10 +156,10 @@ if [[ -f ./.slop/SLOP.md ]]; then
   printf "\n"
   SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.slop/SLOP.md)"
 fi
-if [[ -f ./.SLOP.md ]]; then
-  color_system "Loading .SLOP.md..."
+if [[ -f ./SLOP.md ]]; then
+  color_system "Loading SLOP.md..."
   printf "\n"
-  SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./.SLOP.md)"
+  SLOP_PROJECT_PROMPT="$SLOP_PROJECT_PROMPT\n\n$(cat ./SLOP.md)"
 fi
 if [[ -n "$SLOP_PROJECT_PROMPT" ]]; then
   SLOP_PROJECT_PROMPT=$(printf "%s" "$SLOP_PROJECT_PROMPT" | jq -Rasr '.')
@@ -559,8 +559,6 @@ handle_user_input() {
   else
     # Doesn't work, we just freeze on this line without hitting the first line of loading_spinner
     #local spin_pid=$(loading_spinner "Thinking..." &)
-    # TODO: once we have chat history sent in each message for context, no need to inject the
-    # slop prompt into every message
     RESPONSE=$(send_ollama_message "user" "$user_input")
     #kill "$spin_pid" 2>/dev/null # kill the spinner if we're still going, ignore a "not found"
     handle_curl_response "$RESPONSE"
@@ -578,6 +576,7 @@ if [[ -n "$SLOP_SYSTEM_PROMPT" || -n "$SLOP_PROJECT_PROMPT" ]]; then
   if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
     _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_SYSTEM_PROMPT }")
   fi
+  # TODO: instead of this, prepend the SLOP.md contents to the first user turn
   if [[ -n "$SLOP_PROJECT_PROMPT" ]]; then
     _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROJECT_PROMPT }")
   fi
