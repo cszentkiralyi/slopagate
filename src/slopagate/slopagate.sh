@@ -133,19 +133,29 @@ fi
 color_system "$(printf "Model: %s" "$SLOP_MODEL")"
 printf "\n"
 
+command_load_system_prompt() {
+  local system_prompt=""
+
+  if [[ -f ~/.slopagate/SYSTEM.md ]]; then
+    system_prompt=$(cat ~/.slopagate/SYSTEM.md)
+  elif [[ -f .slop/SYSTEM.md ]]; then
+    system_prompt=$(cat .slop/SYSTEM.md)
+  fi
+
+  if [[ -n "$system_prompt" ]]; then
+    SLOP_SYSTEM_PROMPT="$system_prompt"
+  fi
+}
+
 SLOP_SYSTEM_PROMPT=""
 SLOP_PROJECT_PROMPT=""
 
-if [[ -f ~/.slopagate/SYSTEM.md ]]; then
-  SLOP_SYSTEM_PROMPT=$(cat ~/.slopagate/SYSTEM.md)
-elif [[ -f .slop/SYSTEM.md ]]; then
-  SLOP_SYSTEM_PROMPT=$(cat .slop/SYSTEM.md)
-fi
+command_load_system_prompt
 if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
   SLOP_SYSTEM_PROMPT=$(printf "%s" "$SLOP_SYSTEM_PROMPT" | jq -Rasr '.')
 fi
 
-# Read prompts from files, overriding if they exist
+# Read prompts from files, concatenating if they exist
 if [[ -f ~/.slopagate/SLOP.md ]]; then
   color_system "Loading ~/.slopagate/SLOP.md..."
   printf "\n"
@@ -225,7 +235,7 @@ SLOP_TOOLS_JSON="[
     \"type\": \"function\",
     \"function\": {
       \"name\": \"grep\",
-      \"description\": \"Search for a string in a file.\",
+      \"description\": \"Search for a string in a file. Use this before reading blindly.\",
       \"parameters\": {
         \"type\": \"object\",
         \"properties\": {
@@ -535,6 +545,9 @@ handle_user_command() {
   elif [[ "$command" = "model" ]]; then
     # TODO: once we support command args, detect $2 and set the model to it
     printf "%s" "$SLOP_MODEL"
+    return
+  elif [[ "$command" = "system" ]]; then
+    command_load_system_prompt
     return
   elif [[ -f "./.slop/commands/$1.sh" ]]; then
     script="./.slop/commands/$1.sh"
