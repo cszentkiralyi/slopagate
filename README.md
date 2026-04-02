@@ -17,5 +17,5 @@ populate those dependencies yourself.
 
 There are tools that this script depends on to solve trivial problems that
 common Bash approaches make tedious. These are bundled into a standalone
-Node executable and placed in `bin/`. Use `make stt` to make the sufficient
+Node executable and placed in `bin/`. Use `make bin/stt` to make the sufficient
 text tool from the Javascript in `src/stt/`.
