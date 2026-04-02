@@ -584,24 +584,27 @@ handle_user_input() {
 
 printf "" > json_log.json
 
-if [[ -n "$SLOP_SYSTEM_PROMPT" || -n "$SLOP_PROJECT_PROMPT" ]]; then
+if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
   color_system "Connecting..."
-  if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
-    _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_SYSTEM_PROMPT }")
-  fi
-  # TODO: instead of this, prepend the SLOP.md contents to the first user turn
-  if [[ -n "$SLOP_PROJECT_PROMPT" ]]; then
-    _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_PROJECT_PROMPT }")
-  fi
+  _system_resp=$(send_raw_ollama_message "{ \"role\": \"system\", \"content\": $SLOP_SYSTEM_PROMPT }")
   printf "\r"
 fi
 
 color_bold "$(printf "Started session %s.\n\n" "$SLOP_CHAT_ID")"
 printf "\n\n"
 
+# Track if we've sent the project prompt yet (only first time)
+_sent_project_prompt=0
+
 while true; do
   printf "\n"
   read -e -p " ❯  " user_prompt
   printf "\n"
+  
+  # Send project prompt as user role on first message only
+  if [[ "$SLOP_PROJECT_PROMPT" && "$_sent_project_prompt" -eq 0 ]]; then
+    _sent_project_prompt=1
+    user_prompt=$(printf "%s\n%s\n" "$SLOP_PROJECT_PROMPT" "$user_prompt")
+  fi
   handle_user_input "$user_prompt"
 done
