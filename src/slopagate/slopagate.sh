@@ -306,9 +306,7 @@ send_raw_ollama_message() {
       \"tools\": $SLOP_TOOLS_JSON
     }"
     
-    printf "%s\n" "$JSON_PAYLOAD" > "json_log.json"
     RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$SLOP_CONNECTION")
-    printf "%s\n" "$RESPONSE" >> "json_log.json"
     printf "%s" "$RESPONSE"
 }
 
@@ -581,8 +579,6 @@ handle_user_input() {
 
 
 ## Main REPL
-
-printf "" > json_log.json
 
 if [[ -n "$SLOP_SYSTEM_PROMPT" ]]; then
   color_system "Connecting..."
