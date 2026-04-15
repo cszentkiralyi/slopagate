@@ -1,9 +1,11 @@
 # Libraries, packages, etc
-vendor/glow/
 **/node_modules/
 
 # Build artifacts
 bin/stt
+
+# Port artifacts
+legacy/
 
 # Temp files from running
 json_log.json
