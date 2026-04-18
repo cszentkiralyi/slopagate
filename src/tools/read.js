@@ -30,20 +30,29 @@ const ReadTool = new Tool({
     let content;
     
     if (!start_line && !end_line) {
-      content = await fs.readFile(file_path, { encoding: 'utf-8' });
-      content = addLineNumbers(content);
-    } else {
-    let file = await fs.open(file_path);
-      let start = start_line || 1;
-      let lines = file.readLines();
-      let lineNo = 1;
-      content = '';
-      for (const line of lines) {
-        if (lineNo < start) continue;
-        if (end && lineNo > end) break;
-        content += addLineNumber(line) + '\n';
+      try {
+        content = await fs.readFile(file_path, { encoding: 'utf-8' });
+        content = addLineNumbers(content.split('\n'));
+      } catch (err) {
+        content = `Error: file ${file_path} not found!`;
       }
-      file.close();
+    } else {
+      try {
+        let file = await fs.open(file_path);
+        let start = start_line || 1;
+        let lines = file.readLines();
+        let lineNo = 1;
+        content = '';
+        for (const line of lines) {
+          if (lineNo < start) continue;
+          if (end && lineNo > end) break;
+          content += addLineNumber(line) + '\n';
+        }
+      } catch (err) {
+        content = `Error: file ${file_path} not found!`;
+      } finally {
+        file.close();
+      }
     }
     
     return content;

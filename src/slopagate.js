@@ -24,7 +24,8 @@ const Session = require('./session.js');
 const Tools = require('./tools.js');
 
 const CONFIG = {
-  projectDirectory: process.env.SLOP_PROJECT_DIR || `${process.env.PWD}/.slop`,
+  rootDirectory: process.env.PWD,
+  slopDirectory: process.env.SLOP_PROJECT_DIR || `${process.env.PWD}/.slop`,
 
   port: process.env.SLOP_PORT || 11434,
   host: process.env.SLOP_HOST || 'http://127.0.0.1',
@@ -54,22 +55,37 @@ Terminal.Text.color('system', `Model: ${CONFIG.model}`);
 console.log();
 
 /* TODO
- * 1. Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
- *    in that order
+ * 1. ~~Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
+ *    in that order~~
  * 2. Load project prompts from these places, concatenating results:
  *    - ~/.slopagate/SLOP.md
  *    - .slop/SLOP.md
  *    - SLOP.md
  * 3. ~~Generate chat ID, 16-char random alphanum~~
- * 4. Send system prompt
+ * 4. ~~Send system prompt~~
  */
+
+const SYSTEM_PROMPT_PATHS = [
+  path.join(process.env.HOME, '.slopagate'),
+  CONFIG.slopDirectory
+]
 
 
 async function repl() {
+  let systemPrompt = null;
+  SYSTEM_PROMPT_PATHS.forEach(possiblePath => {
+    if (systemPrompt) return;
+    try {
+      systemPrompt = fsSync.readFileSync(path.join(possiblePath, 'SYSTEM.md'), { encoding: 'utf-8' });
+    } catch (err) { /* don't care */ }
+  });
+  
   let session = new Session({
     model: CONFIG.model,
     connection: CONFIG.connection,
-    tools: Tools.all()
+    tools: Tools.all(),
+    
+    systemPrompt: systemPrompt
   });
 
   let _CTRL_C_FLAG = false;

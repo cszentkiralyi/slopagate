@@ -16,8 +16,9 @@ class Session {
   get model() { return this._model; }
   get think() { return this._think; }
   get connection() { return this._connection; }
+  get systemPrompt() { return this._systemPrompt; }
   get tempdir() { return this._tempdir; }
-  get temppath() { return this._tempdir.path; }
+  get temppath() { return this._tempdir ? this._tempdir.path : null; }
   
   constructor(props) {
     this._id = props.id || ID();
@@ -27,6 +28,10 @@ class Session {
     this.tools = props.tools || [];
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
+    
+    if (props.systemPrompt) {
+      this.history.push({ role: 'system', content: props.systemPrompt });
+    }
   }
   
   dispose() {
@@ -48,7 +53,7 @@ class Session {
   }
   
   async handleTool(toolCall) {
-    this.#ensureTempdir();
+    await this.#ensureTempdir();
 
     let id = toolCall.id;
     let name = toolCall.function.name;
