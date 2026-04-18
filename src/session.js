@@ -1,12 +1,14 @@
-const fs = require('node:fs');
+const fs = require('node:fs/promises');
 
 const { ID } = require('./util.js');
+const Terminal = require ('./ui/terminal.js');
 
 class Session {
   _id;
   _model;
   _think;
   _connection;
+  _tempdir = null;
 
   history = [];
   tools;
@@ -14,10 +16,8 @@ class Session {
   get model() { return this._model; }
   get think() { return this._think; }
   get connection() { return this._connection; }
-  
-  get toolDefinitions() {
-    return this.tools.map(t => t.description);
-  }
+  get tempdir() { return this._tempdir; }
+  get temppath() { return this._tempdir.path; }
   
   constructor(props) {
     this._id = props.id || ID();
@@ -25,9 +25,27 @@ class Session {
     this._think = props.think || false;
     this._connection = props.connection;
     this.tools = props.tools || [];
+    
+    this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
+  }
+  
+  dispose() {
+    this.#removeTempdir();
+  }
+  
+  async #ensureTempdir() {
+    if (this._tempdir) return;
+    this._tempdir = await this._tempdirPromise;
+    delete this._tempdirPromise;
+  }
+  async #removeTempdir() {
+    this._tempdir.remove();
+    this._tempdir = null;
   }
   
   async handleTool(toolCall) {
+    this.#ensureTempdir();
+
     let id = toolCall.id;
     let name = toolCall.function.name;
     let args = toolCall.function.arguments;
@@ -35,7 +53,11 @@ class Session {
     
     let tool = this.tools.filter(t => t.name === name)[0];
     if (tool) {
-      output = await tool.run(args);
+      let msg = tool.message ? tool.message(args) : null;
+      if (msg) {
+        Terminal.Text.color('muted', tool.message(args))
+      }
+      output = await tool.run(args, this.temppath);
     } else {
       output = `Error: tool "${name}" not found!`;
     }
@@ -76,6 +98,11 @@ class Session {
     // - eval_count (tokens down)
     // - prompt_eval_duration / eval_duration / total_duration
     let incoming = responseObj.message;
+    
+    if (!incoming) {
+      console.log(responseObj);
+      throw new Error('Malformed model reseponse object');
+    }
     
     while (incoming.tool_calls) {
       let results = await Promise.all(incoming.tool_calls.map(t => this.handleTool(t)));

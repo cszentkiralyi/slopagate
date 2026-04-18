@@ -3,6 +3,7 @@ class Tool {
   description;
   parameters;
   handler;
+  message;
   
   get spec() {
     return {
@@ -18,8 +19,9 @@ class Tool {
   
   constructor(props) { Object.assign(this, props); }
   
-  async run(args) {
-    return await this.handler(args);
+  async run(args, temppath) {
+    this.temppath = temppath;
+    return await this.handler(args, this);
   }
 }
 

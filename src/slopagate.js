@@ -8,12 +8,6 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
-let _CTRL_C_FLAG = false;
-rl.on('SIGINT', () => {
-  if (_CTRL_C_FLAG) process.exit(0);
-  _CTRL_C_FLAG = true;
-  setTimeout(() => _CTRL_C_FLAG = false, 2000);
-});
 
 marked.use(markedTerminal({
   // <https://github.com/mikaelbr/marked-terminal/tree/7eb3cd342807a87688b9a8788eab54816ed38279?tab=readme-ov-file#options>
@@ -75,6 +69,17 @@ async function repl() {
     connection: CONFIG.connection,
     tools: Tools.all()
   });
+
+  let _CTRL_C_FLAG = false;
+  rl.on('SIGINT', () => {
+    if (_CTRL_C_FLAG) {
+      session.dispose();
+      process.exit(0);
+    }
+    _CTRL_C_FLAG = true;
+    setTimeout(() => _CTRL_C_FLAG = false, 2000);
+  });
+
   Terminal.Text.color('bold', `Started session ${session.id}.\n`);
   while (true) {
     let userInput = await rl.question('❯ ');

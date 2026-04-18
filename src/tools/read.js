@@ -2,11 +2,12 @@ const fs = require('node:fs/promises');
 
 const Tool = require('./tool.js');
 
+const addLineNumber = (line, no) => `${no} ${line}`;
 const addLineNumbers = (lines, start) => {
   let start_line = start || 1;
   let output = '';
   for (let i = 0; i < lines.length; i++) {
-    output += `${i + start_line} ${lines[i]}\n`;
+    output += addLineNumber(lines[i], i + start_line) + '\n';
   }
   return output;
 }
@@ -25,12 +26,12 @@ const ReadTool = new Tool({
   },
   handler: async (args) => {
     let { file_path, start_line, end_line } = args;
-    //if (!fs.existsSync(file_path)) return `Error: no file at path "${file_path}"`;
     
     let content;
     
     if (!start_line && !end_line) {
-      content = fs.readFile(file_path, { encoding: 'utf-8' });
+      content = await fs.readFile(file_path, { encoding: 'utf-8' });
+      content = addLineNumbers(content);
     } else {
     let file = await fs.open(file_path);
       let start = start_line || 1;
@@ -40,14 +41,16 @@ const ReadTool = new Tool({
       for (const line of lines) {
         if (lineNo < start) continue;
         if (end && lineNo > end) break;
-        content += line + '\n';
+        content += addLineNumber(line) + '\n';
       }
-      content = addLineNumbers(content, start);
       file.close();
     }
     
-
     return content;
+  },
+  
+  message: (args) => {
+    return  `Reading ${args.file_path}`;
   }
 });
 
