@@ -16,6 +16,8 @@
   "main": "src/slopagate.js",
   "scripts": {
     "dev": "node src/slopagate.js",
+    "build": "scripts/sea.sh",
+    "clean": "rm slop",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

@@ -1,0 +1,8 @@
+{
+  "main": "./src/sea.js",
+  "mainFormat": "commonjs",
+  "output": "slop",
+
+  "useCodeCache": true,
+  "disableExperimentalSEAWarning": true
+}
