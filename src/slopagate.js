@@ -1,5 +1,7 @@
 const process = require('node:process');
 const readline = require('node:readline/promises');
+const path = require('node:path');
+const fsSync = require('node:fs');
 
 const { marked } = require('marked');
 const { markedTerminal } = require('marked-terminal');
@@ -73,6 +75,11 @@ async function repl() {
   let _CTRL_C_FLAG = false;
   rl.on('SIGINT', () => {
     if (_CTRL_C_FLAG) {
+      let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
+      fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
+      let json = session.serialize();
+      fsSync.writeFileSync(path.join(sessionPath, session.id + '.json'), json);
+      Terminal.Text.color('default', `\nEnding session ${session.id}`);
       session.dispose();
       process.exit(0);
     }

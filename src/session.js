@@ -43,6 +43,10 @@ class Session {
     this._tempdir = null;
   }
   
+  serialize() {
+    return Session.serialize(this);
+  }
+  
   async handleTool(toolCall) {
     this.#ensureTempdir();
 
@@ -115,6 +119,24 @@ class Session {
 
     this.history.push(incoming);
     return incoming;
+  }
+  
+  
+  static serialize(session) {
+    let data = {
+      id: session.id,
+      model: session.model,
+      think: session.think,
+      connection: session.connection,
+      tools: session.tools.map(t => t.name),
+      history: session.history
+    };
+    return JSON.stringify(data);
+  }
+  static deserialize(content, toolDefs) {
+    let data = JSON.parse(content);
+    data.tools = data.tools.map(name => toolDefs.find(t => t.name === name)).filter(t => t != null);
+    return new Session(data);
   }
 }
 

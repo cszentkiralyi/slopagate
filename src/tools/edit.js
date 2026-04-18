@@ -15,9 +15,9 @@ const EditTool = new Tool({
     required: [ 'file_path', 'old_str', 'new_str' ]
   },
   
-  handler: async (args, this) => {
+  handler: async (args, tool) => {
     let { file_path, old_str, new_str } = args;
-    let temp_path =  `${this.temppath}/edit`;
+    let temp_path =  `${tool.temppath}/edit`;
     // TODO: handle file creation case
     await fs.copyFile(file_path, temp_path);
     let content = await fs.readFile(temp_path);
