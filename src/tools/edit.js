@@ -19,17 +19,19 @@ const EditTool = new Tool({
     let { file_path, old_str, new_str } = args;
     let temp_path =  `${tool.temppath}/edit`;
     // TODO: handle file creation case
-    await fs.copyFile(file_path, temp_path);
-    let content = await fs.readFile(temp_path);
-    if (content.includes(old_str)) {
-      content = content.toString().replace(old_str, new_str);
-      await fs.writeFile(temp_path, content);
-      await fs.rm(file_path);
-      await fs.copyFile(temp_path, file_path);
-      return `Edited "${file_path}" successfully.`;
+    try {
+      await fs.copyFile(file_path, temp_path);
+      let content = await fs.readFile(temp_path);
+      if (content.includes(old_str)) {
+        content = content.toString().replace(old_str, new_str);
+        await fs.writeFile(temp_path, content);
+        await fs.rm(file_path);
+        await fs.copyFile(temp_path, file_path);
+        return `Edited "${file_path}" successfully.`;
+      }
+    } catch (e) {
+      return `Error: file "${file_path}" not found!`;
     }
-    
-    return `Error: file "${file_path}" not found!`;
   },
   
   message: (args) => {

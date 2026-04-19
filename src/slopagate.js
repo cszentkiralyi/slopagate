@@ -18,6 +18,9 @@ marked.use(markedTerminal({
   tab: 2
 }));
 
+
+const CLI_PROMPT = '❯ ';
+
 const Events = require('./components/events.js');
 const Harness = require('./components/harness.js');
 const TUI = require('./components/tui.js');
@@ -34,36 +37,6 @@ const CONFIG = {
 };
 CONFIG.connection = `${CONFIG.host}:${CONFIG.port}${CONFIG.endpoint}`;
 
-/* Banner */
-const BANNER = `
-  ██████  ██▓     ▒█████   ██▓███   ▄▄▄        ▄████  ▄▄▄     ▄▄▄█████▓▓█████       ▄▄▄██▀▀▀██████ 
-▒██    ▒ ▓██▒    ▒██▒  ██▒▓██░  ██▒▒████▄     ██▒ ▀█▒▒████▄   ▓  ██▒ ▓▒▓█   ▀         ▒██ ▒██    ▒ 
-░ ▓██▄   ▒██░    ▒██░  ██▒▓██░ ██▓▒▒██  ▀█▄  ▒██░▄▄▄░▒██  ▀█▄ ▒ ▓██░ ▒░▒███           ░██ ░ ▓██▄   
-  ▒   ██▒▒██░    ▒██   ██░▒██▄█▓▒ ▒░██▄▄▄▄██ ░▓█  ██▓░██▄▄▄▄██░ ▓██▓ ░ ▒▓█  ▄      ▓██▄██▓  ▒   ██▒
-▒██████▒▒░██████▒░ ████▓▒░▒██▒ ░  ░ ▓█   ▓██▒░▒▓███▀▒ ▓█   ▓██▒ ▒██▒ ░ ░▒████▒ ██▓  ▓███▒ ▒██████▒▒
-▒ ▒▓▒ ▒ ░░ ▒░▓  ░░ ▒░▒░▒░ ▒▓▒░ ░  ░ ▒▒   ▓▒█░ ░▒   ▒  ▒▒   ▓▒█░ ▒ ░░   ░░ ▒░ ░ ▒▓▒  ▒▓▒▒░ ▒ ▒▓▒ ▒ ░
-░ ░▒  ░ ░░ ░ ▒  ░  ░ ▒ ▒░ ░▒ ░       ▒   ▒▒ ░  ░   ░   ▒   ▒▒ ░   ░     ░ ░  ░ ░▒   ▒ ░▒░ ░ ░▒  ░ ░
-░  ░  ░    ░ ░   ░ ░ ░ ▒  ░░         ░   ▒   ░ ░   ░   ░   ▒    ░         ░    ░    ░ ░ ░ ░  ░  ░  
-      ░      ░  ░    ░ ░                 ░  ░      ░       ░  ░           ░  ░  ░   ░   ░       ░  
-                                                                                ░                  
-                                 Propagate the slop - slopagate.js
-
-`;
-console.log(TUI.Terminal.bold(TUI.Terminal.fg(BANNER, 'white')));
-console.log(TUI.Terminal.fg(`Connection: ${CONFIG.connection}`, 'gray'));
-console.log(TUI.Terminal.fg(`Model: ${CONFIG.model}`, 'gray'));
-console.log();
-
-/* TODO
- * 1. ~~Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
- *    in that order~~
- * 2. Load project prompts from these places, concatenating results:
- *    - ~/.slopagate/SLOP.md
- *    - .slop/SLOP.md
- *    - SLOP.md
- * 3. ~~Generate chat ID, 16-char random alphanum~~
- * 4. ~~Send system prompt~~
- */
 
 const SYSTEM_PROMPT_PATHS = [
   path.join(process.env.HOME, '.slopagate'),
@@ -71,6 +44,46 @@ const SYSTEM_PROMPT_PATHS = [
 ]
 
 async function repl() {
+  let terminal = new TUI.Terminal();
+  let ui_history = new TUI.Container();
+  let ui_input = new TUI.TextInput({
+    prompt: CLI_PROMPT
+  });
+  terminal.appendChild(ui_history);
+  terminal.appendChild(ui_input);
+  ui_input.focus();
+
+  /* Banner */
+  const BANNER = `
+    ██████  ██▓     ▒█████   ██▓███   ▄▄▄        ▄████  ▄▄▄     ▄▄▄█████▓▓█████       ▄▄▄██▀▀▀██████ 
+  ▒██    ▒ ▓██▒    ▒██▒  ██▒▓██░  ██▒▒████▄     ██▒ ▀█▒▒████▄   ▓  ██▒ ▓▒▓█   ▀         ▒██ ▒██    ▒ 
+  ░ ▓██▄   ▒██░    ▒██░  ██▒▓██░ ██▓▒▒██  ▀█▄  ▒██░▄▄▄░▒██  ▀█▄ ▒ ▓██░ ▒░▒███           ░██ ░ ▓██▄   
+    ▒   ██▒▒██░    ▒██   ██░▒██▄█▓▒ ▒░██▄▄▄▄██ ░▓█  ██▓░██▄▄▄▄██░ ▓██▓ ░ ▒▓█  ▄      ▓██▄██▓  ▒   ██▒
+  ▒██████▒▒░██████▒░ ████▓▒░▒██▒ ░  ░ ▓█   ▓██▒░▒▓███▀▒ ▓█   ▓██▒ ▒██▒ ░ ░▒████▒ ██▓  ▓███▒ ▒██████▒▒
+  ▒ ▒▓▒ ▒ ░░ ▒░▓  ░░ ▒░▒░▒░ ▒▓▒░ ░  ░ ▒▒   ▓▒█░ ░▒   ▒  ▒▒   ▓▒█░ ▒ ░░   ░░ ▒░ ░ ▒▓▒  ▒▓▒▒░ ▒ ▒▓▒ ▒ ░
+  ░ ░▒  ░ ░░ ░ ▒  ░  ░ ▒ ▒░ ░▒ ░       ▒   ▒▒ ░  ░   ░   ▒   ▒▒ ░   ░     ░ ░  ░ ░▒   ▒ ░▒░ ░ ░▒  ░ ░
+  ░  ░  ░    ░ ░   ░ ░ ░ ▒  ░░         ░   ▒   ░ ░   ░   ░   ▒    ░         ░    ░    ░ ░ ░ ░  ░  ░  
+        ░      ░  ░    ░ ░                 ░  ░      ░       ░  ░           ░  ░  ░   ░   ░       ░  
+                                                                                  ░                  
+                                  Propagate the slop - slopagate.js
+
+  `;
+  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.bold(TUI.ANSI.fg(BANNER, 'white')) }));
+  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Connection: ${CONFIG.connection}`, 'gray') }));
+  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Model: ${CONFIG.model}`, 'gray') }));
+  ui_history.appendChild(new TUI.Text({ content: '' }));
+
+  /* TODO
+  * 1. ~~Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
+  *    in that order~~
+  * 2. Load project prompts from these places, concatenating results:
+  *    - ~/.slopagate/SLOP.md
+  *    - .slop/SLOP.md
+  *    - SLOP.md
+  * 3. ~~Generate chat ID, 16-char random alphanum~~
+  * 4. ~~Send system prompt~~
+  */
+
   let systemPrompt = null;
   SYSTEM_PROMPT_PATHS.forEach(possiblePath => {
     if (systemPrompt) return;
@@ -97,41 +110,54 @@ async function repl() {
       fsSync.writeFileSync(path.join(sessionPath, harness.session.id + '.json'), json);
       console.log(`\nEnding session ${harness.session.id}`);
       harness.session.dispose();
+      terminal.dispose();
       process.exit(0);
     }
     _CTRL_C_FLAG = true;
     setTimeout(() => _CTRL_C_FLAG = false, 2000);
   });
-
-  console.log(`Started session ${harness.session.id}.\n`);
   
-  let triggerUserTurn;
-  let makeUserTurnTrigger = () => {
-    return new Promise((res, rej) => triggerUserTurn = res);
-  }
+  let spinner = null;
+
+  ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
   
   Events.on('model:content', (event) => {
-    console.log(marked.parse(event.content));
-    if (triggerUserTurn) triggerUserTurn(true);
+    let content = marked.parse(event.content);
+    ui_history.appendChild(new TUI.Text({ content }));
+    if (spinner) {
+      ui_history.removeChild(spinner);
+      if (!event.done) ui_history.appendChild(spinner);
+    }
+    terminal.draw();
   });
   Events.on('tool:message', (event) => {
-    console.log(TUI.Terminal.fg(event.content, 245 /* muted */));
+    ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(event.content, 245 /* muted */)}));
+    if (spinner) {
+      ui_history.removeChild(spinner);
+      if (!event.done) ui_history.appendChild(spinner);
+    }
+    terminal.draw();
   })
-
-  while (true) {
-    let userInput = await rl.question('❯ ');
-    console.log(); // newline
-    
-    if (userInput[0] === '!' || userInput[0] === '/') {
+  
+  terminal.draw();
+  ui_input.onInput = (input) => {
+    if (input[0] === '!' || input[0] === '/') {
       // shell command or slash command
-      console.log('Shell & slash commands not yet implemented.');
+      ui_history.appendChild(new TUI.Text({ content: 'Shell & slash commands not yet implemented.'}))
     } else {
-      Events.emit('user:message', { message: userInput });
-      console.log();
-      
-      await makeUserTurnTrigger();
+      Events.emit('user:message', { message: input });
     }
 
+    ui_history.appendChild(new TUI.Text({
+      content: CLI_PROMPT + input + '\n',
+      align: CLI_PROMPT.length
+    }));
+
+    spinner = new TUI.Spinner({ size: 'small', message: 'Autofilling...'});
+    ui_history.appendChild(spinner);
+
+    ui_input.clear();
+    terminal.draw();
   }
 }
 

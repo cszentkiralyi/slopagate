@@ -14,14 +14,10 @@ class Toolbox {
     Events.on('tool:call', ({ id, name, args, dir }) => {
       let tool = this.get(name), content;
       if (tool) {
-        try {
-          if (tool.message) {
-             Events.emit('tool:message', { content: tool.message(args) });
-          }
-          content = tool.run(args);
-        } catch (err) {
-          content = `Error: tool "${name}" encountered an error!`;
+        if (tool.message) {
+            Events.emit('tool:message', { content: tool.message(args) });
         }
+        content = tool.run(args);
       } else {
         content = `Error: tool "${name}" not found!`;
       }
