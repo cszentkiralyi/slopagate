@@ -1,7 +1,6 @@
 const fs = require('node:fs/promises');
 
-const { ID } = require('./util.js');
-const Terminal = require ('./ui/terminal.js');
+const { ID } = require('../util.js');
 
 class Session {
   _id;
@@ -35,15 +34,15 @@ class Session {
   }
   
   dispose() {
-    this.#removeTempdir();
+    this.removeTempDir();
   }
   
-  async #ensureTempdir() {
+  async ensureTempDir() {
     if (this._tempdir) return;
     this._tempdir = await this._tempdirPromise;
     delete this._tempdirPromise;
   }
-  async #removeTempdir() {
+  async removeTempDir() {
     this._tempdir.remove();
     this._tempdir = null;
   }
@@ -51,29 +50,7 @@ class Session {
   serialize() {
     return Session.serialize(this);
   }
-  
-  async handleTool(toolCall) {
-    await this.#ensureTempdir();
 
-    let id = toolCall.id;
-    let name = toolCall.function.name;
-    let args = toolCall.function.arguments;
-    let output;
-    
-    let tool = this.tools.filter(t => t.name === name)[0];
-    if (tool) {
-      let msg = tool.message ? tool.message(args) : null;
-      if (msg) {
-        Terminal.Text.color('muted', tool.message(args))
-      }
-      output = await tool.run(args, this.temppath);
-    } else {
-      output = `Error: tool "${name}" not found!`;
-    }
-    
-    return { id, tool_name: name, content: output };
-  }
-  
   async send_internal(messages)  {
     let payload = {
       model: this.model,
@@ -100,30 +77,7 @@ class Session {
   
   async send(outgoing) {
     this.history.push(outgoing);
-
-    let responseObj = await this.send_internal(this.history);
-    // TODO: responseObj has other cool stuff in it that I want to use later:
-    // - prompt_eval_count (tokens up)
-    // - eval_count (tokens down)
-    // - prompt_eval_duration / eval_duration / total_duration
-    let incoming = responseObj.message;
-    
-    if (!incoming) {
-      console.log(responseObj);
-      throw new Error('Malformed model reseponse object');
-    }
-    
-    while (incoming.tool_calls) {
-      let results = await Promise.all(incoming.tool_calls.map(t => this.handleTool(t)));
-      results.forEach(r => r.role = 'tool');
-      // TODO: assumes 1 tool call with no accompanying user-facing content
-      this.history.push(results[0]);
-      responseObj = await this.send_internal(this.history);
-      incoming = responseObj.message;
-    }
-
-    this.history.push(incoming);
-    return incoming;
+    return await this.send_internal(this.history);
   }
   
   

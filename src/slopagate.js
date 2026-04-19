@@ -18,10 +18,9 @@ marked.use(markedTerminal({
   tab: 2
 }));
 
-const Terminal = require('./ui/terminal.js');
-const Session = require('./session.js');
-
-const Tools = require('./tools.js');
+const Events = require('./components/events.js');
+const Harness = require('./components/harness.js');
+const TUI = require('./components/tui.js');
 
 const CONFIG = {
   rootDirectory: process.env.PWD,
@@ -36,7 +35,7 @@ const CONFIG = {
 CONFIG.connection = `${CONFIG.host}:${CONFIG.port}${CONFIG.endpoint}`;
 
 /* Banner */
-Terminal.Text.color('bold', `
+const BANNER = `
   ██████  ██▓     ▒█████   ██▓███   ▄▄▄        ▄████  ▄▄▄     ▄▄▄█████▓▓█████       ▄▄▄██▀▀▀██████ 
 ▒██    ▒ ▓██▒    ▒██▒  ██▒▓██░  ██▒▒████▄     ██▒ ▀█▒▒████▄   ▓  ██▒ ▓▒▓█   ▀         ▒██ ▒██    ▒ 
 ░ ▓██▄   ▒██░    ▒██░  ██▒▓██░ ██▓▒▒██  ▀█▄  ▒██░▄▄▄░▒██  ▀█▄ ▒ ▓██░ ▒░▒███           ░██ ░ ▓██▄   
@@ -49,9 +48,10 @@ Terminal.Text.color('bold', `
                                                                                 ░                  
                                  Propagate the slop - slopagate.js
 
-`);
-Terminal.Text.color('system', `Connection: ${CONFIG.connection}`);
-Terminal.Text.color('system', `Model: ${CONFIG.model}`);
+`;
+console.log(TUI.Terminal.bold(TUI.Terminal.fg(BANNER, 'white')));
+console.log(TUI.Terminal.fg(`Connection: ${CONFIG.connection}`, 'gray'));
+console.log(TUI.Terminal.fg(`Model: ${CONFIG.model}`, 'gray'));
 console.log();
 
 /* TODO
@@ -70,7 +70,6 @@ const SYSTEM_PROMPT_PATHS = [
   CONFIG.slopDirectory
 ]
 
-
 async function repl() {
   let systemPrompt = null;
   SYSTEM_PROMPT_PATHS.forEach(possiblePath => {
@@ -80,12 +79,13 @@ async function repl() {
     } catch (err) { /* don't care */ }
   });
   
-  let session = new Session({
-    model: CONFIG.model,
-    connection: CONFIG.connection,
-    tools: Tools.all(),
-    
-    systemPrompt: systemPrompt
+  let harness = new Harness({
+    session: {
+      model: CONFIG.model,
+      connection: CONFIG.connection,
+      
+      systemPrompt: systemPrompt
+    }
   });
 
   let _CTRL_C_FLAG = false;
@@ -93,17 +93,31 @@ async function repl() {
     if (_CTRL_C_FLAG) {
       let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
       fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
-      let json = session.serialize();
-      fsSync.writeFileSync(path.join(sessionPath, session.id + '.json'), json);
-      Terminal.Text.color('default', `\nEnding session ${session.id}`);
-      session.dispose();
+      let json = harness.session.serialize();
+      fsSync.writeFileSync(path.join(sessionPath, harness.session.id + '.json'), json);
+      console.log(`\nEnding session ${harness.session.id}`);
+      harness.session.dispose();
       process.exit(0);
     }
     _CTRL_C_FLAG = true;
     setTimeout(() => _CTRL_C_FLAG = false, 2000);
   });
 
-  Terminal.Text.color('bold', `Started session ${session.id}.\n`);
+  console.log(`Started session ${harness.session.id}.\n`);
+  
+  let triggerUserTurn;
+  let makeUserTurnTrigger = () => {
+    return new Promise((res, rej) => triggerUserTurn = res);
+  }
+  
+  Events.on('model:content', (event) => {
+    console.log(marked.parse(event.content));
+    if (triggerUserTurn) triggerUserTurn(true);
+  });
+  Events.on('tool:message', (event) => {
+    console.log(TUI.Terminal.fg(event.content, 245 /* muted */));
+  })
+
   while (true) {
     let userInput = await rl.question('❯ ');
     console.log(); // newline
@@ -112,17 +126,12 @@ async function repl() {
       // shell command or slash command
       console.log('Shell & slash commands not yet implemented.');
     } else {
-      let userMessage = { role: 'user', content: userInput };
-      let modelMessage = await session.send(userMessage);
-
-      if (modelMessage.content) {
-        console.log(marked.parse(modelMessage.content));
-      } else {
-        console.log('No message content, dumping JSON:\n', JSON.stringify(modelMessage));
-      }
+      Events.emit('user:message', { message: userInput });
+      console.log();
+      
+      await makeUserTurnTrigger();
     }
 
-    console.log();
   }
 }
 
