@@ -15,6 +15,11 @@ class TextInput extends Component {
   #value = '';
   #history = [];
   #historyIdx = -1;
+  #ctrl_c = false;
+  #ctrl_timeout = null;
+  
+  shortcuts;
+
   get value() { return this.#value; }
 
   render(width) {
@@ -66,6 +71,19 @@ class TextInput extends Component {
         this.#value = '';
       }
       return;
+    } else if (char === 3) { // ^C
+      if (!'^C' in this.shortcuts) return;
+      if (this.#ctrl_c) {
+        this.#ctrl_c = false;
+        if (this.#ctrl_timeout) {
+          clearTimeout(this.#ctrl_timeout);
+          this.#ctrl_timeout = null;
+        }
+        this.shortcuts['^C']();
+        return;
+      }
+      this.#ctrl_c = true;
+      this.#ctrl_timeout = setTimeout(() => this.#ctrl_c = false, 3000)
     } else if (char >= 128 || (char >= 32 && char <= 126)) {
       this.#value += k;
       return;

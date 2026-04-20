@@ -1,0 +1,4373 @@
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 0, dirty true
+ Container: rendering child
+ Container: child returned 1 lines, skip 0, dirty true
+ Container: rendering child
+ Container: child returned 1 lines, skip 0, dirty true
+ Container: rendering child
+ Container: child returned 1 lines, skip 0, dirty true
+ Container: rendering child
+ Container: child returned 2 lines, skip 0, dirty true
+ Container: done rendering, 19 lines, skip 0, dirty true
+Container: child returned 19 lines, skip 0, dirty true
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 0, dirty true
+Term: first draw
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 3 lines, skip 0, dirty true
+Container: done rendering, 22 lines, skip 19, dirty true
+Term: got 22 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 22; skipping 19 so we clear 3
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 0, dirty true
+Container: done rendering, 23 lines, skip 19, dirty true
+Term: got 23 lines, last draw 23; skipping 19 so we clear 4
+Term: starting draw
+Container: rendering child
+ Container: rendering child
+ Container: child returned 14 lines, skip 14, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 1 lines, skip 1, dirty false
+ Container: rendering child
+ Container: child returned 2 lines, skip 2, dirty false
+ Container: done rendering, 19 lines, skip 19, dirty false
+Container: child returned 19 lines, skip 19, dirty false
+Container: rendering child
+Container: child returned 4 lines, skip 4, dirty false
+Container: done rendering, 23 lines, skip 23, dirty false

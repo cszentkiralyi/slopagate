@@ -45,7 +45,7 @@ class Terminal extends Container {
       this.#last_draw = Date.now();
       this.#draw_inner();
     };
-    if (!this.#last_draw || now > nextDrawMs) {
+    if (!this.#last_draw || now >= nextDrawMs) {
       impl();
       return;
     }
@@ -54,6 +54,7 @@ class Terminal extends Container {
   }
   
   #draw_inner() {
+    //this.log('Term: starting draw');
     this.#last_draw = Date.now();
 
     let width = process.stdout.columns,
@@ -64,6 +65,7 @@ class Terminal extends Container {
     
     if (this.#first_draw) {
       this.#first_draw = false;
+      //this.log('Term: first draw');
       fs.writeSync(process.stdout.fd, lines.join('\n'));
       return;
     }
@@ -76,8 +78,8 @@ class Terminal extends Container {
           prev.length - skip
         );
     
-    // FIXME: sometimes we eat one too many lines, seems like only when the user strikes backspace
-    output += Terminal.cursorUp(clearHeight);
+    //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
+    output += Terminal.cursorUp(clearHeight - 1);
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
 

@@ -11,25 +11,29 @@ class Container extends Component {
     let lines = [],
         skip = 0,
         dirty = false;
+    let logIndent = this.depth
+      ? ' '.repeat(this.depth)
+      : '';
     this.children.forEach(child => {
+      //this.log(`${logIndent}Container: rendering child`);
       let result = child.render(width);
       if (!result || !result.lines) {
         console.log(result);
         throw new Error();
       }
+      //this.log(`${logIndent}Container: child returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
       lines.push(...result.lines);
-      if (!dirty && !result.dirty) {
-        skip += result.lines.length;
-      } else {
-        dirty = true;
-      }
+      if (!dirty) skip += result.skip;
+      dirty ||= result.dirty;
     });
+    //this.log(`${logIndent}Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
-    return { lines, dirty, skip: (dirty ? 0 : skip) };
+    return { lines, dirty, skip };
   }
   
   appendChild(c) {
     c.root = c.root || this.root || this;
+    c.depth = (this.depth || 0) + 1;
     this.children.push(c);
     return true;
   }

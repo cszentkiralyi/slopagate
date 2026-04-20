@@ -1,15 +1,9 @@
 const process = require('node:process');
-const readline = require('node:readline/promises');
 const path = require('node:path');
 const fsSync = require('node:fs');
 
 const { marked } = require('marked');
 const { markedTerminal } = require('marked-terminal');
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 marked.use(markedTerminal({
   // <https://github.com/mikaelbr/marked-terminal/tree/7eb3cd342807a87688b9a8788eab54816ed38279?tab=readme-ov-file#options>
@@ -101,26 +95,22 @@ async function repl() {
     }
   });
 
-  let _CTRL_C_FLAG = false;
-  rl.on('SIGINT', () => {
-    if (_CTRL_C_FLAG) {
-      let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
-      fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
-      let json = harness.session.serialize();
-      fsSync.writeFileSync(path.join(sessionPath, harness.session.id + '.json'), json);
-      console.log(`\nEnding session ${harness.session.id}`);
-      harness.session.dispose();
-      terminal.dispose();
-      process.exit(0);
-    }
-    _CTRL_C_FLAG = true;
-    setTimeout(() => _CTRL_C_FLAG = false, 2000);
-  });
+  const sigint = () => {
+    let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
+    fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
+    let json = harness.session.serialize();
+    fsSync.writeFileSync(path.join(sessionPath, harness.session.id + '.json'), json);
+    console.log(`\nEnding session ${harness.session.id}`);
+    harness.session.dispose();
+    terminal.dispose();
+    process.exit(0);
+  };
+  ui_input.shortcuts = { '^C': sigint };
+  
+  ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
   
   let spinner = null;
 
-  ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
-  
   Events.on('model:content', (event) => {
     if (event.content) {
       let content = marked.parse(event.content);
@@ -175,7 +165,7 @@ async function repl() {
     }));
 
     spinner = new TUI.Spinner({
-      size: 'small',
+      animation: 'small',
       message: 'Autofilling...',
       padding: { top: 1 }
     });
