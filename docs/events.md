@@ -1,0 +1,29 @@
+- `Harness`
+  - Dispatch
+    - `model:content` for model messages the user should see, the event
+      is `{ content }`
+    - `tool:call` is a tool call, the event is `{ id, name, args, dir }`
+  - Handle
+    - `user:request` by sending the user input
+    - `user:abort` by "stopping"... whatever is happening
+    - `model:response` by parsing content & tool calls
+    - `tool:response` by sending to the model
+- `TUI`
+  - Dispatch
+    - `user:request`
+    - `user:abort`
+  - Handle
+    - `model:content` by showing the messaage
+    - `tool:call` by showing a status
+- `Session`
+  - Dispatch
+    - `model:response`
+  - Handle
+    - `model:request` by making a chat request
+    - `tool:response` by forwarding the tool response
+- `Toolbox`
+  - Dispatch
+    - `tool:response`
+    - `tool:message`
+  - Handle
+    - `tool:call` by executing the tool

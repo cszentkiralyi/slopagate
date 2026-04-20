@@ -21,9 +21,9 @@ marked.use(markedTerminal({
 
 const CLI_PROMPT = '❯ ';
 
-const Events = require('./components/events.js');
-const Harness = require('./components/harness.js');
-const TUI = require('./components/tui.js');
+const Events = require('./modules/events.js');
+const Harness = require('./modules/harness.js');
+const TUI = require('./modules/tui.js');
 
 const CONFIG = {
   rootDirectory: process.env.PWD,
@@ -125,8 +125,9 @@ async function repl() {
     if (event.content) {
       let content = marked.parse(event.content);
       ui_history.appendChild(new TUI.Text({
-        content: TUI.ANSI.bg(content, 2),
-        padding: { top: 1, left: 1, right: 1, bottom: 1 }
+        content: content,
+        padding: { top: 1, left: 1, right: 1, bottom: 1 },
+        //bg: 2
       }));
     }
     if (spinner) {
@@ -159,6 +160,7 @@ async function repl() {
         });
       } else if (input === '/debug done') {
         Events.emit('model:content', { done: true });
+      } else if (input.split(' ')[0] === '/ignore') {
       } else {
         // shell command or slash command
         ui_history.appendChild(new TUI.Text({ content: 'Shell & slash commands not yet implemented.'}))
@@ -173,7 +175,7 @@ async function repl() {
     }));
 
     spinner = new TUI.Spinner({
-      size: 'star',
+      size: 'small',
       message: 'Autofilling...',
       padding: { top: 1 }
     });
