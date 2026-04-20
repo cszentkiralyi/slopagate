@@ -122,11 +122,19 @@ async function repl() {
   ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
   
   Events.on('model:content', (event) => {
-    let content = marked.parse(event.content);
-    ui_history.appendChild(new TUI.Text({ content }));
+    if (event.content) {
+      let content = marked.parse(event.content);
+      ui_history.appendChild(new TUI.Text({
+        content: TUI.ANSI.bg(content, 2),
+        padding: { top: 1, left: 1, right: 1, bottom: 1 }
+      }));
+    }
     if (spinner) {
       ui_history.removeChild(spinner);
-      if (!event.done) ui_history.appendChild(spinner);
+      if (!event.done) { 
+        spinner.start();
+        ui_history.appendChild(spinner);
+      }
     }
     terminal.draw();
   });
@@ -134,7 +142,10 @@ async function repl() {
     ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(event.content, 245 /* muted */)}));
     if (spinner) {
       ui_history.removeChild(spinner);
-      if (!event.done) ui_history.appendChild(spinner);
+      if (!event.done) { 
+        spinner.start();
+        ui_history.appendChild(spinner);
+      }
     }
     terminal.draw();
   })
@@ -142,8 +153,16 @@ async function repl() {
   terminal.draw();
   ui_input.onInput = (input) => {
     if (input[0] === '!' || input[0] === '/') {
-      // shell command or slash command
-      ui_history.appendChild(new TUI.Text({ content: 'Shell & slash commands not yet implemented.'}))
+      if (input === '/debug model') {
+        Events.emit('model:content', {
+          content: 'Hello there! **This** is _some_ `Markdown` I think.',
+        });
+      } else if (input === '/debug done') {
+        Events.emit('model:content', { done: true });
+      } else {
+        // shell command or slash command
+        ui_history.appendChild(new TUI.Text({ content: 'Shell & slash commands not yet implemented.'}))
+      }
     } else {
       Events.emit('user:message', { message: input });
     }
@@ -153,7 +172,11 @@ async function repl() {
       align: CLI_PROMPT.length
     }));
 
-    spinner = new TUI.Spinner({ size: 'small', message: 'Autofilling...'});
+    spinner = new TUI.Spinner({
+      size: 'star',
+      message: 'Autofilling...',
+      padding: { top: 1 }
+    });
     ui_history.appendChild(spinner);
 
     ui_input.clear();

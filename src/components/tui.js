@@ -69,7 +69,7 @@ class ANSI {
 class Component {
   root;
   constructor(props) { Object.assign(this, props); }
-  render(width) { return { lines: [], dirty: false }; }
+  render(width) { return { lines: [], dirty: false, skip: 0 }; }
   focus() { if (this.root && this.root.giveFocus) this.root.giveFocus(this); }
   static isDirty(prev, next) {
     if (!prev && !next) return false;
@@ -146,6 +146,7 @@ class Text extends Component {
 
     if (props && typeof props.content !== 'string')
       throw new Error();
+
     Object.assign(this, props);
   }
   
@@ -153,7 +154,7 @@ class Text extends Component {
     let lines = [],
         blankLine = (new Array(width)).fill(' ').join('');
     if (this.padding && this.padding.top) {
-      lines.push(new Array(this.padding.top).map(_ => blankLine));
+      lines.push(...new Array(this.padding.top).map(_ => blankLine));
     }
     this.content.split('\n').forEach(line => {
       if (!line) {
@@ -162,16 +163,14 @@ class Text extends Component {
       }
       
       lines.push(...Text.fit(line, width, { padding: this.padding }));
-      
-      if (this.padding && this.padding.bottom) {
-        lines.push(new Array(this.padding.top).map(''));
-      }
-      if (this.fg || this.bg) {
-        let applyFg = this.fg ? s => ANSI.fg(s, this.fg) : s => s,
-            applyBg = this.bg ? s => ANSI.bg(s, this.bg) : s => s;
-        lines = lines.map(l => applyFg(applyBg(l)));
-      }
     });
+    if (this.padding && this.padding.bottom) {
+      lines.push(...(new Array(this.padding.bottom)).map(_ => blankLine));
+    }
+
+    let applyFg = this.fg ? s => ANSI.fg(s, this.fg) : s => s,
+        applyBg = this.bg ? s => ANSI.bg(s, this.bg) : s => s;
+    lines = lines.map(l => applyFg(applyBg(l)));
     let dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
     return {
@@ -315,7 +314,9 @@ class Spinner extends Component {
   static FRAMES = {
     //small: [ '⠟', '⠯', '⠷', '⠾', '⠽', '⠻' ],
     small: [ "⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈" ],
-    large: [ '⡿', '⣟', '⣯', '⣷', '⣾', '⣽', '⣻', '⢿' ]
+    large: [ '⡿', '⣟', '⣯', '⣷', '⣾', '⣽', '⣻', '⢿' ],
+    star: [ '-', '\\', '|', '/', '-', '\\', '|', '/'],
+    bar: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
   };
   static DELAY_MS = 400;
   
@@ -332,6 +333,10 @@ class Spinner extends Component {
     setTimeout(() => this.root.draw(), Spinner.DELAY_MS);
   }
   
+  start() {
+    this.#loop = true;
+  }
+  
   dispose() {
     this.#loop = false;
   }
@@ -345,16 +350,18 @@ class Spinner extends Component {
       }
     }
     if (this.#loop) {
-      setTimeout(() => this.root.draw(), Math.min(diff, Spinner.DELAY_MS));
+      setTimeout(() => this.root.draw(), Spinner.DELAY_MS);
     }
     let blank = (new Array(width)).fill(' ').join(''),
         leftPad = new Array(this.padding && this.padding.left || 0).fill(' ').join(''),
         rightPad = new Array(this.padding && this.padding.right || 0).fill(' ').join(''),
+        topPad = this.padding && this.padding.top ? new Array(this.padding.top).fill('\n') : [],
+        bottomPad = this.padding && this.padding.bottom ? new Array(this.padding.bottom).fill('\n') : [],
         spin = `${Spinner.FRAMES[this.size][this.#currentFrame]} ${this.message || ''}`;
     let lines = [
-          ...(new Array(this.padding && this.padding.top || 0).fill(blank).join('\n')),
+          ...topPad,
           `${leftPad}${spin}${rightPad}`,
-          ...(new Array(this.padding && this.padding.bottom || 0).fill(blank).join('\n'))
+          ...bottomPad
         ].map(line => Text.fit(line, width)).flat(),
         dirty = Component.isDirty(this._lines, lines);
     if (dirty) this._lines = lines;
@@ -395,16 +402,21 @@ class Terminal extends Container {
   
   draw() {
     if (this.#next_draw_id) return;
+    let nextDrawMs = this.#last_draw + Terminal.DRAW_GAP_MS,
+        now = Date.now();
     let impl = () => {
-      this.#next_draw_id = null;
+      if (this.#next_draw_id) {
+        clearTimeout(this.#next_draw_id);
+        this.#next_draw_id = null;
+      }
       this.#last_draw = Date.now();
       this.#draw_inner();
     };
-    if (!this.#last_draw || Date.now() - this.#last_draw > Terminal.DRAW_GAP_MS) {
+    if (!this.#last_draw || now > nextDrawMs) {
       impl();
       return;
     }
-    this.#next_draw_id = setTimeout(impl);
+    this.#next_draw_id = setTimeout(impl, nextDrawMs - now);
     return;
   }
   
@@ -425,13 +437,15 @@ class Terminal extends Container {
     
     if (!dirty) return;
     
+    let drawHeight = Math.min(lines.length - skip, prevLines.length, height - skip);
     let output = '';
-    //output += Terminal.cursorUp(Math.min(prevLines.length, height - skip, height));
-    output += Terminal.cursorUp(Math.min(lines.length - skip, prevLines.length, height - skip));
+    // FIXME: sometimes we eat one too many lines, seems like only when the user strikes backspace
+    output += Terminal.cursorUp(drawHeight);
     output += Terminal.eraseFromCursor();
     output += lines.slice(skip).join('\n');
 
     fs.writeSync(process.stdout.fd, output);
+    //console.log({ drawHeight, length: lines.length, skip, prev: prevLines.length, height });
   }
   
   appendChild(c) {
