@@ -1,4 +1,5 @@
 const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const Tool = require('./tool.js');
 
@@ -17,18 +18,21 @@ const EditTool = new Tool({
   
   handler: async (args, tool) => {
     let { file_path, old_str, new_str } = args;
-    let temp_path =  `${tool.temppath}/edit`;
+    let temp_path = path.join(tool.temppath, 'edit');
+    let rel_path = path.relative('.', file_path);
     // TODO: handle file creation case
     try {
-      await fs.copyFile(file_path, temp_path);
+      await fs.copyFile(rel_path, temp_path);
       let content = await fs.readFile(temp_path);
       if (content.includes(old_str)) {
         content = content.toString().replace(old_str, new_str);
         await fs.writeFile(temp_path, content);
-        await fs.rm(file_path);
-        await fs.copyFile(temp_path, file_path);
+        await fs.rm(rel_path);
+        await fs.copyFile(temp_path, rel_path);
+        await fs.rm(temp_path);
         return `Edited "${file_path}" successfully.`;
       }
+      return `Error: old_str not found in file!`;
     } catch (e) {
       return `Error: file "${file_path}" not found!`;
     }

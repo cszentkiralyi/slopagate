@@ -28,7 +28,10 @@ class Harness {
       Object.assign(
         { tools: this.toolbox.all() },
         (props && props.session || null))
-      );
+    );
+    this.session.ensureTempDir().then(_ => {
+      Events.emit('harness:ready');
+    });
   }
   
   async onUserMessage(event) {

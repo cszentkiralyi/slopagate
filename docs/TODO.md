@@ -2,6 +2,7 @@
 
 ## Priority
 
+- [ ] Whacking `(` in the text field clears it!?
 - [ ] Abort signal so one Ctrl+C kills the current request, tool, whatever
 - [ ] Chat history isn't being sent correctly, agents seem to know what we're
       talking about but refuse to acknowledge it:
@@ -13,6 +14,7 @@
 
 ## Backlog
 
+- [ ] Wait for `harness:ready`
 - [ ] Save session history more-often
   - Every model response with content?
   - Every `done` model response?

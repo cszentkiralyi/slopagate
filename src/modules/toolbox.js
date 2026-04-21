@@ -24,7 +24,7 @@ class Toolbox {
         if (tool.message) {
             Events.emit('tool:message', { content: tool.message(args) });
         }
-        content = await tool.run(args);
+        content = await tool.run(args, dir);
       } else {
         content = `Error: tool "${name}" not found!`;
       }
