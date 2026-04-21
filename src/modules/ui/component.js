@@ -2,10 +2,13 @@ const { Logger } = require('../../util.js');
 
 class Component {
   root;
+  hidden;
   constructor(props) { Object.assign(this, props); }
   render(width) { return { lines: [], dirty: false, skip: 0 }; }
   focus() { if (this.root && this.root.giveFocus) this.root.giveFocus(this); }
-  log(x) { Logger.log(x); }
+  hide() { this.hidden = true; }
+  show() { this.hidden = false; }
+  log(x) { Logger.log(' '.repeat(this.depth || 0) + x); }
 
   static isDirty(prev, next) {
     if (!prev && !next) return false;

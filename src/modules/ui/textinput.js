@@ -30,7 +30,8 @@ class TextInput extends Component {
           width - 2,
           {
              padding: { left: 0, right: 1 },
-             align: prompt.length
+             align: prompt.length,
+             fill: true
           }),
         horiz = (new Array(width - 2)).fill(TextInput.SYMBOLS.horizontal).join(''),
         lines = [
@@ -38,7 +39,7 @@ class TextInput extends Component {
           ...(valueLines.map(l => TextInput.SYMBOLS.vertical + l + TextInput.SYMBOLS.vertical)),
           TextInput.SYMBOLS.sw + horiz + TextInput.SYMBOLS.se
         ];
-    lines = lines.map(l => ANSI.bg(l, 238));
+    lines = lines.map(l => ANSI.bg(l, this.bg || 236));
     
     let dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;

@@ -1,5 +1,6 @@
 class ANSI {
-  static RESET_ESCAPE = '\x1B[0m';
+  //static RESET_ESCAPE = '\x1B[0m';
+  static RESET_ESCAPE = '\u001b[0m';
   static COLORS = new Map([
     [ 'black', 0 ],
     [ 'red', 1 ],
@@ -19,8 +20,8 @@ class ANSI {
     [ 'white', 15 ],
   ]);
 
-  static #resolveColor(color) {
-    if (!color) return null;
+  static resolveColor(color) {
+    if (!color && color !== 0) return null; // 0 is valid
     let t_color = typeof color;
     if (t_color === 'string') {
       return this.COLORS.get(color);
@@ -29,15 +30,17 @@ class ANSI {
     }
     return null;
   }
+  static fgEsc(code) { return `\x1B[38:5:${code}m`; }
+  static bgEsc(code) { return `\x1B[48:5:${code}m`; }
   static fg(text, color) {
-    let code = this.#resolveColor(color);
+    let code = this.resolveColor(color);
     if (!code) return text;
-    return `\x1B[38:5:${code}m${text}${this.RESET_ESCAPE}`;
+    return `${ANSI.fgEsc(code)}${text}${this.RESET_ESCAPE}`;
   }
   static bg(text, color) {
-    let code = this.#resolveColor(color);
+    let code = this.resolveColor(color);
     if (!code) return text;
-    return `\x1B[48:5:${code}m${text}${this.RESET_ESCAPE}`;
+    return `${ANSI.bgEsc(code)}${text}${this.RESET_ESCAPE}`;
   }
   static bold(text) {
     return `\x1B[1m${text}${this.RESET_ESCAPE}`;

@@ -1,13 +1,15 @@
 const events = require('node:events');
 
+const { Logger } = require('../util.js');
+
 class Wrapper extends events.EventEmitter {
   emit(event, ...args) {
-    console.log('Event', event, args);
+    Logger.log(`EVENT(${event}) ${JSON.stringify(args)}`);
     super.emit(event, ...args);
   }
 }
 
-const Events = new events.EventEmitter();
-//const Events = new Wrapper();
+//const Events = new events.EventEmitter();
+const Events = new Wrapper();
 
 module.exports = Events;

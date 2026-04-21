@@ -2,14 +2,24 @@ const Component = require('./component.js');
 const Text = require('./text.js');
 
 class Spinner extends Component {
-  static FRAMES = {
-    small: [ '⠟', '⠯', '⠷', '⠾', '⠽', '⠻' ],
-    //small: [ "⠁", "⠂", "⠄", "⡀", "⢀", "⠠", "⠐", "⠈" ],
-    large: [ '⡿', '⣟', '⣯', '⣷', '⣾', '⣽', '⣻', '⢿' ],
-    star: [ '-', '\\', '|', '/', '-', '\\', '|', '/'],
-    bar: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
-  };
-  static DELAY_MS = 400;
+  static ANIMATIONS = {
+    'braille-small': {
+      delay: 150,
+      frames: [ '⠟', '⠯', '⠷', '⠾', '⠽', '⠻' ]
+    },
+    'braille-large': {
+      delay: 150,
+      frames: [ '⡿', '⣟', '⣯', '⣷', '⣾', '⣽', '⣻', '⢿' ]
+    },
+    'star': {
+      delay: 300,
+      frames: [ '-', '\\', '|', '/', '-', '\\', '|', '/' ]
+    },
+    'bar': {
+      delay: 300,
+      frames: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
+    }
+  }
   
   #lastRender = null;
   #lastRenderedFrame = -1;
@@ -21,7 +31,12 @@ class Spinner extends Component {
     super(props);
     Object.assign(this, props);
     
-    setTimeout(() => this.root.draw(), Spinner.DELAY_MS);
+    if (this.loop || typeof this.loop === 'undefined') {
+      setTimeout(() => this.root.draw(), SPINNER.ANIMATIONS[this.animation].delay);
+    } else {
+      this.#loop = false;
+    }
+    delete this.loop;
   }
   
   start() {
@@ -34,37 +49,49 @@ class Spinner extends Component {
   
   render(width) {
     let now = Date.now(),
-        diff = (now - this.#lastRender);
-    let frame = this.#lastRenderedFrame;
-    if (!this.#lastRender || diff >= Spinner.DELAY_MS) 
+        diff = (now - this.#lastRender),
+        frame = this.#lastRenderedFrame,
+        { frames, delay } = Spinner.ANIMATIONS[this.animation],
+        timeout = null;
+    if (!this.#lastRender || diff >= delay) 
       frame++;
-    if (frame > Spinner.FRAMES[this.animation].length - 1)
+
+    //this.log(`Spinner: ${this.#lastRenderedFrame} -> ${frame} after ${diff}ms`);
+    if (frame > frames.length - 1)
        frame = 0;
-    if (this.#loop) {
-      setTimeout(() => this.root.draw(), Spinner.DELAY_MS);
-    }
-    let lines;
+    let lines, dirty = false;
     if (frame === this.#lastRenderedFrame) {
+      //this.log(`Spinner: recycling previous lines`);
+      timeout = Math.max(delay - diff, 0);
       lines = this._lines;
     } else {
-      let blank = (new Array(width)).fill(' ').join(''),
-          leftPad = new Array(this.padding && this.padding.left || 0).fill(' ').join(''),
-          rightPad = new Array(this.padding && this.padding.right || 0).fill(' ').join(''),
-          topPad = this.padding && this.padding.top ? new Array(this.padding.top).fill('\n') : [],
-          bottomPad = this.padding && this.padding.bottom ? new Array(this.padding.bottom).fill('\n') : [],
-          spin = `${Spinner.FRAMES[this.animation][frame]} ${this.message || ''}`;
+      //this.log(`Spinner: rendering frame with padding ${JSON.stringify(this.padding)}`);
+      let leftPad = this.padding && this.padding.left ? ' '.repeat(this.padding.left) : '',
+          rightPad = this.padding && this.padding.right ? ' '.repeat(this.padding.right) : '',
+          topPad = this.padding && this.padding.top ?  new Array(this.padding.top) : [],
+          bottomPad = this.padding && this.padding.bottom ? new Array(this.padding.bottom) : [],
+          spin = `${frames[frame]} ${this.message || ''}`;
+      timeout = delay;
       lines = [
         ...topPad,
         `${leftPad}${spin}${rightPad}`,
         ...bottomPad
-      ].map(line => Text.fit(line, width)).flat();
+      ];
+      dirty = true;
+      this._lines = lines;
+      this.#lastRenderedFrame = frame;
+      this.#lastRender = now;
     }
-    let dirty = Component.isDirty(this._lines, lines);
-    if (dirty) this._lines = lines;
-    this.#lastRender = now;
-    this.#lastRenderedFrame = frame;
+
+    if (this.#loop) {
+      //this.log(`Spinner: looping to a root.draw() call in ${timeout}ms`);
+      setTimeout(() => this.root.draw(), timeout);
+    }
+    
+    //this.log(`Spinner: returning result of ${lines.length} lines, skip ${(dirty ? 0 : lines.length)}, dirty ${dirty}`);
+
     return {
-      lines, dirty, skip: (this.dirty ? 0 : lines.length)
+      lines, dirty, skip: (dirty ? 0 : lines.length)
     };
   }
 }

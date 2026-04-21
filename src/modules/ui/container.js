@@ -11,22 +11,20 @@ class Container extends Component {
     let lines = [],
         skip = 0,
         dirty = false;
-    let logIndent = this.depth
-      ? ' '.repeat(this.depth)
-      : '';
     this.children.forEach(child => {
-      //this.log(`${logIndent}Container: rendering child`);
+      if (!child || child.hidden) return;
+      //this.log(`Container: rendering child`);
       let result = child.render(width);
       if (!result || !result.lines) {
         console.log(result);
         throw new Error();
       }
-      //this.log(`${logIndent}Container: child returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
+      //this.log(`Container: child returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
       lines.push(...result.lines);
       if (!dirty) skip += result.skip;
       dirty ||= result.dirty;
     });
-    //this.log(`${logIndent}Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
+    //this.log(`Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
     return { lines, dirty, skip };
   }

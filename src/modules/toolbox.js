@@ -11,13 +11,13 @@ class Toolbox {
   register(tool) {
     this._tools.set(tool.name, tool);
     
-    Events.on('tool:call', ({ id, name, args, dir }) => {
+    Events.on('tool:call', async ({ id, name, args, dir }) => {
       let tool = this.get(name), content;
       if (tool) {
         if (tool.message) {
             Events.emit('tool:message', { content: tool.message(args) });
         }
-        content = tool.run(args);
+        content = await tool.run(args);
       } else {
         content = `Error: tool "${name}" not found!`;
       }

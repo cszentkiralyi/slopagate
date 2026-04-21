@@ -1,6 +1,8 @@
 const ANSI = require('./ansi.js');
 const Component = require('./component.js');
 
+const { Logger } = require('../../util.js');
+
 class Text extends Component {
   content;
   padding;
@@ -18,24 +20,35 @@ class Text extends Component {
   
   render(width) {
     let lines = [],
-        blankLine = (new Array(width)).fill(' ').join('');
+        blankLine = this.bg ? ' '.repeat(width) : '',
+        paddingLines;
     if (this.padding && this.padding.top) {
-      lines.push(...new Array(this.padding.top).map(_ => blankLine));
+      paddingLines = (new Array(this.padding.top).fill(blankLine));
+      lines.push(...paddingLines);
     }
+    //this.log(`Text: content = ${JSON.stringify(this.content)}`);
     this.content.split('\n').forEach(line => {
-      if (!line) {
+      if (!line || !line.length) {
         lines.push(blankLine);
         return;
       }
       
-      lines.push(...Text.fit(line, width, { padding: this.padding }));
+      lines.push(...Text.fit(line, width, { padding: this.padding, fill: !!this.bg }));
     });
     if (this.padding && this.padding.bottom) {
-      lines.push(...(new Array(this.padding.bottom)).map(_ => blankLine));
+      paddingLines = (new Array(this.padding.bottom).fill(blankLine));
+      lines.push(...paddingLines);
     }
 
-    let applyFg = this.fg ? s => ANSI.fg(s, this.fg) : s => s,
-        applyBg = this.bg ? s => ANSI.bg(s, this.bg) : s => s;
+    // TODO: maybe make ANSI.#fgEsc & #bgEsc that guarantee their args are Numbers, so then
+    // the public fgEsc & bgEsc can resolve the color and shorten stuff like this
+    let applyFg = this.fg
+          ? s => Text.applyEscape(s, ANSI.fgEsc(ANSI.resolveColor(this.fg)))
+          : s => s,
+        applyBg = this.bg
+          ? s => Text.applyEscape(s, ANSI.bgEsc(ANSI.resolveColor(this.bg)))
+          : s => s;
+    Logger.log(`Text: lines = ${JSON.stringify(lines)}`);
     lines = lines.map(l => applyFg(applyBg(l)));
     let dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
@@ -48,54 +61,66 @@ class Text extends Component {
   
   static fit(s, width, options) {
     let lines = [],
-        blank = (new Array(width)).fill(' ').join(''),
-        { padding, align } = (options || {}),
+        { padding, align, fill } = (options || {}),
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
-        totalPadding = leftPad + rightPad,
-        leftPadStr = leftPad ? (new Array(leftPad)).fill(' ').join('') : '',
-        currentLine = '',
+        leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
+        blank = fill ? ' '.repeat(width) : '',
+        currentLine = '', currentLen = 0,
         rem;
-    let finishLine = (line) => {
-      for (rem = width - line.length; rem > 0; rem--) line += ' ';
-      lines.push(line);
+    let finishLine = () => {
+      Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
+      if (fill && (rem = width - Text.measure(currentLine)) > 0) {
+         currentLine += ' '.repeat(rem);
+      }
+      lines.push(currentLine);
     }
     let firstLine = true,
-        alignStr = align > 0 ? (new Array(align)).fill(' ').join('') : '';
+        alignStr = align > 0 ? ' '.repeat(align) : '';
     s.split('\n').forEach(line => {
       if (!line) {
         lines.push(blank);
       } else {
-        currentLine = leftPadStr;
+        currentLine = leftPadStr;;
         if (!firstLine) currentLine += alignStr;
+        currentLen = currentLine.length
         line.split(' ').forEach(word => {
-          let len = Text.measure(word);
-          let lineLen = Text.measure(currentLine);
-          if (lineLen + len + 1 + totalPadding <= width) {
-            currentLine += ' ' + word;
-          } else {
-            for (let i = (width - lineLen); i > 0; i--) {
-              currentLine += ' ' 
+          if (!word || !word.length) {
+            if (currentLen + 1 + rightPad <= width) {
+              currentLine += ' ';
+              currentLen++;
+              return;
             }
+          }
+          let len = Text.measure(word);
+          if (currentLen + len + 1 + rightPad <= width) {
+            currentLine += ' ' + word;
+            currentLen += len + 1;
+          } else {
             finishLine(currentLine);
             if (firstLine) firstLine = false;
-            currentLine = leftPadStr;
-            if (!firstLine && align)
-              currentLine += alignStr;
+            currentLine = leftPadStr + alignStr;
+            currentLen = currentLine.length + len;
             currentLine += word;
           }
         })
       }
     });
-    if (currentLine.length > 0) {
-      finishLine(currentLine);
+    if (Text.measure(currentLine) > 0) {
+      finishLine();
     }
     
     return lines;
   }
+  
+  static applyEscape(s, esc) {
+    if (!s || !esc) return s;
+    let reset = ANSI.RESET_ESCAPE + esc;
+    return `${esc}${s.replaceAll(ANSI.RESET_ESCAPE, reset)}${ANSI.RESET_ESCAPE}`;
+  }
 
   static measure(s) {
-    return (s || '').replace(/\x1B\[[0-9;]*m/, '').length;
+    return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Tmfin]/g, '').length;
   }
 }
 

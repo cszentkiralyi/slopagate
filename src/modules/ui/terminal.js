@@ -34,7 +34,6 @@ class Terminal extends Container {
   }
   
   draw() {
-    if (this.#next_draw_id) return;
     let nextDrawMs = this.#last_draw + Terminal.DRAW_GAP_MS,
         now = Date.now();
     let impl = () => {
@@ -49,6 +48,7 @@ class Terminal extends Container {
       impl();
       return;
     }
+    if (this.#next_draw_id) return;
     this.#next_draw_id = setTimeout(impl, nextDrawMs - now);
     return;
   }
@@ -82,6 +82,7 @@ class Terminal extends Container {
     output += Terminal.cursorUp(clearHeight - 1);
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
+    //this.log(`Term: end of draw`);
 
     fs.writeSync(process.stdout.fd, output);
   }

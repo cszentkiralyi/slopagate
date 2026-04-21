@@ -58,8 +58,11 @@ const ReadTool = new Tool({
     return content;
   },
   
-  message: (args) => {
-    return  `Reading ${args.file_path}`;
+  message: ({ file_path, start_line, end_line }) => {
+    let lines = '';
+    if (start_line || end_line)
+       lines = ':' + [start_line, end_line].filter(l => l).join('-');
+    return `Reading ${file_path}${lines}`;
   }
 });
 

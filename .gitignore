@@ -8,5 +8,6 @@ slop
 legacy/
 
 # Temp files from running
+*.log
 json_log.json
 .sloptmp/

@@ -38,17 +38,27 @@ const SYSTEM_PROMPT_PATHS = [
 ]
 
 async function repl() {
-  let terminal = new TUI.Terminal();
-  let ui_history = new TUI.Container();
-  let ui_input = new TUI.TextInput({
-    prompt: CLI_PROMPT
-  });
+  let terminal = new TUI.Terminal(),
+      ui_history = new TUI.Container(),
+      ui_lower = new TUI.Container(),
+      spinner = new TUI.Spinner({
+        animation: 'braille-small',
+        message: 'Autofilling...',
+        padding: { left: 1 },
+        hidden: true,
+        loop: false
+      }),
+      ui_input = new TUI.TextInput({
+        prompt: CLI_PROMPT
+      });
   terminal.appendChild(ui_history);
-  terminal.appendChild(ui_input);
+  terminal.appendChild(ui_lower);
+  ui_lower.appendChild(spinner);
+  ui_lower.appendChild(ui_input);
   ui_input.focus();
 
   /* Banner */
-  const BANNER = `
+  const BANNER_LARGE = `
     ██████  ██▓     ▒█████   ██▓███   ▄▄▄        ▄████  ▄▄▄     ▄▄▄█████▓▓█████       ▄▄▄██▀▀▀██████ 
   ▒██    ▒ ▓██▒    ▒██▒  ██▒▓██░  ██▒▒████▄     ██▒ ▀█▒▒████▄   ▓  ██▒ ▓▒▓█   ▀         ▒██ ▒██    ▒ 
   ░ ▓██▄   ▒██░    ▒██░  ██▒▓██░ ██▓▒▒██  ▀█▄  ▒██░▄▄▄░▒██  ▀█▄ ▒ ▓██░ ▒░▒███           ░██ ░ ▓██▄   
@@ -62,10 +72,28 @@ async function repl() {
                                   Propagate the slop - slopagate.js
 
   `;
-  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.bold(TUI.ANSI.fg(BANNER, 'white')) }));
+  const BANNER_TINY = `
+    ██████  ██▓     ▒█████   ██▓███  
+  ▒██    ▒ ▓██▒    ▒██▒  ██▒▓██░  ██▒
+  ░ ▓██▄   ▒██░    ▒██░  ██▒▓██░ ██▓▒
+    ▒   ██▒▒██░    ▒██   ██░▒██▄█▓▒ ▒
+  ▒██████▒▒░██████▒░ ████▓▒░▒██▒ ░  ░
+  ▒ ▒▓▒ ▒ ░░ ▒░▓  ░░ ▒░▒░▒░ ▒▓▒░ ░  ░
+  ░ ░▒  ░ ░░ ░ ▒  ░  ░ ▒ ▒░ ░▒ ░     
+  ░  ░  ░    ░ ░   ░ ░ ░ ▒  ░░       
+        ░      ░  ░    ░ ░           
+
+   Propagate the slop - slopagate.js                                   
+
+  `;
+  ui_history.appendChild(new TUI.Text({
+    content: TUI.ANSI.bold(
+      (process.stdout.columns >= 102) ? BANNER_LARGE : BANNER_TINY,
+    ),
+    fg: 'white'
+  }));
   ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Connection: ${CONFIG.connection}`, 'gray') }));
   ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Model: ${CONFIG.model}`, 'gray') }));
-  ui_history.appendChild(new TUI.Text({ content: '' }));
 
   /* TODO
   * 1. ~~Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
@@ -82,7 +110,9 @@ async function repl() {
   SYSTEM_PROMPT_PATHS.forEach(possiblePath => {
     if (systemPrompt) return;
     try {
-      systemPrompt = fsSync.readFileSync(path.join(possiblePath, 'SYSTEM.md'), { encoding: 'utf-8' });
+      let systemPath = path.join(possiblePath, 'SYSTEM.md') 
+      systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
+      ui_history.appendChild(new TUI.Text({ content: `System: ${path.relative(CONFIG.rootDirectory, systemPath)}`, fg: 'gray' }))
     } catch (err) { /* don't care */ }
   });
   
@@ -107,36 +137,51 @@ async function repl() {
   };
   ui_input.shortcuts = { '^C': sigint };
   
+  ui_history.appendChild(new TUI.Text({ content: '' }));
   ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
   
-  let spinner = null;
-
+  const addUserHistory = (s) => {
+    ui_history.appendChild(new TUI.Text({
+      content: s,
+      align: CLI_PROMPT.length,
+      padding: { top: 1, left: 1, right: 1, bottom: 1 }
+    }));
+  };
+  const addModelHistory = (s) => {
+    ui_history.appendChild(new TUI.Text({
+      content: s,
+      padding: { top: 1, left: 1, right: 1, bottom: 1 },
+      bg: 94
+    }));
+  };
+  const addToolHistory = (s) => {
+    ui_history.appendChild(new TUI.Text({
+      content: s,
+      padding: { top: 1, left: 1, right: 1, bottom: 1 },
+      fg: 245 /* muted */
+    }));
+  };
+  
   Events.on('model:content', (event) => {
     if (event.content) {
-      let content = marked.parse(event.content);
-      ui_history.appendChild(new TUI.Text({
-        content: content,
-        padding: { top: 1, left: 1, right: 1, bottom: 1 },
-        //bg: 2
-      }));
+      let content = marked.parse(event.content).trim();
+      addModelHistory(content);
     }
-    if (spinner) {
-      ui_history.removeChild(spinner);
-      if (!event.done) { 
-        spinner.start();
-        ui_history.appendChild(spinner);
-      }
+    if (!event.done) { 
+      spinner.start();
+      spinner.show();
+    } else {
+      spinner.hide();
     }
     terminal.draw();
   });
   Events.on('tool:message', (event) => {
-    ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(event.content, 245 /* muted */)}));
-    if (spinner) {
-      ui_history.removeChild(spinner);
-      if (!event.done) { 
-        spinner.start();
-        ui_history.appendChild(spinner);
-      }
+    addToolHistory(event.content);
+    if (!event.done) {
+      spinner.start();
+      spinner.show();
+    } else {
+      spinner.hide();
     }
     terminal.draw();
   })
@@ -145,11 +190,11 @@ async function repl() {
   ui_input.onInput = (input) => {
     if (input[0] === '!' || input[0] === '/') {
       if (input === '/debug model') {
-        Events.emit('model:content', {
+        setTimeout(() => Events.emit('model:content', {
           content: 'Hello there! **This** is _some_ `Markdown` I think.',
-        });
+        }), 300);
       } else if (input === '/debug done') {
-        Events.emit('model:content', { done: true });
+        setTimeout(() => Events.emit('model:content', { done: true }), 300);
       } else if (input.split(' ')[0] === '/ignore') {
       } else {
         // shell command or slash command
@@ -157,19 +202,11 @@ async function repl() {
       }
     } else {
       Events.emit('user:message', { message: input });
+      addUserHistory(CLI_PROMPT + input);
+      
+      spinner.start();
+      spinner.show();
     }
-
-    ui_history.appendChild(new TUI.Text({
-      content: CLI_PROMPT + input + '\n',
-      align: CLI_PROMPT.length
-    }));
-
-    spinner = new TUI.Spinner({
-      animation: 'small',
-      message: 'Autofilling...',
-      padding: { top: 1 }
-    });
-    ui_history.appendChild(spinner);
 
     ui_input.clear();
     terminal.draw();
