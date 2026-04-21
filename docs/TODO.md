@@ -2,7 +2,6 @@
 
 ## Priority
 
-- [ ] Whacking `(` in the text field clears it!?
 - [ ] Abort signal so one Ctrl+C kills the current request, tool, whatever
 - [ ] Chat history isn't being sent correctly, agents seem to know what we're
       talking about but refuse to acknowledge it:
@@ -61,7 +60,3 @@
   [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
       does not explain why we are executing tool calls twice by responding to
       the `tool:call` message twice.
-
-## Finished
-
-- [x] Loading/thinking animation or indicator

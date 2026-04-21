@@ -58,13 +58,13 @@ class TextInput extends Component {
       if (this.#value.length == 0) return;
       this.#value = this.#value.substring(0, this.#value.length - 1);
       return;
-    } else if (char === 38 || k === '\x1b[A') {  // up
+    } else if (k === '\x1b[A') {  // up
       if (-this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx--;
         this.#value = this.getHistory(this.#historyIdx);
       }
       return;
-    } else if (char === 40 || k === '\x1b[B') { // down
+    } else if (k === '\x1b[B') { // down
       if (this.#historyIdx < 0) {
         this.#historyIdx++;
         this.#value = this.getHistory(this.#historyIdx);
@@ -85,7 +85,7 @@ class TextInput extends Component {
       }
       this.#ctrl_c = true;
       this.#ctrl_timeout = setTimeout(() => this.#ctrl_c = false, 3000)
-    } else if (char >= 128 || (char >= 32 && char <= 126)) {
+    } else if (char >= 32 && (char - 127) != 0) {
       this.#value += k;
       return;
     }
