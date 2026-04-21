@@ -73,7 +73,7 @@ class Harness {
           let name = call.function.name;
           let args = call.function.arguments;
           //Logger.log(`tool_call: ${JSON.stringify(call)}`);
-          Events.emit('tool:call', { id, name, args, dir: this.session.tempdir });
+          Events.emit('tool:call', { id, name, args, temppath: this.session.temppath });
         });
       }
     }

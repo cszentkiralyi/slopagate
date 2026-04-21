@@ -40,6 +40,7 @@ const SYSTEM_PROMPT_PATHS = [
 async function repl() {
   let terminal = new TUI.Terminal({ gap: 1 }),
       ui_history = new TUI.Container({ gap: 1 }),
+      ui_startup_history = new TUI.Container(),
       ui_lower = new TUI.Container(),
       spinner = new TUI.Spinner({
         animation: 'braille-small',
@@ -86,14 +87,15 @@ async function repl() {
    Propagate the slop - slopagate.js                                   
 
   `;
-  ui_history.appendChild(new TUI.Text({
+  ui_history.appendChild(ui_startup_history);
+  ui_startup_history.appendChild(new TUI.Text({
     content: TUI.ANSI.bold(
       (process.stdout.columns >= 102) ? BANNER_LARGE : BANNER_TINY,
     ),
     fg: 'white'
   }));
-  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Connection: ${CONFIG.connection}`, 'gray') }));
-  ui_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Model: ${CONFIG.model}`, 'gray') }));
+  ui_startup_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Connection: ${CONFIG.connection}`, 'gray') }));
+  ui_startup_history.appendChild(new TUI.Text({ content: TUI.ANSI.fg(`Model: ${CONFIG.model}`, 'gray') }));
 
   /* TODO
   * 1. ~~Load system prompt from one of ~/.slopagate/SYSTEM.md or .slop/SYSTEM.md,
@@ -112,7 +114,7 @@ async function repl() {
     try {
       let systemPath = path.join(possiblePath, 'SYSTEM.md') 
       systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
-      ui_history.appendChild(new TUI.Text({ content: `System: ${path.relative(CONFIG.rootDirectory, systemPath)}`, fg: 'gray' }))
+      ui_startup_history.appendChild(new TUI.Text({ content: `System: ${path.relative(CONFIG.rootDirectory, systemPath)}`, fg: 'gray' }))
     } catch (err) { /* don't care */ }
   });
   
@@ -137,7 +139,7 @@ async function repl() {
   };
   ui_input.shortcuts = { '^C': sigint };
   
-  ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
+  ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.` }))
   
   const addUserHistory = (s) => {
     ui_history.appendChild(new TUI.Text({

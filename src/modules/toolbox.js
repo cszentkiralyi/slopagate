@@ -15,16 +15,13 @@ class Toolbox {
 
     this._tools.set(tool.name, tool);
     
-    Events.on('tool:call', async ({ id, name, args, dir }) => {
-      Logger.log(`tool: ${{ id, name, args, dir }}`);
+    Events.on('tool:call', async ({ id, name, args, temppath }) => {
+      //Logger.log(`tool: ${{ id, name, args, temppath }}`);
       let tool = this.get(name), content;
       if (tool) {
         if (this._handledCalls.has(id)) return;
         this._handledCalls.add(id);
-        if (tool.message) {
-            Events.emit('tool:message', { content: tool.message(args) });
-        }
-        content = await tool.run(args, dir);
+        content = await tool.run(args, temppath);
       } else {
         content = `Error: tool "${name}" not found!`;
       }

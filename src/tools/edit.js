@@ -19,9 +19,13 @@ const EditTool = new Tool({
   handler: async (args, tool) => {
     let { file_path, old_str, new_str } = args;
     let temp_path = path.join(tool.temppath, 'edit');
-    let rel_path = path.relative('.', file_path);
-    // TODO: handle file creation case
+
+    let linesNeg = args.old_str.split('\n').length;
+    let linesPos = args.new_str.split('\n').length;
+    tool.message(`Editing ${args.file_path} (-${linesNeg} +${linesPos})`);
+
     try {
+      let rel_path = path.relative('.', file_path);
       await fs.copyFile(rel_path, temp_path);
       let content = await fs.readFile(temp_path);
       if (content.includes(old_str)) {
@@ -33,15 +37,17 @@ const EditTool = new Tool({
         return `Edited "${file_path}" successfully.`;
       }
       return `Error: old_str not found in file!`;
-    } catch (e) {
-      return `Error: file "${file_path}" not found!`;
+    } catch (editErr) {
+      if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
+      
+      try {
+        await fs.writeFile(temp_path);
+        return `Created "${file_path}" successfully.`;
+      } catch (createErr) {
+        if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
+        return `Error: some or all of the path "${file_path}" doesn't exist!`;
+      }
     }
-  },
-  
-  message: (args) => {
-    let linesNeg = args.old_str.split('\n').length;
-    let linesPos = args.new_str.split('\n').length;
-    return `Editing ${args.file_path} (-${linesNeg} +${linesPos})`;
   }
 });
 

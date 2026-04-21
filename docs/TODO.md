@@ -21,7 +21,7 @@
   - Every few minutes?
 - [ ] Tools
   - [ ] `edit`:
-    - [ ] File creation is borked
+    - [x] File creation is borked
     - [ ] We aren't showing diffs (later, these should expand/collapse)
   - [x] `read`: we aren't showing line numbers
   - [ ] `ls`
@@ -32,9 +32,12 @@
         Or maybe just until the tool response goes out?
 - [ ] Error handling
   - [ ] Tools
-  - [ ] Models
-  - [ ] Slash commands
+    - [x] Response
+    - [ ] UI
+  - [ ] Models - UI
+  - [ ] Slash commands - UI
 - [ ] `SLOP.md`
+- [ ] Add padding support to containers
 - [ ] Up/down history access, it's present but bad
 - [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Slash commands
@@ -53,7 +56,9 @@
 - [ ] Memory (required "edit" tool to be done)
   - [ ] Auto-memory
   - [ ] /init & SLOP.md
-- [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
+- [ ] Auto-summarize after being idle & at certain points (e.g. Claude uses
+      "approaching context window limit" as a trigger)
+  [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
       does not explain why we are executing tool calls twice by responding to
       the `tool:call` message twice.
 

@@ -48,7 +48,7 @@ class Text extends Component {
         applyBg = this.bg
           ? s => Text.applyEscape(s, ANSI.bgEsc(ANSI.resolveColor(this.bg)))
           : s => s;
-    Logger.log(`Text: lines = ${JSON.stringify(lines)}`);
+    //Logger.log(`Text: lines = ${JSON.stringify(lines)}`);
     lines = lines.map(l => applyFg(applyBg(l)));
     let dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
@@ -69,7 +69,7 @@ class Text extends Component {
         currentLine = '', currentLen = 0,
         rem;
     let finishLine = () => {
-      Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
+      //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
       if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
          currentLine += ' '.repeat(rem);
       }

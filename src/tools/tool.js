@@ -1,3 +1,5 @@
+const Events = require('../modules/events.js');
+
 class Tool {
   name;
   description;
@@ -20,8 +22,11 @@ class Tool {
   constructor(props) { Object.assign(this, props); }
   
   async run(args, temppath) {
-    this.temppath = temppath;
-    return await this.handler(args, this);
+    let tool = {
+      temppath: temppath,
+      message: (content) => Events.emit('tool:message', { id: args.id, content })
+    };
+    return await this.handler(args, tool);
   }
 }
 

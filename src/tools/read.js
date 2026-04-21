@@ -24,10 +24,13 @@ const ReadTool = new Tool({
     },
     required: [ 'file_path' ]
   },
-  handler: async (args) => {
+  handler: async (args, tool) => {
     let { file_path, start_line, end_line } = args;
     
-    let content;
+    let content, message = '';
+    if (start_line || end_line)
+       message = ':' + [start_line, end_line].filter(l => l || '').join('-');
+    tool.message(`Reading ${file_path}${message}`);
     
     if (!start_line && !end_line) {
       try {
@@ -56,13 +59,6 @@ const ReadTool = new Tool({
     }
     
     return content;
-  },
-  
-  message: ({ file_path, start_line, end_line }) => {
-    let lines = '';
-    if (start_line || end_line)
-       lines = ':' + [start_line, end_line].filter(l => l).join('-');
-    return `Reading ${file_path}${lines}`;
   }
 });
 
