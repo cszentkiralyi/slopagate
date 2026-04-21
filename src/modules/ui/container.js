@@ -10,8 +10,9 @@ class Container extends Component {
   render(width) {
     let lines = [],
         skip = 0,
-        dirty = false;
-    this.children.forEach(child => {
+        dirty = false,
+        lastChild = this.children.length - 1;
+    this.children.forEach((child,  i) => {
       if (!child || child.hidden) return;
       //this.log(`Container: rendering child`);
       let result = child.render(width);
@@ -21,6 +22,7 @@ class Container extends Component {
       }
       //this.log(`Container: child returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
       lines.push(...result.lines);
+      if (this.gap && i < lastChild) lines.push('')
       if (!dirty) skip += result.skip;
       dirty ||= result.dirty;
     });

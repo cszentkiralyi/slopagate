@@ -38,8 +38,8 @@ const SYSTEM_PROMPT_PATHS = [
 ]
 
 async function repl() {
-  let terminal = new TUI.Terminal(),
-      ui_history = new TUI.Container(),
+  let terminal = new TUI.Terminal({ gap: 1 }),
+      ui_history = new TUI.Container({ gap: 1 }),
       ui_lower = new TUI.Container(),
       spinner = new TUI.Spinner({
         animation: 'braille-small',
@@ -137,14 +137,13 @@ async function repl() {
   };
   ui_input.shortcuts = { '^C': sigint };
   
-  ui_history.appendChild(new TUI.Text({ content: '' }));
   ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.\n` }))
   
   const addUserHistory = (s) => {
     ui_history.appendChild(new TUI.Text({
       content: s,
       align: CLI_PROMPT.length + 1,
-      padding: { top: 1, left: 1, right: 1, bottom: 1 }
+      padding: { left: 1, right: 1 }
     }));
   };
   const addModelHistory = (s) => {
@@ -158,7 +157,7 @@ async function repl() {
   const addToolHistory = (s) => {
     ui_history.appendChild(new TUI.Text({
       content: s,
-      padding: { top: 1, left: 1, right: 1, bottom: 1 },
+      padding: { left: 2, right: 2 },
       fg: 245 /* muted */
     }));
   };
