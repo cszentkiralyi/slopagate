@@ -78,10 +78,11 @@ class Terminal extends Container {
           prev.length - skip
         );
     
-    //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
+    this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
     output += Terminal.cursorUp(clearHeight - 1);
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
+    if (lines.length < prev.length) output += Terminal.eraseDown();
     //this.log(`Term: end of draw`);
 
     fs.writeSync(process.stdout.fd, output);

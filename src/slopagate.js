@@ -143,7 +143,7 @@ async function repl() {
   const addUserHistory = (s) => {
     ui_history.appendChild(new TUI.Text({
       content: s,
-      align: CLI_PROMPT.length,
+      align: CLI_PROMPT.length + 1,
       padding: { top: 1, left: 1, right: 1, bottom: 1 }
     }));
   };
@@ -151,7 +151,8 @@ async function repl() {
     ui_history.appendChild(new TUI.Text({
       content: s,
       padding: { top: 1, left: 1, right: 1, bottom: 1 },
-      bg: 94
+      bg: 237
+      //bg: 94
     }));
   };
   const addToolHistory = (s) => {

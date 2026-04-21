@@ -2,6 +2,8 @@ const Events = require('./events.js');
 const Session = require('./session.js');
 const Toolbox = require('./toolbox.js');
 
+const { Logger } = require('../util.js');
+
 const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
 
@@ -55,17 +57,22 @@ class Harness {
     if (!response || !response.message) return;
     let { message, done } = response;
     
-    if (message.content) {
-      Events.emit('model:content', { done, content: message.content });
-    }
-    if (message.tool_calls) {
-      await this.session.ensureTempDir();
-      message.tool_calls.forEach(call => {
-        let id = call.id;
-        let name = call.function.name;
-        let args = call.function.arguments;
-        Events.emit('tool:call', { id, name, args, dir: this.session.tempdir });
-      });
+    if (message.content || message.tool_calls) {
+      this.session.history.push(message);
+      if (message.content) {
+        Events.emit('model:content', { done, content: message.content });
+      }
+      if (message.tool_calls) {
+        await this.session.ensureTempDir();
+        //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
+        message.tool_calls.forEach(call => {
+          let id = call.id;
+          let name = call.function.name;
+          let args = call.function.arguments;
+          //Logger.log(`tool_call: ${JSON.stringify(call)}`);
+          Events.emit('tool:call', { id, name, args, dir: this.session.tempdir });
+        });
+      }
     }
   }
   

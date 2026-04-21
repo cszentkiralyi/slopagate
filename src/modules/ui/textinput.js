@@ -73,7 +73,7 @@ class TextInput extends Component {
       }
       return;
     } else if (char === 3) { // ^C
-      if (!'^C' in this.shortcuts) return;
+      if (!('^C' in this.shortcuts)) return;
       if (this.#ctrl_c) {
         this.#ctrl_c = false;
         if (this.#ctrl_timeout) {

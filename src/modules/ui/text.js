@@ -70,7 +70,7 @@ class Text extends Component {
         rem;
     let finishLine = () => {
       Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
-      if (fill && (rem = width - Text.measure(currentLine)) > 0) {
+      if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
          currentLine += ' '.repeat(rem);
       }
       lines.push(currentLine);
