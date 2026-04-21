@@ -3,15 +3,6 @@ const Component = require('./component.js');
 const Text = require('./text.js');
 
 class TextInput extends Component {
-  static SYMBOLS = {
-    horizontal: '─',
-    vertical: '│',
-    nw: '┌',
-    ne: '┐',
-    se: '┘',
-    sw: '└'
-  };
-
   #value = '';
   #history = [];
   #historyIdx = -1;
@@ -27,19 +18,20 @@ class TextInput extends Component {
         value = prompt + this.value + '█',
         valueLines = Text.fit(
           value,
-          width - 2,
+          width,
           {
-             padding: { left: 0, right: 1 },
+             padding: { left: 1, right: 1 },
              align: prompt.length,
              fill: true
           }),
-        horiz = (new Array(width - 2)).fill(TextInput.SYMBOLS.horizontal).join(''),
+        bg = this.bg || 236,
+        // Unicode block elements, upper/lower half block
         lines = [
-          TextInput.SYMBOLS.nw + horiz + TextInput.SYMBOLS.ne,
-          ...(valueLines.map(l => TextInput.SYMBOLS.vertical + l + TextInput.SYMBOLS.vertical)),
-          TextInput.SYMBOLS.sw + horiz + TextInput.SYMBOLS.se
+          ANSI.fg('\u2584'.repeat(width), bg),
+          ...(valueLines.map(l => ANSI.bg(l, bg))),
+          ANSI.fg('\u2580'.repeat(width), bg),
         ];
-    lines = lines.map(l => ANSI.bg(l, this.bg || 236));
+    //lines = lines.map(l => ANSI.bg(l, this.bg || 236));
     
     let dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
