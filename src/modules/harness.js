@@ -19,7 +19,7 @@ class Harness {
     Events.on('user:message', (event) => this.onUserMessage(event));
     Events.on('user:abort', (event) => this.onUserAbort(event));
     Events.on('model:response', (event) => this.onModelResponse(event));
-    Events.on('tool:response', (event) => this.onToolResponse(event));
+    Events.on('tool_calls:response', (event) => this.onToolsResponse(event));
     
     this.toolbox = new Toolbox([
       ReadTool,
@@ -73,20 +73,46 @@ class Harness {
         // Toolbox doesn't support abort() yet
         //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
-        message.tool_calls.forEach(call => {
+        
+        let toolPromises = [];
+        
+        // Remove existing listener before adding new ones to avoid duplicates
+        Events.off('tool:response', this.#handleToolResponse);
+        
+        for (let call of message.tool_calls) {
           let id = call.id;
           let name = call.function.name;
           let args = call.function.arguments;
           //Logger.log(`tool_call: ${JSON.stringify(call)}`);
           Events.emit('tool:call', { id, name, args, temppath: this.session.temppath });
-        });
+          
+          // Create a promise that resolves when the corresponding tool:response event is received
+          let toolPromise = new Promise((resolve, reject) => {
+            let onResponse = (evt) => {
+              if (evt.id === id) {
+                Events.off('tool:response', onResponse);
+                resolve(evt);
+              }
+            };
+            Events.on('tool:response', onResponse);
+          });
+          toolPromises.push(toolPromise);
+        }
+        
+        let results = await Promise.all(toolPromises);
+        results.forEach(msg => msg.role = 'tool');
+        Events.emit('tool_calls:response', results);
       }
     }
   }
   
-  async onToolResponse(event) {
-    let message = event;
-    message.role = 'tool';
+  // Fallback handler for any tool:response events emitted during normal flow
+  #handleToolResponse(event) {
+    // This handler is removed per-tool in onModelResponse above
+    // Kept here for potential global event processing if needed
+  }
+  
+  async onToolsResponse(message) {
     this.#abortTarget = this.session;
     let response = await this.session.send(message);
     Events.emit('model:response', { response });

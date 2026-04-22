@@ -45,7 +45,7 @@ class Terminal extends Container {
       this.#draw_inner();
     };
     if (!this.#last_draw || now >= nextDrawMs) {
-      this.log('Drawing immediately!');
+      //this.log('Drawing immediately!');
       impl();
       return;
     }
@@ -85,7 +85,7 @@ class Terminal extends Container {
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
     if (lines.length < prev.length) output += Terminal.eraseDown();
-    this.log(`Term: end of draw`);
+    //this.log(`Term: end of draw`);
 
     fs.writeSync(process.stdout.fd, output);
   }
