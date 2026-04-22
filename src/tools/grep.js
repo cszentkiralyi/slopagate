@@ -1,0 +1,34 @@
+const { execSync } = require('node:child_process');
+
+const Tool = require('./tool.js');
+
+const GrepTool = new Tool({
+  name: 'grep',
+  description: 'Search for a pattern in a file and return matching lines.',
+  parameters: {
+    type: 'object',
+    properties: {
+      file_path: { type: 'string' },
+      search_string: { type: 'string' }
+    },
+    required: [ 'file_path', 'search_string' ]
+  },
+  handler: async (args) => {
+    let { file_path, search_string } = args;
+
+    try {
+      const output = execSync(`grep -Fn '${search_string}' "${file_path}"`);
+      return output.toString().split('\n').slice(0, 20).join('\n');
+    } catch (err) {
+      if (err.message?.includes('ENOENT')) {
+        return `Error: file ${file_path} not found`;
+      }
+      if (err.message?.includes('No match')) {
+        return `Error: string "${search_string}" not found in ${file_path}`;
+      }
+      return `Error: ${err.message}`;
+    }
+  }
+});
+
+module.exports = GrepTool;
