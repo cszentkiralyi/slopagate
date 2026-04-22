@@ -100,7 +100,11 @@ class Harness {
         }
         
         let results = await Promise.all(toolPromises);
-        results.forEach(msg => msg.role = 'tool');
+        results.forEach(msg => {
+          msg.role = 'tool';
+          msg.tool_name = msg.name;
+          delete msg.name;
+        });
         Events.emit('tool_calls:response', results);
       }
     }
@@ -112,9 +116,9 @@ class Harness {
     // Kept here for potential global event processing if needed
   }
   
-  async onToolsResponse(message) {
+  async onToolsResponse(messages) {
     this.#abortTarget = this.session;
-    let response = await this.session.send(message);
+    let response = await this.session.send(...messages);
     Events.emit('model:response', { response });
   }
 }

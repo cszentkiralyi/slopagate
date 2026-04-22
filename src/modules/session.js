@@ -85,9 +85,9 @@ class Session {
       return responseObj;
     }
   }
-  
-  async send(outgoing) {
-    this.history.push(outgoing);
+
+  async send(...outgoing) {
+    this.history.push(...outgoing);
     return await this.send_internal(this.history);
   }
   
