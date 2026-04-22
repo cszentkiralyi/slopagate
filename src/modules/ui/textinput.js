@@ -45,11 +45,11 @@ class TextInput extends Component {
     return { lines, dirty, skip: (dirty ? 0 : lines.length) };
   }
   
-  key(k) {
+  async key(k) {
     // TODO: cursor position
     let char = k.charCodeAt(0),
         [laters, later] = this.#makeLater();
-    if (this.onKey) this.onKey(k, char, later);
+    if (this.onKey) await this.onKey(k, char, later);
     this.log(JSON.stringify({ k, char }));
     if (char === 13 && k.length === 1) { // newline / cr
       this.#historyIdx = -1;
@@ -80,7 +80,7 @@ class TextInput extends Component {
       this.#value += k;
     }
     
-    if (laters.length) laters.run();
+    if (laters.length) await laters.run();
   }
   
   clear() {

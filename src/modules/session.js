@@ -36,7 +36,7 @@ class Session {
     }
   }
   
-  dispose() {
+  async dispose() {
     this.removeTempDir();
   }
   abort() {
@@ -49,7 +49,7 @@ class Session {
     delete this._tempdirPromise;
   }
   async removeTempDir() {
-    this.#tempdir.remove();
+    await this.#tempdir.remove();
     this.#tempdir = null;
   }
   

@@ -134,23 +134,23 @@ async function repl() {
     }
   });
 
-  const sigint = () => {
+  const sigint = async () => {
     let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
     fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
     let json = harness.session.serialize();
     fsSync.writeFileSync(path.join(sessionPath, harness.session.id + '.json'), json);
     console.log(`\nEnding session ${harness.session.id}`);
-    harness.session.dispose();
-    terminal.dispose();
+    await harness.session.dispose();
+    await terminal.dispose();
     process.exit(0);
   };
   ui_input.shortcuts = {
     '^C': (() => {
       let ctrl_c = false, ctrl_timeout = null;
-      return (input) => {
+      return async (input) => {
         if (ctrl_c) {
           if (ctrl_timeout) clearTimeout(ctrl_timeout)
-          sigint();
+          await sigint();
           return;
         }
         Events.emit('user:abort');

@@ -25,10 +25,10 @@ class Terminal extends Container {
 
     ANSI.hideCursor();
 
-    process.stdin.on('data', (k) => this.key(k));
+    process.stdin.on('data', async (k) => await this.key(k));
     process.stdin.on('resize', () => this.draw());
   }
-  dispose() {
+  async dispose() {
     ANSI.showCursor();
     process.stdin.setRawMode(this.#was_raw);
   }
@@ -96,9 +96,9 @@ class Terminal extends Container {
   takeFocus() {
     this.#focused = null;
   }
-  key(k) {
+  async key(k) {
     if (this.#focused && this.#focused.key) {
-      this.#focused.key(k);
+      await this.#focused.key(k);
     }
     this.draw();
   }
