@@ -7,6 +7,7 @@ const { Logger } = require('../util.js');
 const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
 const LsTool = require('../tools/ls.js');
+const GrepTool = require('../tools/grep.js');
 
 class Harness {
   #abortTarget = null;
@@ -23,7 +24,8 @@ class Harness {
     this.toolbox = new Toolbox([
       ReadTool,
       EditTool,
-      LsTool
+      LsTool,
+      GrepTool
     ]);
     this.session = new Session(
       Object.assign(
