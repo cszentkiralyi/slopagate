@@ -3,27 +3,30 @@ const fs = require('node:fs/promises');
 const { ID } = require('../util.js');
 
 class Session {
-  _id;
-  _model;
-  _think;
-  _connection;
-  _tempdir = null;
+  #id;
+  #model;
+  #think;
+  #connection;
+  #systemPrompt;
+  #tempdir = null;
+
+  #abortController = null;
 
   history = [];
   tools;
-  get id() { return this._id; }
-  get model() { return this._model; }
-  get think() { return this._think; }
-  get connection() { return this._connection; }
-  get systemPrompt() { return this._systemPrompt; }
-  get tempdir() { return this._tempdir; }
-  get temppath() { return this._tempdir ? this._tempdir.path : null; }
+  get id() { return this.#id; }
+  get model() { return this.#model; }
+  get think() { return this.#think; }
+  get connection() { return this.#connection; }
+  get systemPrompt() { return this.#systemPrompt; }
+  get tempdir() { return this.#tempdir; }
+  get temppath() { return this.#tempdir ? this.#tempdir.path : null; }
   
   constructor(props) {
-    this._id = props.id || ID();
-    this._model = props.model;
-    this._think = props.think || false;
-    this._connection = props.connection;
+    this.#id = props.id || ID();
+    this.#model = props.model;
+    this.#think = props.think || false;
+    this.#connection = props.connection;
     this.tools = props.tools || [];
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
@@ -36,15 +39,18 @@ class Session {
   dispose() {
     this.removeTempDir();
   }
+  abort() {
+    if (this.#abortController) this.#abortController.abort();
+  }
   
   async ensureTempDir() {
-    if (this._tempdir) return;
-    this._tempdir = await this._tempdirPromise;
+    if (this.#tempdir) return;
+    this.#tempdir = await this._tempdirPromise;
     delete this._tempdirPromise;
   }
   async removeTempDir() {
-    this._tempdir.remove();
-    this._tempdir = null;
+    this.#tempdir.remove();
+    this.#tempdir = null;
   }
   
   serialize() {
@@ -58,21 +64,26 @@ class Session {
       stream: false, // TODO
       messages: messages,
       tools: this.tools.map(t => t.spec)
-    };
+    }, responseObj;
     
-    let response = await fetch(this.connection, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-      // TODO
-      // signal: abortSignal
-      // Somewhere else, make an AbortController whose c.signal we pass here.
-      // Use c.abort() to cancel this request.
-    });
-
-    // TODO: blindly assumes success
-    let responseJson = await response.text();
-    return JSON.parse(responseJson);
+    this.#abortController = new AbortController();
+    
+    try {
+      let response = await fetch(this.connection, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: this.#abortController.signal
+      });
+      responseObj = JSON.parse(await response.text());
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        responseObj = { role: 'assistant', message: { } };
+      }
+    } finally {
+      this.#abortController = null;
+      return responseObj;
+    }
   }
   
   async send(outgoing) {

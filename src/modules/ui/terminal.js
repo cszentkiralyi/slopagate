@@ -45,16 +45,18 @@ class Terminal extends Container {
       this.#draw_inner();
     };
     if (!this.#last_draw || now >= nextDrawMs) {
+      this.log('Drawing immediately!');
       impl();
       return;
     }
-    if (this.#next_draw_id) return;
+    if (this.#next_draw_id) { this.log('Already queued a draw, noop'); return; }
+    this.log(`Queueing draw for ${nextDrawMs - now}ms in the future`);
     this.#next_draw_id = setTimeout(impl, nextDrawMs - now);
     return;
   }
   
   #draw_inner() {
-    //this.log('Term: starting draw');
+    this.log('Term: starting draw');
     this.#last_draw = Date.now();
 
     let width = process.stdout.columns,
@@ -83,7 +85,7 @@ class Terminal extends Container {
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
     if (lines.length < prev.length) output += Terminal.eraseDown();
-    //this.log(`Term: end of draw`);
+    this.log(`Term: end of draw`);
 
     fs.writeSync(process.stdout.fd, output);
   }

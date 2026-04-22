@@ -2,18 +2,11 @@
 
 ## Priority
 
-- [ ] Abort signal so one Ctrl+C kills the current request, tool, whatever
-- [ ] Chat history isn't being sent correctly, agents seem to know what we're
-      talking about but refuse to acknowledge it:
-      > User: Give me a corn joke.
-      > Model: ...corn joke...
-      > User: Explain that joke, I'm not smart.
-      > Model: There is no joke stored in any file. Would you like me to tell you a
-      > corn joke instead?
+- `grep` tool
+
 
 ## Backlog
 
-- [ ] Wait for `harness:ready`
 - [ ] Save session history more-often
   - Every model response with content?
   - Every `done` model response?
@@ -36,8 +29,11 @@
   - [ ] Models - UI
   - [ ] Slash commands - UI
 - [ ] `SLOP.md`
-- [ ] Add padding support to containers
 - [ ] Up/down history access, it's present but bad
+- [ ] Fix whatever the heck is going on with abort draws, we don't reliably
+      redraw after hiding the spinner & showing the abort message.
+- [ ] Add padding support to containers
+- [ ] Wait for `harness:ready`
 - [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Slash commands
   - [ ] /system to refresh system prompts

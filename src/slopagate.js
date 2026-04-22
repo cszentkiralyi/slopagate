@@ -42,6 +42,11 @@ async function repl() {
       ui_history = new TUI.Container({ gap: 1 }),
       ui_startup_history = new TUI.Container(),
       ui_lower = new TUI.Container(),
+      aborted = new TUI.Text({
+        content: 'Aborted. ^C again to exit.',
+        padding: { left: 1 },
+        hidden: true
+      }),
       spinner = new TUI.Spinner({
         animation: 'braille-small',
         message: 'Autofilling...',
@@ -54,6 +59,7 @@ async function repl() {
       });
   terminal.appendChild(ui_history);
   terminal.appendChild(ui_lower);
+  ui_lower.appendChild(aborted);
   ui_lower.appendChild(spinner);
   ui_lower.appendChild(ui_input);
   ui_input.focus();
@@ -137,7 +143,21 @@ async function repl() {
     terminal.dispose();
     process.exit(0);
   };
-  ui_input.shortcuts = { '^C': sigint };
+  ui_input.shortcuts = {
+    '^C': (() => {
+      let ctrl_c = false, ctrl_timeout = null;
+      return (input) => {
+        if (ctrl_c) {
+          if (ctrl_timeout) clearTimeout(ctrl_timeout)
+          sigint();
+          return;
+        }
+        Events.emit('user:abort');
+        ctrl_c = true;
+        ctrl_timeout = setTimeout(() => ctrl_c = false, 1000);
+      }
+    })()
+  };
   
   ui_history.appendChild(new TUI.Text({ content: `Started session ${harness.session.id}.` }))
   
@@ -164,6 +184,12 @@ async function repl() {
     }));
   };
   
+  Events.on('user:abort', (event) => {
+    spinner.hide();
+    aborted.show();
+    spinner.log('Hidden');
+    terminal.draw();
+  });
   Events.on('model:content', (event) => {
     if (event.content) {
       let content = marked.parse(event.content).trim();
@@ -189,6 +215,10 @@ async function repl() {
   })
   
   terminal.draw();
+  ui_input.onKey = (k) => {
+    ui_input.log('onKey');
+    if (!aborted.hidden) aborted.hide();
+  };
   ui_input.onInput = (input) => {
     if (input[0] === '!' || input[0] === '/') {
       if (input === '/debug model') {

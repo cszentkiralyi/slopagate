@@ -11,6 +11,10 @@ class Spinner extends Component {
       delay: 150,
       frames: [ '⡿', '⣟', '⣯', '⣷', '⣾', '⣽', '⣻', '⢿' ]
     },
+    'braille-vert-scroll': {
+      delay: 200,
+      frames: [ ' ', '⠈', '⠘', '⠸', '⠰', '⠠' ]
+    },
     'block-fade': {
       delay: 150,
       frames: [ ' ', '░', '▒', '▓', '█', '▓', '▒', '░' ]

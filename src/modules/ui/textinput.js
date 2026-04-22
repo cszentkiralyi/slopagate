@@ -41,6 +41,7 @@ class TextInput extends Component {
   key(k) {
     // TODO: cursor position
     let char = k.charCodeAt(0);
+    if (this.onKey) this.onKey(k);
     if (char === 13 && k.length === 1) { // newline / cr
       this.#historyIdx = -1;
       this.#history.push(this.#value);
@@ -66,17 +67,10 @@ class TextInput extends Component {
       return;
     } else if (char === 3) { // ^C
       if (!('^C' in this.shortcuts)) return;
-      if (this.#ctrl_c) {
-        this.#ctrl_c = false;
-        if (this.#ctrl_timeout) {
-          clearTimeout(this.#ctrl_timeout);
-          this.#ctrl_timeout = null;
-        }
-        this.shortcuts['^C']();
-        return;
-      }
-      this.#ctrl_c = true;
-      this.#ctrl_timeout = setTimeout(() => this.#ctrl_c = false, 3000)
+      this.shortcuts['^C'](this);
+    } else if (char === 4) { // ^D 
+      if (!('^D' in this.shortcuts)) return;
+      this.shortcuts['^D'](this);
     } else if (char >= 32 && (char - 127) != 0) {
       this.#value += k;
       return;

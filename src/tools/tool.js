@@ -8,14 +8,16 @@ class Tool {
   message;
   
   get spec() {
-    return {
-      'type': 'function',
-      'function': {
-        'name': this.name,
-        'description': this.description || this.name,
-        'parameters': this.parameters,
-      }
+    let func = {
+      'name': this.name,
+      'description': this.description || this.name,
+      'parameters': this.parameters,
     };
+    if (this.parameters
+        && this.parameters.required
+        && this.parameters.required.length)
+      func.required = this.parameters.required;
+    return { 'type': 'function', 'function': func };
   }
   get json() { return JSON.stringify(this.spec); }
   

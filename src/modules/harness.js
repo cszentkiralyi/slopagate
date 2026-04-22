@@ -8,8 +8,7 @@ const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
 
 class Harness {
-  _abortControllers = new Map();
-  _primaryAbort = null;
+  #abortTarget = null;
   
   session = null;
   toolbox = null;
@@ -35,19 +34,18 @@ class Harness {
   }
   
   async onUserMessage(event) {
-    let message = { role: 'user', content: event.message }
+    // TODO: turns, right now the user can just send stuff whenever
+    let message = { role: 'user', content: event.message };
+    this.#abortTarget = this.session;
     let response = await this.session.send(message);
     Events.emit('model:response', { response });
   }
   
   onUserAbort(event) {
-    // TODO: what *do* we do if we don't have a primary abort? Should we
-    // even be making that call, or should the event be passing us some
-    // kind of "abort ID" we use to target a specific controller?
-    if (!this._primaryAbort) return;
-    let abort = this._abortControllers.get(this._primaryAbort);
-    abort.abort();
-    this._abortControllers.delete(this._primaryAbort);
+    if (this.#abortTarget) {
+      this.#abortTarget.abort();
+      this.#abortTarget = null;
+    }
   }
   
   async onModelResponse(event) {
@@ -62,11 +60,14 @@ class Harness {
     
     if (message.content || message.tool_calls) {
       this.session.history.push(message);
+      if (done) this.#abortTarget = null;
       if (message.content) {
         Events.emit('model:content', { done, content: message.content });
       }
       if (message.tool_calls) {
         await this.session.ensureTempDir();
+        // Toolbox doesn't support abort() yet
+        //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
         message.tool_calls.forEach(call => {
           let id = call.id;
@@ -82,6 +83,7 @@ class Harness {
   async onToolResponse(event) {
     let message = event;
     message.role = 'tool';
+    this.#abortTarget = this.session;
     let response = await this.session.send(message);
     Events.emit('model:response', { response });
   }
