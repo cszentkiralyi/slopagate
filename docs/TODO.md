@@ -12,13 +12,18 @@ yet.
   - Every model response with content?
   - Every `done` model response?
   - Every few minutes?
+- [ ] New, simplistic Markdown renderer
+  - Only double & single asterisk/underscore, inline code
+  - Single-line headers
+  - Code blocks via triple-grave
+  - `Text.fit`: "respect list" option that will detect /^(\w*)\([^ ]*) / and then
+    preface every new line with `' '.repeat(measure($1 + $2))`.
+- [ ] `SLOP.md`
+- [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Tools
-  - [ ] `edit`:
-    - [x] File creation is borked
-    - [ ] We aren't showing diffs (later, these should expand/collapse)
-  - [x] `read`: we aren't showing line numbers
-  - [x] `ls`
-  - [x] `grep`
+  - [ ] Go back to global tool 'messages' calls, group them by tool as we iterate
+        over them to call them to change the signature to accept n >= 1 calls, and
+        e.g. 'read' should make it 'X and n other files'
   - [ ] Dedicated spinner: in addition to the "autofilling" one, between the
         time a tool call starts and the model responds to its response, the tool
         should spin.
@@ -29,26 +34,25 @@ yet.
     - [ ] UI
   - [ ] Models - UI
   - [ ] Slash commands - UI
-- [ ] `SLOP.md`
 - [ ] Up/down history access, it's present but bad
 - [ ] Fix whatever the heck is going on with abort draws, we don't reliably
       redraw after hiding the spinner & showing the abort message.
 - [ ] Add padding support to containers
 - [ ] Wait for `harness:ready`
-- [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Slash commands
   - [ ] /system to refresh system prompts
   - [ ] /think to toggle thinking
   - [ ] /effort maybe
   - [ ] /plan to disable editing tools (need system prompt change?)
-- [ ] Autocomplete
-  - [ ] Files with @
-  - [ ] Slash commands
 - [ ] Context compaction/engineering
   - [ ] unread to compact reads
   - [ ] promptdoc to alter system prompt
-  - [ ] scribe to summarize (done automatically on a delay? like claude)
+  - [ ] scribe to summarize (done automatically on a delay? at certain token
+        breakpoints? every n turns? like claude)
   - [ ] others?
+- [ ] Autocomplete
+  - [ ] Files with @
+  - [ ] Slash commands
 - [ ] Memory (required "edit" tool to be done)
   - [ ] Auto-memory
   - [ ] /init & SLOP.md
