@@ -20,7 +20,7 @@ class TextInput extends Component {
           value,
           width,
           {
-             padding: { left: 1, right: 1 },
+             padding: { left: 0, right: 1 },
              align: prompt.length,
              fill: true
           }),
