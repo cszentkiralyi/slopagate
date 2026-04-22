@@ -51,10 +51,9 @@ const ReadTool = new Tool({
           if (end && lineNo > end) break;
           content += addLineNumber(line) + '\n';
         }
+        await file.close();
       } catch (err) {
         content = `Error: file ${file_path} not found!`;
-      } finally {
-        file.close();
       }
     }
     
