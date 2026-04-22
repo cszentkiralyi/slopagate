@@ -2,8 +2,9 @@
 
 ## Priority
 
-- `grep` tool
-
+Big refactor of `slopagate.js`, it's time to clean up the glue that holds
+all the well-engineered pieces together. I don't know what that looks like
+yet.
 
 ## Backlog
 
@@ -16,8 +17,8 @@
     - [x] File creation is borked
     - [ ] We aren't showing diffs (later, these should expand/collapse)
   - [x] `read`: we aren't showing line numbers
-  - [ ] `ls`
-  - [ ] `grep`
+  - [x] `ls`
+  - [x] `grep`
   - [ ] Dedicated spinner: in addition to the "autofilling" one, between the
         time a tool call starts and the model responds to its response, the tool
         should spin.

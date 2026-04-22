@@ -43,7 +43,7 @@ async function repl() {
       ui_startup_history = new TUI.Container(),
       ui_lower = new TUI.Container(),
       aborted = new TUI.Text({
-        content: 'Aborted. ^C again to exit.',
+        content: '^C again to exit.',
         padding: { left: 1 },
         hidden: true
       }),
@@ -55,7 +55,8 @@ async function repl() {
         loop: false
       }),
       ui_input = new TUI.TextInput({
-        prompt: CLI_PROMPT
+        prompt: CLI_PROMPT,
+        state: 'normal'
       });
   terminal.appendChild(ui_history);
   terminal.appendChild(ui_lower);
@@ -215,9 +216,26 @@ async function repl() {
   })
   
   terminal.draw();
-  ui_input.onKey = (k) => {
-    ui_input.log('onKey');
+  ui_input.onKey = (k, char, later) => {
     if (!aborted.hidden) aborted.hide();
+
+    let len = ui_input.value.length;
+    if (len > 1) return;
+
+    let v = ui_input.value + k;
+    if (!len) {
+      if (v === '!') {
+        ui_input.prompt = '! ';
+        ui_input.state = 'bash';
+        later(() => ui_input.clear());
+        return;
+      } else if (ui_input.state === 'bash'
+          && (k === '\b' || char === TUI.TextInput.KEYS.BS)) {
+        ui_input.log(JSON.stringify({ value: ui_input.value, code: char, BS: TUI.TextInput.KEYS.BS }));
+        ui_input.prompt = CLI_PROMPT;
+        ui_input.state = 'normal';
+      }
+    }
   };
   ui_input.onInput = (input) => {
     if (input[0] === '!' || input[0] === '/') {

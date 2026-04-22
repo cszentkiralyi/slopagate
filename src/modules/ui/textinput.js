@@ -3,6 +3,13 @@ const Component = require('./component.js');
 const Text = require('./text.js');
 
 class TextInput extends Component {
+  static KEYS = {
+    CR: 13,
+    BS: 127,
+    UP: '\x1B[A',
+    DOWN: '\x1B[B'
+  };
+
   #value = '';
   #history = [];
   #historyIdx = -1;
@@ -40,23 +47,22 @@ class TextInput extends Component {
   
   key(k) {
     // TODO: cursor position
-    let char = k.charCodeAt(0);
-    if (this.onKey) this.onKey(k);
+    let char = k.charCodeAt(0),
+        [laters, later] = this.#makeLater();
+    if (this.onKey) this.onKey(k, char, later);
+    this.log(JSON.stringify({ k, char }));
     if (char === 13 && k.length === 1) { // newline / cr
       this.#historyIdx = -1;
       this.#history.push(this.#value);
       this.onInput(this.#value);
-      return;
     } else if (char === 127 || char === 8) { // backspace
       if (this.#value.length == 0) return;
       this.#value = this.#value.substring(0, this.#value.length - 1);
-      return;
     } else if (k === '\x1b[A') {  // up
       if (-this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx--;
         this.#value = this.getHistory(this.#historyIdx);
       }
-      return;
     } else if (k === '\x1b[B') { // down
       if (this.#historyIdx < 0) {
         this.#historyIdx++;
@@ -64,7 +70,6 @@ class TextInput extends Component {
       } else if (this.#historyIdx == 0) {
         this.#value = '';
       }
-      return;
     } else if (char === 3) { // ^C
       if (!('^C' in this.shortcuts)) return;
       this.shortcuts['^C'](this);
@@ -73,8 +78,9 @@ class TextInput extends Component {
       this.shortcuts['^D'](this);
     } else if (char >= 32 && (char - 127) != 0) {
       this.#value += k;
-      return;
     }
+    
+    if (laters.length) laters.run();
   }
   
   clear() {
@@ -89,6 +95,13 @@ class TextInput extends Component {
           neg = Math.min(0, l - n - 1);
       return this.#history[neg] || '';
     }
+  }
+  
+  #makeLater() {
+    let laters = [],
+        later = (f) => laters.push(f);
+    laters.run = laters.forEach.bind(laters, f => f());
+    return [laters, later];
   }
 }
 
