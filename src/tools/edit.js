@@ -22,11 +22,11 @@ const EditTool = new Tool({
 
     let linesNeg = args.old_str.split('\n').length;
     let linesPos = args.new_str.split('\n').length;
-    tool.message(`Editing ${args.file_path} (-${linesNeg} +${linesPos})`);
 
     try {
       await fs.copyFile(file_path, temp_path);
       let content = await fs.readFile(temp_path);
+      tool.message(`Editing ${args.file_path} (-${linesNeg} +${linesPos})`);
       if (content.includes(old_str)) {
         content = content.toString().replace(old_str, new_str);
         await fs.writeFile(temp_path, content);
@@ -40,7 +40,18 @@ const EditTool = new Tool({
       if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
       
       try {
-        await fs.writeFile(temp_path);
+        tool.message(`Creating ${args.file_path} (+${linesPos})`);
+        /* 2026-04-21
+         * Let it be known that today, Qwen3.5 9B pointed out this wasn't
+         * writing anything to the temp_path. It also silently fixed another
+         * bug I was blinded to, where we wrote to the temp path and then
+         * *never did anything else* like move it to the real path. I don't
+         * know if I should be impressed with technology or disappointed in
+         * myself.
+         * Qwen3.5:9b-65k wrote this code: */
+        await fs.writeFile(temp_path, new_str);
+        await fs.copyFile(temp_path, file_path);
+        await fs.rm(temp_path);
         return `Created "${file_path}" successfully.`;
       } catch (createErr) {
         if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;

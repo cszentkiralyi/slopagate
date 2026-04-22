@@ -56,3 +56,10 @@
   [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
       does not explain why we are executing tool calls twice by responding to
       the `tool:call` message twice.
+- [ ] Command-line commands
+  - [ ] `history {id}`
+    - `less` the history JSON if interactively-called
+    - `cat` if non-interactive
+    - `--path` argument just returns the path to that history ID JSON file
+  - [ ] `help` prints a description of CLI commands, flags, env vars we give
+        a shit about, etc

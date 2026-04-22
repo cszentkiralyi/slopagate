@@ -27,7 +27,7 @@ const CONFIG = {
   host: process.env.SLOP_HOST || 'http://127.0.0.1',
   endpoint: process.env.SLOP_ENDPOINT || '/api/chat',
   
-  model: process.env.SLOP_MODEL || 'qwen3.5:9b-32k'
+  model: process.env.SLOP_MODEL || 'qwen3.5:9b-65k'
 };
 CONFIG.connection = `${CONFIG.host}:${CONFIG.port}${CONFIG.endpoint}`;
 
