@@ -28,7 +28,7 @@ class TextInput extends Component {
           width,
           {
              padding: { left: 0, right: 1 },
-             align: prompt.length,
+             align: true,
              fill: true
           }),
         bg = this.bg || 236,

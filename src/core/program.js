@@ -82,7 +82,10 @@ class Program {
     };
     this.interface.getById('chat-input').onInput = (input, inst) => {
       Events.emit('user:message', { message: input });
-      this.interface.addMessage({ role: 'user', content: this.interface.CLI_PROMPT + input });
+      this.interface.addMessage({
+        role: 'user',
+        content: this.interface.getById('chat-input').prompt + input
+      });
       this.interface.spinner.start();
       this.interface.spinner.show();
       inst.clear();

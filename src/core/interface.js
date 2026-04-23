@@ -96,12 +96,13 @@ class Interface {
     if (role === 'user') {
       textProps = {
         id, content,
-        align: Interface.CLI_PROMPT.length + 1,
+        align: true,
         padding: { left: 1, right: 1 }
       };
     } else if (role === 'model') {
       textProps = {
         id, content,
+        align: true,
         padding: { top: 1, left: 1, right: 1, bottom: 1 },
         bg: 237
       };

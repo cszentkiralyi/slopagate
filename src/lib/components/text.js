@@ -33,7 +33,11 @@ class Text extends Component {
         return;
       }
       
-      lines.push(...Text.fit(line, width, { padding: this.padding, fill: !!this.bg }));
+      lines.push(...Text.fit(line, width, {
+        padding: this.padding,
+        align: !!this.align,
+        fill: !!this.bg,
+      }));
     });
     if (this.padding && this.padding.bottom) {
       paddingLines = (new Array(this.padding.bottom).fill(blankLine));
@@ -59,14 +63,17 @@ class Text extends Component {
     };
   }
   
+  static LEADING_WHITESPACE_REGEX = /^(\w*)/;
+  static LIST_ITEM_REGEX = /^\w*([a-zA-Z0-9]+[.\)]\w)/;
   static fit(s, width, options) {
     let lines = [],
-        { padding, align, fill } = (options || {}),
+        { padding, align, indent, fill } = (options || {}),
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
         blank = fill ? ' '.repeat(width) : '',
-        currentLine = '', currentLen = 0,
+        currentLine = '', alignStr = '', currentLen = 0,
+        firstLine = true,
         rem;
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
@@ -75,14 +82,20 @@ class Text extends Component {
       }
       lines.push(currentLine);
     }
-    let firstLine = true,
-        alignStr = align > 0 ? ' '.repeat(align) : '';
     s.split('\n').forEach(line => {
       if (!line) {
         lines.push(blank);
       } else {
-        currentLine = leftPadStr;;
-        if (!firstLine) currentLine += alignStr;
+        currentLine = leftPadStr;
+        if (firstLine && (align || indent)) {
+          let m;
+          if (m = Text.LEADING_WHITESPACE_REGEX.exec(line))
+            alignStr += ' '.repeat(Text.measure(m[1]));
+          if (m = Text.LIST_ITEM_REGEX.exec(line)) {
+            alignStr += ' '.repeat(Text.measure(m[1]));
+          }
+          Logger.log(`Text: set alignStr = ${JSON.stringify(alignStr)}`);
+        }
         currentLen = currentLine.length
         line.split(' ').forEach(word => {
           if (!word || !word.length) {

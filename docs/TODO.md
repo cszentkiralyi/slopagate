@@ -2,9 +2,10 @@
 
 ## Priority
 
-Big refactor of `slopagate.js`, it's time to clean up the glue that holds
-all the well-engineered pieces together. I don't know what that looks like
-yet.
+`Text.fit()`: new option to preserve original whitesapce for new lines (so a string
+that matches with `/^(\w+)/` applies `$1` to all its new lines), and then replace
+the current "align" behavior with true/false to list-align.
+
 
 ## Backlog
 

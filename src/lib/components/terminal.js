@@ -34,7 +34,7 @@ class Terminal extends Container {
   }
   
   draw() {
-    let nextDrawMs = this.#last_draw + Terminal.DRAW_GAP_MS,
+    let nextDrawMs = (this.#last_draw + Terminal.DRAW_GAP_MS) | 0,
         now = Date.now();
     let impl = () => {
       if (this.#next_draw_id) {
@@ -50,13 +50,13 @@ class Terminal extends Container {
       return;
     }
     if (this.#next_draw_id) { this.log('Already queued a draw, noop'); return; }
-    this.log(`Queueing draw for ${nextDrawMs - now}ms in the future`);
+    //this.log(`Queueing draw for ${nextDrawMs - now}ms in the future`);
     this.#next_draw_id = setTimeout(impl, nextDrawMs - now);
     return;
   }
   
   #draw_inner() {
-    this.log('Term: starting draw');
+    //this.log('Term: starting draw');
     this.#last_draw = Date.now();
 
     let width = process.stdout.columns,
@@ -80,11 +80,10 @@ class Terminal extends Container {
           prev.length - skip
         );
     
-    this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
+    //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
     output += Terminal.cursorUp(clearHeight - 1);
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');
-    if (lines.length < prev.length) output += Terminal.eraseDown();
     //this.log(`Term: end of draw`);
 
     fs.writeSync(process.stdout.fd, output);
