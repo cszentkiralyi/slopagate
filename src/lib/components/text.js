@@ -64,7 +64,7 @@ class Text extends Component {
   }
   
   static LEADING_WHITESPACE_REGEX = /^(\w*)/;
-  static LIST_ITEM_REGEX = /^\w*([a-zA-Z0-9]+[.\)]\w)/;
+  static LIST_ITEM_REGEX = /^\w*([^\w]+\w)/;
   static fit(s, width, options) {
     let lines = [],
         { padding, align, indent, fill } = (options || {}),
@@ -73,8 +73,7 @@ class Text extends Component {
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
         blank = fill ? ' '.repeat(width) : '',
         currentLine = '', alignStr = '', currentLen = 0,
-        firstLine = true,
-        rem;
+        rem, m;
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
       if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
@@ -86,32 +85,24 @@ class Text extends Component {
       if (!line) {
         lines.push(blank);
       } else {
-        currentLine = leftPadStr;
-        if (firstLine && (align || indent)) {
-          let m;
-          if (m = Text.LEADING_WHITESPACE_REGEX.exec(line))
-            alignStr += ' '.repeat(Text.measure(m[1]));
-          if (m = Text.LIST_ITEM_REGEX.exec(line)) {
-            alignStr += ' '.repeat(Text.measure(m[1]));
-          }
-          Logger.log(`Text: set alignStr = ${JSON.stringify(alignStr)}`);
+        alignStr = '';
+        if (indent && (m = line.match(Text.LEADING_WHITESPACE_REGEX))) {
+          alignStr += ' '.repeat(Text.measure(m[1]));
+          //Logger.log(`Text: indent detected ${JSON.stringify(alignStr)}`);
         }
+        if (align && (m = line.match(Text.LIST_ITEM_REGEX))) {
+          alignStr += ' '.repeat(Text.measure(m[1]));
+          //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
+        }
+        currentLine += leftPadStr;
         currentLen = currentLine.length
         line.split(' ').forEach(word => {
-          if (!word || !word.length) {
-            if (currentLen + 1 + rightPad <= width) {
-              currentLine += ' ';
-              currentLen++;
-              return;
-            }
-          }
           let len = Text.measure(word);
           if (currentLen + len + 1 + rightPad <= width) {
             currentLine += ' ' + word;
             currentLen += len + 1;
           } else {
             finishLine(currentLine);
-            if (firstLine) firstLine = false;
             currentLine = leftPadStr + alignStr;
             currentLen = currentLine.length + len;
             currentLine += word;

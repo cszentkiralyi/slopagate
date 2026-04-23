@@ -12,6 +12,8 @@ class Terminal extends Container {
   #last_draw = null;
   #next_draw_id = null;
   
+  get last_draw() { return this.#last_draw };
+  
   static DRAW_FPS = 60;
   static DRAW_GAP_MS = 1000 / this.DRAW_FPS;
   

@@ -12,6 +12,7 @@ class Interface {
   #chat_input;
   
   #elements_by_id = new Map();
+  #draw_timeout;
   
   get spinner() { return this.#global_spinner; }
   get statusLine() { return this.#status_line; }
@@ -63,6 +64,20 @@ class Interface {
   draw() {
     this.#terminal.draw();
   }
+  // Draw no more than ms later, but may be sooner
+  drawLater(ms) {
+    let now = Date.now(),
+        later = now + ms;
+    if (this.#draw_timeout && this.#draw_timeout.then <= later
+        || this.#terminal.last_draw + TUI.Terminal.DRAW_GAP_MS <= later)
+      return;
+    if (this.#draw_timeout) clearTimeout(this.#draw_timeout.id);
+    this.#draw_timeout = {
+      id: setTimeout(() => this.draw(), ms),
+      then: later
+    };
+  }
+
   async dispose() { 
     await this.#terminal.dispose();
   }
@@ -86,7 +101,9 @@ class Interface {
     let c = this.getById(id), result;
     if (!c) return false;
     result = this.#terminal.removeChild(c);
-    if (result) this.#elements_by_id.delete(id);
+    if (result) {
+      this.#elements_by_id.delete(id);
+    }
     return result;
   }
   

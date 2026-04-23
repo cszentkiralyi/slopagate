@@ -28,6 +28,7 @@ class TextInput extends Component {
           width,
           {
              padding: { left: 0, right: 1 },
+             indent: true,
              align: true,
              fill: true
           }),
@@ -48,6 +49,8 @@ class TextInput extends Component {
   async key(k) {
     // TODO: cursor position
     // TODO: URGENT: premature returns shouldn't prevent laters
+    // TODO: this.shortcuts is basically shitty shorthand... I don't feel
+    //       great about it now that I've taken another look.
     let char = k.charCodeAt(0),
       [laters, later] = this.#makeLater();
     if (this.onKey) await this.onKey(k, later, this);

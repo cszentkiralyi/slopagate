@@ -66,7 +66,7 @@ class Program {
     });
 
     this.interface.getById('chat-input').shortcuts = {
-      '^C': (() => {
+      '^C': ((inst) => {
         let ctrl_c = false, ctrl_timeout = null;
         return async (inst) => {
           if (ctrl_c) {
@@ -74,9 +74,10 @@ class Program {
             await this.dispose();
             return;
           }
+          inst.clear();
           Events.emit('user:abort');
           ctrl_c = true;
-          ctrl_timeout = setTimeout(() => ctrl_c = false, 1000);
+          ctrl_timeout = setTimeout(() => ctrl_c = false, 2000);
         }
       })()
     };
@@ -92,9 +93,10 @@ class Program {
       this.interface.draw();
     };
     this.interface.getById('chat-input').onKey = async (k, later, inst) => {
-      inst.log('onKey called');
+      //inst.log('onKey called');
       let statusline = this.interface.statusLine;
       if (!statusline.hidden) statusline.hide();
+      later(() => this.interface.draw());
     }
 
 
