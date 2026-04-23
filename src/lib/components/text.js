@@ -63,11 +63,12 @@ class Text extends Component {
     };
   }
   
-  static LEADING_WHITESPACE_REGEX = /^(\w*)/;
-  static LIST_ITEM_REGEX = /^\w*([^\w]+\w)/;
+  static LEADING_WHITESPACE_REGEX = /^(\s*)/;
+  static LIST_ITEM_REGEX = /^\s*([^\s]+\s*)/;
+  static LIST_ITEM_REGEX_STRICT = /^\s*([^\s]*[\.\)]\s)/;
   static fit(s, width, options) {
     let lines = [],
-        { padding, align, indent, fill } = (options || {}),
+        { padding, align, forceAlign, indent, fill } = (options || {}),
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
@@ -82,6 +83,7 @@ class Text extends Component {
       lines.push(currentLine);
     }
     s.split('\n').forEach(line => {
+      currentLine = '';
       if (!line) {
         lines.push(blank);
       } else {
@@ -90,16 +92,18 @@ class Text extends Component {
           alignStr += ' '.repeat(Text.measure(m[1]));
           //Logger.log(`Text: indent detected ${JSON.stringify(alignStr)}`);
         }
-        if (align && (m = line.match(Text.LIST_ITEM_REGEX))) {
+        if ((forceAlign && (m = line.match(Text.LIST_ITEM_REGEX)))
+            || (align && (m = line.match(Text.LIST_ITEM_REGEX_STRICT)))) {
           alignStr += ' '.repeat(Text.measure(m[1]));
           //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
         }
         currentLine += leftPadStr;
         currentLen = currentLine.length
-        line.split(' ').forEach(word => {
+        line.split(' ').forEach((word, idx) => {
           let len = Text.measure(word);
           if (currentLen + len + 1 + rightPad <= width) {
-            currentLine += ' ' + word;
+            if (idx > 0) currentLine += ' ';
+            currentLine += word;
             currentLen += len + 1;
           } else {
             finishLine(currentLine);
@@ -107,12 +111,10 @@ class Text extends Component {
             currentLen = currentLine.length + len;
             currentLine += word;
           }
-        })
+        });
+        if (Text.measure(currentLine)) finishLine();
       }
     });
-    if (Text.measure(currentLine) > 0) {
-      finishLine();
-    }
     
     return lines;
   }
