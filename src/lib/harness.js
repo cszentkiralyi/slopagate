@@ -1,4 +1,4 @@
-const Events = require('./events.js');
+const Events = require('../events.js');
 const Session = require('./session.js');
 const Toolbox = require('./toolbox.js');
 
@@ -35,6 +35,10 @@ class Harness {
     this.session.ensureTempDir().then(_ => {
       Events.emit('harness:ready');
     });
+  }
+  
+  async dispose() {
+    await this.session.dispose();
   }
   
   async onUserMessage(event) {

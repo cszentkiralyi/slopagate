@@ -1,4 +1,4 @@
-const Events = require('./events.js');
+const Events = require('../events.js');
 const { Logger } = require('../util.js');
 
 class Toolbox {

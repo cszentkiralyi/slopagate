@@ -1,4 +1,4 @@
-const Events = require('../modules/events.js');
+const Events = require('../events.js');
 
 class Tool {
   name;

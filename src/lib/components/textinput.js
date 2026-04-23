@@ -1,4 +1,4 @@
-const ANSI = require('./ansi.js');
+const ANSI = require('../ansi.js');
 const Component = require('./component.js');
 const Text = require('./text.js');
 
@@ -47,14 +47,15 @@ class TextInput extends Component {
   
   async key(k) {
     // TODO: cursor position
+    // TODO: URGENT: premature returns shouldn't prevent laters
     let char = k.charCodeAt(0),
-        [laters, later] = this.#makeLater();
-    if (this.onKey) await this.onKey(k, char, later);
+      [laters, later] = this.#makeLater();
+    if (this.onKey) await this.onKey(k, later, this);
     this.log(JSON.stringify({ k, char }));
     if (char === 13 && k.length === 1) { // newline / cr
       this.#historyIdx = -1;
       this.#history.push(this.#value);
-      this.onInput(this.#value);
+      this.onInput(this.#value, this);
     } else if (char === 127 || char === 8) { // backspace
       if (this.#value.length == 0) return;
       this.#value = this.#value.substring(0, this.#value.length - 1);
@@ -71,6 +72,7 @@ class TextInput extends Component {
         this.#value = '';
       }
     } else if (char === 3) { // ^C
+      //this.log(`Have ^C shortcut? ${'^C' in this.shortcuts} ${JSON.stringify(this.shortcuts)}`);
       if (!('^C' in this.shortcuts)) return;
       this.shortcuts['^C'](this);
     } else if (char === 4) { // ^D 
@@ -79,7 +81,7 @@ class TextInput extends Component {
     } else if (char >= 32 && (char - 127) != 0) {
       this.#value += k;
     }
-    
+
     if (laters.length) await laters.run();
   }
   

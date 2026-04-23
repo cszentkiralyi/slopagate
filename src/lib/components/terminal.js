@@ -1,7 +1,7 @@
 const process = require('node:process');
 const fs = require('node:fs');
 
-const ANSI = require('./ansi.js');
+const ANSI = require('../ansi.js');
 const Container = require('./container.js');
 
 class Terminal extends Container {
@@ -97,6 +97,7 @@ class Terminal extends Container {
     this.#focused = null;
   }
   async key(k) {
+    //this.log(`key() going to ${this.#focused} ${this.#focused && this.#focused.key}`)
     if (this.#focused && this.#focused.key) {
       await this.#focused.key(k);
     }

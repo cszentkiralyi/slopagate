@@ -1,7 +1,7 @@
-const ANSI = require('./ansi.js');
-const Component = require('./component.js');
-
+const ANSI = require('../ansi.js');
 const { Logger } = require('../../util.js');
+
+const Component = require('./component.js');
 
 class Text extends Component {
   content;
