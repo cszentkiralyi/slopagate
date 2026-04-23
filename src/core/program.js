@@ -6,6 +6,7 @@ const Events = require('../events.js');
 const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
+const SD = require('../lib/sd.js');
 
 class Program {
   config;
@@ -110,7 +111,7 @@ class Program {
       if (event.content) {
         this.interface.addMessage({
           role: 'model',
-          content: event.content.trim() 
+          content: SD.toAnsi(event.content.trim())
         });
       }
       if (!event.done) { 

@@ -23,14 +23,18 @@ class TextInput extends Component {
   render(width) {
     let prompt = this.prompt || '',
         value = prompt + this.value + '█',
+        padding = Object.assign(
+          { left: 0, right: 1 },
+          this.padding
+        ),
         valueLines = Text.fit(
           value,
           width,
           {
-             padding: { left: 0, right: 1 },
-             indent: true,
-             align: true,
-             fill: true
+            padding,
+            indent: true,
+            align: true,
+            fill: true
           }),
         bg = this.bg || 236,
         // Unicode block elements, upper/lower half block
