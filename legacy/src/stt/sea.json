@@ -1,8 +1,0 @@
-{
-  "main": "./src/stt/stt_bundle.js",
-  "mainFormat": "commonjs",
-  "output": "bin/stt",
-
-  "useCodeCache": true,
-  "disableExperimentalSEAWarning": true
-}
