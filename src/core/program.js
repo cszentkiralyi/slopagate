@@ -35,7 +35,9 @@ class Program {
       host: process.env.SLOP_HOST || 'http://127.0.0.1',
       endpoint: process.env.SLOP_ENDPOINT || '/api/chat',
 
-      model: process.env.SLOP_MODEL || 'qwen3.5:9b-65k'
+      model: process.env.SLOP_MODEL || 'qwen3.5:9b-65k',
+      think: false,
+      contextWindow: process.env.SLOP_CONTEXT_WINDOW || 65536,
     };
     config.connection = `${config.host}:${config.port}${config.endpoint}`;
     
@@ -47,7 +49,12 @@ class Program {
     });
     
     this.commands = [
-      { name: 'quit', handler: async () => await this.dispose() }
+      { name: 'quit', handler: async () => await this.dispose() },
+      {
+        name: 'think',
+        arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
+        handler: async (args) => await this.thinkCommand(args)
+      }
     ];
 
 
@@ -181,6 +188,19 @@ class Program {
     cmd = cmd[0];
     
     await cmd.handler(args);
+  }
+  
+  async thinkCommand(bstr) {
+    if (!bstr || !bstr.length) {
+      this.config.think = !this.config.think;
+    } else {
+      this.config.think = (bstr === 'true');
+    }
+    let msg = {
+      content: `Thinking ${this.config.think ? 'enabled' : 'disabled'}.`,
+      fg: 'gray'
+    };
+    this.interface.statusline.showMessage(msg, true);
   }
 }
 

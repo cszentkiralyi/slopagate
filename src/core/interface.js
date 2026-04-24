@@ -158,7 +158,17 @@ class Interface {
     }
     
     if (hints.length) {
-      hints.sort();
+      hints.sort((a, b) => {
+        let la = a.length, lb = b.length;
+        if (la < lb) return -1;
+        if (lb < la) return 1;
+        let r, i;
+        for (i = 0; i < la && i < lb; i++) {
+          r = b[i] - a[i];
+          if (r != 0) return r;
+        }
+        return r;
+      });
       return hints[0];
     }
     return null;
