@@ -14,10 +14,25 @@ class TextInput extends Component {
   #caret = 1;
   #history = [];
   #historyIdx = -1;
+  #hint;
   
   shortcuts;
 
   get value() { return this.#value; }
+  get hint() {
+    // Never call if we can't, or the user ain't typing
+    if (!this.getHint || !this.#value || !this.value.length)
+      return '';
+    if (this.#hint && this.#hint.value === this.#value)
+      return this.#hint.content;
+    
+    let h = this.getHint(this.#value);
+    if (h && h.length) {
+      this.#hint = { value: this.#value, content: h };
+      return h;
+    }
+    return '';
+  }
 
   render(width) {
     let prompt = this.prompt || '',
@@ -26,10 +41,16 @@ class TextInput extends Component {
           this.padding
         ),
         bg = this.bg || 236,
-        value, lines, dirty;
+        hint, value, lines, dirty;
     
     if (this.#caret >= this.#value.length) {
-      value = this.#value + '█';
+      value = this.#value;
+      if (hint = this.hint) {
+        value += ANSI.invert(hint.charAt(0));
+        value += ANSI.fg(hint.substring(1), 'gray');       
+      } else {
+        value += '█';
+      }
     } else {
       value = this.#value.substring(0, this.#caret)
         + ANSI.invert(this.#value.substring(this.#caret, this.#caret + 1))
@@ -58,7 +79,6 @@ class TextInput extends Component {
   }
   
   async key(k) {
-    // TODO: cursor position
     // TODO: URGENT: premature returns shouldn't prevent laters
     // TODO: this.shortcuts is basically shitty shorthand... I don't feel
     //       great about it now that I've taken another look.
@@ -68,9 +88,9 @@ class TextInput extends Component {
     if (this.onKey) await this.onKey(k, later, this);
     if (this.#caret > len) this.#caret = len;
     if (char === 13 && k.length === 1) { // cr
-      this.#historyIdx = -1;
+      this.#historyIdx++;
       this.#history.push(this.#value);
-      this.onInput(this.#value, this);
+      await this.onInput(this.#value, this);
     } else if (char === 127 || char === 8) { // bs
       if (len == 0) return;
       if (this.#caret == len) {
@@ -81,13 +101,13 @@ class TextInput extends Component {
       }
       this.#caret--;
     } else if (k === '\x1b[A') {  // up
-      if (-this.#historyIdx < this.#history.length - 1) {
+      if (this.#historyIdx > 0) {
         this.#historyIdx--;
         this.#value = this.getHistory(this.#historyIdx);
         this.#caret = this.#value.length;
       }
     } else if (k === '\x1b[B') { // down
-      if (this.#historyIdx < 0) {
+      if (this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx++;
         this.#value = this.getHistory(this.#historyIdx);
       } else if (this.#historyIdx == 0) {
@@ -98,9 +118,9 @@ class TextInput extends Component {
       if (this.#caret < len) this.#caret++;
     } else if (k === '\x1b[D') { // left
       if (this.#caret > 0) this.#caret--;
-    } else if (char === 1) { // home or ^A
+    } else if (char === 1) { // ^A (maybe home? not sure)
       this.#caret = 0;
-    } else if (char === 5) { // end or ^E
+    } else if (char === 5) { // ^E (maybe end)
       this.#caret = this.#value.length;
     } else if (char === 3) { // ^C
       //this.log(`Have ^C shortcut? ${'^C' in this.shortcuts} ${JSON.stringify(this.shortcuts)}`);
@@ -109,6 +129,10 @@ class TextInput extends Component {
     } else if (char === 4) { // ^D 
       if (!('^D' in this.shortcuts)) return;
       this.shortcuts['^D'](this);
+    } else if (k === '\t' || char === 9) { // tab
+      let hint;
+      if ((hint = this.hint).length) this.#value += hint;
+      this.#caret = this.#value.length;
     } else if (char >= 32 && (char - 127) != 0) {
       if (this.#caret == len) {
         this.#value += k;
@@ -118,10 +142,11 @@ class TextInput extends Component {
           + this.#value.substring(this.#caret);
       }
       this.#caret++;
-    } else {
+    }/*else {
       this.log(`key: ${JSON.stringify({ k, char, len })}`);
     }
-
+    */
+   
     if (laters.length) await laters.run();
   }
   

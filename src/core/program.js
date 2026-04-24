@@ -6,7 +6,6 @@ const Events = require('../events.js');
 const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
-const TUI = require('../lib/tui.js');
 const Slopdown = require('../lib/sd.js');
 
 class Program {
@@ -19,6 +18,8 @@ class Program {
   interface;
   
   md;
+
+  commands;
   
   get spinnerMessage() {
     let idx = Math.floor(Math.random() * Program.SPINNER_MESSAGES.length);
@@ -44,9 +45,15 @@ class Program {
       'inline-code': s => ANSI.bg(ANSI.fg(` ${s} `, 160), 16),
       'code': s => ANSI.fg(s, 246)
     });
+    
+    this.commands = [
+      { name: 'quit', handler: async () => await this.dispose() }
+    ];
+
 
     this.interface = new Interface({
-      banner: { content: ANSI.bold(banner), fg: 'white' }
+      banner: { content: ANSI.bold(banner), fg: 'white' },
+      commands: this.commands.map(c => ({ name: c.name, arguments: c.arguments }))
     });
 
     
@@ -101,13 +108,18 @@ class Program {
         }
       })()
     };
-    this.interface.getById('chat-input').onInput = (input, inst) => {
-      Events.emit('user:message', { message: input });
-      this.interface.addMessage({
-        role: 'user',
-        content: this.interface.getById('chat-input').prompt + input
-      });
-      this.interface.statusline.showSpinner(this.spinnerMessage);
+    this.interface.getById('chat-input').onInput = async (input, inst) => {
+      if (input[0] === '/') {
+        let [cmd, argstr] = input.substring(1).split(' ');
+        await this.command(cmd, argstr);
+      } else {
+        Events.emit('user:message', { message: input });
+        this.interface.addMessage({
+          role: 'user',
+          content: this.interface.getById('chat-input').prompt + input
+        });
+        this.interface.statusline.showSpinner(this.spinnerMessage);
+      }
       inst.clear();
       this.interface.draw();
     };
@@ -158,6 +170,17 @@ class Program {
     await this.harness.dispose();
     await this.interface.dispose();
     process.exit(0);
+  }
+  
+  async command(name, args) {
+    let cmd = this.commands
+      ? this.commands.filter(c => c.name === name)
+      : null;
+    if (!cmd || !cmd.length || cmd.length > 1)
+      throw new Error(`Ambiguous command "${name}"`);
+    cmd = cmd[0];
+    
+    await cmd.handler(args);
   }
 }
 

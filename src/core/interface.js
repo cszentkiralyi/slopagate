@@ -15,7 +15,9 @@ class Interface {
   
   get statusline() { return this.#statusline; }
 
-  constructor({ banner }) {
+  constructor(props) {
+    Object.assign(this, props);
+
     this.#terminal = new TUI.Terminal({ gap: 1 });
     this.#chat_history = new TUI.Container({ id: 'chat_history', gap: 1 });
     this.#startup_messages = new TUI.Container();
@@ -33,10 +35,12 @@ class Interface {
       id: 'chat-input',
       prompt: Interface.CLI_PROMPT,
       state: 'normal',
-      padding: { left: 1, right: 1 }
+      padding: { left: 1, right: 1 },
+      getHint: (v) => this.getInputHint(v)
     });
     
-    if (banner) this.#chat_history.appendChild(new TUI.Text(banner));
+    if (this.banner)
+      this.#chat_history.appendChild(new TUI.Text(this.banner));
     this.#terminal.appendChild(this.#chat_history);
     this.#terminal.appendChild(this.#lower_panel);
     this.#chat_history.appendChild(this.#startup_messages);
@@ -138,6 +142,26 @@ class Interface {
       // TODO: may be wrong for us to trigger this?
       this.draw();
     }
+  }
+  
+  getInputHint(value) {
+    let s = value,
+        hints = [],
+        slen, len;
+    if (s[0] === '/' && this.commands && this.commands.length) {
+      s = s.substring(1), slen = s.length;
+      this.commands.forEach(cmd => {
+        len = cmd.name.length;
+        if (len > slen && cmd.name.startsWith(s))
+          hints.push(cmd.name.substring(slen));
+      });
+    }
+    
+    if (hints.length) {
+      hints.sort();
+      return hints[0];
+    }
+    return null;
   }
 }
 
