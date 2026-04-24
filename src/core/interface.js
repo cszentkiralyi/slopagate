@@ -49,7 +49,6 @@ class Interface {
     this.registerId(this.#chat_history);
     this.registerId(this.#startup_messages);
     this.registerId(this.#lower_panel);
-    //this.registerId(this.#global_spinner);
     this.registerId(this.#statusline);
     this.registerId(this.#chat_input);
   }
