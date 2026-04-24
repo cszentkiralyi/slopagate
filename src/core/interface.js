@@ -7,29 +7,28 @@ class Interface {
   #chat_history;
   #startup_messages;
   #lower_panel;
-  #global_spinner;
-  #status_line;
+  #statusline;
   #chat_input;
   
   #elements_by_id = new Map();
   #draw_timeout;
   
-  get spinner() { return this.#global_spinner; }
-  get statusLine() { return this.#status_line; }
+  get statusline() { return this.#statusline; }
 
   constructor({ banner }) {
     this.#terminal = new TUI.Terminal({ gap: 1 });
     this.#chat_history = new TUI.Container({ id: 'chat_history', gap: 1 });
     this.#startup_messages = new TUI.Container();
     this.#lower_panel = new TUI.Container();
-    this.#global_spinner = new TUI.Spinner({
-      id: 'global-spinner',
-      animation: 'braille-small',
-      message: 'Autofilling...',
-      padding: { left: 1 },
-      loop: false
+    this.#statusline = new TUI.Statusline({
+      spinner: new TUI.Spinner({
+        id: 'global-spinner',
+        animation: 'braille-small',
+        message: 'Autofilling...',
+        padding: { left: 1 },
+        loop: false
+      })
     });
-    this.#status_line = new TUI.Statusline();
     this.#chat_input = new TUI.TextInput({
       id: 'chat-input',
       prompt: Interface.CLI_PROMPT,
@@ -41,7 +40,7 @@ class Interface {
     this.#terminal.appendChild(this.#chat_history);
     this.#terminal.appendChild(this.#lower_panel);
     this.#chat_history.appendChild(this.#startup_messages);
-    this.#lower_panel.appendChild(this.#status_line);
+    this.#lower_panel.appendChild(this.#statusline);
     this.#lower_panel.appendChild(this.#chat_input);
 
     this.#chat_input.focus();
@@ -50,8 +49,8 @@ class Interface {
     this.registerId(this.#chat_history);
     this.registerId(this.#startup_messages);
     this.registerId(this.#lower_panel);
-    this.registerId(this.#global_spinner);
-    this.registerId(this.#status_line);
+    //this.registerId(this.#global_spinner);
+    this.registerId(this.#statusline);
     this.registerId(this.#chat_input);
   }
   
@@ -140,15 +139,6 @@ class Interface {
       // TODO: may be wrong for us to trigger this?
       this.draw();
     }
-  }
-  
-  showSpinner() {
-    this.#status_line.setChild(this.#global_spinner);
-    this.#global_spinner.start();
-  }
-  hideSpinner() {
-    this.#global_spinner.stop();
-    this.#status_line.removeAllChildren();
   }
 }
 

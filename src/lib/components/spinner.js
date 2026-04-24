@@ -1,5 +1,4 @@
 const Component = require('./component.js');
-const Text = require('./text.js');
 
 class Spinner extends Component {
   static ANIMATIONS = {

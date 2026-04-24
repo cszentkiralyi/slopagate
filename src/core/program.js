@@ -10,11 +10,20 @@ const TUI = require('../lib/tui.js');
 const Slopdown = require('../lib/sd.js');
 
 class Program {
+  static SPINNER_MESSAGES = [
+    'Autofilling...'
+  ];
+
   config;
   harness;
   interface;
   
   md;
+  
+  get spinnerMessage() {
+    let idx = Math.floor(Math.random() * Program.SPINNER_MESSAGES.length);
+    return Program.SPINNER_MESSAGES[idx];
+  }
 
   constructor({ banner }) {
     let config = this.config = {
@@ -98,26 +107,22 @@ class Program {
         role: 'user',
         content: this.interface.getById('chat-input').prompt + input
       });
-      this.interface.showSpinner();
+      this.interface.statusline.showSpinner(this.spinnerMessage);
       inst.clear();
       this.interface.draw();
     };
     this.interface.getById('chat-input').onKey = async (k, later, inst) => {
-      let statusline = this.interface.statusLine;
-      if (statusline.children.length && statusline.children[0] !== this.interface.spinner)
-        statusline.removeAllChildren()
-      later(() => this.interface.draw());
+      if (this.interface.statusline.dismiss())
+        later(() => this.interface.draw());
     }
 
 
     Events.on('user:abort', (event) => {
-      this.interface.statusLine.setChild(new TUI.Text({
+      this.interface.statusline.showMessage({
         content: '^C again to exit.',
         padding: { left: 1 },
         fg: 'gray'
-      }));
-      this.interface.spinner.stop();
-      this.interface.statusLine.show();
+      }, true);
       this.interface.draw();
     });
     Events.on('model:content', (event) => {
@@ -127,12 +132,16 @@ class Program {
           content: this.md.toAnsi(event.content.trim())
         });
       }
-      (event.done) ? this.interface.hideSpinner() : this.interface.showSpinner();
+      (event.done)
+        ? this.interface.statusline.hide()
+        : this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
       this.interface.addMessage({ role: 'tool', content: event.content });
-      (event.done) ? this.interface.hideSpinner() : this.interface.showSpinner();
+      (event.done)
+        ? this.interface.statusline.hide()
+        : this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     })
   

@@ -27,7 +27,7 @@ class Text extends Component {
       lines.push(...paddingLines);
     }
     //this.log(`Text: content = ${JSON.stringify(this.content)}`);
-    this.content.split('\n').forEach(line => {
+    (this.content || '').split('\n').forEach(line => {
       if (!line || !line.length) {
         lines.push(blankLine);
         return;
