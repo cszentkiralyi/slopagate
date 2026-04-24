@@ -32,7 +32,7 @@ class Slopdown {
         m, search, sym, inner, idx, fmt, recur;
         
     markdown.split('\n').forEach(line => {
-      // TODO: code fencing, block quotes
+      // TODO: block quotes
       if (!line || !line.length) {
         lines.push('');
         return;
