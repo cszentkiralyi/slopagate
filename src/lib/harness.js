@@ -11,9 +11,14 @@ const GrepTool = require('../tools/grep.js');
 
 class Harness {
   #abortTarget = null;
+  #inputTokens = 0;
+  #outputTokens = 0;
   
   session = null;
   toolbox = null;
+
+  get inputTokens() { return this.#inputTokens; }
+  get outputTokens() { return this.#outputTokens; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
@@ -65,6 +70,13 @@ class Harness {
      */
     if (!response || !response.message) return;
     let { message, done } = response;
+    
+    this.#inputTokens += response.prompt_eval_count;
+    this.#outputTokens += response.eval_count;
+    Events.emit('metrics:tokens', {
+      inputTokens: this.#inputTokens,
+      outputTokens: this.#outputTokens
+    });
     
     if (message.content || message.tool_calls) {
       this.session.history.push(message);
@@ -124,6 +136,12 @@ class Harness {
     this.#abortTarget = this.session;
     let response = await this.session.send(...messages);
     Events.emit('model:response', { response });
+  }
+  
+  
+  static estimteTokens(s) {
+    let len = Text.measure(s);
+    return Math.ceil(len / 3.5); // rough estimate: 3.5 char/tok
   }
 }
 

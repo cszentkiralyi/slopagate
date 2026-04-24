@@ -12,9 +12,6 @@ class Text extends Component {
   constructor(props) { 
     super(props);
 
-    if (props && typeof props.content !== 'string')
-      throw new Error();
-
     Object.assign(this, props);
   }
   
@@ -37,6 +34,7 @@ class Text extends Component {
         padding: this.padding,
         align: !!this.align,
         fill: !!this.bg,
+        justify: this.justify
       }));
     });
     if (this.padding && this.padding.bottom) {
@@ -68,7 +66,7 @@ class Text extends Component {
   static LIST_ITEM_REGEX_STRICT = /^\s*([^\s]*[\.\)]\s|[\-\*]\s)/;
   static fit(s, width, options) {
     let lines = [],
-        { padding, align, forceAlign, indent, fill } = (options || {}),
+        { padding, align, forceAlign, indent, fill, justify } = (options || {}),
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
@@ -78,7 +76,9 @@ class Text extends Component {
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
       if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
-         currentLine += ' '.repeat(rem);
+        currentLine += ' '.repeat(rem);
+      } else if (justify === 'right' && (rem = Math.abs((width - Text.measure(currentLine)) % width))) {
+        currentLine = ' '.repeat(rem) + currentLine;
       }
       lines.push(currentLine);
     }

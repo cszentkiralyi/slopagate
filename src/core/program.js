@@ -162,8 +162,14 @@ class Program {
         ? this.interface.statusline.hide()
         : this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
-    })
-  
+    });
+
+    Events.on('metrics:tokens', (event) => {
+      this.updateStatuslineTokens(event);
+      this.interface.draw();
+    });
+    this.updateStatuslineTokens({ inputTokens: 0, outputTokens: 0 });
+
     this.interface.addMessage({ role: 'system', content: `Started session ${this.harness.session.id}.` });
     this.interface.draw();
   }
@@ -177,6 +183,18 @@ class Program {
     await this.harness.dispose();
     await this.interface.dispose();
     process.exit(0);
+  }
+
+
+  #roundTokens(n) {
+    if (n < 1000) return n;
+    if (n < 1000000) return `${(n / 1000).toFixed(1)}K`;
+    return `${(n / 1000000).toFixed(2)}M`;
+  }
+  updateStatuslineTokens({ inputTokens, outputTokens }) {
+    let txt = this.interface.statusline.right, s;
+    s = `↑ ${this.#roundTokens(inputTokens)} / ${this.#roundTokens(outputTokens)} ↓`;
+    txt.content = s;
   }
   
   async command(name, args) {

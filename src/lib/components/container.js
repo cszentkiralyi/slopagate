@@ -3,7 +3,16 @@ const Component = require('./component.js');
 class Container extends Component {
   _lines = []; // cache
   children = [];
-  root = null;
+  #root = null;
+  
+  get root() { return this.#root; }
+  set root(r) {
+    if (r === this.#root) return;
+    this.#root = r;
+    if (this.children.length) {
+      this.children.forEach(c => c.root = r);
+    }
+  }
   
   constructor(props) { super(props); Object.assign(this, props); }
   
@@ -32,7 +41,7 @@ class Container extends Component {
   }
   
   appendChild(c) {
-    c.root = c.root || this.root || this;
+    c.root = this.root || this;
     c.depth = (this.depth || 0) + 1;
     this.children.push(c);
     return true;

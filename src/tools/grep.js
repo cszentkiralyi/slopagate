@@ -13,11 +13,13 @@ const GrepTool = new Tool({
     },
     required: [ 'file_path', 'search_string' ]
   },
-  handler: async (args) => {
+  handler: async (args, tool) => {
     let { file_path, search_string } = args;
 
     try {
-      const output = execSync(`grep -Fn '${search_string}' "${file_path}"`);
+      let s = JSON.stringify(search_string);
+      tool.message(`Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${file_path}`);
+      const output = execSync(`grep -Fn ${JSON.stringify(search_string)} "${file_path}"`);
       return output.toString().split('\n').slice(0, 20).join('\n');
     } catch (err) {
       if (err.message?.includes('ENOENT')) {

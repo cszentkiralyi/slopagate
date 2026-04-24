@@ -1,44 +1,63 @@
+const Container = require('./container.js');
 const HContainer = require('./hcontainer.js');
 const Text = require('./text.js');
 
 class Statusline extends HContainer {
   static BLANK = new Text('');
+  
 
   dismissable;
+  message;
   spinner;
+  
+  #left;
+  #right;
+  get right() { return this.#right; }
 
   constructor(props) {
     super(props);
-    this.hide();
 
     Object.assign(this, props);
+    
+    this.#left = new Container();
+    this.#right = new Text({ justify: 'right' });
+    this.appendChild(this.#left);
+    this.appendChild(this.#right);
+    
+    this.hide();
   }
 
-  #setChild(child) {
-    this.removeAllChildren();
-    this.appendChild(child);
+  #setLeftChild(child) {
+    this.#left.removeAllChildren();
+    this.#left.appendChild(child);
   }
   
   hide() {
-    this.#setChild(Statusline.BLANK);
+    this.#setLeftChild(Statusline.BLANK);
+  }
+  async draw() {
+    this.log(`WARNING: draw() called on Statusline!`);
+    await this.root.draw();
   }
 
   dismiss() {
-    if (!this.dismissable || !this.children.length) return false;
+    if (!this.dismissable || !this.#left.children.length) return false;
     this.hide();
     return true;
   }
   
   showMessage(props, dismissable) {
-    this.#setChild(new Text(props));
+    this.#setLeftChild(new Text(props));
     this.dismissable = !!dismissable;
   }
   
   showSpinner(message) {
     // If you didn't provide a spinner in the constructor, that's on you
+    console.log({ left: this.#left, root: this.root, leftroot: this.#left.root });
     this.spinner.message = message;
+    this.dismissable = false;
+    this.#setLeftChild(this.spinner);
     this.spinner.start();
-    this.#setChild(this.spinner);
   }
 
 }
