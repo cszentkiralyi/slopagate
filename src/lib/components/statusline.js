@@ -53,7 +53,6 @@ class Statusline extends HContainer {
   
   showSpinner(message) {
     // If you didn't provide a spinner in the constructor, that's on you
-    console.log({ left: this.#left, root: this.root, leftroot: this.#left.root });
     this.spinner.message = message;
     this.dismissable = false;
     this.#setLeftChild(this.spinner);

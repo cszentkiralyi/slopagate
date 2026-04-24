@@ -2,6 +2,7 @@ const ANSI = require('./ansi.js');
 
 class Slopdown {
   static INLINE_MARKUP_REGEX = /(\*\*\*|\*\*|\*|___|__|_|`)([^\1]+)\1/;
+  static CODE_FENCE_REGEX = /^(\s*)```.*/;
   static SYMBOL_TO_KIND = {
     '*': 'emphasis',
     '_': 'emphasis',
@@ -38,7 +39,7 @@ class Slopdown {
         return;
       }
 
-      if (line.startsWith('```')) {
+      if (line.trim().startsWith('```')) {
         if (inCode) {
           inCode = false;
           fmt = this.#fmtByKind['code'] || Slopdown.IDENTITY;

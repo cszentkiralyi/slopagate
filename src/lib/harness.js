@@ -1,6 +1,7 @@
 const Events = require('../events.js');
 const Session = require('./session.js');
 const Toolbox = require('./toolbox.js');
+const Text = require('./components/text.js');
 
 const { Logger } = require('../util.js');
 
@@ -71,7 +72,8 @@ class Harness {
     if (!response || !response.message) return;
     let { message, done } = response;
     
-    this.#inputTokens += response.prompt_eval_count;
+    // According to Qwen3.5:9B, this is not accumulated.
+    this.#inputTokens = response.prompt_eval_count;
     this.#outputTokens += response.eval_count;
     Events.emit('metrics:tokens', {
       inputTokens: this.#inputTokens,
@@ -138,6 +140,17 @@ class Harness {
     Events.emit('model:response', { response });
   }
   
+  estimateHistoryTokens() {
+    return this.session.history.reduce((m, entry) => {
+      if (entry.content) {
+        m += Harness.estimteTokens(`${entry.role}: ${entry.content}`);
+      }
+      if (entry.tool_calls) {
+        m += Harness.estimteTokens(JSON.stringify(entry.tool_calls));
+      }
+      return m
+    }, 0);
+  }
   
   static estimteTokens(s) {
     let len = Text.measure(s);

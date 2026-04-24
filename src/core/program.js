@@ -126,6 +126,10 @@ class Program {
           content: this.interface.getById('chat-input').prompt + input
         });
         this.interface.statusline.showSpinner(this.spinnerMessage);
+        this.updateStatuslineTokens({
+          inputTokens: this.harness.estimateHistoryTokens(),
+          outputTokens: this.harness.outputTokens
+        });
       }
       inst.clear();
       this.interface.draw();
@@ -192,8 +196,12 @@ class Program {
     return `${(n / 1000000).toFixed(2)}M`;
   }
   updateStatuslineTokens({ inputTokens, outputTokens }) {
-    let txt = this.interface.statusline.right, s;
-    s = `↑ ${this.#roundTokens(inputTokens)} / ${this.#roundTokens(outputTokens)} ↓`;
+    let txt = this.interface.statusline.right, s, pct;
+    s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
+    pct = `${(100 *(inputTokens + outputTokens) / this.config.contextWindow).toFixed(0)}%`;
+    if (pct > 50) pct = ANSI.fg(pct, 3);
+    if (pct > 70) pct = ANSI.fg(pct, 1);
+    s += ` │ ${pct}`
     txt.content = s;
   }
   
