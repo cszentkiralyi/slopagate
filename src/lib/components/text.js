@@ -70,11 +70,13 @@ class Text extends Component {
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
+        rightPadStr = rightPad ? ' '.repeat(rightPad) : '',
         blank = fill ? ' '.repeat(width) : '',
         currentLine = '', alignStr = '', currentLen = 0,
         rem, m;
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
+      currentLine += rightPadStr;
       if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
         currentLine += ' '.repeat(rem);
       } else if (justify === 'right' && (rem = Math.abs((width - Text.measure(currentLine)) % width))) {

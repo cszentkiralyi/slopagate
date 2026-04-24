@@ -27,7 +27,7 @@ class Interface {
         id: 'global-spinner',
         animation: 'braille-small',
         message: 'Autofilling...',
-        padding: { left: 1 },
+        padding: { left: 1, right: 1 },
         loop: false
       })
     });

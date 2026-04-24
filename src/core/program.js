@@ -44,8 +44,8 @@ class Program {
     this.md = new Slopdown({
       'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
       'emphasis': s => ANSI.italic(s),
-      'inline-code': s => ANSI.bg(ANSI.fg(` ${s} `, 160), 16),
-      'code': s => ANSI.fg(s, 246)
+      'inline-code': s => ANSI.fg(s, 213),
+      'code': s => ANSI.fg(s, 213)
     });
     
     this.commands = [

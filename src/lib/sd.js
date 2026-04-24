@@ -34,12 +34,9 @@ class Slopdown {
         
     markdown.split('\n').forEach(line => {
       // TODO: block quotes
-      if (!line || !line.length) {
-        lines.push('');
-        return;
-      }
+      let line_q = line && line.length;
 
-      if (line.trim().startsWith('```')) {
+      if (line_q && line.trim().startsWith('```')) {
         if (inCode) {
           inCode = false;
           fmt = this.#fmtByKind['code'] || Slopdown.IDENTITY;
@@ -50,7 +47,13 @@ class Slopdown {
         }
         return;
       } else if (inCode) {
-        ret += line + '\n';
+        fmt = this.#fmtByKind['code'] || Slopdown.IDENTITY;
+        ret += (fmt(line)) + '\n';
+        return;
+      }
+
+      if (!line_q) {
+        lines.push('');
         return;
       }
 
