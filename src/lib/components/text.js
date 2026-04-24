@@ -102,9 +102,12 @@ class Text extends Component {
         line.split(' ').forEach((word, idx) => {
           let len = Text.measure(word);
           if (currentLen + len + 1 + rightPad <= width) {
-            if (idx > 0) currentLine += ' ';
+            if (idx) {
+              currentLine += ' ';
+              currentLen++;
+            }
             currentLine += word;
-            currentLen += len + 1;
+            currentLen += len;
           } else {
             finishLine(currentLine);
             currentLine = leftPadStr + alignStr;
@@ -120,7 +123,7 @@ class Text extends Component {
   }
   
   static measure(s) {
-    return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Tmfin]/g, '').length;
+    return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Za-z]/g, '').length;
   }
 }
 

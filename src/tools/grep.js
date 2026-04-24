@@ -19,7 +19,7 @@ const GrepTool = new Tool({
     try {
       let s = JSON.stringify(search_string);
       tool.message(`Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${file_path}`);
-      const output = execSync(`grep -Fn ${JSON.stringify(search_string)} "${file_path}"`);
+      const output = execSync(`grep -Fnd recurse ${JSON.stringify(search_string)} ${file_path}`);
       return output.toString().split('\n').slice(0, 20).join('\n');
     } catch (err) {
       if (err.message?.includes('ENOENT')) {

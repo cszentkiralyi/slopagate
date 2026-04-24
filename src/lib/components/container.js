@@ -62,6 +62,7 @@ class Container extends Component {
   }
   removeAllChildren() {
     if (!this.children || !this.children.length) return;
+    this.children.forEach(c => c.dispose());
     this.children = [];
   }
   

@@ -2,7 +2,16 @@
 
 ## Priority
 
+- [ ] Markdown
+  - [ ] Code fence styling broken?
+  - [ ] We don't calculate bold text widths correctly, I think?
+  - [ ] Still have end-of-line inline code styling issues?
+- [ ] Spinner still has statusline as its root for some reason
+- [ ] Refactor
+  - [ ] `Terminal` cursor movement belongs in `ANSI`
+  - [ ] `Text.measure()` should be `ANSI.measure()`
 - [ ] Commands & modes for `Interface`
+- [ ] Improve token estimation/tracking
 
 ## Backlog
 

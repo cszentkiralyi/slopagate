@@ -6,6 +6,7 @@ class Component {
   constructor(props) { Object.assign(this, props); }
   render(width) { return { lines: [], dirty: false, skip: 0 }; }
   focus() { if (this.root && this.root.giveFocus) this.root.giveFocus(this); }
+  dispose() { }
   hide() { this.hidden = true; this._lines = null; }
   show() { this.hidden = false; this._lines = null; }
   log(x) { Logger.log(' '.repeat(this.depth || 0) + x); }
