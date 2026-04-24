@@ -10,8 +10,12 @@
   - Every model response with content?
   - Every `done` model response?
   - Every few minutes?
-- [ ] `SLOP.md`
 - [ ] Shell shortcut: `!` which should change the prompt
+- [ ] Context compaction/engineering
+  - [ ] unread to compact reads
+  - [ ] promptdoc to alter system prompt
+  - [ ] scribe to summarize (done automatically on a delay? at certain token
+        breakpoints? every n turns? like claude)
 - [ ] Tools
   - [ ] Go back to global tool 'messages' calls, group them by tool as we iterate
         over them to call them to change the signature to accept n >= 1 calls, and
@@ -27,8 +31,7 @@
   - [ ] Models - UI
   - [ ] Slash commands - UI
 - [ ] Up/down history access, it's present but bad
-- [ ] Fix whatever the heck is going on with abort draws, we don't reliably
-      redraw after hiding the spinner & showing the abort message.
+- [ ] `SLOP.md`
 - [ ] Add padding support to containers
 - [ ] Wait for `harness:ready`
 - [ ] Slash commands
@@ -36,11 +39,6 @@
   - [ ] /think to toggle thinking
   - [ ] /effort maybe
   - [ ] /plan to disable editing tools (need system prompt change?)
-- [ ] Context compaction/engineering
-  - [ ] unread to compact reads
-  - [ ] promptdoc to alter system prompt
-  - [ ] scribe to summarize (done automatically on a delay? at certain token
-        breakpoints? every n turns? like claude)
   - [ ] others?
 - [ ] Autocomplete
   - [ ] Files with @

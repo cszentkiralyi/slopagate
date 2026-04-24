@@ -126,8 +126,10 @@ class Program {
           content: this.interface.getById('chat-input').prompt + input
         });
         this.interface.statusline.showSpinner(this.spinnerMessage);
+        let estInputTok = this.harness.estimateHistoryTokens(),
+            lastInputTok = this.harness.inputTokens;
         this.updateStatuslineTokens({
-          inputTokens: this.harness.estimateHistoryTokens(),
+          inputTokens: (estInputTok > lastInputTok) ? estInputTok : lastInputTok,
           outputTokens: this.harness.outputTokens
         });
       }
