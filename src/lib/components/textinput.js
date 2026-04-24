@@ -11,10 +11,9 @@ class TextInput extends Component {
   };
 
   #value = '';
+  #caret = 1;
   #history = [];
   #historyIdx = -1;
-  #ctrl_c = false;
-  #ctrl_timeout = null;
   
   shortcuts;
 
@@ -22,30 +21,38 @@ class TextInput extends Component {
 
   render(width) {
     let prompt = this.prompt || '',
-        value = prompt + this.value + '█',
         padding = Object.assign(
           { left: 0, right: 1 },
           this.padding
         ),
-        valueLines = Text.fit(
-          value,
-          width,
-          {
-            padding,
-            indent: true,
-            align: true,
-            fill: true
-          }),
         bg = this.bg || 236,
-        // Unicode block elements, upper/lower half block
-        lines = [
-          ANSI.fg('\u2584'.repeat(width), bg),
-          ...(valueLines.map(l => ANSI.bg(l, bg))),
-          ANSI.fg('\u2580'.repeat(width), bg),
-        ];
-    //lines = lines.map(l => ANSI.bg(l, this.bg || 236));
+        value, lines, dirty;
     
-    let dirty = Component.isDirty(this._lines, lines);
+    if (this.#caret >= this.#value.length) {
+      value = this.#value + '█';
+    } else {
+      value = this.#value.substring(0, this.#caret)
+        + ANSI.invert(this.#value.substring(this.#caret, this.#caret + 1))
+        + this.#value.substring(this.#caret + 1);
+    }
+    
+    lines = Text.fit(
+      prompt + value,
+      width,
+      {
+        padding,
+        indent: true,
+        align: true,
+        fill: !!bg
+      }
+    );
+    lines = [
+          ANSI.fg('\u2584'.repeat(width), bg),
+          ...lines,
+          ANSI.fg('\u2580'.repeat(width), bg),
+    ].map(l => ANSI.bg(l, bg));
+
+    dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
     return { lines, dirty, skip: (dirty ? 0 : lines.length) };
   }
@@ -56,20 +63,28 @@ class TextInput extends Component {
     // TODO: this.shortcuts is basically shitty shorthand... I don't feel
     //       great about it now that I've taken another look.
     let char = k.charCodeAt(0),
-      [laters, later] = this.#makeLater();
+        len = this.#value ? this.#value.length : 0,
+        [laters, later] = this.#makeLater();
     if (this.onKey) await this.onKey(k, later, this);
-    this.log(JSON.stringify({ k, char }));
-    if (char === 13 && k.length === 1) { // newline / cr
+    if (this.#caret > len) this.#caret = len;
+    if (char === 13 && k.length === 1) { // cr
       this.#historyIdx = -1;
       this.#history.push(this.#value);
       this.onInput(this.#value, this);
-    } else if (char === 127 || char === 8) { // backspace
-      if (this.#value.length == 0) return;
-      this.#value = this.#value.substring(0, this.#value.length - 1);
+    } else if (char === 127 || char === 8) { // bs
+      if (len == 0) return;
+      if (this.#caret == len) {
+        this.#value = this.#value.substring(0, len - 1);
+      } else {
+        this.#value = this.#value.substring(0, this.#caret - 1)
+          + this.#value.substring(this.#caret);
+      }
+      this.#caret--;
     } else if (k === '\x1b[A') {  // up
       if (-this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx--;
         this.#value = this.getHistory(this.#historyIdx);
+        this.#caret = this.#value.length;
       }
     } else if (k === '\x1b[B') { // down
       if (this.#historyIdx < 0) {
@@ -78,6 +93,15 @@ class TextInput extends Component {
       } else if (this.#historyIdx == 0) {
         this.#value = '';
       }
+      this.#caret = this.#value.length;
+    } else if (k === '\x1b[C') { // right
+      if (this.#caret < len) this.#caret++;
+    } else if (k === '\x1b[D') { // left
+      if (this.#caret > 0) this.#caret--;
+    } else if (char === 1) { // home or ^A
+      this.#caret = 0;
+    } else if (char === 5) { // end or ^E
+      this.#caret = this.#value.length;
     } else if (char === 3) { // ^C
       //this.log(`Have ^C shortcut? ${'^C' in this.shortcuts} ${JSON.stringify(this.shortcuts)}`);
       if (!('^C' in this.shortcuts)) return;
@@ -86,7 +110,16 @@ class TextInput extends Component {
       if (!('^D' in this.shortcuts)) return;
       this.shortcuts['^D'](this);
     } else if (char >= 32 && (char - 127) != 0) {
-      this.#value += k;
+      if (this.#caret == len) {
+        this.#value += k;
+      } else {
+        this.#value = this.#value.substring(0, this.#caret)
+          + k
+          + this.#value.substring(this.#caret);
+      }
+      this.#caret++;
+    } else {
+      this.log(`key: ${JSON.stringify({ k, char, len })}`);
     }
 
     if (laters.length) await laters.run();

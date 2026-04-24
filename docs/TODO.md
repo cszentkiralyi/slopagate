@@ -2,7 +2,6 @@
 
 ## Priority
 
-- [ ] Establish statusline API
 - [ ] Commands & modes for `Interface`
 
 ## Backlog

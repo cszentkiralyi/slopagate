@@ -47,10 +47,10 @@ class Text extends Component {
     // TODO: maybe make ANSI.#fgEsc & #bgEsc that guarantee their args are Numbers, so then
     // the public fgEsc & bgEsc can resolve the color and shorten stuff like this
     let applyFg = this.fg
-          ? s => Text.applyEscape(s, ANSI.fgEsc(ANSI.resolveColor(this.fg)))
+          ? s => ANSI.esc(s, ANSI.fgEsc(ANSI.resolveColor(this.fg)))
           : s => s,
         applyBg = this.bg
-          ? s => Text.applyEscape(s, ANSI.bgEsc(ANSI.resolveColor(this.bg)))
+          ? s => ANSI.esc(s, ANSI.bgEsc(ANSI.resolveColor(this.bg)))
           : s => s;
     //Logger.log(`Text: lines = ${JSON.stringify(lines)}`);
     lines = lines.map(l => applyFg(applyBg(l)));
@@ -119,12 +119,6 @@ class Text extends Component {
     return lines;
   }
   
-  static applyEscape(s, esc) {
-    if (!s || !esc) return s;
-    let reset = ANSI.RESET_ESCAPE + esc;
-    return `${esc}${s.replaceAll(ANSI.RESET_ESCAPE, reset)}${ANSI.RESET_ESCAPE}`;
-  }
-
   static measure(s) {
     return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Tmfin]/g, '').length;
   }

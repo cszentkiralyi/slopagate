@@ -35,27 +35,31 @@ class ANSI {
   static fg(text, color) {
     let code = this.resolveColor(color);
     if (!code) return text;
+    return ANSI.esc(text, ANSI.fgEsc(code));
     return `${ANSI.fgEsc(code)}${text}${this.RESET_ESCAPE}`;
   }
   static bg(text, color) {
     let code = this.resolveColor(color);
     if (!code) return text;
-    return `${ANSI.bgEsc(code)}${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, ANSI.bgEsc(code));
   }
   static bold(text) {
-    return `\x1B[1m${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, `\x1B[1m`);
   }
   static dim(text) {
-    return `\x1B[2m${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, `\x1B[2m`);
   }
   static italic(text) {
-    return `\x1B[3m${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, `\x1B[3m`);
   }
   static underline(text) {
-    return `\x1B[4m${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, `\x1B[4m`);
+  }
+  static invert(text) {
+    return ANSI.esc(text, `\x1B[7m`);
   }
   static strike(text) {
-    return `\x1B[9m${text}${this.RESET_ESCAPE}`;
+    return ANSI.esc(text, `\x1B[9m`);
   }
   
   static hideCursor() {
@@ -63,6 +67,12 @@ class ANSI {
   }
   static showCursor() {
     console.log(`\x1B[?25h`);
+  }
+
+  static esc(s, esc) {
+    if (!s || !esc) return s;
+    let reset = ANSI.RESET_ESCAPE + esc;
+    return `${esc}${s.replaceAll(ANSI.RESET_ESCAPE, reset)}${ANSI.RESET_ESCAPE}`;
   }
 }
 
