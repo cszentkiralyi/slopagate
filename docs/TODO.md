@@ -2,10 +2,8 @@
 
 ## Priority
 
-`Text.fit()`: new option to preserve original whitesapce for new lines (so a string
-that matches with `/^(\w+)/` applies `$1` to all its new lines), and then replace
-the current "align" behavior with true/false to list-align.
-
+- [ ] Establish statusline API
+- [ ] Commands & modes for `Interface`
 
 ## Backlog
 
@@ -13,12 +11,6 @@ the current "align" behavior with true/false to list-align.
   - Every model response with content?
   - Every `done` model response?
   - Every few minutes?
-- [ ] New, simplistic Markdown renderer
-  - Only double & single asterisk/underscore, inline code
-  - Single-line headers
-  - Code blocks via triple-grave
-  - `Text.fit`: "respect list" option that will detect /^(\w*)\([^ ]*) / and then
-    preface every new line with `' '.repeat(measure($1 + $2))`.
 - [ ] `SLOP.md`
 - [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Tools

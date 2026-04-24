@@ -24,7 +24,8 @@ class Container extends Component {
       lines.push(...result.lines);
       if (this.gap && i < lastChild) lines.push('')
       if (!dirty) skip += result.skip;
-      dirty ||= result.dirty;
+      dirty ||= result.dirty || child.dirtyRender;
+      child.dirtyRender = false;
     });
     //this.log(`Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
@@ -50,6 +51,10 @@ class Container extends Component {
       }
     });
     return foundInner;
+  }
+  removeAllChildren() {
+    if (!this.children || !this.children.length) return;
+    this.children = [];
   }
   
   static isContainer(inst) {

@@ -65,7 +65,7 @@ class Text extends Component {
   
   static LEADING_WHITESPACE_REGEX = /^(\s*)/;
   static LIST_ITEM_REGEX = /^\s*([^\s]+\s*)/;
-  static LIST_ITEM_REGEX_STRICT = /^\s*([^\s]*[\.\)]\s)/;
+  static LIST_ITEM_REGEX_STRICT = /^\s*([^\s]*[\.\)]\s|[\-\*]\s)/;
   static fit(s, width, options) {
     let lines = [],
         { padding, align, forceAlign, indent, fill } = (options || {}),

@@ -23,7 +23,7 @@ class Harness {
     
     this.toolbox = new Toolbox([
       ReadTool,
-      EditTool,
+      //EditTool,
       LsTool,
       GrepTool
     ]);

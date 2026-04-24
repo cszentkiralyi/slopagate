@@ -51,11 +51,16 @@ class Spinner extends Component {
     this.#loop = true;
   }
   
-  dispose() {
+  stop() {
     this.#loop = false;
   }
   
+  dispose() {
+    this.stop();
+  }
+  
   render(width) {
+    //this.log(`Spinner: render ${this.#lastRenderedFrame} : ${this.#lastRender}`);
     let now = Date.now(),
         diff = (now - this.#lastRender),
         frame = this.#lastRenderedFrame,
@@ -68,7 +73,7 @@ class Spinner extends Component {
     if (frame > frames.length - 1)
        frame = 0;
     let lines, dirty = false;
-    if (frame === this.#lastRenderedFrame) {
+    if (frame === this.#lastRenderedFrame && this._lines) {
       //this.log(`Spinner: recycling previous lines`);
       timeout = Math.max(delay - diff, 0);
       lines = this._lines;

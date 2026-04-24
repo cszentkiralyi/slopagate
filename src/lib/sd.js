@@ -1,40 +1,80 @@
 const ANSI = require('./ansi.js');
 
 class Slopdown {
-  static toAnsi(markdown) {
-    // TODO
-    // 1. Can we just use one regex to detect any pairs using \1, and
-    //    then use one string replaceAllment fn?
-    // 2. Can we avoid rendering other text inside a `?
-    // 3. Detect code fences, requires swapping to markdown:line[]
+  static INLINE_MARKUP_REGEX = /(\*\*\*|\*\*|\*|___|__|_|`)([^\1]+)\1/;
+  static SYMBOL_TO_KIND = {
+    '*': 'emphasis',
+    '_': 'emphasis',
+    '**': 'strong',
+    '__': 'strong',
+    '***': 'strong-emphasis',
+    '___': 'strong-emphasis',
+    '`': 'inline-code'
+  };
+  static IDENTITY = s => s;
+  
+  #fmtByKind;
 
-    // Inline code (backticks) - highest priority to avoid partial matches
-    markdown = markdown.replaceAll(/`([^`]+)`/g, (match, text) => {
-      return ANSI.fg(text, 90);
-    });
+  constructor(theme) {
+    /* `theme` is an object, mapping markup kind to formatting function. The
+     * function is called as `fmt(content)` and should just return another
+     * string that appropriately colors/themes/whatever `content`. */
+    this.#fmtByKind = theme;
+    if (!('strong-emphasis' in this.#fmtByKind)
+        && ('strong' in this.#fmtByKind)
+        && ('emphasis' in this.#fmtByKind)) {
+      this.#fmtByKind['strong-emphasis'] = s => this.#fmtByKind['strong'](this.#fmtByKind['emphasis'](s));
+    }
+  }
 
-    // Bold + Italic - three asterisks or underscores
-    markdown = markdown.replaceAll(/\*\*\*(.+?)\*\*\*/g, (match, text) => {
-      return ANSI.fg(ANSI.italic(text), 90);
-    });
-    markdown = markdown.replaceAll(/___([^_]+)___/g, (match, text) => {
-      return ANSI.fg(ANSI.italic(text), 90);
-    });
+  toAnsi(markdown) {
+    let lines = [], rem, ret, inCode,
+        m, search, sym, inner, idx, fmt, recur;
+        
+    markdown.split('\n').forEach(line => {
+      // TODO: code fencing, block quotes
+      if (!line || !line.length) {
+        lines.push('');
+        return;
+      }
 
-    // Bold - two asterisks or underscores
-    markdown = markdown.replaceAll(/\*\*(.+?)\*\*/g, (match, text) => {
-      return ANSI.bold(text);
-    });
-    markdown = markdown.replaceAll(/__([^_]+)__/g, (match, text) => {
-      return ANSI.bold(text);
-    });
+      if (line.startsWith('```')) {
+        if (inCode) {
+          inCode = false;
+          fmt = this.#fmtByKind['code'] || Slopdown.IDENTITY;
+          lines.push(fmt(ret));
+        } else {
+          inCode = true;
+          ret = '';
+        }
+        return;
+      } else if (inCode) {
+        ret += line + '\n';
+        return;
+      }
 
-    // Italic - single asterisk or underscore (non-greedy, same delimiter both sides)
-    markdown = markdown.replaceAll(/(\*|_)(.+?)\1/g, (match, delim, text) => {
-      return ANSI.italic(text);
+      rem = line, ret = '';
+      while (m = Slopdown.INLINE_MARKUP_REGEX.exec(rem)) {
+        [search, sym, inner] = m;
+        if ((idx = inner.indexOf(sym)) > -1) {
+          inner = inner.substring(0, idx);
+          search = search.substring(0, idx + (sym.length * 2));
+        }
+        recur = sym !== '`';
+        idx = rem.indexOf(search);
+        fmt = this.#fmtByKind[Slopdown.SYMBOL_TO_KIND[sym]] || Slopdown.IDENTITY;
+        ret += rem.substring(0, idx);
+        rem = rem.substring(Math.min(idx + inner.length + (sym.length * 2), rem.length));
+        if (sym !== '`') {
+          rem = fmt(inner) + rem;
+        } else {
+          ret += fmt(inner);
+        }
+      }
+      if (rem) { ret += rem }
+      lines.push(ret);
     });
-
-    return markdown;
+    return lines.join('\n');
   }
 }
 

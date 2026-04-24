@@ -83,6 +83,7 @@ class Terminal extends Container {
         );
     
     //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
+    //this.log(`Term: ${lines.slice(skip)}`)
     output += Terminal.cursorUp(clearHeight - 1);
     output += Terminal.eraseDown();
     output += lines.slice(skip).join('\n');

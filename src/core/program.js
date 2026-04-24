@@ -6,12 +6,15 @@ const Events = require('../events.js');
 const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
-const SD = require('../lib/sd.js');
+const TUI = require('../lib/tui.js');
+const Slopdown = require('../lib/sd.js');
 
 class Program {
   config;
   harness;
   interface;
+  
+  md;
 
   constructor({ banner }) {
     let config = this.config = {
@@ -25,6 +28,13 @@ class Program {
       model: process.env.SLOP_MODEL || 'qwen3.5:9b-65k'
     };
     config.connection = `${config.host}:${config.port}${config.endpoint}`;
+    
+    this.md = new Slopdown({
+      'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
+      'emphasis': s => ANSI.italic(s),
+      'inline-code': s => ANSI.bg(ANSI.fg(` ${s} `, 160), 16),
+      'code': s => ANSI.fg(s, 246)
+    });
 
     this.interface = new Interface({
       banner: { content: ANSI.bold(banner), fg: 'white' }
@@ -88,48 +98,41 @@ class Program {
         role: 'user',
         content: this.interface.getById('chat-input').prompt + input
       });
-      this.interface.spinner.start();
-      this.interface.spinner.show();
+      this.interface.showSpinner();
       inst.clear();
       this.interface.draw();
     };
     this.interface.getById('chat-input').onKey = async (k, later, inst) => {
-      //inst.log('onKey called');
       let statusline = this.interface.statusLine;
-      if (!statusline.hidden) statusline.hide();
+      if (statusline.children.length && statusline.children[0] !== this.interface.spinner)
+        statusline.removeAllChildren()
       later(() => this.interface.draw());
     }
 
 
     Events.on('user:abort', (event) => {
-      this.interface.spinner.hide();
+      this.interface.statusLine.setChild(new TUI.Text({
+        content: '^C again to exit.',
+        padding: { left: 1 },
+        fg: 'gray'
+      }));
+      this.interface.spinner.stop();
       this.interface.statusLine.show();
-      this.interface.spinner.log('Hidden');
       this.interface.draw();
     });
     Events.on('model:content', (event) => {
       if (event.content) {
         this.interface.addMessage({
           role: 'model',
-          content: SD.toAnsi(event.content.trim())
+          content: this.md.toAnsi(event.content.trim())
         });
       }
-      if (!event.done) { 
-       this.interface.spinner.start();
-       this.interface.spinner.show();
-      } else {
-        this.interface.spinner.hide();
-      }
+      (event.done) ? this.interface.hideSpinner() : this.interface.showSpinner();
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
       this.interface.addMessage({ role: 'tool', content: event.content });
-      if (!event.done) { 
-       this.interface.spinner.start();
-       this.interface.spinner.show();
-      } else {
-        this.interface.spinner.hide();
-      }
+      (event.done) ? this.interface.hideSpinner() : this.interface.showSpinner();
       this.interface.draw();
     })
   

@@ -27,26 +27,20 @@ class Interface {
       animation: 'braille-small',
       message: 'Autofilling...',
       padding: { left: 1 },
-      hidden: true,
       loop: false
     });
-    this.#status_line = new TUI.Text({
-      id: 'status-line',
-      content: '^C again to exit.',
-      padding: { left: 1 },
-      hidden: true
-    });
+    this.#status_line = new TUI.Statusline();
     this.#chat_input = new TUI.TextInput({
       id: 'chat-input',
       prompt: Interface.CLI_PROMPT,
-      state: 'normal'
+      state: 'normal',
+      padding: { left: 1, right: 1 }
     });
     
     if (banner) this.#chat_history.appendChild(new TUI.Text(banner));
     this.#terminal.appendChild(this.#chat_history);
     this.#terminal.appendChild(this.#lower_panel);
     this.#chat_history.appendChild(this.#startup_messages);
-    this.#lower_panel.appendChild(this.#global_spinner);
     this.#lower_panel.appendChild(this.#status_line);
     this.#lower_panel.appendChild(this.#chat_input);
 
@@ -82,12 +76,6 @@ class Interface {
     await this.#terminal.dispose();
   }
   
-  addStartupMessage({ content }) {
-    this.#startup_messages.appendChild(new TUI.Text({
-      content, fg: 'gray'
-    }));
-  }
-  
   registerId(component) {
     if (component && component.id) {
       this.#elements_by_id.set(component.id, component);
@@ -107,6 +95,13 @@ class Interface {
     return result;
   }
   
+
+  addStartupMessage({ content }) {
+    this.#startup_messages.appendChild(new TUI.Text({
+      content, fg: 'gray'
+    }));
+  }
+
   addMessage({ role, content, id }) {
     let textProps;
     
@@ -145,6 +140,15 @@ class Interface {
       // TODO: may be wrong for us to trigger this?
       this.draw();
     }
+  }
+  
+  showSpinner() {
+    this.#status_line.setChild(this.#global_spinner);
+    this.#global_spinner.start();
+  }
+  hideSpinner() {
+    this.#global_spinner.stop();
+    this.#status_line.removeAllChildren();
   }
 }
 
