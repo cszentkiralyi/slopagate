@@ -1,0 +1,30 @@
+const ANSI = require('../src/lib/ansi.js');
+const SD = require('../src/lib/sd.js');
+
+let md = new SD({
+  'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
+  'emphasis': s => ANSI.italic(s),
+  'inline-code': s => ANSI.bg(ANSI.fg(` ${s} `, 160), 16),
+  'code': s => ANSI.fg(s, 246)
+});
+
+let content = `
+This is *some* Markdown. Not a lot, **just a little**, and it _uses_ a __variety__ of symbols.
+
+1. Here is a list.
+2. Here is a second item.
+3. I just remembered I don't have list alignment for \`-\` and \`*\`
+
+\`\`\`lang-to-ignore
+A code fence!
+er
+Compilation error.
+\`\`\`
+
+And triples? ***TEST**, dear god was that ___LOUD___? Anyway.
+`;
+
+console.log(content);
+console.log('\n---\n');
+console.log(md.toAnsi(content));
+//console.log(content.split('\n').map(l => md.toAnsi(l)).join('\n'));

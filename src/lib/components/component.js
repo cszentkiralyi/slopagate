@@ -3,7 +3,6 @@ const { Logger } = require('../../util.js');
 class Component {
   root;
   hidden;
-  dirtyRender;
   constructor(props) { Object.assign(this, props); }
   render(width) { return { lines: [], dirty: false, skip: 0 }; }
   focus() { if (this.root && this.root.giveFocus) this.root.giveFocus(this); }

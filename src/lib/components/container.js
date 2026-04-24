@@ -24,8 +24,7 @@ class Container extends Component {
       lines.push(...result.lines);
       if (this.gap && i < lastChild) lines.push('')
       if (!dirty) skip += result.skip;
-      dirty ||= result.dirty || child.dirtyRender;
-      child.dirtyRender = false;
+      dirty ||= result.dirty;
     });
     //this.log(`Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
