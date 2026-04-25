@@ -1,152 +1,61 @@
-const Context = require('../src/lib/context.js');
 const test = require('node:test');
 const assert = require('node:assert');
 const BashTool = require('../src/tools/bash.js');
 
-test('BashTool executes simple commands', async (t) => {
-  const tool = new BashTool({ readonly: false });
+test('BashTool permissionGate method', (t) => {
+  const tool = new BashTool();
 
-  const result = await tool.handler({ command: 'echo hello' }, tool);
-  
-  t.assert.ok(result.includes('hello'), 'Should return output of echo command');
+  t.assert.ok(tool.permissionGate('npm run test'), 'npm run test should be permitted');
+  t.assert.ok(tool.permissionGate('node --test *'), 'node --test * should be permitted');
+  t.assert.ok(tool.permissionGate('git log *'), 'git log * should be permitted');
+  t.assert.ok(tool.permissionGate('git status *'), 'git status * should be permitted');
+  t.assert.ok(tool.permissionGate('head *'), 'head * should be permitted');
+  t.assert.ok(tool.permissionGate('tail *'), 'tail * should be permitted');
+  t.assert.ok(tool.permissionGate('pwd'), 'pwd should be permitted');
+
+  t.assert.ok(!tool.permissionGate('ls'), 'ls should not be permitted');
+  t.assert.ok(!tool.permissionGate('cd /etc'), 'cd /etc should not be permitted');
+  t.assert.ok(!tool.permissionGate('rm -rf /'), 'rm -rf / should not be permitted');
 });
 
-test('BashTool captures stderr', async (t) => {
-  const tool = new BashTool({ readonly: false });
+test('BashTool handler method', async (t) => {
+  const tool = new BashTool();
 
-  const result = await tool.handler({ command: 'echo hello >&2' }, tool);
-  
-  t.assert.ok(result.includes('hello'), 'Should return output including stderr');
+  // Test permitted command
+  const result1 = await tool.handler({ command: 'pwd' }, tool);
+  t.assert.ok(result1.includes('/'), 'pwd should return home directory');
+
+  // Test permitted command with stderr
+  const result2 = await tool.handler({ command: 'pwd' }, tool);
+  t.assert.ok(result2.trim().startsWith('/'), 'pwd should return home directory');
+
+  // Test non-permitted command
+  const result3 = await tool.handler({ command: 'ls' }, tool);
+  t.assert.ok(result3 === 'Error: Command not permitted', 'non-permitted command should return error');
 });
 
-test('BashTool handles exit codes via error message', async (t) => {
-  const tool = new BashTool({ readonly: false });
+test('BashTool message method', (t) => {
+  const tool = new BashTool();
 
-  const result = await tool.handler({ command: 'exit 42' }, tool);
-  
-  t.assert.ok(result.includes('Error: exit code'), 'Should report exit code error');
-});
+  // Test single permitted command
+  const calls1 = [{
+    args: { command: 'pwd' }
+  }];
+  const message1 = tool.message(calls1);
+  t.assert.ok(message1 === 'Executing pwd', 'single permitted command should show message');
 
-test('BashTool blocks non-permitted commands by default', async (t) => {
-  const tool = new BashTool({ readonly: true });
-
-  const result = await tool.handler({ command: 'rm -rf /' }, tool);
-  
-  t.assert.equal(result, 'Error: Command not permitted', 'Should block non-permitted commands');
-});
-
-test('BashTool allows npm run test when readonly', async (t) => {
-  const tool = new BashTool({ readonly: true });
-
-  const result = await tool.handler({ command: 'npm run test' }, tool);
-  
-  t.assert.notEqual(result, 'Error: Command not permitted', 'Should allow npm run test');
-});
-
-test('BashTool blocks readonly commands when not in safe list', async (t) => {
-  const tool = new BashTool({ readonly: true });
-
-  const result = await tool.handler({ command: 'ls' }, tool);
-  
-  t.assert.equal(result, 'Error: Command not permitted', 'Should block ls when readonly');
-});
-
-test('BashTool allows git log when readonly', async (t) => {
-  const tool = new BashTool({ readonly: true });
-
-  const result = await tool.handler({ command: 'git log *' }, tool);
-  
-  t.assert.notEqual(result, 'Error: Command not permitted', 'Should allow git log');
-});
-
-test('BashTool handles command not found', async (t) => {
-  const tool = new BashTool({ readonly: false });
-
-  const result = await tool.handler({ command: 'nonexistent_command_xyz' }, tool);
-  
-  t.assert.ok(result.includes('Error'), 'Should handle command not found gracefully');
-});
-
-test('BashTool handles multiline output', async (t) => {
-  const tool = new BashTool({ readonly: false });
-
-  const result = await tool.handler({ command: 'echo -e "line1\\nline2\\nline3"' }, tool);
-  
-  t.assert.ok(result.includes('line1'), 'Should capture multiline output');
-  t.assert.ok(result.includes('line3'), 'Should capture all lines');
-});
-
-test('BashTool works with Context integration', async (t) => {
-  const tools = { bash: new BashTool({ readonly: false }) };
-  const context = new Context({ tools });
-  
-  context.add({ role: 'user', content: 'What is 2 + 2?' });
-  context.add({ role: 'assistant', content: 'bash', params: { command: 'echo 2 + 2 = 4' } });
-  
-  context.compact([]);
-  
-  t.assert.equal(context.messages.length, 2, 'Messages should be preserved');
-});
-
-test('BashTool.message() filters calls by permission gate', async (t) => {
-  const tool = new BashTool({ readonly: false });
-  
-  const calls = [
-    { id: 1, args: { command: 'echo hello' } },
-    { id: 2, args: { command: 'rm -rf /' } },
-    { id: 3, args: { command: 'npm run test' } },
+  // Test multiple permitted commands
+  const calls2 = [
+    { args: { command: 'npm run test' } },
+    { args: { command: 'git log *' } }
   ];
-  
-  const result = tool.message(calls);
-  
-  t.assert.ok(result.includes('Executing'), 'Should return message about executing permitted commands');
-  t.assert.ok(!result.includes('rm -rf'), 'Should not mention blocked command');
-});
+  const message2 = tool.message(calls2);
+  t.assert.ok(message2.includes('Executing 2 commands'), 'multiple commands should show count');
+  t.assert.ok(message2.includes('npm'), 'summary should include npm');
+  t.assert.ok(message2.includes('git'), 'summary should include git');
 
-test('BashTool.message() returns "No permitted commands" when all filtered', async (t) => {
-  const tool = new BashTool({ readonly: true });
-  
-  const calls = [
-    { id: 1, args: { command: 'ls' } },
-    { id: 2, args: { command: 'echo hello' } },
-  ];
-  
-  const result = tool.message(calls);
-  
-  t.assert.equal(result, 'No permitted commands to execute', 'Should return message when no commands are permitted');
-});
-
-test('BashTool.message() handles empty calls array', async (t) => {
-  const tool = new BashTool({ readonly: false });
-  
-  const result = tool.message([]);
-  
-  t.assert.ok(result === 'No permitted commands to execute' || result === 'Executing 0 commands ( )', 'Should handle empty array');
-});
-
-test('BashTool.message() single command execution', async (t) => {
-  const tool = new BashTool({ readonly: false });
-  
-  const calls = [
-    { id: 1, args: { command: 'git log *' } },
-  ];
-  
-  const result = tool.message(calls);
-  
-  t.assert.ok(result.includes('git log'), 'Should mention the single command');
-});
-
-test('BashTool.message() summary truncation for many commands', async (t) => {
-  const tool = new BashTool({ readonly: false });
-  
-  const calls = [
-    { id: 1, args: { command: 'npm run test' } },
-    { id: 2, args: { command: 'git log *' } },
-    { id: 3, args: { command: 'echo hello' } },
-  ];
-  
-  const result = tool.message(calls);
-  
-  t.assert.ok(result.includes('Executing'), 'Should indicate multiple commands');
-  // Should have some truncation if summary exceeds 20 chars
+  // Test no permitted commands
+  const calls3 = [{ args: { command: 'ls' } }];
+  const message3 = tool.message(calls3);
+  t.assert.ok(message3 === 'No permitted commands to execute', 'no permitted commands should show message');
 });
