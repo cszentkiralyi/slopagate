@@ -87,3 +87,66 @@ test('BashTool works with Context integration', async (t) => {
   
   t.assert.equal(context.messages.length, 2, 'Messages should be preserved');
 });
+
+test('BashTool.message() filters calls by permission gate', async (t) => {
+  const tool = new BashTool({ readonly: false });
+  
+  const calls = [
+    { id: 1, args: { command: 'echo hello' } },
+    { id: 2, args: { command: 'rm -rf /' } },
+    { id: 3, args: { command: 'npm run test' } },
+  ];
+  
+  const result = tool.message(calls);
+  
+  t.assert.ok(result.includes('Executing'), 'Should return message about executing permitted commands');
+  t.assert.ok(!result.includes('rm -rf'), 'Should not mention blocked command');
+});
+
+test('BashTool.message() returns "No permitted commands" when all filtered', async (t) => {
+  const tool = new BashTool({ readonly: true });
+  
+  const calls = [
+    { id: 1, args: { command: 'ls' } },
+    { id: 2, args: { command: 'echo hello' } },
+  ];
+  
+  const result = tool.message(calls);
+  
+  t.assert.equal(result, 'No permitted commands to execute', 'Should return message when no commands are permitted');
+});
+
+test('BashTool.message() handles empty calls array', async (t) => {
+  const tool = new BashTool({ readonly: false });
+  
+  const result = tool.message([]);
+  
+  t.assert.ok(result === 'No permitted commands to execute' || result === 'Executing 0 commands ( )', 'Should handle empty array');
+});
+
+test('BashTool.message() single command execution', async (t) => {
+  const tool = new BashTool({ readonly: false });
+  
+  const calls = [
+    { id: 1, args: { command: 'git log *' } },
+  ];
+  
+  const result = tool.message(calls);
+  
+  t.assert.ok(result.includes('git log'), 'Should mention the single command');
+});
+
+test('BashTool.message() summary truncation for many commands', async (t) => {
+  const tool = new BashTool({ readonly: false });
+  
+  const calls = [
+    { id: 1, args: { command: 'npm run test' } },
+    { id: 2, args: { command: 'git log *' } },
+    { id: 3, args: { command: 'echo hello' } },
+  ];
+  
+  const result = tool.message(calls);
+  
+  t.assert.ok(result.includes('Executing'), 'Should indicate multiple commands');
+  // Should have some truncation if summary exceeds 20 chars
+});

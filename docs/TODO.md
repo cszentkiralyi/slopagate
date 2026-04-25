@@ -2,8 +2,6 @@
 
 ## Priority
 
-- [ ] `bash` tool with permission gate
-  - `npm run test`
 - [ ] Get `tool_age` to pass tests & fix tool TTLs
   - `ls` & `grep` clear earlier
 - [ ] Modes for `Interface`
@@ -13,6 +11,8 @@
 - [ ] Commands for config
   - [ ] Config framework
   - [ ] Commands
+- [ ] I think during an agent turn, more than one message might have `done`,
+      the spinner is not showing up as consistently as I expected.
 
 ## Backlog
 

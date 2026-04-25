@@ -1,10 +1,12 @@
 /* Runs shell commands with permission checking */
 const { exec } = require('node:child_process');
+
+const { Logger } = require('../util.js');
 const Tool = require('./tool.js');
 
 class BashTool extends Tool {
   name = 'bash';
-  description = 'Execute shell commands.';
+  description = 'Execute a limited set of shell commands: ';
   readonly = false;
   parameters = {
     type: 'object',
@@ -23,6 +25,8 @@ class BashTool extends Tool {
   constructor(props) {
     super(props);
     Object.assign(this, props);
+    
+    this.description += BashTool.SAFE_BASH_CMDS.map(c => c.pattern).join(', ');
   }
 
   permissionGate(command) {
@@ -42,26 +46,38 @@ class BashTool extends Tool {
       return 'Error: Command not permitted';
     }
 
-    return new Promise((resolve, reject) => {
+    let p = new Promise((resolve, reject) => {
       exec(command, (error, stdout, stderr) => {
         if (error) {
+          Logger.log(`BashTool: Error executing command "${command}": ${error.message} (exit code: ${error.code || 'unknown'})`);
+          if (error.killed) {
+            Logger.log(`BashTool: Command was killed, possibly due to OOM`);
+          }
           resolve(`Error: ${error.message}`);
         } else {
           resolve(stdout.trim() + (stderr ? '\n' + stderr : ''));
         }
       });
     });
+    return await p;
   }
 
   message(calls) {
-    if (calls.length == 1) {
-      let { command } = calls[0].args;
+    // Filter calls to only include permitted commands
+    const permittedCalls = calls.filter(c => this.permissionGate(c.args.command));
+    
+    if (permittedCalls.length === 0) {
+      return 'No permitted commands to execute';
+    }
+    
+    if (permittedCalls.length == 1) {
+      let { command } = permittedCalls[0].args;
       return `Executing ${command}`;
     }
-    let summaries = calls.map(c => c.args.command.split(' ')[0]),
+    let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
         summary = summaries.join(' ');
     if (summary.length > 20) summary = summary.substring(0, 20) + '...';
-    return `Executing ${calls.length} commands (${summary})`;
+    return `Executing ${permittedCalls.length} commands (${summary})`;
   }
 }
 
