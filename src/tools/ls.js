@@ -7,7 +7,8 @@ const Tool = require('./tool.js');
 
 class LsTool extends Tool {
   name = 'ls';
-  description =  'List files and folders in a directory.';
+  description = 'List files and folders in a directory.';
+  ttl = 2;
   readonly =  true;
   parameters =  {
     type:  'object',

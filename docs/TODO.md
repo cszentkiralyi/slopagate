@@ -4,8 +4,6 @@
 
 - [ ] Update markdown parsing to ignore mid-word symbols, like `a_foo_thing` should
       just stay as it is
-- [ ] Get `tool_age` to pass tests & fix tool TTLs
-  - `ls` & `grep` clear earlier
 - [ ] Modes for `Interface`
   - [ ] Framework: default, triggers & alternate prompts, back-out
   - [ ] Shell
