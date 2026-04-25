@@ -34,6 +34,7 @@ class Text extends Component {
         padding: this.padding,
         align: !!this.align,
         fill: !!this.bg,
+        forceAlign: this.forceAlign,
         justify: this.justify
       }));
     });

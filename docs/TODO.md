@@ -15,6 +15,7 @@
   - [ ] Commands
 - [ ] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
+- [ ] ^C leads to NaN token measurements
 
 ## Backlog
 
