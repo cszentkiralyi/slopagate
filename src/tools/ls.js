@@ -42,4 +42,4 @@ class LsTool extends Tool {
   message(e) { return null; }
 }
 
-module.exports = (new LsTool({}));
+module.exports = LsTool;

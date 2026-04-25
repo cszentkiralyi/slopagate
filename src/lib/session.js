@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 
 const { ID } = require('../util.js');
+const Context = require('./context.js');
 
 class Session {
   #id;
@@ -9,11 +10,17 @@ class Session {
   #connection;
   #systemPrompt;
   #tempdir = null;
+  
+  #activeContext = null;
+  #masterContext = null;
 
   #abortController = null;
 
-  history = [];
   tools;
+  get history() { return this.#masterContext.messages; }
+  get messages() { return this.#activeContext.messages; }
+  set messages(m) { this.#activeContext.messages = m; }
+  get context() { return this.#activeContext; }
   get id() { return this.#id; }
   get model() { return this.#model; }
   get think() { return this.#think; }
@@ -27,12 +34,13 @@ class Session {
     this.#model = props.model;
     this.#think = props.think || false;
     this.#connection = props.connection;
+    this.#masterContext = this.#activeContext = new Context();
     this.tools = props.tools || [];
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
     
     if (props.systemPrompt) {
-      this.history.push({ role: 'system', content: props.systemPrompt });
+      this.#masterContext.system_prompt = props.system_prompt;
     }
   }
   
@@ -87,8 +95,18 @@ class Session {
   }
 
   async send(...outgoing) {
-    this.history.push(...outgoing);
-    return await this.send_internal(this.history);
+    if (this.#masterContext !== this.#activeContext)
+      this.#masterContext.messages.push(...outgoing);
+    this.#activeContext.messages.push(...outgoing);
+    
+    this.#activeContext = this.#activeContext.fork([
+      'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance'
+    ]);
+    
+    // TODO: take ownership of this result and add it to context,
+    // we already have the entire user half for god's sake
+
+    return await this.send_internal(this.#activeContext.messages);
   }
   
   

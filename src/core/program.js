@@ -185,10 +185,13 @@ class Program {
     fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
     let json = this.harness.session.serialize();
     fsSync.writeFileSync(path.join(sessionPath, this.harness.session.id + '.json'), json);
-    console.log(`\nEnding session ${this.harness.session.id}`);
     await this.harness.dispose();
     await this.interface.dispose();
-    process.exit(0);
+    // HACK: we can't await a draw
+    setTimeout(() => {
+      console.log(`\nEnding session ${this.harness.session.id}`);
+      process.exit(0);
+    }, (1000 / 60) * 2);
   }
 
 

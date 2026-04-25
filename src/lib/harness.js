@@ -1,6 +1,7 @@
 const ANSI = require('../lib/ansi.js');
 const Events = require('../events.js');
 const Session = require('./session.js');
+const Context = require('./context.js');
 const Toolbox = require('./toolbox.js');
 
 const { Logger } = require('../util.js');
@@ -30,7 +31,7 @@ class Harness {
     this.toolbox = new Toolbox([
       ReadTool,
       EditTool,
-      LsTool,
+      new LsTool({}),
       GrepTool
     ]);
     this.session = new Session(
@@ -81,9 +82,11 @@ class Harness {
     });
     
     if (message.content || message.tool_calls) {
-      this.session.history.push(message);
+      this.session.messages.push(message);
       if (done) this.#abortTarget = null;
       if (message.content) {
+        // TODO: remove me
+        this.session.messages.push(message);
         Events.emit('model:content', { done, content: message.content });
       }
       if (message.tool_calls) {
@@ -162,8 +165,8 @@ class Harness {
   }
   
   static estimteTokens(s) {
-    let len = ANSI.measure(s);
-    return Math.ceil(len / 3.5); // rough estimate: 3.5 char/tok
+    // TODO: temporary shim
+    return Context.estimateTokens(s);
   }
 }
 
