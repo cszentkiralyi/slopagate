@@ -5,17 +5,23 @@ const fs = require('node:fs/promises');
 
 const Tool = require('./tool.js');
 
-const LsTool = new Tool({
-  name: 'ls',
-  description: 'List files and folders in a directory.',
-  readonly: true,
-  parameters: {
-    type: 'object',
-    properties: {
-      directory: { type: 'string', default: '.' }
+class LsTool extends Tool {
+  name = 'ls';
+  description =  'List files and folders in a directory.';
+  readonly =  true;
+  parameters =  {
+    type:  'object',
+    properties:  {
+      directory:  { type: 'string', default: '.' }
     }
-  },
-  handler: async (args, tool) => {
+  };
+  
+  constructor(props) {
+    super(props);
+    Object.assign(this, props);
+  }
+
+  async handler(args, tool) {
     let { directory } = args;
     
     directory = directory || '.';
@@ -32,6 +38,8 @@ const LsTool = new Tool({
       return `Error: Cannot list ${directory}: ${err.message}`;
     }
   }
-});
 
-module.exports = LsTool;
+  message(e) { return null; }
+}
+
+module.exports = (new LsTool({}));

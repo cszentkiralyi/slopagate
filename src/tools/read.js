@@ -28,10 +28,7 @@ const ReadTool = new Tool({
   handler: async (args, tool) => {
     let { file_path, start_line, end_line } = args;
     
-    let content, message = '';
-    if (start_line || end_line)
-       message = ':' + [start_line, end_line].filter(l => l || '').join('-');
-    tool.message(`Reading ${file_path}${message}`);
+    let content;
     
     if (!start_line && !end_line) {
       try {
@@ -59,6 +56,19 @@ const ReadTool = new Tool({
     }
     
     return content;
+  },
+  
+  message: (calls) => {
+    if (calls.length == 1) {
+      let { file_path, start_line, end_line } = calls[0].args, message = '';
+      if (start_line || end_line)
+        message = ':' + [start_line, end_line].filter(l => l || '').join('-');
+      return `Reading ${file_path}${message}`;
+    }
+    let filenames = calls.map(c => c.file_path.split('/').slice(-1)),
+        fstr = filenames.join(', ');
+    if (fstr.length > 20) fstr = fstr.substring(0, 20) + '...';
+    return `Reading ${calls.length} files (${fstr})`;
   }
 });
 

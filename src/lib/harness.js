@@ -92,17 +92,20 @@ class Harness {
         //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
         
-        let toolPromises = [];
+        let toolPromises = [], eventsByName = {}, event;
         
         // Remove existing listener before adding new ones to avoid duplicates
         Events.off('tool:response', this.#handleToolResponse);
         
         for (let call of message.tool_calls) {
-          let id = call.id;
-          let name = call.function.name;
-          let args = call.function.arguments;
+          let id = call.id,
+              name = call.function.name,
+              args = call.function.arguments,
+              event = { id, name, args, temppath: this.session.temppath };
+          eventsByName[name] ||= [];
+          eventsByName[name].push(event);
           //Logger.log(`tool_call: ${JSON.stringify(call)}`);
-          Events.emit('tool:call', { id, name, args, temppath: this.session.temppath });
+          Events.emit('tool:call', event);
           
           // Create a promise that resolves when the corresponding tool:response event is received
           let toolPromise = new Promise((resolve, reject) => {
@@ -116,6 +119,14 @@ class Harness {
           });
           toolPromises.push(toolPromise);
         }
+        
+        Object.keys(eventsByName).map(name => {
+          let tool = this.toolbox.get(name), msg;
+          Logger.log(tool);
+          console.log(tool);
+          if (tool && (msg = tool.message(eventsByName[name])))
+            Events.emit('tool:message', { content: msg });
+        });
         
         let results = await Promise.all(toolPromises);
         results.forEach(msg => {

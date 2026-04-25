@@ -17,8 +17,6 @@ const GrepTool = new Tool({
     let { file_path, search_string } = args;
 
     try {
-      let s = JSON.stringify(search_string);
-      tool.message(`Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${file_path}`);
       const output = execSync(`grep -Fnd recurse ${JSON.stringify(search_string)} ${file_path}`);
       return output.toString().split('\n').slice(0, 20).join('\n');
     } catch (err) {
@@ -30,6 +28,15 @@ const GrepTool = new Tool({
       }
       return `Error: ${err.message}`;
     }
+  },
+  
+  message: (calls) => {
+    if (calls.length == 1) {
+      let { file_path, search_string } = calls[0].args,
+          s = JSON.stringify(search_string);
+      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${file_path}`;
+    }
+    return `Grep: searching ${(new Set(calls.map(c => c.args.file_path))).length} files`;
   }
 });
 

@@ -1,12 +1,15 @@
 const Events = require('../events.js');
+const { Logger } = require('../util.js');
 
 class Tool {
   name;
   description;
   readonly = false;
   parameters;
-  handler;
-  message;
+  // Uncommenting this blocks any subclasses from defining a message()
+  // method, which is absolute bullshit.
+  // handler;
+  // message; 
   
   get spec() {
     let func = {
@@ -34,6 +37,8 @@ class Tool {
   message(calls) {
     return null;
   }
+  
+  log(x) { Logger.log(`Tool:${this.name} ${x}`); }
 }
 
 module.exports = Tool;

@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
+const ANSI = require('../lib/ansi.js');
 const Tool = require('./tool.js');
 
 const EditTool = new Tool({
@@ -20,13 +21,9 @@ const EditTool = new Tool({
     let { file_path, old_str, new_str } = args;
     let temp_path = path.join(tool.temppath, 'edit');
 
-    let linesNeg = args.old_str.split('\n').length;
-    let linesPos = args.new_str.split('\n').length;
-
     try {
       await fs.copyFile(file_path, temp_path);
       let content = await fs.readFile(temp_path);
-      tool.message(`Editing ${args.file_path} (-${linesNeg} +${linesPos})`);
       if (content.includes(old_str)) {
         content = content.toString().replace(old_str, new_str);
         await fs.writeFile(temp_path, content);
@@ -40,7 +37,6 @@ const EditTool = new Tool({
       if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
       
       try {
-        tool.message(`Creating ${args.file_path} (+${linesPos})`);
         /* 2026-04-21
          * Let it be known that today, Qwen3.5 9B pointed out this wasn't
          * writing anything to the temp_path. It also silently fixed another
@@ -58,7 +54,23 @@ const EditTool = new Tool({
         return `Error: some or all of the path "${file_path}" doesn't exist!`;
       }
     }
+  },
+  
+  message(calls) {
+    let target, linesNeg, linesPos
+    if (calls.length == 1) {
+      target = calls[0].args.file_path;
+      linesNeg = calls[0].args.old_str.split('\n').length;
+      linesPos = calls[0].args.new_str.split('\n').length;
+      return `Editing ${calls[0].args.file_path} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
+    } else {
+      target = `${calls.length} files`;
+      linesNeg = calls.reduce((m, c) => m + c.args.old_str.split('\n').length, 0);
+      linesPos = calls.reduce((m, c) => m + c.args.new_str.split('\n').length, 0);
+    }
+    return `Editing ${target} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
   }
+
 });
 
 module.exports = EditTool;
