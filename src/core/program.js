@@ -12,7 +12,13 @@ const { Logger } = require('../util.js');
 
 class Program {
   static SPINNER_MESSAGES = [
-    'Autofilling...'
+    'Autofilling',
+    'Hallucinating',
+    'Reticulating splines',
+    'Checking with The Man',
+    'Sidequesting',
+    'Leaking API keys',
+    'Going rogue'
   ];
 
   config;
@@ -25,7 +31,7 @@ class Program {
   
   get spinnerMessage() {
     let idx = Math.floor(Math.random() * Program.SPINNER_MESSAGES.length);
-    return Program.SPINNER_MESSAGES[idx];
+    return Program.SPINNER_MESSAGES[idx] + '...';
   }
 
   constructor({ banner }) {
@@ -205,6 +211,8 @@ class Program {
   updateStatuslineTokens({ inputTokens, outputTokens }) {
     let txt = this.interface.statusline.right, s, pct;
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
+    //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
+    //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
     pct = `${(100 *(inputTokens + outputTokens) / this.config.contextWindow).toFixed(0)}%`;
     if (pct > 50) pct = ANSI.fg(pct, 3);
     if (pct > 70) pct = ANSI.fg(pct, 1);

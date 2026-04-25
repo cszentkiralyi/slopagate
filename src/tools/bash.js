@@ -19,7 +19,8 @@ class BashTool extends Tool {
   static SAFE_BASH_CMDS = [
     { pattern: 'npm run test', readonly: false },
     { pattern: 'git log *', readonly: true },
-    { pattern: 'node --test *', readonly: false }
+    { pattern: 'node --test *', readonly: false },
+    { pattern: 'exit *', readonly: true }
   ];
 
   constructor(props) {
@@ -54,8 +55,12 @@ class BashTool extends Tool {
             Logger.log(`BashTool: Command was killed, possibly due to OOM`);
           }
           resolve(`Error: ${error.message}`);
+        } else if (stderr) {
+          // Command ran but returned error output in stderr
+          Logger.log(`BashTool: Command "${command}" returned error: ${stderr.trim()}`);
+          resolve(stderr.trim());
         } else {
-          resolve(stdout.trim() + (stderr ? '\n' + stderr : ''));
+          resolve(stdout.trim());
         }
       });
     });
