@@ -80,7 +80,19 @@ class Context {
     return this;
   }
 
+  requestSummary(s) {
+    const prompt = `Summarize the following conversation in under 200 tokens. Keep all essential context and details.\n\n${this.messages.map(m => Context.toTranscript(m)).join('\n')}`;
+    return `Summarized: ${this.getModelResponse(prompt)}`;
+  }
+
   // requestSummary(s: string) => string
+  // requestSummary: callback to hit the LLM agent
+
+  // getResponse(s: string) => void
+  // Uses getModelResponse() to summarize the provided transcript
+  getResponse(s) {
+    return this.getModelResponse(s);
+  }
   
   #estimate({ system_prompt } = {}) {
     let diff;
