@@ -1,8 +1,11 @@
 const { Logger } = require('../../util.js');
 
 class Component {
-  root;
+  #root;
+  get root() { return this.#root; }
+  set root(r) { (r != this.#root) ? this.#root = r : null; }
   hidden;
+  name = 'Component';
   constructor(props) { Object.assign(this, props); }
   render(width) { return { lines: [], dirty: false, skip: 0 }; }
   focus() { if (this.root && this.root.giveFocus) this.root.giveFocus(this); }

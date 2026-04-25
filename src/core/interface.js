@@ -19,9 +19,9 @@ class Interface {
     Object.assign(this, props);
 
     this.#terminal = new TUI.Terminal({ gap: 1 });
-    this.#chat_history = new TUI.Container({ id: 'chat_history', gap: 1 });
-    this.#startup_messages = new TUI.Container();
-    this.#lower_panel = new TUI.Container();
+    this.#chat_history = new TUI.Container({ name: 'Container.chat_history', id: 'chat_history', gap: 1 });
+    this.#startup_messages = new TUI.Container({ name: 'Container.startup' });
+    this.#lower_panel = new TUI.Container({ name: 'Container.lower' });
     this.#statusline = new TUI.Statusline({
       spinner: new TUI.Spinner({
         id: 'global-spinner',

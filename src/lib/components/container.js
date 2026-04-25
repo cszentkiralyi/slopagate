@@ -3,13 +3,16 @@ const Component = require('./component.js');
 class Container extends Component {
   _lines = []; // cache
   children = [];
+  name = 'Container';
   #root = null;
   
   get root() { return this.#root; }
   set root(r) {
+    //this.log(`${this.name}: setting root (null? ${this.#root == null}) (new root? ${(r === this.#root)})`);
     if (r === this.#root) return;
     this.#root = r;
     if (this.children.length) {
+      //this.log(`${this.name}: recursively setting root on ${this.children.length} children`);
       this.children.forEach(c => c.root = r);
     }
   }
@@ -40,8 +43,16 @@ class Container extends Component {
     return { lines, dirty, skip };
   }
   
+  dispose() {
+    if (!this.children || !this.children.length) return;
+    this.children.forEach(c => c.dispose());
+  }
+  
   appendChild(c) {
+    //if (!this.root) this.log(`Missing root in ${this.name}!`);
+    //if (this.root === this) this.log(`${this.name}.root is this.`);
     c.root = this.root || this;
+    //this.log(`${this.name}: root is ours ${this.root === c.root}? us ${this === c.root}? Something else ${c.root != null}?`)
     c.depth = (this.depth || 0) + 1;
     this.children.push(c);
     return true;

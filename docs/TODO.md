@@ -2,7 +2,6 @@
 
 ## Priority
 
-- [ ] Spinner still has statusline as its root for some reason
 - [ ] Refactor
   - [ ] `Terminal` cursor movement belongs in `ANSI`
   - [ ] `Text.measure()` should be `ANSI.measure()`
@@ -29,6 +28,7 @@
         time a tool call starts and the model responds to its response, the tool
         should spin.
         Or maybe just until the tool response goes out?
+  - [ ] Replace `ls` with `glob` that uses `find` under the hood
 - [ ] Error handling
   - [ ] Tools
     - [x] Response

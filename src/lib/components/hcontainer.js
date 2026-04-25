@@ -2,6 +2,8 @@ const Component = require('./component.js');
 const Container = require('./container.js');
 
 class HContainer extends Container {
+  name = 'HContainer';
+
   render(width) {
     let lines = [], dirty = false, rem;
     if (this.children && this.children.length) {

@@ -5,10 +5,10 @@ const Text = require('./text.js');
 class Statusline extends HContainer {
   static BLANK = new Text('');
   
-
   dismissable;
   message;
   spinner;
+  name = 'Statusline';
   
   #left;
   #right;
@@ -19,7 +19,7 @@ class Statusline extends HContainer {
 
     Object.assign(this, props);
     
-    this.#left = new Container();
+    this.#left = new Container({ name: 'Container.statusline.left' });
     this.#right = new Text({ justify: 'right' });
     this.appendChild(this.#left);
     this.appendChild(this.#right);
