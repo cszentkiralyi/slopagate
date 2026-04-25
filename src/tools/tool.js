@@ -41,7 +41,8 @@ class Tool {
   }
   
   simplifyPath(p) {
-    return path.relative('.', p);
+    let simplified = path.relative('.', p);
+    return (simplified && simplified.length) ? simplified : '.';
   }
   
   log(x) { Logger.log(`Tool:${this.name} ${x}`); }

@@ -30,7 +30,9 @@ class BashTool extends Tool {
     super(props);
     Object.assign(this, props);
     
-    this.description += BashTool.SAFE_BASH_CMDS.map(c => c.pattern).join(', ');
+    let base_cmds = new Set();
+    BashTool.SAFE_BASH_CMDS.map(c => c.pattern.split(' ')[0]).forEach(c => base_cmds.add(c));
+    this.description += Array.from(base_cmds.values()).sort().join(', ');
   }
 
   permissionGate(command) {
