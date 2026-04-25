@@ -47,8 +47,8 @@ const tool_age = ({ messages, tools, limits }) => {
       continue;
     }
     
-    // Distance exceeds TTL, clear this tool result
-    msg.content = '[Old tool result content cleared]';
+    // Distance exceeds TTL, replace tool content with placeholder
+    msg.content = `[Old tool result content cleared for tool: ${msg.name}]`;
   }
   
   return { messages };

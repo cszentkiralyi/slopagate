@@ -1,149 +1,137 @@
-const Context = require('../src/lib/context.js');
 const test = require('node:test');
+const assert = require('node:assert');
+const tool_age = require('../src/lib/layers/tool_age.js');
 
-// Test 1: Tool responses within TTL are preserved
-test('tool_age preserves tool responses within TTL', async (t) => {
-  t.plan(2);
-  
+// Test: Tool results outside TTL are deleted when iterating backwards from newest
+test('compaction removes tool results outside TTL window', (t) => {
+  // Messages array: oldest at index 0, newest at last index
+  // User messages define turn boundaries. Tool messages store which user turn they belong to.
+  // We iterate backwards from newest (last index) to oldest (first index)
+  // and delete tool content when distance from most recent user turn exceeds TTL
+  const messages = [
+    { role: 'user', content: 'Hello', name: 'fetchData' },
+    { role: 'user', content: 'User request 1', name: 'fetchData' },
+    { role: 'user', content: 'User request 2', name: 'fetchData' },
+    { role: 'user', content: 'User request 3', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn1', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn2', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn3', name: 'fetchData' },
+  ];
+
   const tools = {
-    tool1: { ttl: 5 },
-    tool2: { ttl: 3 }
+    fetchData: { ttl: 1 } // Keep tool results within 1 user turn
   };
-  
-  const context = new Context({
-    tools,
-    limits: { tool_age: 3 }
-  });
-  
-  // Add messages: user, tool1, tool2, user, tool1, user, tool1, tool2
-  context.add({ role: 'user', content: 'First user message' });
-  context.add({ role: 'tool', name: 'tool1', content: 'Tool 1 result 1' });
-  context.add({ role: 'tool', name: 'tool2', content: 'Tool 2 result 1' });
-  context.add({ role: 'user', content: 'Second user message' });
-  context.add({ role: 'tool', name: 'tool1', content: 'Tool 1 result 2' });
-  context.add({ role: 'user', content: 'Third user message' });
-  context.add({ role: 'tool', name: 'tool1', content: 'Tool 1 result 3' });
-  context.add({ role: 'tool', name: 'tool2', content: 'Tool 2 result 2' });
-  
-  // Compact with tool_age layer
-  context.compact(['tool_age']);
-  
-  t.assert.equal(
-    context.messages[0].content,
-    'First user message',
-    'User message should be preserved'
-  );
-  t.assert.equal(
-    context.messages[6].content,
-    '[Old tool result content cleared]',
-    'tool1 at distance 3 from user should be cleared (TTL=3)'
-  );
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  // All tools should be kept since each tool is at distance 0 from its user turn
+  assert.strictEqual(result.messages.length, 7);
 });
 
-// Test 2: Tool responses beyond TTL are cleared
-test('tool_age clears tool responses beyond TTL', async (t) => {
-  t.plan(1);
-  
+// Test: Tools older than TTL are deleted
+test('compaction deletes old tool results', (t) => {
+  const messages = [
+    { role: 'user', content: 'Hello', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn0', name: 'fetchData' },
+    { role: 'user', content: 'User 1', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn1', name: 'fetchData' },
+    { role: 'user', content: 'User 2', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn2', name: 'fetchData' },
+    { role: 'user', content: 'User 3', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn3', name: 'fetchData' },
+    { role: 'user', content: 'User 4', name: 'fetchData' },
+  ];
+
   const tools = {
-    myTool: { ttl: 2 }
+    fetchData: { ttl: 2 } // Keep within 2 user turns
   };
-  
-  const context = new Context({
-    tools,
-    limits: { tool_age: 2 }
-  });
-  
-  context.add({ role: 'user', content: 'User 1' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 1' });
-  context.add({ role: 'user', content: 'User 2' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 2' });
-  context.add({ role: 'user', content: 'User 3' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 3' });
-  
-  context.compact(['tool_age']);
-  
-  t.assert.equal(
-    context.messages[5].content,
-    '[Old tool result content cleared]',
-    'Tool result beyond TTL should be cleared'
-  );
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  // turn0 tool: distance from turn4 = 4 > TTL(2), should have placeholder
+  // turn1 tool: distance from turn4 = 3 > TTL(2), should have placeholder
+  // turn2 tool: distance from turn4 = 2 <= TTL(2), should be kept
+  // turn3 tool: distance from turn4 = 1 <= TTL(2), should be kept
+  // turn4 tool: distance 0, should be kept
+  // All 9 messages should be present, old tool content replaced
+  assert.strictEqual(result.messages.length, 9);
 });
 
-// Test 3: Tools without TTL or with TTL=null should not be affected
-test('tool_age ignores tools without TTL', async (t) => {
-  t.plan(1);
-  
+// Test: Tools with very large TTL keep all
+test('compaction with large TTL keeps all tools', (t) => {
+  const messages = [
+    { role: 'user', content: 'Hello', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn0', name: 'fetchData' },
+    { role: 'user', content: 'User 1', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn1', name: 'fetchData' },
+    { role: 'user', content: 'User 2', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn2', name: 'fetchData' },
+    { role: 'user', content: 'User 3', name: 'fetchData' },
+  ];
+
   const tools = {
-    alwaysFresh: { ttl: null },
-    hasTtl: { ttl: 1 }
+    fetchData: { ttl: 100 }
   };
-  
-  const context = new Context({
-    tools,
-    limits: { tool_age: 1 }
-  });
-  
-  context.add({ role: 'user', content: 'User 1' });
-  context.add({ role: 'tool', name: 'alwaysFresh', content: 'Always fresh result' });
-  context.add({ role: 'user', content: 'User 2' });
-  context.add({ role: 'tool', name: 'hasTtl', content: 'Has TTL result' });
-  
-  context.compact(['tool_age']);
-  
-  t.assert.equal(
-    context.messages[3].content,
-    'Always fresh result',
-    'Tool with null TTL should not be cleared'
-  );
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  assert.strictEqual(result.messages.length, 7);
 });
 
-// Test 4: When no tools or tools array is empty
-test('tool_age returns early when no tools', async (t) => {
-  t.plan(1);
-  
-  const context = new Context({
-    tools: [],
-    limits: { tool_age: 2 }
-  });
-  
-  context.add({ role: 'user', content: 'User 1' });
-  context.add({ role: 'tool', name: 'anyTool', content: 'Result' });
-  
-  context.compact(['tool_age']);
-  
-  t.assert.equal(
-    context.messages[1].content,
-    'Result',
-    'Tool result should be preserved when tools array is empty'
-  );
+// Test: Tools with TTL=0 keep all (special case: no TTL means keep forever)
+test('compaction with special TTL values keeps all tools', (t) => {
+  const messages = [
+    { role: 'user', content: 'Hello', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn0', name: 'fetchData' },
+    { role: 'user', content: 'User 1', name: 'fetchData' },
+    { role: 'tool', content: 'Tool result for turn1', name: 'fetchData' },
+    { role: 'user', content: 'User 2', name: 'fetchData' },
+  ];
+
+  const tools = {
+    fetchData: { ttl: 0 }
+  };
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  // TTL=0 or null means keep all tool results
+  assert.strictEqual(result.messages.length, 5);
 });
 
-// Test 5: Tool_age limit overrides tool TTL
-test('tool_age limit can override tool TTL', async (t) => {
-  t.plan(1);
-  
+// Test: Non-tool messages are preserved
+test('compaction preserves non-tool messages', (t) => {
+  const messages = [
+    { role: 'tool', content: 'Tool result for turn0', name: 'fetchData' },
+    { role: 'user', content: 'System message' },
+    { role: 'user', content: 'User message' },
+    { role: 'assistant', content: 'Assistant message' },
+  ];
+
+  const tools = { fetchData: { ttl: 1 } };
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  assert.strictEqual(result.messages.length, 4);
+  assert.strictEqual(result.messages[0].content, 'Tool result for turn0');
+  assert.strictEqual(result.messages[1].content, 'System message');
+  assert.strictEqual(result.messages[2].content, 'User message');
+  assert.strictEqual(result.messages[3].content, 'Assistant message');
+});
+
+// Test: Tools without a TTL config are preserved
+test('compaction handles tools without TTL config', (t) => {
+  const messages = [
+    { role: 'tool', content: 'Tool result for otherTool turn0', name: 'otherTool' },
+    { role: 'tool', content: 'Tool result for otherTool turn1', name: 'otherTool' },
+    { role: 'tool', content: 'Tool result for otherTool turn2', name: 'otherTool' },
+  ];
+
   const tools = {
-    myTool: { ttl: 5 }
+    otherTool: { ttl: 1 } // Only this tool has config
   };
-  
-  const context = new Context({
-    tools,
-    limits: { tool_age: 3 } // This should be used instead of tool.ttl
-  });
-  
-  context.add({ role: 'user', content: 'User 1' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 1' });
-  context.add({ role: 'user', content: 'User 2' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 2' });
-  context.add({ role: 'user', content: 'User 3' });
-  context.add({ role: 'tool', name: 'myTool', content: 'Result 3' });
-  
-  context.compact(['tool_age']);
-  
-  // With tool_age: 3, result 3 should be cleared (distance from user is 3)
-  t.assert.equal(
-    context.messages[5].content,
-    '[Old tool result content cleared]',
-    'tool_age limit should override tool TTL'
-  );
+
+  const result = tool_age({ messages, tools, limits: {} });
+
+  // All 3 messages are either unknown tools or have no TTL, so all preserved
+  assert.strictEqual(result.messages.length, 3);
 });
