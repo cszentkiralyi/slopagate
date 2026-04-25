@@ -1,7 +1,7 @@
 const ANSI = require('./ansi.js');
 
 class Slopdown {
-  static INLINE_MARKUP_REGEX = /(\*\*\*|\*\*|\*|___|__|_|`)([^\1]+)\1/;
+  static INLINE_MARKUP_REGEX = /(?<![a-zA-Z0-9])(\*\*\*|\*\*|\*|___|__|_|`)([^\1]+)\1/;
   static CODE_FENCE_REGEX = /^(\s*)```.*/;
   static SYMBOL_TO_KIND = {
     '*': 'emphasis',
