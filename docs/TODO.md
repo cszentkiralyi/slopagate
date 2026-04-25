@@ -2,8 +2,6 @@
 
 ## Priority
 
-- [ ] Update markdown parsing to ignore mid-word symbols, like `a_foo_thing` should
-      just stay as it is
 - [ ] Modes for `Interface`
   - [ ] Framework: default, triggers & alternate prompts, back-out
   - [ ] Shell

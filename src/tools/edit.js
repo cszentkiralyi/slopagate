@@ -5,6 +5,9 @@ const ANSI = require('../lib/ansi.js');
 const Tool = require('./tool.js');
 
 class EditTool extends Tool {
+  static ADD_COLOR = 70;
+  static REM_COLOR = 160;
+
   name = 'edit';
   description = 'Make edits to a text file by replacing old_str with new_str in a file. The strings must differ. If a file doesn\'t exist it will be created.';
   parameters = {
@@ -68,13 +71,13 @@ class EditTool extends Tool {
       target = this.simplifyPath(calls[0].args.file_path);
       linesNeg = calls[0].args.old_str.split('\n').length;
       linesPos = calls[0].args.new_str.split('\n').length;
-      return `Editing ${calls[0].args.file_path} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
+      return `Editing ${calls[0].args.file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})`;
     } else {
       target = `${calls.length} files`;
       linesNeg = calls.reduce((m, c) => m + c.args.old_str.split('\n').length, 0);
       linesPos = calls.reduce((m, c) => m + c.args.new_str.split('\n').length, 0);
     }
-    return `Editing ${target} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
+    return `Editing ${target} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})`;
   }
 }
 
