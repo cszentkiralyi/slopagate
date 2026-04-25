@@ -86,8 +86,8 @@ class Terminal extends Container {
     
     //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
     //this.log(`Term: ${lines.slice(skip)}`)
-    output += Terminal.cursorUp(clearHeight - 1);
-    output += Terminal.eraseDown();
+    output += ANSI.cursorUp(clearHeight - 1);
+    output += ANSI.eraseDown();
     output += lines.slice(skip).join('\n');
     //this.log(`Term: end of draw`);
 
@@ -106,16 +106,6 @@ class Terminal extends Container {
       await this.#focused.key(k);
     }
     this.draw();
-  }
-  
-  static cursorUp(n) {
-    if (n == 0) return '\r';
-    // Move to the beginning of the line, then up n lines
-    return `\x1B[${n}F`;
-  }
-  static eraseDown() {
-    // 0 = cursor to end of screen, 1 = cursor to beginning, 2 = entire screen
-    return `\x1B[0J`;
   }
   
 }

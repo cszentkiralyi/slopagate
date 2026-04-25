@@ -75,11 +75,11 @@ class Text extends Component {
         currentLine = '', alignStr = '', currentLen = 0,
         rem, m;
     let finishLine = () => {
-      //Logger.log(`Text: (${fill}, ${width}, ${width - Text.measure(currentLine)}, ${Text.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
+      //Logger.log(`Text: (${fill}, ${width}, ${width - ANSI.measure(currentLine)}, ${ANSI.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
       currentLine += rightPadStr;
-      if (fill && (rem = Math.abs((width - Text.measure(currentLine)) % width)) > 0) {
+      if (fill && (rem = Math.abs((width - ANSI.measure(currentLine)) % width)) > 0) {
         currentLine += ' '.repeat(rem);
-      } else if (justify === 'right' && (rem = Math.abs((width - Text.measure(currentLine)) % width))) {
+      } else if (justify === 'right' && (rem = Math.abs((width - ANSI.measure(currentLine)) % width))) {
         currentLine = ' '.repeat(rem) + currentLine;
       }
       lines.push(currentLine);
@@ -91,18 +91,18 @@ class Text extends Component {
       } else {
         alignStr = '';
         if (indent && (m = line.match(Text.LEADING_WHITESPACE_REGEX))) {
-          alignStr += ' '.repeat(Text.measure(m[1]));
+          alignStr += ' '.repeat(ANSI.measure(m[1]));
           //Logger.log(`Text: indent detected ${JSON.stringify(alignStr)}`);
         }
         if ((forceAlign && (m = line.match(Text.LIST_ITEM_REGEX)))
             || (align && (m = line.match(Text.LIST_ITEM_REGEX_STRICT)))) {
-          alignStr += ' '.repeat(Text.measure(m[1]));
+          alignStr += ' '.repeat(ANSI.measure(m[1]));
           //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
         }
         currentLine += leftPadStr;
         currentLen = currentLine.length
         line.split(' ').forEach((word, idx) => {
-          let len = Text.measure(word);
+          let len = ANSI.measure(word);
           if (currentLen + len + 1 + rightPad <= width) {
             if (idx) {
               currentLine += ' ';
@@ -117,7 +117,7 @@ class Text extends Component {
             currentLine += word;
           }
         });
-        if (Text.measure(currentLine)) finishLine();
+        if (ANSI.measure(currentLine)) finishLine();
       }
     });
     

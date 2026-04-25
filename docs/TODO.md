@@ -2,9 +2,6 @@
 
 ## Priority
 
-- [ ] Refactor
-  - [ ] `Terminal` cursor movement belongs in `ANSI`
-  - [ ] `Text.measure()` should be `ANSI.measure()`
 - [ ] Commands & modes for `Interface`
 - [ ] Improve token estimation/tracking
 

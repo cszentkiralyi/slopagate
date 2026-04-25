@@ -1,7 +1,7 @@
+const ANSI = require('../lib/ansi.js');
 const Events = require('../events.js');
 const Session = require('./session.js');
 const Toolbox = require('./toolbox.js');
-const Text = require('./components/text.js');
 
 const { Logger } = require('../util.js');
 
@@ -153,7 +153,7 @@ class Harness {
   }
   
   static estimteTokens(s) {
-    let len = Text.measure(s);
+    let len = ANSI.measure(s);
     return Math.ceil(len / 3.5); // rough estimate: 3.5 char/tok
   }
 }

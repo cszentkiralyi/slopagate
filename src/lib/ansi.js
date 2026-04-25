@@ -68,11 +68,25 @@ class ANSI {
   static showCursor() {
     console.log(`\x1B[?25h`);
   }
+  
+  static cursorUp(n) {
+    if (n == 0) return '\r';
+    // Move to the beginning of the line, then up n lines
+    return `\x1B[${n}F`;
+  }
+  static eraseDown() {
+    // 0 = cursor to end of screen, 1 = cursor to beginning, 2 = entire screen
+    return `\x1B[0J`;
+  }
 
   static esc(s, esc) {
     if (!s || !esc) return s;
     let reset = ANSI.RESET_ESCAPE + esc;
     return `${esc}${s.replaceAll(ANSI.RESET_ESCAPE, reset)}${ANSI.RESET_ESCAPE}`;
+  }
+  
+  static measure(s) {
+    return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Za-z]/g, '').length;
   }
 }
 
