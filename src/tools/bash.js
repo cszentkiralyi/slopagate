@@ -5,7 +5,7 @@ const Tool = require('./tool.js');
 class BashTool extends Tool {
   name = 'bash';
   description = 'Execute shell commands.';
-  readonly = true;
+  readonly = false;
   parameters = {
     type: 'object',
     properties: {
@@ -15,8 +15,9 @@ class BashTool extends Tool {
   };
 
   static SAFE_BASH_CMDS = [
-    { pattern: 'npm run test', isGlob: false },
-    { pattern: 'git log *', isGlob: true }
+    { pattern: 'npm run test', readonly: false },
+    { pattern: 'git log *', readonly: true },
+    { pattern: 'node --test *', readonly: false }
   ];
 
   constructor(props) {
@@ -25,9 +26,10 @@ class BashTool extends Tool {
   }
 
   permissionGate(command) {
-    return BashTool.SAFE_BASH_CMDS.some(({ pattern, isGlob }) => {
-      if (isGlob) {
-        return command.startsWith(pattern.replace(/\*/g, ''));
+    return BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
+      if (this.readonly && !readonly) return false;
+      if (pattern.endsWith('*')) {
+        return command.startsWith(pattern.substring(0, pattern.length - 1));
       }
       return command === pattern;
     });
