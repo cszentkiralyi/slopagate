@@ -63,7 +63,7 @@ class TextInput extends Component {
       {
         padding,
         indent: true,
-        align: true,
+        forceAlign: this.prompt && this.prompt.length,
         fill: !!bg
       }
     );

@@ -207,6 +207,7 @@ class Program {
     if (pct > 50) pct = ANSI.fg(pct, 3);
     if (pct > 70) pct = ANSI.fg(pct, 1);
     s += ` │ ${pct}`
+    txt.padding ||= { right: 1 };
     txt.content = s;
   }
   
@@ -222,11 +223,13 @@ class Program {
   }
   
   async thinkCommand(bstr) {
+    Logger.log(`thinkCommand "${JSON.stringify(bstr)}`);
     if (!bstr || !bstr.length) {
       this.config.think = !this.config.think;
     } else {
       this.config.think = (bstr === 'true' || bstr === 'on');
     }
+    this.session.setConfig('think', this.config.think);
     let msg = {
       content: `Thinking ${this.config.think ? 'enabled' : 'disabled'}.`,
       fg: 'gray'

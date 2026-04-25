@@ -7,7 +7,7 @@ class Session {
   #id;
   #config;
   #model;
-  #think;
+
   #connection;
   #systemPrompt;
   #tempdir = null;
@@ -24,7 +24,7 @@ class Session {
   get context() { return this.#activeContext; }
   get id() { return this.#id; }
   get model() { return this.#model; }
-  get think() { return this.#think; }
+  get think() { return this.#config.think; }
   get connection() { return this.#connection; }
   get systemPrompt() { return this.#systemPrompt; }
   get tempdir() { return this.#tempdir; }
@@ -34,8 +34,9 @@ class Session {
     this.#id = props.id || ID();
     this.#config = props.config || {};
     this.#model = props.model;
-    this.#think = props.think || false;
+
     this.#connection = props.connection;
+    this.tools = props.tools || [];
     this.#masterContext = this.#activeContext = new Context({
       tools: this.tools.reduce((m, t) => {
         m[t.name] = { name: t.name, ttl: t.ttl };
@@ -49,12 +50,27 @@ class Session {
         generation: 2000
       }
     });
-    this.tools = props.tools || [];
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
     
     if (props.systemPrompt) {
       this.#masterContext.system_prompt = props.system_prompt;
+    }
+  }
+
+  setConfig(k, v) {
+    if (typeof this.#config === 'Map') {
+      this.#config.set(k, v);
+    } else {
+      this.#config[k] = v;
+    }
+  }
+
+  getConfig(k) {
+    if (typeof this.#config === 'Map') {
+      return this.#config.get(k);
+    } else {
+      return this.#config[k];
     }
   }
   
@@ -82,8 +98,8 @@ class Session {
   async send_internal(messages)  {
     let payload = {
       model: this.model,
-      think: false, // TODO
-      stream: false, // TODO
+      think: (this.#config.think || false),
+      stream: (this.#config.stream || false),
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj;
