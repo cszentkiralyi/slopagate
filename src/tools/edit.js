@@ -4,10 +4,10 @@ const path = require('node:path');
 const ANSI = require('../lib/ansi.js');
 const Tool = require('./tool.js');
 
-const EditTool = new Tool({
-  name: 'edit',
-  description: 'Make edits to a text file by replacing old_str with new_str in a file. The strings must differ. If a file doesn\'t exist it will be created.',
-  parameters: {
+class EditTool extends Tool {
+  name = 'edit';
+  description = 'Make edits to a text file by replacing old_str with new_str in a file. The strings must differ. If a file doesn\'t exist it will be created.';
+  parameters = {
     type: 'object',
     properties: {
       file_path: { type: 'string' },
@@ -15,9 +15,15 @@ const EditTool = new Tool({
       new_str: { type: 'string' }
     },
     required: [ 'file_path', 'old_str', 'new_str' ]
-  },
+  };
   
-  handler: async (args, tool) => {
+  constructor(props) {
+    super(props);
+    this.handler = this.handler;
+    Object.assign(this, props);
+  }
+
+  async handler(args, tool) {
     let { file_path, old_str, new_str } = args;
     let temp_path = path.join(tool.temppath, 'edit');
 
@@ -54,12 +60,12 @@ const EditTool = new Tool({
         return `Error: some or all of the path "${file_path}" doesn't exist!`;
       }
     }
-  },
+  }
   
   message(calls) {
     let target, linesNeg, linesPos
     if (calls.length == 1) {
-      target = calls[0].args.file_path;
+      target = this.simplifyPath(calls[0].args.file_path);
       linesNeg = calls[0].args.old_str.split('\n').length;
       linesPos = calls[0].args.new_str.split('\n').length;
       return `Editing ${calls[0].args.file_path} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
@@ -70,7 +76,6 @@ const EditTool = new Tool({
     }
     return `Editing ${target} (${ANSI.fg('-' + linesNeg, 160)} ${ANSI.fg('+' + linesPos, 70)})`;
   }
-
-});
+}
 
 module.exports = EditTool;

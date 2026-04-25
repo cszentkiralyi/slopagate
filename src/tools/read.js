@@ -12,11 +12,11 @@ const addLineNumbers = (lines, start) => {
   return output;
 }
 
-const ReadTool = new Tool({
-  name: 'read',
-  description: 'Read a text file, either all at once or limited to a line range.',
-  readonly: true,
-  parameters: {
+class ReadTool extends Tool {
+  name = 'read';
+  description = 'Read a text file, either all at once or limited to a line range.';
+  readonly = true;
+  parameters = {
     type: 'object',
     properties: {
       file_path: { type: 'string '},
@@ -24,8 +24,15 @@ const ReadTool = new Tool({
       end_line: { type: 'integer '}
     },
     required: [ 'file_path' ]
-  },
-  handler: async (args, tool) => {
+  };
+  
+  constructor(props) {
+    super(props);
+    this.handler = this.handler;
+    Object.assign(this, props);
+  }
+
+  async handler(args, tool) {
     let { file_path, start_line, end_line } = args;
     
     let content;
@@ -43,20 +50,20 @@ const ReadTool = new Tool({
     } catch (err) {
       content = `Error: file ${file_path} not found!`;
     }
-  },
+  }
   
-  message: (calls) => {
+  message(calls) {
     if (calls.length == 1) {
       let { file_path, start_line, end_line } = calls[0].args, message = '';
       if (start_line || end_line)
         message = ':' + [start_line, end_line].filter(l => l || '').join('-');
-      return `Reading ${file_path}${message}`;
+      return `Reading ${this.simplifyPath(file_path)}${message}`;
     }
     let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
         fstr = filenames.join(', ');
     if (fstr.length > 20) fstr = fstr.substring(0, 20) + '...';
     return `Reading ${calls.length} files (${fstr})`;
   }
-});
+}
 
 module.exports = ReadTool;

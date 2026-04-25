@@ -2,18 +2,25 @@ const { execSync } = require('node:child_process');
 
 const Tool = require('./tool.js');
 
-const GrepTool = new Tool({
-  name: 'grep',
-  description: 'Search for a pattern in a file and return matching lines.',
-  parameters: {
+class GrepTool extends Tool {
+  name = 'grep';
+  description = 'Search for a pattern in a file and return matching lines.';
+  parameters = {
     type: 'object',
     properties: {
       file_path: { type: 'string' },
       search_string: { type: 'string' }
     },
     required: [ 'file_path', 'search_string' ]
-  },
-  handler: async (args, tool) => {
+  };
+  
+  constructor(props) {
+    super(props);
+    this.handler = this.handler;
+    Object.assign(this, props);
+  }
+
+  async handler(args, tool) {
     let { file_path, search_string } = args;
 
     try {
@@ -28,16 +35,21 @@ const GrepTool = new Tool({
       }
       return `Error: ${err.message}`;
     }
-  },
+  }
   
-  message: (calls) => {
+  message(calls) {
     if (calls.length == 1) {
       let { file_path, search_string } = calls[0].args,
           s = JSON.stringify(search_string);
-      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${file_path}`;
+      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path)}`;
     }
-    return `Grep: searching ${(new Set(calls.map(c => c.args.file_path))).length} files`;
+    let paths = new Set(), patterns = new Set();
+    calls.forEach(c => {
+      paths.add(c.file_path);
+      patterns.add(c.search_string);
+    })
+    return `Grep: searching ${paths.size} files for ${patterns.size} patterns`;
   }
-});
+}
 
 module.exports = GrepTool;

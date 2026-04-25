@@ -30,11 +30,11 @@ class Harness {
     Events.on('tool_calls:response', (event) => this.onToolsResponse(event));
     
     this.toolbox = new Toolbox([
-      ReadTool,
-      EditTool,
-      new LsTool({}),
-      GrepTool,
-      new BashTool({})
+      new ReadTool(),
+      new EditTool(),
+      new LsTool(),
+      new GrepTool(),
+      new BashTool()
     ]);
     this.session = new Session({
       tools: this.toolbox.all(),

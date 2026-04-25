@@ -42,7 +42,7 @@ class LsTool extends Tool {
   message(calls) {
     if (calls.length == 1) {
       let { directory } = calls[0].args;
-      return `Listing ${directory}`;
+      return `Listing ${this.simplifyPath(directory)}`;
     }
     let dirnames = calls.map(c => c.args.directory.split('/').slice(-1)),
         dstr = dirnames.join(', ');
