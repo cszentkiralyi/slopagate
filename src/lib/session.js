@@ -5,6 +5,7 @@ const Context = require('./context.js');
 
 class Session {
   #id;
+  #config;
   #model;
   #think;
   #connection;
@@ -31,10 +32,23 @@ class Session {
   
   constructor(props) {
     this.#id = props.id || ID();
+    this.#config = props.config || {};
     this.#model = props.model;
     this.#think = props.think || false;
     this.#connection = props.connection;
-    this.#masterContext = this.#activeContext = new Context();
+    this.#masterContext = this.#activeContext = new Context({
+      tools: this.tools.reduce((m, t) => {
+        m[t.name] = { name: t.name, ttl: t.ttl };
+        return m;
+      }, {}),
+      limits: {
+        window: this.#config.context_window_length,
+        tool_age: 5
+      },
+      budgets: {
+        generation: 2000
+      }
+    });
     this.tools = props.tools || [];
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');

@@ -8,22 +8,32 @@ class Context {
   limits = {};
   budgets = {};
   system_prompt;
+  tools;
   messages = [];
   
-  get estimated_tokens() { return this.#estimated_tokens; }
+  get estimated_tokens() {
+    return this.#estimated_tokens;
+  }
   
   constructor(props) {
     Object.assign(this, props);
+    
+    if (this.messages && this.messages.length) {
+      let s = this.messages.map(m => Context.toTranscript(m)).join('\n');
+      this.#estimated_tokens = Context.estimateTokens(s);
+      this.#estimated_tokens += this.budgets.generation || 0;
+    }
   }
   
   add(message) {
     this.messages.push(message);
-    this.#estimated_tokens += Context.estimteTokens(Context.toTranscript(message));
+    this.#estimated_tokens += Context.estimateTokens(Context.toTranscript(message));
   }
   
   fork({ system_prompt, layers }) {
     let f = new Context({
       system_prompt: system_prompt || this.system_prompt, 
+      tools: { ...this.tools },
       limits: { ...this.limits },
       budgets: { ...this.budgets },
       messages: this.messages.map(m => { return { ...m }; }),
@@ -39,6 +49,7 @@ class Context {
     let arg = {
       messages: this.messages,
       system_prompt: this.system_prompt,
+      tools: this.tools, // TODO: feed tool names, ttls
       limits: this.limits,
       budgets: this.budgets,
       estimated_tokens: this.estimated_tokens,
@@ -69,6 +80,7 @@ class Context {
   
   
   static COMPACT_LAYERS = {
+
     'system_prompt': ({ messages, system_prompt, limits, estimated_tokens }) => {
       if (!system_prompt || !system_prompt.length
           || !limits || !limits.system_prompt
@@ -78,16 +90,27 @@ class Context {
           prompt = system_prompt.split('\n'),
           lines = [];
           i;
-      for (i = 0; i < lines.length && budget > 0; i++) {
-        lines.push(lines[i]);
-        budget -= this.estimateTokens(lines[i]);
+      for (i = 0; i < prompt.length && budget > 0; i++) {
+        lines.push(prompt[i]);
+        budget -= Context.estimateTokens(prompt[i]);
       }
       // We currently allow overshooting if there's no newline.
       return { system_prompt: lines.join('\n') };
     },
 
-    'tool_age': ({ messages }) => {
-      return { messages };
+    'tool_age': ({ messages, tools }) => {
+      if (!tools || !tools.length || !tools.some(t => t.ttl))
+        return;
+      let len = messages.length, msg, i, tool, ttl;
+      for (i = 0; i < len;) {
+        msg = messages[len - i - 1];
+        if (msg.role === 'user') i++;
+        ttl = this.limits.tool_age;
+        if (msg.role === 'tool' && (tool = tools[msg.name])
+            && (ttl = (ttl || tool.ttl)) && ttl < i) {
+          msg.content = '[Old tool result content cleared]';
+        }
+      }
     },
 
     'tool_length': ({ messages }) => {
@@ -104,7 +127,8 @@ class Context {
 
     'chat_summary': ({ messages }) => {
       return { messages };
-    },
+    }
+
   };
 }
 

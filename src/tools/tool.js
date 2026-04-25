@@ -5,6 +5,7 @@ class Tool {
   name;
   description;
   readonly = false;
+  ttl = 5
   parameters;
   // Uncommenting this blocks any subclasses from defining a message()
   // method, which is absolute bullshit.
