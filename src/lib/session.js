@@ -15,7 +15,7 @@ class Session {
   #activeContext = null;
   #masterContext = null;
 
-  #abortController = null;
+  #abortControllers = null;
 
   tools;
   get history() { return this.#masterContext.messages; }
@@ -78,7 +78,9 @@ class Session {
     this.removeTempDir();
   }
   abort() {
-    if (this.#abortController) this.#abortController.abort();
+    if (this.#abortControllers && this.#abortControllers.length)
+      this.#abortControllers.forEach(c => c.abort());
+    this.#abortControllers = null;
   }
   
   async ensureTempDir() {
@@ -102,16 +104,18 @@ class Session {
       stream: (this.#config.stream || false),
       messages: messages,
       tools: this.tools.map(t => t.spec)
-    }, responseObj;
+    }, responseObj, controller;
     
-    this.#abortController = new AbortController();
+    controller = new AbortController();
+    this.#abortControllers ||= [];
+    this.#abortControllers.push(controller);
     
     try {
       let response = await fetch(this.connection, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: this.#abortController.signal
+        signal: controller.signal
       });
       responseObj = JSON.parse(await response.text());
     } catch (err) {
@@ -119,7 +123,11 @@ class Session {
         responseObj = { role: 'assistant', message: { } };
       }
     } finally {
-      this.#abortController = null;
+      let idx;
+      if (this.#abortControllers
+          && -1 < (idx = this.#abortControllers.indexOf(controller))) {
+        this.#abortControllers.splice(idx, 1);
+      }
       return responseObj;
     }
   }
