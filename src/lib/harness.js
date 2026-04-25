@@ -34,11 +34,10 @@ class Harness {
       new LsTool({}),
       GrepTool
     ]);
-    this.session = new Session(
-      Object.assign(
-        { tools: this.toolbox.all() },
-        (props && props.session || null))
-    );
+    this.session = new Session({
+      tools: this.toolbox.all(),
+      ...(props && props.session || null)
+    });
     this.session.ensureTempDir().then(_ => {
       Events.emit('harness:ready');
     });

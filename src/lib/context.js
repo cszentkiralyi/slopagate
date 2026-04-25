@@ -3,31 +3,41 @@ const ANSI = require('./ansi.js');
 class Context {
   static FORCE_COMPACT_RATIO = 0.70;
 
-  #estimated_tokens = 0;
+  #tokens_up = 0
+  #tokens_down = 0;
+  #other_tokens = 0;
+  #system_prompt = null;
   
   limits = {};
   budgets = {};
-  system_prompt;
   tools;
   messages = [];
   
-  get estimated_tokens() {
-    return this.#estimated_tokens;
+  get tokens_up() { return this.#tokens_up; }
+  get tokens_down() { return this.#tokens_down; }
+  get other_tokens() { return this.#other_tokens; }
+  get estimated_tokens() { return this.tokens_up + this.tokens_down + this.other_tokens }
+  
+  get system_prompt() { return this.#system_prompt; }
+  set system_prompt(sp) {
+    this.#estimate({ system_prompt: sp });
+    this.#system_prompt = sp;
   }
   
   constructor(props) {
     Object.assign(this, props);
     
-    if (this.messages && this.messages.length) {
-      let s = this.messages.map(m => Context.toTranscript(m)).join('\n');
-      this.#estimated_tokens = Context.estimateTokens(s);
-      this.#estimated_tokens += this.budgets.generation || 0;
-    }
+    this.#estimate();
   }
   
   add(message) {
     this.messages.push(message);
-    this.#estimated_tokens += Context.estimateTokens(Context.toTranscript(message));
+    let tok = Context.estimateTokens(Context.toTranscript(message));
+    if (m.role === 'assistant') {
+      this.#tokens_down += tok;
+    } else {
+      this.#tokens_up += tok;
+    }
   }
   
   fork({ system_prompt, layers }) {
@@ -64,10 +74,33 @@ class Context {
     this.messages = arg.messages || this.messages;
     this.system_prompt = arg.system_prompt || this.system_prompt;
     
+    this.#estimate();
+    
     return this;
   }
 
   // requestSummary(s: string) => string
+  
+  #estimate({ system_prompt } = {}) {
+    let diff;
+    this.#other_tokens = this.system_prompt ? Context.estimateTokens(this.system_prompt) : 0;
+    if (system_prompt
+        && (diff = Context.estimateTokens(system_prompt) - this.#other_tokens)) {
+      this.#other_tokens += diff;
+    } else {
+      let tok
+      this.#tokens_up = 0;
+      this.#tokens_down = 0;
+      this.messages.forEach(m => {
+        tok = Context.estimateTokens(Context.toTranscript(m));
+        if (m.role === 'assistant') {
+          this.#tokens_down += tok;
+        } else {
+          this.#tokens_up += tok;
+        }
+      });
+    }
+  }
   
   static toTranscript(m) {
     return `${m.role}: ${m.content}`;

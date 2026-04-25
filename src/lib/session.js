@@ -1,6 +1,6 @@
 const fs = require('node:fs/promises');
 
-const { ID } = require('../util.js');
+const { ID, Logger } = require('../util.js');
 const Context = require('./context.js');
 
 class Session {
@@ -48,13 +48,13 @@ class Session {
       },
       budgets: {
         generation: 2000
-      }
+      },
     });
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
     
     if (props.systemPrompt) {
-      this.#masterContext.system_prompt = props.system_prompt;
+      this.#masterContext.system_prompt = props.systemPrompt;
     }
   }
 
@@ -135,8 +135,11 @@ class Session {
     
     // TODO: take ownership of this result and add it to context,
     // we already have the entire user half for god's sake
-
-    return await this.send_internal(this.#activeContext.messages);
+    
+    return await this.send_internal([
+      { role: 'system', content: this.#activeContext.system_prompt },
+      ...this.#activeContext.messages
+    ]);
   }
   
   
