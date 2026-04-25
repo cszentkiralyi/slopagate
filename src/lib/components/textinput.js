@@ -6,8 +6,11 @@ class TextInput extends Component {
   static KEYS = {
     CR: 13,
     BS: 127,
+    DEL: '\x1B[3~',
     UP: '\x1B[A',
-    DOWN: '\x1B[B'
+    DOWN: '\x1B[B',
+    RIGHT: '\x1B[C',
+    LEFT: '\x1B[D'
   };
 
   #value = '';
@@ -87,7 +90,7 @@ class TextInput extends Component {
         [laters, later] = this.#makeLater();
     if (this.onKey) await this.onKey(k, later, this);
     if (this.#caret > len) this.#caret = len;
-    if (char === 13 && k.length === 1) { // cr
+    if (char === TextInput.KEYS.CR && k.length == 1) { // cr
       this.#historyIdx++;
       this.#history.push(this.#value);
       await this.onInput(this.#value, this);
@@ -100,13 +103,21 @@ class TextInput extends Component {
           + this.#value.substring(this.#caret);
       }
       this.#caret--;
-    } else if (k === '\x1b[A') {  // up
+    } else if (k ===TextInput.KEYS.DEL) { // del
+      if (len == 0) return;
+      if (this.#caret == len) {
+        this.#value = this.#value.substring(0, len);
+      } else {
+        this.#value = this.#value.substring(0, this.#caret)
+          + this.#value.substring(this.#caret + 1);
+      }
+    } else if (k ===TextInput.KEYS.UP) {  // up
       if (this.#historyIdx > 0) {
         this.#historyIdx--;
         this.#value = this.getHistory(this.#historyIdx);
         this.#caret = this.#value.length;
       }
-    } else if (k === '\x1b[B') { // down
+    } else if (k ===TextInput.KEYS.DOWN) { // down
       if (this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx++;
         this.#value = this.getHistory(this.#historyIdx);
@@ -114,9 +125,9 @@ class TextInput extends Component {
         this.#value = '';
       }
       this.#caret = this.#value.length;
-    } else if (k === '\x1b[C') { // right
+    } else if (k ===TextInput.KEYS.RIGHT) { // right
       if (this.#caret < len) this.#caret++;
-    } else if (k === '\x1b[D') { // left
+    } else if (k ===TextInput.KEYS.LEFT) { // left
       if (this.#caret > 0) this.#caret--;
     } else if (char === 1) { // ^A (maybe home? not sure)
       this.#caret = 0;
@@ -142,10 +153,12 @@ class TextInput extends Component {
           + this.#value.substring(this.#caret);
       }
       this.#caret++;
-    }/*else {
+    }
+    /*
+    else {
       this.log(`key: ${JSON.stringify({ k, char, len })}`);
     }
-    */
+    //*/
    
     if (laters.length) await laters.run();
   }
