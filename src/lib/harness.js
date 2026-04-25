@@ -122,8 +122,6 @@ class Harness {
         
         Object.keys(eventsByName).map(name => {
           let tool = this.toolbox.get(name), msg;
-          Logger.log(tool);
-          console.log(tool);
           if (tool && (msg = tool.message(eventsByName[name])))
             Events.emit('tool:message', { content: msg });
         });
