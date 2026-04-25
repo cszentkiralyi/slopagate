@@ -53,6 +53,11 @@ class Harness {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
     this.#abortTarget = this.session;
+    // Update statusline tokens when message is actually sent
+    Events.emit('metrics:tokens', {
+      inputTokens: this.#inputTokens,
+      outputTokens: this.#outputTokens
+    });
     let response = await this.session.send(message);
     Events.emit('model:response', { response });
   }
