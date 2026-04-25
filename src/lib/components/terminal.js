@@ -27,13 +27,13 @@ class Terminal extends Container {
     process.stdin.setEncoding('utf-8');
     process.stdin.setRawMode(true);
 
-    ANSI.hideCursor();
+    console.log(ANSI.hideCursor());
 
     process.stdin.on('data', async (k) => await this.key(k));
     process.stdin.on('resize', () => this.draw());
   }
   async dispose() {
-    ANSI.showCursor();
+    console.log(ANSI.showCursor());
     process.stdin.setRawMode(this.#was_raw);
   }
   

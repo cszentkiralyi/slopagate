@@ -36,7 +36,6 @@ class ANSI {
     let code = this.resolveColor(color);
     if (!code) return text;
     return ANSI.esc(text, ANSI.fgEsc(code));
-    return `${ANSI.fgEsc(code)}${text}${this.RESET_ESCAPE}`;
   }
   static bg(text, color) {
     let code = this.resolveColor(color);
@@ -63,10 +62,10 @@ class ANSI {
   }
   
   static hideCursor() {
-    console.log(`\x1B[?25l`);
+    return `\x1B[?25l`;
   }
   static showCursor() {
-    console.log(`\x1B[?25h`);
+    return `\x1B[?25h`;
   }
   
   static cursorUp(n) {
@@ -86,7 +85,11 @@ class ANSI {
   }
   
   static measure(s) {
-    return (s || '').replaceAll(/(\x1B|\u001b)\[([0-9;:]*)+[A-Za-z]/g, '').length;
+    if (!s) return 0;
+    let stripped = s.replaceAll(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+    // Replace multi-byte Unicode characters (emojis, etc.) with _M
+    let normalized = stripped.replaceAll(/[\u{1F300}-\u{1F9FF}]/gu, '_M');
+    return normalized.length;
   }
 }
 
