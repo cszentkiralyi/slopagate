@@ -10,6 +10,7 @@ const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
 const LsTool = require('../tools/ls.js');
 const GrepTool = require('../tools/grep.js');
+const BashTool = require('../tools/bash.js');
 
 class Harness {
   #abortTarget = null;
@@ -32,7 +33,8 @@ class Harness {
       ReadTool,
       EditTool,
       new LsTool({}),
-      GrepTool
+      GrepTool,
+      new BashTool({})
     ]);
     this.session = new Session({
       tools: this.toolbox.all(),
