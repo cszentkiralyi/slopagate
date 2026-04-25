@@ -53,7 +53,16 @@ class BashTool extends Tool {
     });
   }
 
-  message(e) { return null; }
+  message(calls) {
+    if (calls.length == 1) {
+      let { command } = calls[0].args;
+      return `Executing ${command}`;
+    }
+    let summaries = calls.map(c => c.args.command.split(' ')[0]),
+        summary = summaries.join(' ');
+    if (summary.length > 20) summary = summary.substring(0, 20) + '...';
+    return `Executing ${calls.length} commands (${summary})`;
+  }
 }
 
 module.exports = BashTool;

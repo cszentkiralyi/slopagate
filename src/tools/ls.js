@@ -39,7 +39,16 @@ class LsTool extends Tool {
     }
   }
 
-  message(e) { return null; }
+  message(calls) {
+    if (calls.length == 1) {
+      let { directory } = calls[0].args;
+      return `Listing ${directory}`;
+    }
+    let dirnames = calls.map(c => c.args.directory.split('/').slice(-1)),
+        dstr = dirnames.join(', ');
+    if (dstr.length > 20) dstr = dstr.substring(0, 20) + '...';
+    return `Listing ${calls.length} directories (${dstr})`;
+  }
 }
 
 module.exports = LsTool;
