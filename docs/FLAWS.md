@@ -6,3 +6,8 @@ mitigating.
 - Sometimes models rewrite the whole file (e.g. -57 +56 in a 56-line file), I
   think `edit` should prevent that and force existing files to be edited in
   chunks.
+- These models suck at incorporating their changes into their known file 
+  content. If we read something, then edit it, we need to purge those old reads
+  since they might be inaccurate and the model can't possibly recover on its
+  own so we might as well just clap the whole thing and make it re-read from
+  zero.

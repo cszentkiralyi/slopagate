@@ -34,6 +34,8 @@ class ReadTool extends Tool {
 
   async handler(args, tool) {
     let { file_path, start_line, end_line } = args;
+    try { start_line = parseInt(start_line, 10) } catch (e) { start_line = null; }
+    try { end_line = parseInt(end_line, 10) } catch (e) { end_line = null; }
     
     let content;
     try {
