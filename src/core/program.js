@@ -8,6 +8,8 @@ const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
 
+const { Logger } = require('../util.js');
+
 class Program {
   static SPINNER_MESSAGES = [
     'Autofilling...'
@@ -229,7 +231,7 @@ class Program {
     } else {
       this.config.think = (bstr === 'true' || bstr === 'on');
     }
-    this.session.setConfig('think', this.config.think);
+    this.harness.session.setConfig('think', this.config.think);
     let msg = {
       content: `Thinking ${this.config.think ? 'enabled' : 'disabled'}.`,
       fg: 'gray'

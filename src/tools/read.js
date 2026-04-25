@@ -29,33 +29,20 @@ const ReadTool = new Tool({
     let { file_path, start_line, end_line } = args;
     
     let content;
-    
-    if (!start_line && !end_line) {
-      try {
-        content = await fs.readFile(file_path, { encoding: 'utf-8' });
-        content = addLineNumbers(content.split('\n'));
-      } catch (err) {
-        content = `Error: file ${file_path} not found!`;
+    try {
+      content = await fs.readFile(file_path, { encoding: 'utf-8' });
+      content = content.split('\n');
+      if (start_line) {
+        content.splice(0, start_line);
       }
-    } else {
-      try {
-        let file = await fs.open(file_path);
-        let start = start_line || 1;
-        let lines = file.readLines();
-        let lineNo = 1;
-        content = '';
-        for (const line of lines) {
-          if (lineNo < start) continue;
-          if (end && lineNo > end) break;
-          content += addLineNumber(line) + '\n';
-        }
-        await file.close();
-      } catch (err) {
-        content = `Error: file ${file_path} not found!`;
+      if (end_line) {
+        content.splice(end_line);
       }
+      content = addLineNumbers(content, start_line || 1);
+      return content;
+    } catch (err) {
+      content = `Error: file ${file_path} not found!`;
     }
-    
-    return content;
   },
   
   message: (calls) => {
@@ -65,7 +52,7 @@ const ReadTool = new Tool({
         message = ':' + [start_line, end_line].filter(l => l || '').join('-');
       return `Reading ${file_path}${message}`;
     }
-    let filenames = calls.map(c => c.file_path.split('/').slice(-1)),
+    let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
         fstr = filenames.join(', ');
     if (fstr.length > 20) fstr = fstr.substring(0, 20) + '...';
     return `Reading ${calls.length} files (${fstr})`;

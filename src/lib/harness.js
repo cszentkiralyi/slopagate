@@ -68,6 +68,7 @@ class Harness {
      * - prompt_eval_count (tokens up)
      * - eval_count (tokens down)
      * - prompt_eval_duration / eval_duration / total_duration
+     * - thinking
      */
     if (!response || !response.message) return;
     let { message, done } = response;

@@ -33,7 +33,7 @@ class Context {
   add(message) {
     this.messages.push(message);
     let tok = Context.estimateTokens(Context.toTranscript(message));
-    if (m.role === 'assistant') {
+    if (message.role === 'assistant') {
       this.#tokens_down += tok;
     } else {
       this.#tokens_up += tok;
@@ -68,7 +68,7 @@ class Context {
     layers.forEach(layerName => {
       // Not an accident
       if (layer = Context.COMPACT_LAYERS[layerName]) {
-        arg = layer(arg);
+        Object.assign(arg, layer(arg));
       }
     });
     this.messages = arg.messages || this.messages;

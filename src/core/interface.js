@@ -110,7 +110,7 @@ class Interface {
     if (role === 'user') {
       textProps = {
         id, content,
-        align: true,
+        forceAlign: Interface.CLI_PROMPT,
         padding: { left: 1, right: 1 }
       };
     } else if (role === 'model') {

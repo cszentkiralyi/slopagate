@@ -18,7 +18,7 @@
     "dev": "node src/slopagate.js",
     "build": "scripts/sea.sh",
     "clean": "rm slop",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/*.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.0"

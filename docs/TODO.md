@@ -2,8 +2,17 @@
 
 ## Priority
 
-- [ ] Commands & modes for `Interface`
-- [ ] Improve token estimation/tracking
+- [ ] `bash` tool with permission gate
+  - `npm run test`
+- [ ] Get `tool_age` to pass tests & fix tool TTLs
+  - `ls` & `grep` clear earlier
+- [ ] Modes for `Interface`
+  - [ ] Framework: default, triggers & alternate prompts, back-out
+  - [ ] Shell
+- [ ] Argument hinting
+- [ ] Commands for config
+  - [ ] Config framework
+  - [ ] Commands
 
 ## Backlog
 
