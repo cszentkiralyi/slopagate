@@ -52,14 +52,7 @@ class BashTool extends Tool {
 
     let p = new Promise((resolve, reject) => {
       exec(command, (error, stdout, stderr) => {
-        Logger.log(`BashTool: ${JSON.stringify({ error, stdout, stderr})}`);
-        if (error) {
-          Logger.log(`BashTool: Error executing command "${command}": ${error.message} (exit code: ${error.code || 'unknown'})`);
-          if (error.killed) {
-            Logger.log(`BashTool: Command was killed, possibly due to OOM`);
-          }
-          resolve(`Error: exit code ${error.code || 'unknown'}: ${error.message}`);
-        } else if (stderr) {
+        if (stderr) {
           // Command ran but returned error output in stderr
           Logger.log(`BashTool: Command "${command}" returned error: ${stderr.trim()}`);
           resolve(stderr.trim());
