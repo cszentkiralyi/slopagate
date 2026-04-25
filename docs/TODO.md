@@ -7,6 +7,8 @@
 
 ## Backlog
 
+- [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
+      to different files fucked stuff up
 - [ ] Save session history more-often
   - Every model response with content?
   - Every `done` model response?
