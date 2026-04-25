@@ -222,7 +222,7 @@ class Program {
     if (!bstr || !bstr.length) {
       this.config.think = !this.config.think;
     } else {
-      this.config.think = (bstr === 'true');
+      this.config.think = (bstr === 'true' || bstr === 'on');
     }
     let msg = {
       content: `Thinking ${this.config.think ? 'enabled' : 'disabled'}.`,
