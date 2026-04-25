@@ -2,6 +2,8 @@
 
 ## Priority
 
+- [ ] Update markdown parsing to ignore mid-word symbols, like `a_foo_thing` should
+      just stay as it is
 - [ ] Get `tool_age` to pass tests & fix tool TTLs
   - `ls` & `grep` clear earlier
 - [ ] Modes for `Interface`
@@ -18,6 +20,11 @@
 
 - [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
       to different files fucked stuff up
+- [ ] Security/permissions (nominal, not comprehensive; they're sanity checks)
+  - [ ] User approval mechanism w/ session memory (yes, yes for this session, no,
+        no for this session)
+  - [ ] Gate paths: all paths must be in or below the current directory, and they
+        must be specified as relative paths (maybe)
 - [ ] Save session history more-often
   - Every model response with content?
   - Every `done` model response?

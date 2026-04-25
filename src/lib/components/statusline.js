@@ -52,6 +52,7 @@ class Statusline extends HContainer {
   }
   
   showSpinner(message) {
+    if (this.#left.children && this.#left.children[0] === this.spinner) return;
     // If you didn't provide a spinner in the constructor, that's on you
     this.spinner.message = message;
     this.dismissable = false;

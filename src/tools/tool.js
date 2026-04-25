@@ -1,4 +1,5 @@
-const Events = require('../events.js');
+const path = require('node:path');
+
 const { Logger } = require('../util.js');
 
 class Tool {
@@ -37,6 +38,10 @@ class Tool {
   
   message(calls) {
     return null;
+  }
+  
+  simplifyPath(p) {
+    return path.relative('.', p);
   }
   
   log(x) { Logger.log(`Tool:${this.name} ${x}`); }

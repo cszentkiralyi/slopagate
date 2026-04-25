@@ -18,7 +18,10 @@ class Program {
     'Checking with The Man',
     'Sidequesting',
     'Leaking API keys',
-    'Going rogue'
+    'Going rogue',
+    'Gobbling tokens',
+    'Nuking production',
+    'Babbling'
   ];
 
   config;
