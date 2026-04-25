@@ -1,3 +1,4 @@
+const ANSI = require('../ansi.js');
 const Component = require('./component.js');
 const Container = require('./container.js');
 
@@ -16,7 +17,7 @@ class HContainer extends Container {
         result = child.render(rem);
         dirty = dirty ||= result.dirty;
         parts.push(...(result.lines));
-        rem -= result.lines.reduce((m, l) => m + (l || '').length, 0);
+        rem -= result.lines.reduce((m, l) => m + (l && ANSI.measure(l) || 0), 0);
       });
       lines.push(parts.join(' '.repeat(gap)));
     }

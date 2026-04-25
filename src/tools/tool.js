@@ -3,6 +3,7 @@ const Events = require('../events.js');
 class Tool {
   name;
   description;
+  readonly = false;
   parameters;
   handler;
   message;
@@ -26,9 +27,12 @@ class Tool {
   async run(args, temppath) {
     let tool = {
       temppath: temppath,
-      message: (content) => Events.emit('tool:message', { id: args.id, content })
     };
     return await this.handler(args, tool);
+  }
+  
+  message(calls) {
+    return null;
   }
 }
 

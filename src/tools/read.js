@@ -15,6 +15,7 @@ const addLineNumbers = (lines, start) => {
 const ReadTool = new Tool({
   name: 'read',
   description: 'Read a text file, either all at once or limited to a line range.',
+  readonly: true,
   parameters: {
     type: 'object',
     properties: {

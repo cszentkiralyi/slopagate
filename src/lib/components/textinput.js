@@ -68,10 +68,10 @@ class TextInput extends Component {
       }
     );
     lines = [
-          ANSI.fg('\u2584'.repeat(width), bg),
-          ...lines,
-          ANSI.fg('\u2580'.repeat(width), bg),
-    ].map(l => ANSI.bg(l, bg));
+      ANSI.fg('\u2584'.repeat(width), bg),
+      ...(lines.map(l => ANSI.bg(l, bg))),
+      ANSI.fg('\u2580'.repeat(width), bg),
+    ];
 
     dirty = Component.isDirty(this._lines, lines);
     this._lines = lines;
