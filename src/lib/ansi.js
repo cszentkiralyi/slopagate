@@ -26,7 +26,10 @@ class ANSI {
     if (t_color === 'string') {
       return this.COLORS.get(color);
     } else if (t_color === 'number') {
-      return color;
+      // Only numbers in range 0-255 are valid
+      if (color >= 0 && color <= 255) {
+        return color;
+      }
     }
     return null;
   }
@@ -86,7 +89,7 @@ class ANSI {
   
   static measure(s) {
     if (!s) return 0;
-    let stripped = s.replaceAll(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+    let stripped = s.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
     // Replace multi-byte Unicode characters (emojis, etc.) with _M
     let normalized = stripped.replaceAll(/[\u{1F300}-\u{1F9FF}]/gu, '_M');
     return normalized.length;
