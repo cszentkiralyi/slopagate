@@ -29,7 +29,8 @@ class Program {
     'Babbling'
   ];
 
-  static AFK_TIMEOUT = 3 * 60 * 1000;
+  //static AFK_TIMEOUT = 3 * 60 * 1000;
+  static AFK_TIMEOUT = 1 * 60 * 1000;
 
   #userMessagesSinceRecap = 0;
 
@@ -90,7 +91,8 @@ class Program {
         arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
         handler: async (args) => await this.thinkCommand(args)
       },
-      { name: 'compact', handler: async () => await this.compactCommand() }
+      { name: 'compact', handler: async () => await this.compactCommand() },
+      { name: 'recap', handler: async () => await this.recap() }
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -336,16 +338,7 @@ class Program {
     this.interface.draw();
   }
 
-  #startAfkTimer() {
-    this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
-  }
-
-  #resetAfkTimer() {
-    this.timers.stop('afk');
-    this.#startAfkTimer();
-  }
-
-  async #onAfkTimeout() {
+  async recap() {
     // Not enough user activity to summarize
     if (this.#userMessagesSinceRecap < 2) return;
 
@@ -385,7 +378,8 @@ class Program {
       return;
     }
     let summaryContent = summaryResponse.message.content,
-        content = `🕮  Recap: ${summaryContent.charAt(0).toLowercase() + summaryContent.slice(1)}`;
+        _ = Logger.log(`Program: got recap response ${JSON.stringify(summaryResponse)}`),
+        content = `🕮  Recap: ${summaryContent.slice(0, 1).toLowerCase() + summaryContent.slice(1)}`;
     this.#userMessagesSinceRecap = 0;
     
     Logger.log(`Program: recap = ${content}`);
@@ -396,6 +390,19 @@ class Program {
       content: content,
       padding: { left: 1, right: 1 }
     });
+  }
+
+  #startAfkTimer() {
+    this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
+  }
+
+  #resetAfkTimer() {
+    this.timers.stop('afk');
+    this.#startAfkTimer();
+  }
+
+  async #onAfkTimeout() {
+    await this.recap();
   }
 }
 
