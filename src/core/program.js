@@ -1,6 +1,7 @@
 const process = require('node:process');
 const path = require('node:path');
 const fsSync = require('node:fs');
+const { exec } = require('node:child_process');
 
 const Events = require('../events.js');
 const { Config } = require('../core/config.js');
@@ -135,22 +136,41 @@ class Program {
       })()
     };
     chatInput.onInput = async (input, inst) => {
-      if (input[0] === '/') {
-        let [cmd, argstr] = input.substring(1).split(' ');
-        await this.command(cmd, argstr);
-      } else {
-        Events.emit('user:message', { message: input });
-        this.interface.addMessage({
-          role: 'user',
-          content: this.interface.getById('chat-input').prompt + input
-        });
-        this.interface.statusline.showSpinner(this.spinnerMessage);
-        let estInputTok = this.harness.session.context.estimated_tokens,
-            lastInputTok = this.harness.inputTokens;
-        this.updateStatuslineTokens({
-          inputTokens: (estInputTok > lastInputTok) ? estInputTok : lastInputTok,
-          outputTokens: this.harness.outputTokens
-        });
+      switch (inst.mode) {
+        case 'shell':
+          this.interface.addMessage({
+            role: 'user',
+            content: inst.prompt + input
+          });
+          let result = await new Promise((resolve) => {
+            exec(input, (error, stdout, stderr) => {
+              resolve((stderr ? stderr.trim() : stdout) || '');
+            });
+          });
+          this.interface.addMessage({
+            role: 'shell',
+            content: result
+          });
+          break;
+        case 'normal':
+          if (input[0] === '/') {
+            let [cmd, argstr] = input.substring(1).split(' ');
+            await this.command(cmd, argstr);
+          } else {
+            Events.emit('user:message', { message: input });
+            this.interface.addMessage({
+              role: 'user',
+              content: inst.prompt + input
+            });
+            this.interface.statusline.showSpinner(this.spinnerMessage);
+            let estInputTok = this.harness.session.context.estimated_tokens,
+                lastInputTok = this.harness.inputTokens;
+            this.updateStatuslineTokens({
+              inputTokens: (estInputTok > lastInputTok) ? estInputTok : lastInputTok,
+              outputTokens: this.harness.outputTokens
+            });
+          }
+          break;
       }
       inst.clear();
       this.interface.draw();

@@ -131,6 +131,12 @@ class Interface {
         id, content,
         fg: 'gray'
       };
+    } else if (role === 'shell') {
+      textProps = {
+        id, content,
+        fg: 250,
+        padding: { top: 1, left: 2, right: 2, bottom: 1 }
+      };
     } else if (role === 'system') {
       textProps = { id, content };
     }

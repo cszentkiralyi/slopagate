@@ -22,6 +22,8 @@ class TextInput extends Component {
   
   shortcuts;
   modes;
+  
+  get mode() { return this.#mode; }
 
   get value() { return this.#value; }
   get hint() {
@@ -103,6 +105,8 @@ class TextInput extends Component {
       this.#historyIdx++;
       this.#history.push(this.#value);
       await this.onInput(this.#value, this);
+      if (this.modes && this.#mode !== 'normal')
+        this.#mode = 'normal';
     } else if (char === 127 || char === 8) { // bs
       if (len == 0) {
         if (this.#mode && this.#mode !== 'normal') {
