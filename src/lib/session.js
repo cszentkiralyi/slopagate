@@ -49,6 +49,26 @@ class Session {
       budgets: {
         generation: 2000
       },
+      requestSummary: async (transcript) => {
+        let summaryContext = new Context({
+          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
+          tools: {},
+          limits: {},
+          budgets: {},
+          messages: [{ role: 'user', content: transcript }]
+        });
+        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
+        let response = await this.send_private(summaryContext, summaryMessage);
+        if (response.message && response.message.content) {
+          return response.message.content;
+        } else if (response.message && response.message.tool_calls) {
+          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
+          if (typeof txt === 'string') {
+            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
+          }
+        }
+        return null;
+      }
     });
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
@@ -97,7 +117,7 @@ class Session {
     return Session.serialize(this);
   }
 
-  async send_internal(messages)  {
+  async send_internal(messages, signal)  {
     let payload = {
       model: this.model,
       think: (this.#config.think || false),
@@ -105,11 +125,15 @@ class Session {
       keep_alive: (this.#config.keep_alive || '8m'),
       messages: messages,
       tools: this.tools.map(t => t.spec)
-    }, responseObj, controller;
+    }, responseObj, controller, idx;
     
-    controller = new AbortController();
-    this.#abortControllers ||= [];
-    this.#abortControllers.push(controller);
+    if (signal) {
+      controller = signal;
+    } else {
+      controller = new AbortController();
+      this.#abortControllers ||= [];
+      this.#abortControllers.push(controller);
+    }
     
     try {
       let response = await fetch(this.connection, {
@@ -124,13 +148,110 @@ class Session {
         responseObj = { role: 'assistant', message: { } };
       }
     } finally {
-      let idx;
-      if (this.#abortControllers
-          && -1 < (idx = this.#abortControllers.indexOf(controller))) {
+      if (!signal
+        && this.#abortControllers
+        && -1 < (idx = this.#abortControllers.indexOf(controller))) {
         this.#abortControllers.splice(idx, 1);
       }
       return responseObj;
     }
+  }
+
+  async send_private(context, message, signal) {
+    return await this.send_internal([
+      { role: 'system', content: context.system_prompt },
+      ...context.messages,
+      message
+    ], signal);
+  }
+
+  /**
+   * Summarize the oldest portion of context messages using the side channel.
+   * Walks messages backwards to find the 3rd user message; everything before it
+   * is collected and summarized. Tool call content is replaced with '[Tool response]'.
+   * Replaces the collected messages with a single 'user' summary and an
+   * assistant acknowledgment, then returns the new Context.
+   */
+  async summarize(context) {
+    let cutoffIdx = context.messages.length;
+    let userCount = 0;
+
+    // Walk backwards to find the 3rd user message
+    for (let i = context.messages.length - 1; i >= 0; i--) {
+      if (context.messages[i].role === 'user') {
+        userCount++;
+        if (userCount === 3) {
+          cutoffIdx = i; // include this message in the summary
+          break;
+        }
+      }
+    }
+
+    // Nothing to summarize: fewer than 3 user messages, or cutoffIdx === 0
+    if (userCount < 3 || cutoffIdx <= 0) {
+      return null;
+    }
+
+    // Collect messages from 0..cutoffIdx (inclusive), replacing tool content
+    let collected = [];
+    for (let i = 0; i <= cutoffIdx; i++) {
+      let m = context.messages[i];
+      let content = m.content;
+      if (m.role === 'tool') {
+        content = '[Tool response]';
+      }
+      collected.push({ ...m, content });
+    }
+
+    // Convert to transcript string
+    let transcript = collected
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n');
+
+    let summaryContext = new Context({
+      system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
+      tools: {},
+      limits: {},
+      budgets: {},
+      messages: [{ role: 'user', content: transcript }]
+    });
+
+    let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
+
+    let response = await this.send_private(summaryContext, summaryMessage);
+
+    let summaryText = (response.message && response.message.content)
+      || (response.message && response.message.tool_calls)
+      || (response.message && response.message.content)
+      || '';
+
+    // Find the summary text — handle both direct content and tool call arguments
+    if (response.message && response.message.content) {
+      summaryText = response.message.content;
+    } else if (response.message && response.message.tool_calls) {
+      summaryText = response.message.tool_calls[0]?.function?.arguments ?? '';
+      if (typeof summaryText === 'string') {
+        try { summaryText = JSON.parse(summaryText).summary || summaryText; } catch { /* pass */ }
+      }
+    }
+
+    if (!summaryText) return null;
+
+    // Build the new compacted messages array
+    let remaining = context.messages.slice(cutoffIdx + 1);
+    let newContext = new Context({
+      system_prompt: context.system_prompt,
+      tools: { ...context.tools },
+      limits: { ...context.limits },
+      budgets: { ...context.budgets },
+      messages: [
+        { role: 'user', content: summaryText },
+        { role: 'assistant', content: 'I have the context I need now. Thank you.' },
+        ...remaining
+      ]
+    });
+
+    return newContext;
   }
 
   async send(...outgoing) {
@@ -138,7 +259,7 @@ class Session {
       this.#masterContext.messages.push(...outgoing);
     this.#activeContext.messages.push(...outgoing);
     
-    this.#activeContext = this.#activeContext.fork([
+    this.#activeContext = await this.#activeContext.fork([
       'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance', 'tool_error'
     ]);
     
@@ -153,7 +274,7 @@ class Session {
 
   async compact() {
     // Replace activeContext with a full compact fork, keeping masterContext history
-    let newActive = this.#activeContext.fork([
+    let newActive = await this.#activeContext.fork([
       'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary'
     ]);
     this.#activeContext = newActive;

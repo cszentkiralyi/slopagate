@@ -41,7 +41,7 @@ class Context {
     }
   }
   
-  fork({ system_prompt, layers }) {
+  async fork({ system_prompt, layers }) {
     let f = new Context({
       system_prompt: system_prompt || this.system_prompt, 
       tools: { ...this.tools },
@@ -49,11 +49,11 @@ class Context {
       budgets: { ...this.budgets },
       messages: this.messages.map(m => { return { ...m }; }),
     });
-    f.compact(layers);
+    await f.compact(layers);
     return f;
   }
   
-  compact(layers) {
+  async compact(layers) {
     if (!layers || !layers.length
         || !this.messages || !this.messages.length)
       return this;
@@ -66,12 +66,12 @@ class Context {
       estimated_tokens: this.estimated_tokens,
       requestSummary: (s) => this.requestSummary(s)
     }, layer;
-    layers.forEach(layerName => {
+    for (const layerName of layers) {
       // Not an accident
       if (layer = Layers[layerName]) {
-        Object.assign(arg, layer(arg));
+        Object.assign(arg, await layer(arg));
       }
-    });
+    }
     this.messages = arg.messages || this.messages;
     this.system_prompt = arg.system_prompt || this.system_prompt;
     
@@ -80,9 +80,12 @@ class Context {
     return this;
   }
 
-  requestSummary(s) {
-    const prompt = `Summarize the following conversation in under 200 tokens. Keep all essential context and details.\n\n${this.messages.map(m => Context.toTranscript(m)).join('\n')}`;
-    return `Summarized: ${this.getModelResponse(prompt)}`;
+  // requestSummary: callback to hit the LLM agent, passed via constructor
+  get requestSummary() {
+    return this._requestSummary;
+  }
+  set requestSummary(fn) {
+    this._requestSummary = fn;
   }
 
   // requestSummary(s: string) => string
