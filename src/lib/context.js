@@ -66,7 +66,8 @@ class Context {
       limits: this.limits,
       budgets: this.budgets,
       estimated_tokens: this.estimated_tokens,
-      requestSummary: (s) => this.requestSummary(s)
+      requestSummary: (s) => this.requestSummary(s),
+      toTranscript: (m) => Context.toTranscript(m)
     }, layer;
     for (const layerName of layers) {
       // Not an accident

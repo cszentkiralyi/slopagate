@@ -29,8 +29,7 @@ class Program {
     'Babbling'
   ];
 
-  //static AFK_TIMEOUT = 3 * 60 * 1000;
-  static AFK_TIMEOUT = 1 * 60 * 1000;
+  static AFK_TIMEOUT = 3 * 60 * 1000;
 
   #userMessagesSinceRecap = 0;
 
@@ -378,8 +377,7 @@ class Program {
       return;
     }
     let summaryContent = summaryResponse.message.content,
-        _ = Logger.log(`Program: got recap response ${JSON.stringify(summaryResponse)}`),
-        content = `🕮  Recap: ${summaryContent.slice(0, 1).toLowerCase() + summaryContent.slice(1)}`;
+        content = `🕮  ${summaryContent.slice}`;
     this.#userMessagesSinceRecap = 0;
     
     Logger.log(`Program: recap = ${content}`);
