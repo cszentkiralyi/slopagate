@@ -1,33 +1,32 @@
 const { test } = require('node:test');
-const { assert } = require('node:assert');
-const tool_length = require('../../src/lib/layers/tool_length.js');
+const tool_length = require('../src/lib/layers/tool_length.js');
 
-test('tool_length: skips when no messages', () => {
+test('tool_length: skips when no messages', (t) => {
   const result = tool_length({ messages: null, tools: {} });
-  assert.strictEqual(result, undefined);
+  t.assert.strictEqual(result, undefined);
 });
 
-test('tool_length: skips when messages is undefined', () => {
+test('tool_length: skips when messages is undefined', (t) => {
   const result = tool_length({ messages: undefined, tools: {} });
-  assert.strictEqual(result, undefined);
+  t.assert.strictEqual(result, undefined);
 });
 
-test('tool_length: handles empty messages array', () => {
+test('tool_length: handles empty messages array', (t) => {
   const result = tool_length({ messages: [], tools: {} });
-  assert.deepStrictEqual(result, { messages: [] });
+  t.assert.deepStrictEqual(result, { messages: [] });
 });
 
-test('tool_length: skips non-tool messages', () => {
+test('tool_length: skips non-tool messages', (t) => {
   const messages = [
     { role: 'system', content: 'test' },
     { role: 'user', content: 'test' }
   ];
   const tools = {};
   const result = tool_length({ messages, tools });
-  assert.deepStrictEqual(result, { messages });
+  t.assert.deepStrictEqual(result, { messages });
 });
 
-test('tool_length: skips non-existent tool', () => {
+test('tool_length: skips non-existent tool', (t) => {
   const messages = [{
     role: 'tool',
     name: 'unknown_tool',
@@ -35,10 +34,10 @@ test('tool_length: skips non-existent tool', () => {
   }];
   const tools = {};
   const result = tool_length({ messages, tools });
-  assert.deepStrictEqual(result, { messages });
+  t.assert.deepStrictEqual(result, { messages });
 });
 
-test('tool_length: handles tool with short content', () => {
+test('tool_length: handles tool with short content', (t) => {
   const messages = [{
     role: 'tool',
     name: 'fetch',
@@ -48,10 +47,10 @@ test('tool_length: handles tool with short content', () => {
     fetch: { maxLength: 2000 }
   };
   const result = tool_length({ messages, tools });
-  assert.strictEqual(result.messages[0].content, 'short');
+  t.assert.strictEqual(result.messages[0].content, 'short');
 });
 
-test('tool_length: truncates tool exceeding maxLength', () => {
+test('tool_length: truncates tool exceeding maxLength', (t) => {
   const longContent = 'x'.repeat(3000);
   const messages = [{
     role: 'tool',
@@ -62,11 +61,11 @@ test('tool_length: truncates tool exceeding maxLength', () => {
     fetch: { maxLength: 2000 }
   };
   const result = tool_length({ messages, tools });
-  assert(result.messages[0].content.includes('[...trimmed tool output...]'));
-  assert(result.messages[0].content.includes('x'));
+  t.assert.ok(result.messages[0].content.includes('[...trimmed tool output...]'));
+  t.assert.ok(result.messages[0].content.includes('x'));
 });
 
-test('tool_length: default maxLength is 2000', () => {
+test('tool_length: default maxLength is 2000', (t) => {
   const longContent = 'y'.repeat(2500);
   const messages = [{
     role: 'tool',
@@ -77,11 +76,11 @@ test('tool_length: default maxLength is 2000', () => {
     fetch: {} // No maxLength specified
   };
   const result = tool_length({ messages, tools });
-  assert(result.messages[0].content.includes('[...trimmed tool output...]'));
+  t.assert.ok(result.messages[0].content.includes('[...trimmed tool output...]'));
 });
 
-test('tool_length: preserves middle third of truncated content', () => {
-  const longContent = 'a'.repeat(100) + 'b'.repeat(100) + 'c'.repeat(100) + 'd'.repeat(100) + 'e'.repeat(100);
+test('tool_length: preserves middle third of truncated content', (t) => {
+  const longContent = '1'.repeat(100) + '2'.repeat(100) + '3'.repeat(100) + '4'.repeat(100) + '5'.repeat(100);
   const messages = [{
     role: 'tool',
     name: 'fetch',
@@ -91,9 +90,9 @@ test('tool_length: preserves middle third of truncated content', () => {
     fetch: { maxLength: 100 }
   };
   const result = tool_length({ messages, tools });
-  // Should keep middle portion, which includes 'b' section
-  assert(result.messages[0].content.includes('b'));
-  // Should NOT have first or last sections (a and e)
-  assert(!result.messages[0].content.includes('a'));
-  assert(!result.messages[0].content.includes('e'));
+  // Should keep middle portion, which includes '3' section
+  t.assert.ok(result.messages[0].content.includes('3'));
+  // Should NOT have first or last sections (1 and 5)
+  t.assert.ok(!result.messages[0].content.includes('1'));
+  t.assert.ok(!result.messages[0].content.includes('5'));
 });

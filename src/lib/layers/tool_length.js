@@ -1,5 +1,7 @@
 const { Logger } = require('../../util.js');
 
+const TRIM_MSG = '[...trimmed tool output...]';
+
 const tool_length = ({ messages, tools }) => {
   // Short-circuit if no messages (undefined/null) - return undefined
   if (!messages) {
@@ -41,21 +43,14 @@ const tool_length = ({ messages, tools }) => {
       
       // Calculate the middle third boundaries
       const thirdLength = Math.floor(originalLength / 3);
-      const startIdx = Math.floor((originalLength - thirdLength) / 2);
-      const endIdx = startIdx + thirdLength;
+      const startIdx = thirdLength;
+      const endIdx = originalLength - thirdLength;
       
-      const startContent = originalContent.substring(0, startIdx);
       const middleContent = originalContent.substring(startIdx, endIdx);
-      const endContent = originalContent.substring(endIdx);
       
       // If truncation is needed, replace content with truncated version
-      const shouldTruncate = startContent.length + endContent.length < originalLength;
-      
-      if (shouldTruncate) {
-        Logger.log(`tool_length: compaction (tool=${msg.name}, originalLength=${originalLength}, maxLength=${maxLength})`);
-        const trimmedContent = `[...trimmed tool output...]\n${middleContent}`;
-        msg.content = trimmedContent;
-      }
+      const trimmedContent = `${TRIM_MSG}\n${middleContent.substring(0, maxLength)}\n${TRIM_MSG}`;
+      msg.content = trimmedContent;
     }
   }
   
