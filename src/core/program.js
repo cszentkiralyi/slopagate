@@ -3,6 +3,7 @@ const path = require('node:path');
 const fsSync = require('node:fs');
 
 const Events = require('../events.js');
+const { Config } = require('../core/config.js');
 const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
@@ -38,7 +39,7 @@ class Program {
   }
 
   constructor({ banner }) {
-    let config = this.config = {
+    const configData = {
       rootDirectory: process.env.PWD,
       slopDirectory: process.env.SLOP_PROJECT_DIR || `${process.env.PWD}/.slop`,
 
@@ -50,7 +51,8 @@ class Program {
       think: false,
       contextWindow: process.env.SLOP_CONTEXT_WINDOW || 65536,
     };
-    config.connection = `${config.host}:${config.port}${config.endpoint}`;
+    configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
+    let config = this.config = new Config(configData);
     
     this.md = new Slopdown({
       'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
@@ -77,7 +79,7 @@ class Program {
     
     let system_prompt_paths = [
       path.join(process.env.HOME, '.slopagate'),
-      this.config.slopDirectory
+      this.config.get('slopDirectory')
     ];
     let systemPrompt = null;
     system_prompt_paths.forEach(possiblePath => {
@@ -87,15 +89,15 @@ class Program {
         systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
         this.interface.addMessage({
           role: 'startup',
-          content: `System: ${path.relative(this.config.rootDirectory, systemPath)}`
+          content: `System: ${path.relative(this.config.get('rootDirectory'), systemPath)}`
         });
       } catch (err) { /* don't care */ }
     });
 
     this.harness = new Harness({
       session: {
-        model: this.config.model,
-        connection: this.config.connection,
+        model: this.config.get('model'),
+        connection: this.config.get('connection'),
         systemPrompt: systemPrompt
       }
     });
@@ -103,11 +105,11 @@ class Program {
 
     this.interface.addMessage({
       role: 'startup',
-      content: `Connection: ${this.config.connection}`
+      content: `Connection: ${this.config.get('connection')}`
     });
     this.interface.addMessage({
       role: 'startup',
-      content: `Model: ${this.config.model}`
+      content: `Model: ${this.config.get('model')}`
     });
 
     this.interface.getById('chat-input').shortcuts = {
@@ -218,7 +220,7 @@ class Program {
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = `${(100 *(inputTokens + outputTokens) / this.config.contextWindow).toFixed(0)}%`;
+    pct = `${(100 *(inputTokens + outputTokens) / this.config.get('contextWindow')).toFixed(0)}%`;
     if (pct > 50) pct = ANSI.fg(pct, 3);
     if (pct > 70) pct = ANSI.fg(pct, 1);
     s += ` │ ${pct}`
@@ -240,13 +242,13 @@ class Program {
   async thinkCommand(bstr) {
     Logger.log(`thinkCommand "${JSON.stringify(bstr)}`);
     if (!bstr || !bstr.length) {
-      this.config.think = !this.config.think;
+      this.config.set('think', !this.config.get('think'));
     } else {
-      this.config.think = (bstr === 'true' || bstr === 'on');
+      this.config.set('think', bstr === 'true' || bstr === 'on');
     }
-    this.harness.session.setConfig('think', this.config.think);
+    this.harness.session.setConfig('think', this.config.get('think'));
     let msg = {
-      content: `Thinking ${this.config.think ? 'enabled' : 'disabled'}.`,
+      content: `Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`,
       fg: 'gray'
     };
     this.interface.statusline.showMessage(msg, true);

@@ -2,18 +2,15 @@
 
 ## Priority
 
-- [ ] Simple error pruner: any error <2 turns behind has its content replaced with
-      just the string `Error`
 - [ ] Modes for `Interface`
   - [ ] Framework: default, triggers & alternate prompts, back-out
   - [ ] Shell
 - [ ] Argument hinting
 - [ ] Commands for config
-  - [ ] Config framework
+  - [x] Config framework
   - [ ] Commands
 - [ ] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
-- [ ] ^C leads to NaN token measurements
 
 ## Backlog
 
@@ -24,10 +21,6 @@
         no for this session)
   - [ ] Gate paths: all paths must be in or below the current directory, and they
         must be specified as relative paths (maybe)
-- [ ] Save session history more-often
-  - Every model response with content?
-  - Every `done` model response?
-  - Every few minutes?
 - [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Context compaction/engineering
   - [ ] unread to compact reads
