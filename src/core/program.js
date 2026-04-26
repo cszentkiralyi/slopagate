@@ -361,7 +361,7 @@ class Program {
       .join('\n');
 
     // Use send_private to avoid adding to history
-    let summaryMessage = { role: 'user', content: `Summarize this transcript into a 1-sentence recap:\n\n${transcript}` };
+    let summaryMessage = { role: 'user', content: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:\n\n${transcript}` };
     let summaryContext = new Context({
       tools: {},
       limits: {},
