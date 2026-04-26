@@ -18,8 +18,10 @@ class TextInput extends Component {
   #history = [];
   #historyIdx = -1;
   #hint;
+  #mode = 'normal';
   
   shortcuts;
+  modes;
 
   get value() { return this.#value; }
   get hint() {
@@ -38,7 +40,11 @@ class TextInput extends Component {
   }
 
   render(width) {
-    let prompt = this.prompt || '',
+    let activeMode = this.modes ? (this.#mode || 'normal') : null,
+        mode = this.modes
+          ? this.modes.find(m => m.name === activeMode)
+          : null,
+        prompt = (mode ? mode.prompt : this.prompt) || '',
         padding = Object.assign(
           { left: 0, right: 1 },
           this.padding
@@ -87,7 +93,10 @@ class TextInput extends Component {
     //       great about it now that I've taken another look.
     let char = k.charCodeAt(0),
         len = this.#value ? this.#value.length : 0,
-        [laters, later] = this.#makeLater();
+        [laters, later] = this.#makeLater(),
+        mode = this.modes
+          ? this.modes.find(m => m.name === this.#mode)
+          : null;
     if (this.onKey) await this.onKey(k, later, this);
     if (this.#caret > len) this.#caret = len;
     if (char === TextInput.KEYS.CR && k.length == 1) { // cr
@@ -95,8 +104,18 @@ class TextInput extends Component {
       this.#history.push(this.#value);
       await this.onInput(this.#value, this);
     } else if (char === 127 || char === 8) { // bs
-      if (len == 0) return;
-      if (this.#caret == len) {
+      if (len == 0) {
+        if (this.#mode && this.#mode !== 'normal') {
+          let next = this.modes.find(m => m.default);
+          this.#value = this.modes.find(m => m.name === this.#mode).prompt;
+          this.#caret = this.#value.length;
+          this.#mode = next.name;
+          this.prompt = next.prompt;
+        } else {
+          return;
+        }
+      }
+      if (this.#caret == len && len > 0) {
         this.#value = this.#value.substring(0, len - 1);
       } else {
         this.#value = this.#value.substring(0, this.#caret - 1)
@@ -151,6 +170,16 @@ class TextInput extends Component {
         this.#value = this.#value.substring(0, this.#caret)
           + k
           + this.#value.substring(this.#caret);
+      }
+      if (mode && mode.name === 'normal') {
+        let nextMode = this.modes.find(m => m.trigger === this.#value);
+        if (nextMode) {
+          this.#mode = nextMode.name;
+          this.#value = '';
+          this.#caret = 0;
+          this.prompt = nextMode.prompt;
+          return;
+        }
       }
       this.#caret++;
     }

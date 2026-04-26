@@ -69,6 +69,10 @@ class Program {
         handler: async (args) => await this.thinkCommand(args)
       }
     ];
+    this.input_modes = [
+      { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
+      { name: 'shell', prompt: '! ', trigger: '!' }
+    ];
 
 
     this.interface = new Interface({
@@ -112,7 +116,9 @@ class Program {
       content: `Model: ${this.config.get('model')}`
     });
 
-    this.interface.getById('chat-input').shortcuts = {
+    let chatInput = this.interface.getById('chat-input');
+    chatInput.modes = this.input_modes;
+    chatInput.shortcuts = {
       '^C': ((inst) => {
         let ctrl_c = false, ctrl_timeout = null;
         return async (inst) => {
@@ -128,7 +134,7 @@ class Program {
         }
       })()
     };
-    this.interface.getById('chat-input').onInput = async (input, inst) => {
+    chatInput.onInput = async (input, inst) => {
       if (input[0] === '/') {
         let [cmd, argstr] = input.substring(1).split(' ');
         await this.command(cmd, argstr);
@@ -149,10 +155,10 @@ class Program {
       inst.clear();
       this.interface.draw();
     };
-    this.interface.getById('chat-input').onKey = async (k, later, inst) => {
+    chatInput.onKey = async (k, later, inst) => {
       if (this.interface.statusline.dismiss())
         later(() => this.interface.draw());
-    }
+    };
 
 
     Events.on('user:abort', (event) => {
