@@ -1,58 +1,71 @@
-/* 2026-04-21
- * Entirely vibe-coded, except I changed the result to be joined by newline
- * to preserve spaces in names maybe. */
 const fs = require('node:fs/promises');
 
 const Tool = require('./tool.js');
 
-class LsTool extends Tool {
-  name = 'ls';
-  description = 'List files and folders in a directory.';
-  ttl = 2;
-  readonly =  true;
-  parameters =  {
-    type:  'object',
-    properties:  {
-      directory:  { type: 'string', default: '.' }
-    }
+const addLineNumber = (line, no) => `${no} ${line}`;
+const addLineNumbers = (lines, start) => {
+  let start_line = start || 1;
+  let output = '';
+  for (let i = 0; i < lines.length; i++) {
+    output += addLineNumber(lines[i], i + start_line) + '\n';
+  }
+  return output;
+}
+
+class ReadTool extends Tool {
+  name = 'read';
+  description = 'Read a text file, either all at once or limited to a line range.';
+  readonly = true;
+  parameters = {
+    type: 'object',
+    properties: {
+      file_path: { type: 'string '},
+      start_line: { type: 'integer '},
+      end_line: { type: 'integer '}
+    },
+    required: [ 'file_path' ]
   };
   
   constructor(props) {
     super(props);
+    this.handler = this.handler;
     Object.assign(this, props);
   }
 
   async handler(args, tool) {
-    let { directory } = args;
+    let { file_path, start_line, end_line } = args;
+    try { start_line = parseInt(start_line, 10) } catch (e) { start_line = null; }
+    try { end_line = parseInt(end_line, 10) } catch (e) { end_line = null; }
     
-    directory = directory || '.';
-    
+    let content;
     try {
-      const files = await fs.readdir(directory, { withFileTypes: true });
-      
-      const result = files.map(file => {
-        return file.isDirectory() ? `${file.name}/` : file.name;
-      }).join('\n');
-      
-      return result;
+      content = await fs.readFile(file_path, { encoding: 'utf-8' });
+      content = content.split('\n');
+      if (start_line) {
+        content.splice(0, start_line);
+      }
+      if (end_line) {
+        content.splice(end_line);
+      }
+      content = addLineNumbers(content, start_line || 1);
+      return content;
     } catch (err) {
-      return `Error: Cannot list ${directory}: ${err.message}`;
+      content = `Error: file ${file_path} not found!`;
     }
   }
-
+  
   message(calls) {
     if (calls.length == 1) {
-      let { directory } = calls[0].args;
-      return `Listing ${this.simplifyPath(directory)}/`;
+      let { file_path, start_line, end_line } = calls[0].args, message = '';
+      if (start_line || end_line)
+        message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
+      return `Reading ${this.simplifyPath(file_path)}${message}`;
     }
-    let dirnames = calls
-          .map(c => c.args.directory) 
-          .map(d => this.simplifyPath(d))
-          .map(s => s.substring(0, s.length - 1)),
-        dstr = dirnames.join(', ');
-    if (dstr.length > 40) dstr = dstr.substring(0, 40) + '...';
-    return `Listing ${calls.length} directories (${dstr})`;
+    let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
+        fstr = filenames.join(', ');
+    if (fstr.length > 20) fstr = fstr.substring(0, 40) + '...';
+    return `Reading ${calls.length} files (${fstr})`;
   }
 }
 
-module.exports = LsTool;
+module.exports = ReadTool;
