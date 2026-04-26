@@ -55,23 +55,27 @@ class BashTool extends Tool {
       return command === pattern;
     });
   }
+  
+  toolHint(command) {
+    return BashTool.TOOL_HINTS.find(({ pattern }) => {
+      if (pattern.endsWith('*'))
+        return command.startsWith(pattern.substring(0, pattern.length - 1));
+      return command === pattern;
+    });
+  }
 
   async handler(args, tool) {
     const { command } = args;
 
     if (!this.permissionGate(command)) {
       // Check for tool hints
-      const hintMatch = BashTool.TOOL_HINTS.find(({ pattern }) => {
-        if (pattern.endsWith('*'))
-          return command.startsWith(pattern.substring(0, pattern.length - 1));
-        return command === pattern;
-      });
-      
+      let word = command.split(' ')[0],
+          hintMatch = this.toolHint(command);
       if (hintMatch) {
-        return `Error: command not allowed, use "${hintMatch.hint}" tool instead`;
+        return `Error: command "${word}" not allowed, use "${hintMatch.hint}" tool instead`;
       }
       
-      return `Error: command not allowed.`;
+      return `Error: command "${word}" not allowed.`;
     }
 
     let p = new Promise((resolve, reject) => {

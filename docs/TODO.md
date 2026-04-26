@@ -2,6 +2,9 @@
 
 ## Priority
 
+- [ ] Message queue, I think I'm choking Ollama with simultaneous requests
+- [ ] tool_error layer needs to be more-gracious about hints, those should stay
+      in-context longer than regular "this didn't work" errors
 - [ ] Change "x user messages ago" in compact layers to "2-3x messages ago,"
       we don't get enough words in edgewise between tool calls so we have
       to deal with that
@@ -10,6 +13,11 @@
 
 ## Backlog
 
+- [ ] Security/permissions (nominal, not comprehensive; they're sanity checks)
+  - [ ] User approval mechanism w/ session memory (yes, yes for this session, no,
+        no for this session)
+  - [ ] Gate paths: all paths must be in or below the current directory, and they
+        must be specified as relative paths (maybe)
 - [ ] Implement compaction layers
   - [ ] `chat_importance` - x in [0,1], y in (0.1, 1]
     `y =  min(1, 1 - (0.9 * e^(-((* x) - 0.5)^2 / (2 * (0.25)^2))))`
@@ -21,11 +29,6 @@
   - [ ] `tool_redundancy`
 - [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
       to different files fucked stuff up
-- [ ] Security/permissions (nominal, not comprehensive; they're sanity checks)
-  - [ ] User approval mechanism w/ session memory (yes, yes for this session, no,
-        no for this session)
-  - [ ] Gate paths: all paths must be in or below the current directory, and they
-        must be specified as relative paths (maybe)
 - [ ] Context compaction/engineering
   - [ ] unread to compact reads
   - [ ] promptdoc to alter system prompt
