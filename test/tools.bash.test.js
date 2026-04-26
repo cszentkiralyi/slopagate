@@ -68,25 +68,22 @@ test('Tool hints for ls commands suggest ls tool', (t) => {
 });
 
 // ===== Handler Error Messages Tests =====
-test('handler returns error for forbidden commands', (t) => {
+test('handler returns error for forbidden commands', async (t) => {
   bashTool.readonly = false;
-  bashTool.handler({ command: 'rm -rf /' }, bashTool).then(result => {
-    t.assert.ok(result.includes('Error: command not allowed'));
-  });
+  const result = await bashTool.handler({ command: 'rm -rf /' }, bashTool);
+  t.assert.ok(result.includes('Error: command "rm" not allowed'));
 });
 
-test('handler returns error for cat with hint message', (t) => {
+test('handler returns error for cat with hint message', async (t) => {
   bashTool.readonly = false;
-  bashTool.handler({ command: 'cat file.txt' }, bashTool).then(result => {
-    t.assert.ok(result.includes('use "read" tool instead'));
-  });
+  const result = await bashTool.handler({ command: 'cat file.txt' }, bashTool);
+  t.assert.ok(result.includes('use "read" tool instead'));
 });
 
-test('handler returns error for sed with hint message', (t) => {
+test('handler returns error for sed with hint message', async (t) => {
   bashTool.readonly = false;
-  bashTool.handler({ command: 'sed -n "1p" file.txt' }, bashTool).then(result => {
-    t.assert.ok(result.includes('use "edit" tool instead'));
-  });
+  const result = await bashTool.handler({ command: 'sed -n "1p" file.txt' }, bashTool);
+  t.assert.ok(result.includes('use "edit" tool instead'));
 });
 
 // ===== Message Method Tests =====

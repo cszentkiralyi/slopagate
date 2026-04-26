@@ -20,7 +20,8 @@ const tool_error = ({ messages }) => {
     if (msg.role !== 'tool') continue;
     
     // Check if content starts with "Error:"
-    if (!msg.content.startsWith('Error:')) continue;
+    if (!msg.content || !msg.content.length || !msg.content.startsWith('Error:'))
+      continue;
     
     // Count user messages between this error and the next error (going forward)
     let userCount = 0;
