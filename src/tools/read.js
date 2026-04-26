@@ -58,7 +58,7 @@ class ReadTool extends Tool {
     if (calls.length == 1) {
       let { file_path, start_line, end_line } = calls[0].args, message = '';
       if (start_line || end_line)
-        message = ':' + [start_line, end_line].filter(l => l || '').join('-');
+        message = ':' + (start_line || 1) + end_line ? ('-' + end_line) : '+';
       return `Reading ${this.simplifyPath(file_path)}${message}`;
     }
     let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
