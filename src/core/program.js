@@ -256,7 +256,7 @@ class Program {
   updateStatuslineTokens({ inputTokens, outputTokens }) {
     if (Number.isNaN(inputTokens) || inputTokens == null) inputTokens = 0;
     if (Number.isNaN(outputTokens) || outputTokens == null) outputTokens = 0;
-    let txt = this.interface.statusline.right, s, pct;
+    let txt = this.interface.statusline.right, s, pct, c;
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
