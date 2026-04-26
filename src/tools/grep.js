@@ -26,7 +26,7 @@ class GrepTool extends Tool {
     let { file_path, search_string } = args;
 
     try {
-      const output = execSync(`grep -Fnd recurse ${JSON.stringify(search_string)} ${file_path}`);
+      const output = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`);
       return output.toString().split('\n').slice(0, 20).join('\n');
     } catch (err) {
       if (err.message?.includes('ENOENT')) {
