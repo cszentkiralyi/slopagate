@@ -2,10 +2,6 @@
 
 ## Priority
 
-- [ ] Modes for `Interface`
-  - [ ] Framework: default, triggers & alternate prompts, back-out
-  - [ ] Shell
-- [ ] Argument hinting
 - [ ] Commands for config
   - [x] Config framework
   - [ ] Commands

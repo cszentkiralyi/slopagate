@@ -144,7 +144,7 @@ class Program {
           });
           let result = await new Promise((resolve) => {
             exec(input, (error, stdout, stderr) => {
-              resolve((stderr ? stderr.trim() : stdout) || '');
+              resolve((stderr ? stderr.trim() : stdout.trim()) || '');
             });
           });
           this.interface.addMessage({
@@ -187,6 +187,7 @@ class Program {
         padding: { left: 1 },
         fg: 'gray'
       }, true);
+      setTimeout(() => this.interface.statusline.dismiss() && this.interface.draw(), 2000);
       this.interface.draw();
     });
     Events.on('model:content', (event) => {

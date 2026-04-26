@@ -160,6 +160,17 @@ class Interface {
         len = cmd.name.length;
         if (len > slen && cmd.name.startsWith(s))
           hints.push(cmd.name.substring(slen));
+        // Check for argument hints
+        else if (s.startsWith(cmd.name + ' ')) {
+          let words = s.substring(cmd.name.length + 1).split(' '),
+              wordCount = words.length - (words[words.length - 1] === '' ? 1 : 0);
+          if (wordCount < cmd.arguments.length) {
+            let arg = cmd.arguments[wordCount];
+            if (arg) {
+              hints.push(arg.possible ? arg.possible.join('|') : arg.name);
+            }
+          }
+        }
       });
     }
     
