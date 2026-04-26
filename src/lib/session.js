@@ -259,12 +259,9 @@ class Session {
       this.#masterContext.messages.push(...outgoing);
     this.#activeContext.messages.push(...outgoing);
     
-    this.#activeContext = await this.#activeContext.fork([
-      'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance', 'tool_error'
-    ]);
-    
-    // TODO: take ownership of this result and add it to context,
-    // we already have the entire user half for god's sake
+    this.#activeContext = await this.#activeContext.fork({
+      layers: [ 'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance', 'tool_error' ]
+    });
     
     return await this.send_internal([
       { role: 'system', content: this.#activeContext.system_prompt },
@@ -273,17 +270,13 @@ class Session {
   }
 
   async compact() {
+    Logger.log(`Session: compact() called, forking context.`);
     // Replace activeContext with a full compact fork, keeping masterContext history
-    let newActive = await this.#activeContext.fork([
-      'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary'
-    ]);
+    let newActive = await this.#activeContext.fork({
+      layers: [ 'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary' ]
+    });
+    Logger.log(`Session: fork completed.`);
     this.#activeContext = newActive;
-    // Sync new active context messages back to master for persistence
-    if (this.#masterContext !== this.#activeContext) {
-      this.#masterContext.messages.push(...newActive.messages.filter(m =>
-        !this.#masterContext.messages.some(mm => mm === m)
-      ));
-    }
     return this.#activeContext;
   }
   

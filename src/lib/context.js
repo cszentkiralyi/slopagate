@@ -1,3 +1,4 @@
+const { Logger } = require('../util.js');
 const ANSI = require('./ansi.js');
 const Layers = require('./layers/layers.js');
 
@@ -54,6 +55,7 @@ class Context {
   }
   
   async compact(layers) {
+    Logger.log(`Context: compacting with ${(layers && layers.length || 0)} active layers, ${(this.messages && this.messages.length) || 0} messages.`);
     if (!layers || !layers.length
         || !this.messages || !this.messages.length)
       return this;
@@ -69,6 +71,7 @@ class Context {
     for (const layerName of layers) {
       // Not an accident
       if (layer = Layers[layerName]) {
+        Logger.log(`Context: applying layer '${layerName}'`);
         Object.assign(arg, await layer(arg));
       }
     }
@@ -79,24 +82,9 @@ class Context {
     
     return this;
   }
-
-  // requestSummary: callback to hit the LLM agent, passed via constructor
-  get requestSummary() {
-    return this._requestSummary;
-  }
-  set requestSummary(fn) {
-    this._requestSummary = fn;
-  }
-
   // requestSummary(s: string) => string
   // requestSummary: callback to hit the LLM agent
 
-  // getResponse(s: string) => void
-  // Uses getModelResponse() to summarize the provided transcript
-  getResponse(s) {
-    return this.getModelResponse(s);
-  }
-  
   #estimate({ system_prompt } = {}) {
     let diff;
     this.#other_tokens = this.system_prompt ? Context.estimateTokens(this.system_prompt) : 0;

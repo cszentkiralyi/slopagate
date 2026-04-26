@@ -238,6 +238,8 @@ class Program {
         : this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     });
+    Events.on('model:response', (evt) => this.#resetAfkTimer());
+    Events.on('tool:response', (evt) => this.#resetAfkTimer());
 
     Events.on('metrics:tokens', (event) => {
       this.updateStatuslineTokens(event);
@@ -290,8 +292,14 @@ class Program {
     let cmd = this.commands
       ? this.commands.filter(c => c.name === name)
       : null;
-    if (!cmd || !cmd.length || cmd.length > 1)
-      throw new Error(`Ambiguous command "${name}"`);
+    if (!cmd || !cmd.length) {
+      this.interface.addMessage({ role: 'system', content: `Unknown command "${name}".` });
+      return;
+    }
+    if (cmd.length > 1) {
+      this.interface.addMessage({ role: 'system', content: `Ambiguous command "${name}"` });
+      return;
+    }
     cmd = cmd[0];
     
     await cmd.handler(args);
@@ -313,8 +321,9 @@ class Program {
   }
 
   async compactCommand() {
-    let old_up = this.harness.session.tokens_up,
-        old_down = this.harness.session.tokens_down,
+    Logger.log(`compactCommand`);
+    let old_up = this.harness.session.context.tokens_up,
+        old_down = this.harness.session.context.tokens_down,
         ctx = await this.harness.session.compact(),
         delta_up = ((ctx.tokens_up - old_up || 0)).toFixed(0),
         delta_down = ((ctx.tokens_down - old_down) || 0).toFixed(0),
@@ -345,11 +354,13 @@ class Program {
       m => m.role === 'user' || m.role === 'assistant'
     );
 
-    // Get the 4 most recent filtered messages
-    const recentMessages = filteredMessages.slice(-4);
+    // Get the most-recent filtered messages
+    const recentMessages = filteredMessages.slice(-(this.#userMessagesSinceRecap * 2));
     
     // Not enough messages to be worth summarizing
     if (recentMessages.length < 4) return;
+
+    Logger.log(`Program: recapping ${recentMessages.length} messages.`);
 
     // Convert to transcript string using toTranscript helper
     let transcript = recentMessages
@@ -365,12 +376,19 @@ class Program {
       messages: []
     });
 
-    let summaryText = await this.harness.session.send_private(summaryContext, summaryMessage);
+    let summaryResponse = await this.harness.session.send_private(summaryContext, summaryMessage);
 
-    if (!summaryText || !summaryText.message || !summaryText.message.content) {
+    if (!summaryResponse || !summaryResponse.message
+        || !summaryResponse.message.content
+        || !summaryResponse.message.content.length) {
+      Logger.log(`Program: no recap summary.`);
       return;
     }
-    let content = `🕮  Recap: ${summaryText.message.content.charAt(0).toLowercase()+summaryText.message.content.slice(1)}`;
+    let summaryContent = summaryResponse.message.content,
+        content = `🕮  Recap: ${summaryContent.charAt(0).toLowercase() + summaryContent.slice(1)}`;
+    this.#userMessagesSinceRecap = 0;
+    
+    Logger.log(`Program: recap = ${content}`);
 
     // Add response as tool role message with 'Recap: ' prefix
     this.interface.addMessage({

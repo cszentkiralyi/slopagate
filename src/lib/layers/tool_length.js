@@ -63,3 +63,4 @@ const tool_length = ({ messages, tools }) => {
   return { messages };
 };
 
+module.exports = tool_length;

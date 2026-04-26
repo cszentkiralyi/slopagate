@@ -32,9 +32,8 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     .map(m => toTranscript(m))
     .join('\n');
 
-  // Add prompt and get summary
-  let prompt = "summarize this transcript into 1 message without losing context or details.";
-  let summaryText = await requestSummary(prompt);
+  // Get summary
+  let summaryText = await requestSummary(transcript);
 
   if (!summaryText) {
     return { messages, system_prompt, tools, limits, budgets, estimated_tokens };
@@ -48,6 +47,7 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     ...latestMessages
   ];
 
+  Logger.log(`chat_summary: compacted (replaced ${summarizeArray.length} messages with summary)`);
   return { messages: newMessages, system_prompt, tools, limits, budgets, estimated_tokens };
 };
 
