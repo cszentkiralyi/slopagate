@@ -5,6 +5,7 @@ const Events = require('../events.js');
 const Session = require('./session.js');
 const Context = require('./context.js');
 const Toolbox = require('./toolbox.js');
+const Timers = require('./timers.js');
 
 const { Logger } = require('../util.js');
 
@@ -15,9 +16,12 @@ const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 
 class Harness {
+  static TOOL_TIMEOUT = 15 * 1000;
+
   #abortTarget = null;
   #inputTokens = 0;
   #outputTokens = 0;
+  #timers = new Timers();
   
   session = null;
   toolbox = null;
@@ -60,6 +64,7 @@ class Harness {
   }
   
   async dispose() {
+    this.#timers.clearAll();
     await this.session.dispose();
   }
   
@@ -139,7 +144,7 @@ class Harness {
           eventsByName[name].push(event);
           //Logger.log(`tool_call: ${JSON.stringify(call)}`);
           Events.emit('tool:call', event);
-          
+
           // Create a promise that resolves when the corresponding tool:response event is received
           let toolPromise = new Promise((resolve, reject) => {
             let onResponse = (evt) => {
@@ -149,7 +154,28 @@ class Harness {
               }
             };
             Events.on('tool:response', onResponse);
+
+            // Timeout race
+            this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
+              Events.off('tool:response', onResponse);
+              reject(new Error(`tool ${name} timed out`));
+            });
           });
+
+          // Wrap to clean up timer on resolution
+          toolPromise = toolPromise.catch(err => {
+            this.#timers.stop(`tool:${id}`);
+            throw err;
+          }).catch(async () => {
+            // On timeout, emit a tool:response so the harness can continue
+            return {
+              id,
+              role: 'tool',
+              tool_name: name,
+              content: `Error: tool ${name} timed out`
+            };
+          });
+
           toolPromises.push(toolPromise);
         }
         
