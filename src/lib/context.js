@@ -1,5 +1,5 @@
 const ANSI = require('./ansi.js');
-const layers = require('./layers/layers.js');
+const Layers = require('./layers/layers.js');
 
 class Context {
   static FORCE_COMPACT_RATIO = 0.70;
@@ -68,7 +68,7 @@ class Context {
     }, layer;
     layers.forEach(layerName => {
       // Not an accident
-      if (layer = layers[layerName]) {
+      if (layer = Layers[layerName]) {
         Object.assign(arg, layer(arg));
       }
     });

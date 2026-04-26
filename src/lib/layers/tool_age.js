@@ -1,7 +1,11 @@
+const { Logger } = require('../../util.js');
+
 const tool_age = ({ messages, tools, limits }) => {
   // Tools without TTL or with TTL=null should not be affected
-  if (!tools || !tools.length)
+  if (!tools || !tools.length) {
+    Logger.log(`tool_age: skipped (no tools)`);
     return { messages };
+  }
   
   let len = messages.length;
   
@@ -48,9 +52,11 @@ const tool_age = ({ messages, tools, limits }) => {
     }
     
     // Distance exceeds TTL, replace tool content with placeholder
+    Logger.log(`tool_age: compaction (tool=${msg.name}, distance=${distance}, ttl=${ttl})`);
     msg.content = `[Old tool result content cleared for tool: ${msg.name}]`;
   }
   
+  Logger.log(`tool_age: returning (processed ${len} messages)`);
   return { messages };
 };
 
