@@ -2,6 +2,8 @@
 
 ## Priority
 
+- [ ] Simple error pruner: any error <2 turns behind has its content replaced with
+      just the string `Error`
 - [ ] Modes for `Interface`
   - [ ] Framework: default, triggers & alternate prompts, back-out
   - [ ] Shell

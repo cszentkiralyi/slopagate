@@ -4,6 +4,7 @@ const tool_length = require('./tool_length.js');
 const tool_redundancy = require('./tool_redundancy.js');
 const chat_importance = require('./chat_importance.js');
 const chat_summary = require('./chat_summary.js');
+const tool_error = require('./tool_error.js');
 
 module.exports = {
   system_prompt,
@@ -11,5 +12,6 @@ module.exports = {
   tool_length,
   tool_redundancy,
   chat_importance,
-  chat_summary
+  chat_summary,
+  tool_error
 };

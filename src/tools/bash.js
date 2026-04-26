@@ -80,7 +80,7 @@ class BashTool extends Tool {
     }
     let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
         summary = summaries.join(' ');
-    if (summary.length > 20) summary = summary.substring(0, 20) + '...';
+    if (summary.length > 20) summary = summary.substring(0, 40) + '...';
     return `Executing ${permittedCalls.length} commands (${summary})`;
   }
 }

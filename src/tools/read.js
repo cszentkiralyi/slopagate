@@ -63,7 +63,7 @@ class ReadTool extends Tool {
     }
     let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
         fstr = filenames.join(', ');
-    if (fstr.length > 20) fstr = fstr.substring(0, 20) + '...';
+    if (fstr.length > 20) fstr = fstr.substring(0, 40) + '...';
     return `Reading ${calls.length} files (${fstr})`;
   }
 }

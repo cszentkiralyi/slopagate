@@ -38,6 +38,7 @@ class Harness {
     ]);
     this.session = new Session({
       tools: this.toolbox.all(),
+      keep_alive: '10m',
       ...(props && props.session || null)
     });
     this.session.ensureTempDir().then(_ => {
