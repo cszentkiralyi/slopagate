@@ -71,7 +71,8 @@ class BashTool extends Tool {
     const permittedCalls = calls.filter(c => this.permissionGate(c.args.command));
     
     if (permittedCalls.length === 0) {
-      return 'No permitted commands to execute';
+      //return 'No permitted commands to execute';
+      return null;
     }
     
     if (permittedCalls.length == 1) {
