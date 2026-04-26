@@ -139,7 +139,7 @@ class Session {
     this.#activeContext.messages.push(...outgoing);
     
     this.#activeContext = this.#activeContext.fork([
-      'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance'
+      'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance', 'tool_error'
     ]);
     
     // TODO: take ownership of this result and add it to context,
