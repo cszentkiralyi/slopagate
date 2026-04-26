@@ -96,7 +96,15 @@ class Harness {
      * - prompt_eval_duration / eval_duration / total_duration
      * - thinking
      */
-    if (!response || !response.message) return;
+    if (!response) return;
+    
+    if (response.error) {
+      Events.emit('model:content', { done: true, content: ANSI.fg(response.error, 'red') });
+      return;
+    } else if (!response.message) {
+      return;
+    }
+
     let { message, done } = response;
     
     // According to Qwen3.5:9B, this is not accumulated.
