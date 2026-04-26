@@ -212,6 +212,8 @@ class Program {
     return `${(n / 1000000).toFixed(2)}M`;
   }
   updateStatuslineTokens({ inputTokens, outputTokens }) {
+    if (Number.isNaN(inputTokens) || inputTokens == null) inputTokens = 0;
+    if (Number.isNaN(outputTokens) || outputTokens == null) outputTokens = 0;
     let txt = this.interface.statusline.right, s, pct;
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;

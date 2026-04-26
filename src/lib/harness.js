@@ -95,8 +95,14 @@ class Harness {
     let { message, done } = response;
     
     // According to Qwen3.5:9B, this is not accumulated.
-    this.#inputTokens = response.prompt_eval_count;
-    this.#outputTokens += response.eval_count;
+    let p = response.prompt_eval_count;
+    if (p !== null && p !== undefined && !Number.isNaN(p)) {
+      this.#inputTokens = p;
+    }
+    let e = response.eval_count;
+    if (e !== null && e !== undefined && !Number.isNaN(e)) {
+      this.#outputTokens += e;
+    }
     Events.emit('metrics:tokens', {
       inputTokens: this.#inputTokens,
       outputTokens: this.#outputTokens
