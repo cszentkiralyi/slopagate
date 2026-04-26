@@ -1,3 +1,5 @@
+const fs = require('node:fs');
+const path = require('node:path');
 const ANSI = require('../lib/ansi.js');
 const Events = require('../events.js');
 const Session = require('./session.js');
@@ -19,6 +21,17 @@ class Harness {
   
   session = null;
   toolbox = null;
+
+  #serializeSession() {
+    try {
+      let historyPath = path.join(process.env.HOME, '.slopagate', 'history');
+      fs.mkdirSync(historyPath, { recursive: true });
+      let json = this.session.serialize();
+      fs.writeFileSync(path.join(historyPath, this.session.id + '.json'), json);
+    } catch (err) {
+      Logger.log(`serialize error: ${err.message}`);
+    }
+  }
 
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
@@ -91,7 +104,10 @@ class Harness {
     
     if (message.content || message.tool_calls) {
       this.session.messages.push(message);
-      if (done) this.#abortTarget = null;
+      if (done) {
+        this.#abortTarget = null;
+        this.#serializeSession();
+      }
       if (message.content) {
         // TODO: remove me
         this.session.messages.push(message);
@@ -158,6 +174,7 @@ class Harness {
     this.#abortTarget = this.session;
     let response = await this.session.send(...messages);
     Events.emit('model:response', { response });
+    this.#serializeSession();
   }
   
   estimateHistoryTokens() {
