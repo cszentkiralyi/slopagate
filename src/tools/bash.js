@@ -2,6 +2,7 @@
 const { exec } = require('node:child_process');
 
 const { Logger } = require('../util.js');
+const ANSI = require('../lib/ansi.js');
 const Tool = require('./tool.js');
 
 class BashTool extends Tool {
@@ -77,7 +78,7 @@ class BashTool extends Tool {
     
     if (permittedCalls.length == 1) {
       let { command } = permittedCalls[0].args;
-      return `Executing ${command}`;
+      return `Executing ${ANSI.fg(command, 248)}`;
     }
     let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
         summary = summaries.join(' ');
