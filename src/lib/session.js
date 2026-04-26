@@ -150,6 +150,21 @@ class Session {
       ...this.#activeContext.messages
     ]);
   }
+
+  async compact() {
+    // Replace activeContext with a full compact fork, keeping masterContext history
+    let newActive = this.#activeContext.fork([
+      'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary'
+    ]);
+    this.#activeContext = newActive;
+    // Sync new active context messages back to master for persistence
+    if (this.#masterContext !== this.#activeContext) {
+      this.#masterContext.messages.push(...newActive.messages.filter(m =>
+        !this.#masterContext.messages.some(mm => mm === m)
+      ));
+    }
+    return this.#activeContext;
+  }
   
   
   static serialize(session) {

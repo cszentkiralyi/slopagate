@@ -15,7 +15,7 @@ Terminal-based AI coding assistant that uses a local LLM model (qwen3.5:9b-65k) 
   - `interface.js` - CLI interface, message handling, slash commands
   - `program.js` - Main Program class, harness management, event listeners
 - `lib/`
-  - `ansi.js`, `components/`, `context.js`, `harness.js`, `layers/`, `sd.js`, `session.js`, `toolbox.js`, `tui.js`
+  - `ansi.js`, `components/`, `context.js`, `harness.js`, `layers/`, `sd.js`, `session.js`, `timers.js` - Timers class for managing scheduled callbacks and timers, `toolbox.js`, `tui.js`
 - `tools/` - CLI tools: bash, edit, grep, ls, read, tool.js
 
 ## Documentation (`docs/`)

@@ -81,7 +81,8 @@ class Program {
         name: 'think',
         arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
         handler: async (args) => await this.thinkCommand(args)
-      }
+      },
+      { name: 'compact', handler: async () => await this.compactCommand() }
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -293,6 +294,16 @@ class Program {
       fg: 'gray'
     };
     this.interface.statusline.showMessage(msg, true);
+  }
+
+  async compactCommand() {
+    let ctx = await this.harness.session.compact();
+    let msg = {
+      content: `Context compacted. Tokens: ↑${ctx.tokens_up} ↓${ctx.tokens_down} (est. ${ctx.estimated_tokens}).`,
+      fg: 'gray'
+    };
+    this.interface.statusline.showMessage(msg, true);
+    this.interface.draw();
   }
 }
 

@@ -11,3 +11,6 @@ mitigating.
   since they might be inaccurate and the model can't possibly recover on its
   own so we might as well just clap the whole thing and make it re-read from
   zero.
+- If it screws up a search string for `edit`, it'll start trying to use `bash`
+  to run commands or write/execute scripts to do the edits. It would be nice to
+  catch this and shut it down sooner rather than later.
