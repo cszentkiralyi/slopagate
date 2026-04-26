@@ -55,22 +55,4 @@ class LsTool extends Tool {
   }
 }
 
-module.exports = LsTool;found!`;
-    }
-  }
-  
-  message(calls) {
-    if (calls.length == 1) {
-      let { file_path, start_line, end_line } = calls[0].args, message = '';
-      if (start_line || end_line)
-        message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
-      return `Reading ${this.simplifyPath(file_path)}${message}`;
-    }
-    let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
-        fstr = filenames.join(', ');
-    if (fstr.length > 20) fstr = fstr.substring(0, 40) + '...';
-    return `Reading ${calls.length} files (${fstr})`;
-  }
-}
-
-module.exports = ReadTool;
+module.exports = LsTool;
