@@ -2,6 +2,9 @@
 
 ## Priority
 
+- [ ] Change "x user messages ago" in compact layers to "2-3x messages ago,"
+      we don't get enough words in edgewise between tool calls so we have
+      to deal with that
 - [ ] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
 
@@ -10,7 +13,7 @@
 - [ ] Implement compaction layers
   - [ ] `chat_importance` - x in [0,1], y in (0.1, 1]
     `y =  min(1, 1 - (0.9 * e^(-((* x) - 0.5)^2 / (2 * (0.25)^2))))`
-  - [ ] `chat_summary` - reach out
+  - [x] `chat_summary` - reach out
   - [ ] `system_prompt` - theoretical
   - [x] `tool_age` - tested fine
   - [x] `tool_error`
@@ -23,7 +26,6 @@
         no for this session)
   - [ ] Gate paths: all paths must be in or below the current directory, and they
         must be specified as relative paths (maybe)
-- [ ] Shell shortcut: `!` which should change the prompt
 - [ ] Context compaction/engineering
   - [ ] unread to compact reads
   - [ ] promptdoc to alter system prompt
@@ -58,9 +60,11 @@
 - [ ] Memory (required "edit" tool to be done)
   - [ ] Auto-memory
   - [ ] /init & SLOP.md
-- [ ] Auto-summarize after being idle & at certain points (e.g. Claude uses
-      "approaching context window limit" as a trigger)
-  [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
+- [ ] Sub-agents for specific tasks
+  - Get a subset of context, I guess; maybe even clean slates with minimal prompts
+  - E.g. one to sketch out a plan for the main one to follow, one to update SLOP.md,
+    that sort of thing
+- [ ] Tool calls have been half-heartedtly coralled by a mutex Set, but that
       does not explain why we are executing tool calls twice by responding to
       the `tool:call` message twice.
 - [ ] Command-line commands

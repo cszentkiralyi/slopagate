@@ -1,61 +1,120 @@
+const BashTool = require('../src/tools/bash.js');
 const test = require('node:test');
 const assert = require('node:assert');
-const BashTool = require('../src/tools/bash.js');
 
-test('BashTool permissionGate method', (t) => {
-  const tool = new BashTool();
+const bashTool = new BashTool();
 
-  t.assert.ok(tool.permissionGate('npm run test'), 'npm run test should be permitted');
-  t.assert.ok(tool.permissionGate('node --test *'), 'node --test * should be permitted');
-  t.assert.ok(tool.permissionGate('git log *'), 'git log * should be permitted');
-  t.assert.ok(tool.permissionGate('git status *'), 'git status * should be permitted');
-  t.assert.ok(tool.permissionGate('head *'), 'head * should be permitted');
-  t.assert.ok(tool.permissionGate('tail *'), 'tail * should be permitted');
-  t.assert.ok(tool.permissionGate('pwd'), 'pwd should be permitted');
-
-  t.assert.ok(!tool.permissionGate('ls'), 'ls should not be permitted');
-  t.assert.ok(!tool.permissionGate('cd /etc'), 'cd /etc should not be permitted');
-  t.assert.ok(!tool.permissionGate('rm -rf /'), 'rm -rf / should not be permitted');
+// ===== Permission Gate Tests =====
+test('permissionGate allows node --test command', (t) => {
+  t.assert.ok(bashTool.permissionGate('node --test foo.test.js'));
 });
 
-test('BashTool handler method', async (t) => {
-  const tool = new BashTool();
-
-  // Test permitted command
-  const result1 = await tool.handler({ command: 'pwd' }, tool);
-  t.assert.ok(result1.includes('/'), 'pwd should return home directory');
-
-  // Test permitted command with stderr
-  const result2 = await tool.handler({ command: 'pwd' }, tool);
-  t.assert.ok(result2.trim().startsWith('/'), 'pwd should return home directory');
-
-  // Test non-permitted command
-  const result3 = await tool.handler({ command: 'ls' }, tool);
-  t.assert.ok(result3 === 'Error: Command not permitted', 'non-permitted command should return error');
+test('permissionGate allows git commands with space', (t) => {
+  t.assert.ok(bashTool.permissionGate('git log HEAD'));
+  t.assert.ok(bashTool.permissionGate('git status '));
+  t.assert.ok(bashTool.permissionGate('git diff HEAD~1 '));
 });
 
-test('BashTool message method', (t) => {
-  const tool = new BashTool();
+test('permissionGate allows pwd command', (t) => {
+  t.assert.ok(bashTool.permissionGate('pwd'));
+});
 
-  // Test single permitted command
-  const calls1 = [{
-    args: { command: 'pwd' }
-  }];
-  const message1 = tool.message(calls1);
-  t.assert.ok(message1 === 'Executing pwd', 'single permitted command should show message');
+test('permissionGate rejects npm run test', (t) => {
+  t.assert.equal(bashTool.permissionGate('npm run test'), false);
+});
 
-  // Test multiple permitted commands
-  const calls2 = [
-    { args: { command: 'npm run test' } },
-    { args: { command: 'git log *' } }
-  ];
-  const message2 = tool.message(calls2);
-  t.assert.ok(message2.includes('Executing 2 commands'), 'multiple commands should show count');
-  t.assert.ok(message2.includes('npm'), 'summary should include npm');
-  t.assert.ok(message2.includes('git'), 'summary should include git');
+test('permissionGate rejects sed', (t) => {
+  t.assert.equal(bashTool.permissionGate('sed -n "1,10p" file.txt'), false);
+});
 
-  // Test no permitted commands
-  const calls3 = [{ args: { command: 'ls' } }];
-  const message3 = tool.message(calls3);
-  t.assert.ok(message3 === 'No permitted commands to execute', 'no permitted commands should show message');
+test('permissionGate rejects cat', (t) => {
+  t.assert.equal(bashTool.permissionGate('cat file.txt'), false);
+});
+
+test('permissionGate rejects head/tail', (t) => {
+  t.assert.equal(bashTool.permissionGate('head -20 file.txt'), false);
+  t.assert.equal(bashTool.permissionGate('tail -10 file.txt'), false);
+});
+
+// ===== Tool Hint Tests =====
+test('Tool hints for cat commands suggest read tool', (t) => {
+  const hintMatch = BashTool.TOOL_HINTS.find(({ pattern }) => {
+    if (pattern.endsWith('*'))
+      return 'cat file.txt'.startsWith(pattern.substring(0, pattern.length - 1));
+    return 'cat file.txt' === pattern;
+  });
+  t.assert.ok(hintMatch);
+  t.assert.equal(hintMatch.hint, 'read');
+});
+
+test('Tool hints for grep commands suggest grep tool', (t) => {
+  const hintMatch = BashTool.TOOL_HINTS.find(({ pattern }) => {
+    if (pattern.endsWith('*'))
+      return 'grep foo'.startsWith(pattern.substring(0, pattern.length - 1));
+    return 'grep foo' === pattern;
+  });
+  t.assert.ok(hintMatch);
+  t.assert.equal(hintMatch.hint, 'grep');
+});
+
+test('Tool hints for ls commands suggest ls tool', (t) => {
+  const hintMatch = BashTool.TOOL_HINTS.find(({ pattern }) => {
+    if (pattern.endsWith('*'))
+      return 'ls -la'.startsWith(pattern.substring(0, pattern.length - 1));
+    return 'ls -la' === pattern;
+  });
+  t.assert.ok(hintMatch);
+  t.assert.equal(hintMatch.hint, 'ls');
+});
+
+// ===== Handler Error Messages Tests =====
+test('handler returns error for forbidden commands', (t) => {
+  bashTool.readonly = false;
+  bashTool.handler({ command: 'rm -rf /' }, bashTool).then(result => {
+    t.assert.ok(result.includes('Error: command not allowed'));
+  });
+});
+
+test('handler returns error for cat with hint message', (t) => {
+  bashTool.readonly = false;
+  bashTool.handler({ command: 'cat file.txt' }, bashTool).then(result => {
+    t.assert.ok(result.includes('use "read" tool instead'));
+  });
+});
+
+test('handler returns error for sed with hint message', (t) => {
+  bashTool.readonly = false;
+  bashTool.handler({ command: 'sed -n "1p" file.txt' }, bashTool).then(result => {
+    t.assert.ok(result.includes('use "edit" tool instead'));
+  });
+});
+
+// ===== Message Method Tests =====
+test('message returns permitted command when single command', (t) => {
+  bashTool.readonly = false;
+  const result = bashTool.message([{ args: { command: 'node --test foo.test.js' } }]);
+  t.assert.ok(result.includes('Executing'));
+  t.assert.ok(result.includes('node --test'));
+});
+
+test('message mentions multiple commands when multiple permitted', (t) => {
+  bashTool.readonly = false;
+  const result = bashTool.message([
+    { args: { command: 'node --test foo.test.js' } },
+    { args: { command: 'git log HEAD ' } }
+  ]);
+  t.assert.ok(result.includes('Executing 2 commands'));
+  t.assert.ok(result.includes('node'));
+  t.assert.ok(result.includes('git'));
+});
+
+test('message filters out non-permitted commands', (t) => {
+  bashTool.readonly = false;
+  const result = bashTool.message([
+    { args: { command: 'node --test foo.test.js' } },
+    { args: { command: 'cat file.txt' } },
+    { args: { command: 'git status ' } }
+  ]);
+  t.assert.ok(result.includes('2 commands'));
+  t.assert.ok(!result.includes('cat'));
 });

@@ -18,13 +18,23 @@ class BashTool extends Tool {
   };
 
   static SAFE_BASH_CMDS = [
-    { pattern: 'npm run test', readonly: false },
-    { pattern: 'node --test *', readonly: false },
+    //{ pattern: 'npm run test', readonly: false },
+    { pattern: 'node --test *', readonly: true },
     { pattern: 'git log *', readonly: true },
     { pattern: 'git status *', readonly: true },
-    { pattern: 'head *', readonly: true },
-    { pattern: 'tail *', readonly: true},
+    { pattern: 'git diff *', readonly: true },
     { pattern: 'pwd', readonly: true }
+  ];
+  
+  static TOOL_HINTS = [
+    { pattern: 'cat <<*', hint: 'edit' },
+    { pattern: 'sed *', hint: 'edit' },
+    { pattern: 'cat *', hint: 'read' },
+    { pattern: 'head *', hint: 'read' },
+    { pattern: 'tail *', hint: 'read' },
+    { pattern: 'ls*', hint: 'ls' },
+    { pattern: 'find *', hint: 'ls' },
+    { pattern: 'grep *', hint: 'grep' },
   ];
 
   constructor(props) {
@@ -50,7 +60,18 @@ class BashTool extends Tool {
     const { command } = args;
 
     if (!this.permissionGate(command)) {
-      return 'Error: Command not permitted';
+      // Check for tool hints
+      const hintMatch = BashTool.TOOL_HINTS.find(({ pattern }) => {
+        if (pattern.endsWith('*'))
+          return command.startsWith(pattern.substring(0, pattern.length - 1));
+        return command === pattern;
+      });
+      
+      if (hintMatch) {
+        return `Error: command not allowed, use "${hintMatch.hint}" tool instead`;
+      }
+      
+      return `Error: command not allowed.`;
     }
 
     let p = new Promise((resolve, reject) => {
@@ -72,13 +93,12 @@ class BashTool extends Tool {
     const permittedCalls = calls.filter(c => this.permissionGate(c.args.command));
     
     if (permittedCalls.length === 0) {
-      //return 'No permitted commands to execute';
-      return null;
+      return 'No permitted commands to execute';
     }
     
     if (permittedCalls.length == 1) {
       let { command } = permittedCalls[0].args;
-      return `Executing ${ANSI.fg(command, 248)}`;
+      return `Executing ${ANSI.fg(command, 250)}`;
     }
     let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
         summary = summaries.join(', ');
