@@ -260,10 +260,11 @@ class Program {
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = `${(100 *(inputTokens + outputTokens) / this.config.get('contextWindow')).toFixed(0)}%`;
-    if (pct > 50) pct = ANSI.fg(pct, 3);
-    if (pct > 70) pct = ANSI.fg(pct, 1);
-    s += ` │ ${pct}`
+    pct = 100 * (inputTokens + outputTokens) / this.config.get('contextWindow');
+    if (pct > 50) c = 214;
+    if (pct > 70) c = 1;
+    pct = `${pct.toFixed(0)}%`;
+    s += ` │ ${c ? ANSI.fg(pct, c) : pct}`;
     txt.padding ||= { right: 1 };
     txt.content = s;
   }
