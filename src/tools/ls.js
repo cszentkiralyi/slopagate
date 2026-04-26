@@ -50,9 +50,27 @@ class LsTool extends Tool {
           .map(d => this.simplifyPath(d))
           .map(s => s.substring(0, s.length - 1)),
         dstr = dirnames.join(', ');
-    if (dstr.length > 20) dstr = dstr.substring(0, 40) + '...';
+    if (dstr.length > 40) dstr = dstr.substring(0, 40) + '...';
     return `Listing ${calls.length} directories (${dstr})`;
   }
 }
 
-module.exports = LsTool;
+module.exports = LsTool;found!`;
+    }
+  }
+  
+  message(calls) {
+    if (calls.length == 1) {
+      let { file_path, start_line, end_line } = calls[0].args, message = '';
+      if (start_line || end_line)
+        message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
+      return `Reading ${this.simplifyPath(file_path)}${message}`;
+    }
+    let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
+        fstr = filenames.join(', ');
+    if (fstr.length > 20) fstr = fstr.substring(0, 40) + '...';
+    return `Reading ${calls.length} files (${fstr})`;
+  }
+}
+
+module.exports = ReadTool;

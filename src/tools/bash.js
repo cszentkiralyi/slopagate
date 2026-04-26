@@ -104,12 +104,14 @@ class BashTool extends Tool {
     }
     
     if (permittedCalls.length == 1) {
-      let { command } = permittedCalls[0].args;
-      return `Executing ${ANSI.fg(command, 250)}`;
+      let { command } = permittedCalls[0].args,
+          summary = command;
+      if (summary.length > 40) summary = summary.substring(0, 40) + '...';
+      return `Executing ${ANSI.fg(summary, 250)}`;
     }
     let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
         summary = summaries.join(', ');
-    if (summary.length > 20) summary = summary.substring(0, 40) + '...';
+    if (summary.length > 40) summary = summary.substring(0, 40) + '...';
     return `Executing ${permittedCalls.length} commands (${summary})`;
   }
 }
