@@ -10,8 +10,10 @@ const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
+const Context = require('../lib/context.js');
 
 const { Logger } = require('../util.js');
+const Timers = require('../lib/timers.js');
 
 class Program {
   static SPINNER_MESSAGES = [
@@ -26,6 +28,10 @@ class Program {
     'Nuking production',
     'Babbling'
   ];
+
+  static AFK_TIMEOUT = 3 * 60 * 1000;
+
+  #userMessagesSinceRecap = 0;
 
   config;
   harness;
@@ -67,6 +73,8 @@ class Program {
     });
 
     let config = this.config = new Config(configData);
+    
+    this.timers = new Timers();
     
     this.md = new Slopdown({
       'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
@@ -170,7 +178,7 @@ class Program {
             content: result
           });
           break;
-        case 'normal':
+      case 'normal':
           if (input[0] === '/') {
             let [cmd, argstr] = input.substring(1).split(' ');
             await this.command(cmd, argstr);
@@ -180,6 +188,7 @@ class Program {
               role: 'user',
               content: inst.prompt + input
             });
+            this.#userMessagesSinceRecap++;
             this.interface.statusline.showSpinner(this.spinnerMessage);
             let estInputTok = this.harness.session.context.estimated_tokens,
                 lastInputTok = this.harness.inputTokens;
@@ -187,6 +196,7 @@ class Program {
               inputTokens: (estInputTok > lastInputTok) ? estInputTok : lastInputTok,
               outputTokens: this.harness.outputTokens
             });
+            this.#startAfkTimer();
           }
           break;
       }
@@ -194,6 +204,7 @@ class Program {
       this.interface.draw();
     };
     chatInput.onKey = async (k, later, inst) => {
+      this.#resetAfkTimer();
       if (this.interface.statusline.dismiss())
         later(() => this.interface.draw());
     };
@@ -239,6 +250,7 @@ class Program {
   }
   
   async dispose() {
+    this.timers.stop('afk');
     let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
     fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
     let json = this.harness.session.serialize();
@@ -308,6 +320,59 @@ class Program {
     };
     this.interface.statusline.showMessage(msg, true);
     this.interface.draw();
+  }
+
+  #startAfkTimer() {
+    this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
+  }
+
+  #resetAfkTimer() {
+    this.timers.stop('afk');
+    this.#startAfkTimer();
+  }
+
+  async #onAfkTimeout() {
+    // Not enough user activity to summarize
+    if (this.#userMessagesSinceRecap < 2) return;
+
+    // Filter to only 'user' and 'assistant' role messages first
+    const filteredMessages = this.harness.session.context.messages.filter(
+      m => m.role === 'user' || m.role === 'assistant'
+    );
+
+    // Get the 4 most recent filtered messages
+    const recentMessages = filteredMessages.slice(-4);
+    
+    // Not enough messages to be worth summarizing
+    if (recentMessages.length < 4) return;
+
+    // Convert to transcript string using toTranscript helper
+    let transcript = recentMessages
+      .map(m => Context.toTranscript(m))
+      .join('\n');
+
+    // Use send_private to avoid adding to history
+    let summaryMessage = { role: 'user', content: `Summarize this transcript into a 1-sentence recap:\n\n${transcript}` };
+    let summaryContext = new Context({
+      tools: {},
+      limits: {},
+      budgets: {},
+      messages: []
+    });
+
+    let summaryText = await this.harness.session.send_private(summaryContext, summaryMessage);
+
+    if (!summaryText || !summaryText.message || !summaryText.message.content) {
+      return;
+    }
+    let content = `🕮  Recap: ${summaryText.message.content.charAt(0).toLowercase()+summaryText.message.content.slice(1)}`;
+
+    // Add response as tool role message with 'Recap: ' prefix
+    this.interface.addMessage({
+      role: 'tool',
+      content: content,
+      padding: { left: 1, right: 1 }
+    });
   }
 }
 
