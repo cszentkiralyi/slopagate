@@ -14,6 +14,15 @@
 
 ## Backlog
 
+- [ ] Implement compaction layers
+  - [ ] `chat_importance` - x in [0,1], y in (0.1, 1]
+    `y =  min(1, 1 - (0.9 * e^(-((* x) - 0.5)^2 / (2 * (0.25)^2))))`
+  - [ ] `chat_summary` - reach out
+  - [ ] `system_prompt` - theoretical
+  - [x] `tool_age` - tested fine
+  - [x] `tool_error`
+  - [ ] `tool_length`
+  - [ ] `tool_redundancy`
 - [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
       to different files fucked stuff up
 - [ ] Security/permissions (nominal, not comprehensive; they're sanity checks)
