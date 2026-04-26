@@ -1,6 +1,7 @@
 const process = require('node:process');
 const path = require('node:path');
 const fsSync = require('node:fs');
+const os = require('node:os');
 const { exec } = require('node:child_process');
 
 const Events = require('../events.js');
@@ -53,6 +54,18 @@ class Program {
       contextWindow: process.env.SLOP_CONTEXT_WINDOW || 65536,
     };
     configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
+
+    const configPath = path.join(os.homedir(), '.slopagate', 'config.json');
+    let userConfig;
+    try {
+      userConfig = JSON.parse(fsSync.readFileSync(configPath, 'utf8'));
+    } catch {
+      userConfig = {};
+    }
+    Object.entries(userConfig).forEach(([k, v]) => {
+      configData[k] = v;
+    });
+
     let config = this.config = new Config(configData);
     
     this.md = new Slopdown({

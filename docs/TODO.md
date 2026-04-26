@@ -2,9 +2,6 @@
 
 ## Priority
 
-- [ ] Commands for config
-  - [x] Config framework
-  - [ ] Commands
 - [ ] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
 
@@ -52,7 +49,6 @@
 - [ ] Wait for `harness:ready`
 - [ ] Slash commands
   - [ ] /system to refresh system prompts
-  - [ ] /think to toggle thinking
   - [ ] /effort maybe
   - [ ] /plan to disable editing tools (need system prompt change?)
   - [ ] others?
