@@ -166,7 +166,7 @@ class Program {
         case 'shell':
           this.interface.addMessage({
             role: 'user',
-            content: inst.prompt + input
+            content: this.input_modes.find(m => m.name === inst.mode).prompt + input
           });
           let result = await new Promise((resolve) => {
             exec(input, (error, stdout, stderr) => {
@@ -186,7 +186,7 @@ class Program {
             Events.emit('user:message', { message: input });
             this.interface.addMessage({
               role: 'user',
-              content: inst.prompt + input
+              content: this.input_modes.find(m => m.name === inst.mode).prompt + input
             });
             this.#userMessagesSinceRecap++;
             this.interface.statusline.showSpinner(this.spinnerMessage);
@@ -313,11 +313,16 @@ class Program {
   }
 
   async compactCommand() {
-    let ctx = await this.harness.session.compact();
-    let msg = {
-      content: `Context compacted. Tokens: ↑${ctx.tokens_up} ↓${ctx.tokens_down} (est. ${ctx.estimated_tokens}).`,
-      fg: 'gray'
-    };
+    let old_up = this.harness.session.tokens_up,
+        old_down = this.harness.session.tokens_down,
+        ctx = await this.harness.session.compact(),
+        delta_up = ((ctx.tokens_up - old_up || 0)).toFixed(0),
+        delta_down = ((ctx.tokens_down - old_down) || 0).toFixed(0),
+        pct = (100 * ctx.estimated_tokens / ctx.limits.contextWindow).toFixed(0),
+        msg = {
+          content: `Context compacted: ↑${ctx.tokens_up} (${delta_up}) ↓${ctx.tokens_down} (${delta_down}) (${pct}%).`,
+          fg: 'gray'
+        };
     this.interface.statusline.showMessage(msg, true);
     this.interface.draw();
   }

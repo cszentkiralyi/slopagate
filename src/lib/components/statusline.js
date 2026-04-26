@@ -47,7 +47,7 @@ class Statusline extends HContainer {
   }
   
   showMessage(props, dismissable) {
-    this.#setLeftChild(new Text(props));
+    this.#setLeftChild(new Text(Object.assign({ paddign: { left: 1 } }, props)));
     this.dismissable = !!dismissable;
   }
   

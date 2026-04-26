@@ -122,7 +122,7 @@ class Session {
       model: this.model,
       think: (this.#config.think || false),
       stream: (this.#config.stream || false),
-      keep_alive: (this.#config.keep_alive || '8m'),
+      keep_alive: (this.#config.keep_alive || '5m'),
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;
