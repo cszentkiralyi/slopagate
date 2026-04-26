@@ -130,6 +130,10 @@ class Program {
       role: 'startup',
       content: `Model: ${this.config.get('model')}`
     });
+    this.interface.addMessage({
+      role: 'startup',
+      content: `Context window: ${this.config.get('contextWindow')}`
+    });
 
     let chatInput = this.interface.getById('chat-input');
     chatInput.modes = this.input_modes;
