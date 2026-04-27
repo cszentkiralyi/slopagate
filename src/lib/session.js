@@ -123,6 +123,7 @@ class Session {
       think: (this.#config.think || false),
       stream: (this.#config.stream || false),
       keep_alive: (this.#config.keep_alive || '5m'),
+      num_predict: (this.#config.keep_alive || 16384),
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;

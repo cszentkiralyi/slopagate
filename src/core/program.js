@@ -57,9 +57,11 @@ class Program {
       endpoint:'/api/chat',
 
       model: 'qwen3.5:9b-65k',
+      context_window: 65536,
+      num_predict: 16384,
+
       think: false,
-      stream: false,
-      context_window: 65536
+      stream: false
     };
     // User
     const configPath = path.join(os.homedir(), '.slopagate', 'config.json');
