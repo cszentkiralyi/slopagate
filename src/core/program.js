@@ -377,7 +377,7 @@ class Program {
       return;
     }
     let summaryContent = summaryResponse.message.content,
-        content = `🕮  ${summaryContent.slice}`;
+        content = `🕮  ${summaryContent}`;
     this.#userMessagesSinceRecap = 0;
     
     Logger.log(`Program: recap = ${content}`);
