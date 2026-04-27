@@ -47,7 +47,7 @@ class Session {
         tool_age: 5
       },
       budgets: {
-        generation: 2000
+        generation: (this.#config.context_window_length && this.#config.context_window_length * 0.1) || 2000
       },
       requestSummary: async (transcript) => {
         let summaryContext = new Context({
@@ -213,7 +213,8 @@ class Session {
       tools: {},
       limits: {},
       budgets: {},
-      messages: [{ role: 'user', content: transcript }]
+      messages: [{ role: 'user', content: transcript }],
+      requestSummary: this.#masterContext.requestSummary
     });
 
     let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
@@ -248,7 +249,8 @@ class Session {
         { role: 'user', content: summaryText },
         { role: 'assistant', content: 'I have the context I need now. Thank you.' },
         ...remaining
-      ]
+      ],
+      requestSummary: context.requestSummary
     });
 
     return newContext;

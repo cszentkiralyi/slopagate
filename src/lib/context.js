@@ -29,6 +29,11 @@ class Context {
   constructor(props) {
     Object.assign(this, props);
     
+    // Ensure requestSummary is bound to this, if provided
+    if (props.requestSummary) {
+      this.requestSummary = props.requestSummary.bind(this);
+    }
+    
     this.#estimate();
   }
   
@@ -49,6 +54,7 @@ class Context {
       limits: { ...this.limits },
       budgets: { ...this.budgets },
       messages: this.messages.map(m => { return { ...m }; }),
+      requestSummary: this.requestSummary ? this.requestSummary.bind(this) : null
     });
     await f.compact(layers);
     return f;
@@ -83,9 +89,6 @@ class Context {
     
     return this;
   }
-  // requestSummary(s: string) => string
-  // requestSummary: callback to hit the LLM agent
-
   #estimate({ system_prompt } = {}) {
     let diff;
     this.#other_tokens = this.system_prompt ? Context.estimateTokens(this.system_prompt) : 0;
@@ -106,7 +109,6 @@ class Context {
       });
     }
   }
-  
   static toTranscript(m) {
     return `${m.role}: ${m.content}`;
   }

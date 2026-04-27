@@ -37,10 +37,19 @@ const tool_error = ({ messages }) => {
       }
     }
     
-    // If 2 or more user messages in the past, replace content
-    if (userCount >= 2) {
-      Logger.log(`tool_error: compaction (tool=${msg.name}, userCount=${userCount})`);
+    // Check if this is a bash permission hint error
+    const isBashHint = msg.content.includes('use ') && msg.content.endsWith('tool instead');
+    const threshold = isBashHint ? 3 : 2;
+    
+    // If threshold or more user messages in the past, replace content
+    if (userCount >= threshold) {
+      Logger.log(`tool_error: compaction (tool=${msg.name}, userCount=${userCount}, threshold=${threshold}${isBashHint ? ' [BASH HINT]' : ''})`);
       msg.content = '[Error]';
+    }
+    
+    // Bash hint errors: log when NOT compacted (userCount < 3)
+    if (isBashHint && userCount < 3) {
+      Logger.log(`tool_error: keeping (tool=${msg.name}, userCount=${userCount}, threshold=${threshold} [BASH HINT])`);
     }
   }
   

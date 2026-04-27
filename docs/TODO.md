@@ -2,9 +2,11 @@
 
 ## Priority
 
-- [ ] Message queue, I think I'm choking Ollama with simultaneous requests
 - [ ] tool_error layer needs to be more-gracious about hints, those should stay
       in-context longer than regular "this didn't work" errors
+- [ ] Message queue, I think I'm choking Ollama with simultaneous requests
+- [ ] User aborts may not be aborting everything they need to, I think our various
+      summaries and stuff through back channels still need to be tied to the aborts.
 - [ ] Change "x user messages ago" in compact layers to "2-3x messages ago,"
       we don't get enough words in edgewise between tool calls so we have
       to deal with that
