@@ -47,20 +47,21 @@ class Program {
   }
 
   constructor({ banner }) {
+    // Defaults
     const configData = {
-      rootDirectory: process.env.PWD,
-      slopDirectory: process.env.SLOP_PROJECT_DIR || `${process.env.PWD}/.slop`,
+      root_dir: process.env.PWD,
+      slop_dir: `${process.env.PWD}/.slop`,
 
-      port: process.env.SLOP_PORT || 11434,
-      host: process.env.SLOP_HOST || 'http://127.0.0.1',
-      endpoint: process.env.SLOP_ENDPOINT || '/api/chat',
+      port: 11434,
+      host: 'http://127.0.0.1',
+      endpoint:'/api/chat',
 
-      model: process.env.SLOP_MODEL || 'qwen3.5:9b-65k',
+      model: 'qwen3.5:9b-65k',
       think: false,
-      contextWindow: process.env.SLOP_CONTEXT_WINDOW || 65536,
+      stream: false,
+      context_window: 65536
     };
-    configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
-
+    // User
     const configPath = path.join(os.homedir(), '.slopagate', 'config.json');
     let userConfig;
     try {
@@ -71,7 +72,15 @@ class Program {
     Object.entries(userConfig).forEach(([k, v]) => {
       configData[k] = v;
     });
+    // Env
+    if (process.env.SLOP_PROJECT_DIR) configData.slop_dir = process.env.SLOP_PROJECT_DIR;
+    if (process.env.SLOP_PORT) configData.port = parseInt(process.env.SLOP_PORT, 10);
+    if (process.env.SLOP_HOST) configData.host = process.env.SLOP_HOST;
+    if (process.env.SLOP_ENDPOINT) configData.endpoint = process.env.SLOP_ENDPOINT;
+    if (process.env.SLOP_MODEL) configData.model = process.env.SLOP_MODEL;
+    if (process.env.SLOP_CONTEXT_WINDOW) configData.context_window = parseInt(process.env.SLOP_CONTEXT_WINDOW, 10);
 
+    configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
     let config = this.config = new Config(configData);
     
     this.timers = new Timers();
@@ -88,10 +97,10 @@ class Program {
       {
         name: 'think',
         arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
-        handler: async (args) => await this.thinkCommand(args)
+        handler: async (args) => this.thinkCommand(args)
       },
-      { name: 'compact', handler: async () => await this.compactCommand() },
-      { name: 'recap', handler: async () => await this.recap() }
+      { name: 'compact', handler: async () => this.compactCommand() },
+      { name: 'recap', handler: async () => this.recap() }
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -107,7 +116,7 @@ class Program {
     
     let system_prompt_paths = [
       path.join(process.env.HOME, '.slopagate'),
-      this.config.get('slopDirectory')
+      this.config.get('slop_directory')
     ];
     let systemPrompt = null;
     system_prompt_paths.forEach(possiblePath => {
@@ -117,7 +126,7 @@ class Program {
         systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
         this.interface.addMessage({
           role: 'startup',
-          content: `System: ${path.relative(this.config.get('rootDirectory'), systemPath)}`
+          content: `System: ${path.relative(this.config.get('root_directory'), systemPath)}`
         });
       } catch (err) { /* don't care */ }
     });
@@ -141,7 +150,7 @@ class Program {
     });
     this.interface.addMessage({
       role: 'startup',
-      content: `Context window: ${this.config.get('contextWindow')}`
+      content: `Context window: ${this.config.get('context_window')}`
     });
 
     let chatInput = this.interface.getById('chat-input');
@@ -234,9 +243,7 @@ class Program {
     });
     Events.on('tool:message', (event) => {
       this.interface.addMessage({ role: 'tool', content: event.content });
-      (event.done)
-        ? this.interface.statusline.hide()
-        : this.interface.statusline.showSpinner(this.spinnerMessage);
+      if (!event.done) this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     });
     Events.on('model:response', (evt) => this.#resetAfkTimer());
@@ -280,7 +287,7 @@ class Program {
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = 100 * (inputTokens + outputTokens) / this.config.get('contextWindow');
+    pct = 100 * (inputTokens + outputTokens) / this.config.get('context_window');
     if (pct > 50) c = 214;
     if (pct > 70) c = 1;
     pct = `${pct.toFixed(0)}%`;
@@ -328,7 +335,7 @@ class Program {
         ctx = await this.harness.session.compact(),
         delta_up = ((ctx.tokens_up - old_up || 0)).toFixed(0),
         delta_down = ((ctx.tokens_down - old_down) || 0).toFixed(0),
-        pct = (100 * ctx.estimated_tokens / ctx.limits.contextWindow).toFixed(0),
+        pct = (100 * ctx.estimated_tokens / ctx.limits.context_window).toFixed(0),
         msg = {
           content: `Context compacted: ↑${ctx.tokens_up} (${delta_up}) ↓${ctx.tokens_down} (${delta_down}) (${pct}%).`,
           fg: 'gray'

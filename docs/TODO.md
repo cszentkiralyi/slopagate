@@ -10,15 +10,22 @@
 - [ ] Change "x user messages ago" in compact layers to "2-3x messages ago,"
       we don't get enough words in edgewise between tool calls so we have
       to deal with that
-- [ ] I think during an agent turn, more than one message might have `done`,
+- [x] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
+      **Update**: This is true.
 - [ ] Tool truncation needs to be hitting tool _calls_ too, the LLMs are spitting
-      out big strings, not just reading big files
+      out big strings, not just reading big files. Maybe we track "seen" files
+      and kill not-most-recent-for-the-file edit calls?
 - [ ] FG + BG text looses FG after line wrap (code blocks in model responses,
       model errors)
-- [ ] Insert recaps into context as role:'assistant' messages, but then we also
-      need to make a filter mechanism... not every message should be counter for
-      all 'how many assistant messages?' thing right?
+- [ ] Clean up for a more-stable alpha-2
+  - [ ] TextInput: up/down history
+  - [ ] TextInput: cursor can get lost 1 index behind first character
+  - [ ] TextInput: typing lag?
+  - [ ] Optimization: less per-layer logging, just time entire compact run
+  - [ ] Optimization: "freeze" chat history we know won't change, which parent
+        containers treat as never-dirty and always use `child._lines` w/ a full
+        skip
 
 ## Backlog
 
@@ -38,6 +45,9 @@
   - [ ] `tool_redundancy`
 - [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
       to different files fucked stuff up
+- [ ] Insert recaps into context as role:'assistant' messages, but then we also
+      need to make a filter mechanism... not every message should be counter for
+      all 'how many assistant messages?' thing right?
 - [ ] Context compaction/engineering
   - [ ] unread to compact reads
   - [ ] promptdoc to alter system prompt

@@ -1,3 +1,5 @@
+const { Logger } = require('../../util.js');
+
 const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, estimated_tokens, requestSummary, toTranscript }) => {
   // Check if we have at least 4 messages; if not, return as-is
   if (messages.length < 4) {
@@ -47,6 +49,7 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     ...latestMessages
   ];
 
+  Logger.log(`chat_summary: got summery ${summaryText}`);
   Logger.log(`chat_summary: compacted (replaced ${summarizeArray.length} messages with summary)`);
   return { messages: newMessages, system_prompt, tools, limits, budgets, estimated_tokens };
 };
