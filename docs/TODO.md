@@ -2,7 +2,7 @@
 
 ## Priority
 
-- [ ] tool_error layer needs to be more-gracious about hints, those should stay
+- [x] tool_error layer needs to be more-gracious about hints, those should stay
       in-context longer than regular "this didn't work" errors
 - [ ] Message queue, I think I'm choking Ollama with simultaneous requests
 - [ ] User aborts may not be aborting everything they need to, I think our various
@@ -12,6 +12,13 @@
       to deal with that
 - [ ] I think during an agent turn, more than one message might have `done`,
       the spinner is not showing up as consistently as I expected.
+- [ ] Tool truncation needs to be hitting tool _calls_ too, the LLMs are spitting
+      out big strings, not just reading big files
+- [ ] FG + BG text looses FG after line wrap (code blocks in model responses,
+      model errors)
+- [ ] Insert recaps into context as role:'assistant' messages, but then we also
+      need to make a filter mechanism... not every message should be counter for
+      all 'how many assistant messages?' thing right?
 
 ## Backlog
 

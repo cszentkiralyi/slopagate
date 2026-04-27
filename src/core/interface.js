@@ -135,7 +135,7 @@ class Interface {
       textProps = {
         id, content,
         fg: 250,
-        padding: { top: 1, left: 2, right: 2, bottom: 1 }
+        padding: { left: 2, right: 2 }
       };
     } else if (role === 'system') {
       textProps = { id, content };
