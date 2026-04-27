@@ -50,6 +50,12 @@ class GrepTool extends Tool {
       paths.add(c.file_path);
       patterns.add(c.search_string);
     })
+    // When only 1 file or 1 pattern, use single-call message
+    if (paths.size == 1 || patterns.size == 1) {
+      let { file_path, search_string } = calls[0].args,
+          s = JSON.stringify(search_string);
+      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path)}`;
+    }
     return `Grep: searching ${paths.size} files for ${patterns.size} patterns`;
   }
 }
