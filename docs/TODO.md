@@ -27,7 +27,7 @@
   - [ ] `system_prompt` - theoretical
   - [x] `tool_age` - tested fine
   - [x] `tool_error`
-  - [ ] `tool_length`
+  - [x] `tool_length`
   - [ ] `tool_redundancy`
 - [ ] Each `edit` file should be a unique temp file; two simultaneous edit calls
       to different files fucked stuff up
