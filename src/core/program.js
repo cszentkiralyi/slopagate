@@ -203,7 +203,7 @@ class Program {
             let estInputTok = this.harness.session.context.estimated_tokens,
                 lastInputTok = this.harness.inputTokens;
             this.updateStatuslineTokens({
-              inputTokens: (estInputTok > lastInputTok) ? estInputTok : lastInputTok,
+              inputTokens: estInputTok,
               outputTokens: this.harness.outputTokens
             });
             this.#startAfkTimer();
