@@ -6,7 +6,7 @@ const fs = require('node:fs/promises');
 const Tool = require('./tool.js');
 
 class LsTool extends Tool {
-  name = 'ls';
+  name = 'Ls';
   description = 'List files and folders in a directory.';
   ttl = 2;
   readonly =  true;

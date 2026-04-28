@@ -8,7 +8,7 @@ class EditTool extends Tool {
   static ADD_COLOR = 70;
   static REM_COLOR = 160;
 
-  name = 'edit';
+  name = 'Edit';
   description = 'Make edits to a text file by replacing old_str with new_str in a file. The strings must differ. If a file doesn\'t exist it will be created.';
   parameters = {
     type: 'object',

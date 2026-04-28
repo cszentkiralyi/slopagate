@@ -6,7 +6,7 @@ const ANSI = require('../lib/ansi.js');
 const Tool = require('./tool.js');
 
 class BashTool extends Tool {
-  name = 'bash';
+  name = 'Bash';
   description = 'Execute a limited set of shell commands: ';
   readonly = false;
   parameters = {
@@ -32,14 +32,14 @@ class BashTool extends Tool {
   ];
   
   static TOOL_HINTS = [
-    { pattern: 'cat <<*', hint: 'edit' },
-    { pattern: 'sed *', hint: 'edit' },
-    { pattern: 'cat *', hint: 'read' },
-    { pattern: 'head *', hint: 'read' },
-    { pattern: 'tail *', hint: 'read' },
-    { pattern: 'ls*', hint: 'ls' },
-    { pattern: 'find *', hint: 'ls' },
-    { pattern: 'grep *', hint: 'grep' },
+    { pattern: 'cat <<*', hint: 'Edit' },
+    { pattern: 'sed *', hint: 'Edit' },
+    { pattern: 'cat *', hint: 'Read' },
+    { pattern: 'head *', hint: 'Read' },
+    { pattern: 'tail *', hint: 'Read' },
+    { pattern: 'ls*', hint: 'Ls' },
+    { pattern: 'find *', hint: 'Ls' },
+    { pattern: 'grep *', hint: 'Grep' },
   ];
 
   constructor(props) {

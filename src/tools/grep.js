@@ -3,7 +3,7 @@ const { execSync } = require('node:child_process');
 const Tool = require('./tool.js');
 
 class GrepTool extends Tool {
-  name = 'grep';
+  name = 'Grep';
   description = 'Search for a pattern in a file and return matching lines.';
   ttl = 3;
   readonly = true;

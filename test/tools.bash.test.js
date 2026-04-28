@@ -44,7 +44,7 @@ test('Tool hints for cat commands suggest read tool', (t) => {
     return 'cat file.txt' === pattern;
   });
   t.assert.ok(hintMatch);
-  t.assert.equal(hintMatch.hint, 'read');
+  t.assert.equal(hintMatch.hint, 'Read');
 });
 
 test('Tool hints for grep commands suggest grep tool', (t) => {
@@ -54,7 +54,7 @@ test('Tool hints for grep commands suggest grep tool', (t) => {
     return 'grep foo' === pattern;
   });
   t.assert.ok(hintMatch);
-  t.assert.equal(hintMatch.hint, 'grep');
+  t.assert.equal(hintMatch.hint, 'Grep');
 });
 
 test('Tool hints for ls commands suggest ls tool', (t) => {
@@ -64,7 +64,7 @@ test('Tool hints for ls commands suggest ls tool', (t) => {
     return 'ls -la' === pattern;
   });
   t.assert.ok(hintMatch);
-  t.assert.equal(hintMatch.hint, 'ls');
+  t.assert.equal(hintMatch.hint, 'Ls');
 });
 
 // ===== Handler Error Messages Tests =====
@@ -77,13 +77,13 @@ test('handler returns error for forbidden commands', async (t) => {
 test('handler returns error for cat with hint message', async (t) => {
   bashTool.readonly = false;
   const result = await bashTool.handler({ command: 'cat file.txt' }, bashTool);
-  t.assert.ok(result.includes('use "read" tool instead'));
+  t.assert.ok(result.includes('use "Read" tool instead'));
 });
 
 test('handler returns error for sed with hint message', async (t) => {
   bashTool.readonly = false;
   const result = await bashTool.handler({ command: 'sed -n "1p" file.txt' }, bashTool);
-  t.assert.ok(result.includes('use "edit" tool instead'));
+  t.assert.ok(result.includes('use "Edit" tool instead'));
 });
 
 // ===== Message Method Tests =====
