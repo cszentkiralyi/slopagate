@@ -2,17 +2,13 @@
 
 ## Priority
 
-- [x] tool_error layer needs to be more-gracious about hints, those should stay
-      in-context longer than regular "this didn't work" errors
-- [ ] Message queue, I think I'm choking Ollama with simultaneous requests
+- [ ] Layers aren't getting tool lists
+- [x] Finish skills, at least as commands
 - [ ] User aborts may not be aborting everything they need to, I think our various
       summaries and stuff through back channels still need to be tied to the aborts.
 - [ ] Change "x user messages ago" in compact layers to "2-3x messages ago,"
       we don't get enough words in edgewise between tool calls so we have
       to deal with that
-- [x] I think during an agent turn, more than one message might have `done`,
-      the spinner is not showing up as consistently as I expected.
-      **Update**: This is true.
 - [ ] Tool truncation needs to be hitting tool _calls_ too, the LLMs are spitting
       out big strings, not just reading big files. Maybe we track "seen" files
       and kill not-most-recent-for-the-file edit calls?
