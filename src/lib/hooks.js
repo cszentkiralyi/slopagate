@@ -83,6 +83,24 @@ class Hooks {
   }
 
   /**
+   * Trigger all registered handlers for a hook, collecting results
+   * @param {string} name - Hook name
+   * @param {...any} args - Arguments to pass to handlers
+   * @returns {any[]} Array of handler return values
+   */
+  emitWithResults(name, ...args) {
+    if (!this.#isValidHook(name)) {
+      throw new Error(`Invalid hook: ${name}`);
+    }
+    const handlers = this.#handlers.get(name) || [];
+    const results = [];
+    for (const handler of handlers) {
+      results.push(handler(...args));
+    }
+    return results;
+  }
+
+  /**
    * Unregister a handler by exact function reference
    * @param {string} name - Hook name
    * @param {function} fn - Handler function to remove

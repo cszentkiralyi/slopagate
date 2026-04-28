@@ -145,6 +145,8 @@ class Program {
       }
     });
 
+    this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
+
 
     this.interface.addMessage({
       role: 'startup',
@@ -337,6 +339,11 @@ class Program {
     this.interface.statusline.spinner.stop();
     this.interface.statusline.showMessage(msg, true);
     this.interface.draw();
+  }
+
+  async hookToolCall({ toolCall }) {
+    // TODO: implement
+    return null;
   }
 
   async recap() {

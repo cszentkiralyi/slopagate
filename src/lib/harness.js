@@ -6,6 +6,7 @@ const Session = require('./session.js');
 const Context = require('./context.js');
 const Toolbox = require('./toolbox.js');
 const Timers = require('./timers.js');
+const Hooks = require('./hooks.js');
 
 const { Logger } = require('../util.js');
 
@@ -46,6 +47,8 @@ class Harness {
     Events.on('user:abort', (event) => this.onUserAbort(event));
     Events.on('model:response', (event) => this.onModelResponse(event));
     Events.on('tool_calls:response', (event) => this.onToolsResponse(event));
+    
+    this.hooks = new Hooks({ hooks: ['tool-call'] });
     
     this.toolbox = new Toolbox([
       new ReadTool(),
@@ -151,6 +154,40 @@ class Harness {
           eventsByName[name] ||= [];
           eventsByName[name].push(event);
           //Logger.log(`tool_call: ${JSON.stringify(call)}`);
+          
+          // Emit hook before tool:call event
+          let cancelled = false;
+          let cancelError = null;
+          let overrideResponse = null;
+          
+          try {
+            const results = this.hooks.emitWithResults('tool-call', { toolCall: call });
+            for (const result of results) {
+              if (result && result.cancelled) {
+                cancelled = true;
+                cancelError = result.error || null;
+                overrideResponse = result.response || null;
+                break;
+              }
+            }
+          } catch (err) {
+            cancelled = true;
+            cancelError = err;
+          }
+          
+          if (cancelled) {
+            Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
+            if (overrideResponse) {
+              Events.emit('tool:response', {
+                id,
+                role: 'tool',
+                tool_name: name,
+                content: typeof overrideResponse === 'string' ? overrideResponse : JSON.stringify(overrideResponse)
+              });
+            }
+            continue;
+          }
+          
           Events.emit('tool:call', event);
 
           // Create a promise that resolves when the corresponding tool:response event is received
