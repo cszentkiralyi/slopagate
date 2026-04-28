@@ -34,6 +34,9 @@ class Program {
 
   #userMessagesSinceRecap = 0;
 
+  static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{4,}\.[a-zA-Z0-1]{3,}$/;
+  #exp_fileReadWhitelist = new Set();
+
   config;
   harness;
   interface;
@@ -227,6 +230,14 @@ class Program {
             this.#userMessagesSinceRecap++;
             this.interface.statusline.showSpinner(this.spinnerMessage);
             this.#startAfkTimer();
+            
+            for (let word in input.split(' ')) {
+              // Old-school MS-DOS nnnn.ext is the minimum
+              if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
+              if (EXP_FILE_REGEX.test(word)) {
+                #exp_fileReadWhitelist.add(word);
+              }
+            }
           }
           break;
       }
@@ -367,7 +378,31 @@ class Program {
   }
 
   async hookToolCall({ toolCall }) {
-    // TODO: implement
+    if (!toolCall || !toolCall.function
+        || (toolCall.function.name !== 'grep'
+            && toolCall.function.name !== 'read')
+        || !toolCall.arguments || !toolCall.arguments.file_path
+        || !toolCall.arguments.file_path.length)
+      return null;
+
+    
+    const path = call.function.arguments.file_path;
+    for (let word in path.split(' ')) {
+      // Old-school MS-DOS nnnn.ext is the minimum
+      if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
+      if (!EXP_FILE_REGEX.test(word)) continue;
+      switch (toolCall.function.name) {
+        case 'read':
+          if (toolCall.function.arguments.start_line
+              || toolCall.function.arguments.end_line)
+            continue;
+          return { response: `Error: must use "grep" tool before reading "${word}.`};
+        case 'grep':
+          #exp_fileReadWhitelist.add(word);
+          break;
+      }
+    }
+
     return null;
   }
 

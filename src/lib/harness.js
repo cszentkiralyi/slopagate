@@ -163,10 +163,11 @@ class Harness {
           try {
             const results = this.hooks.emitWithResults('tool-call', { toolCall: call });
             for (const result of results) {
+              if (!result) continue;
+              overrideResponse = result.response || null;
               if (result && result.cancelled) {
                 cancelled = true;
                 cancelError = result.error || null;
-                overrideResponse = result.response || null;
                 break;
               }
             }
