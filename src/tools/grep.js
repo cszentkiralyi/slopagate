@@ -43,7 +43,7 @@ class GrepTool extends Tool {
     if (calls.length == 1) {
       let { file_path, search_string } = calls[0].args,
           s = JSON.stringify(search_string);
-      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path)}`;
+      return `Grep: ${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path || '.')}`;
     }
     let paths = new Set(), patterns = new Set();
     calls.forEach(c => {

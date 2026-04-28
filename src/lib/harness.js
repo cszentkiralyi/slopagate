@@ -19,6 +19,7 @@ class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
 
   #abortTarget = null;
+  // Lifetime counts
   #inputTokens = 0;
   #outputTokens = 0;
   #timers = new Timers();
@@ -107,10 +108,9 @@ class Harness {
 
     let { message, done } = response;
     
-    // According to Qwen3.5:9B, this is not accumulated.
     let p = response.prompt_eval_count;
     if (p !== null && p !== undefined && !Number.isNaN(p)) {
-      this.#inputTokens = p;
+      this.#inputTokens += p;
     }
     let e = response.eval_count;
     if (e !== null && e !== undefined && !Number.isNaN(e)) {

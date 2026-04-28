@@ -116,9 +116,13 @@ class Program {
     });
 
     
+    this.interface.addMessage({
+      role: 'startup',
+      content: `Project directory: ${path.relative(this.config.get('root_dir'), this.config.get('slop_dir'))}`
+    });
     let system_prompt_paths = [
       path.join(process.env.HOME, '.slopagate'),
-      this.config.get('slop_directory')
+      this.config.get('slop_dir')
     ];
     let systemPrompt = null;
     system_prompt_paths.forEach(possiblePath => {
@@ -193,7 +197,7 @@ class Program {
       case 'normal':
           if (input[0] === '/') {
             let [cmd, argstr] = input.substring(1).split(' ');
-            await this.command(cmd, argstr);
+            this.command(cmd, argstr);
           } else {
             Events.emit('user:message', { message: input });
             this.interface.addMessage({
@@ -202,12 +206,6 @@ class Program {
             });
             this.#userMessagesSinceRecap++;
             this.interface.statusline.showSpinner(this.spinnerMessage);
-            let estInputTok = this.harness.session.context.estimated_tokens,
-                lastInputTok = this.harness.inputTokens;
-            this.updateStatuslineTokens({
-              inputTokens: estInputTok,
-              outputTokens: this.harness.outputTokens
-            });
             this.#startAfkTimer();
           }
           break;
@@ -300,17 +298,12 @@ class Program {
   
   async command(name, args) {
     let cmd = this.commands
-      ? this.commands.filter(c => c.name === name)
+      ? this.commands.find(c => c.name === name)
       : null;
-    if (!cmd || !cmd.length) {
+    if (!cmd) {
       this.interface.addMessage({ role: 'system', content: `Unknown command "${name}".` });
       return;
     }
-    if (cmd.length > 1) {
-      this.interface.addMessage({ role: 'system', content: `Ambiguous command "${name}"` });
-      return;
-    }
-    cmd = cmd[0];
     
     await cmd.handler(args);
   }
@@ -332,14 +325,12 @@ class Program {
 
   async compactCommand() {
     Logger.log(`compactCommand`);
-    let old_up = this.harness.session.context.tokens_up,
-        old_down = this.harness.session.context.tokens_down,
+    let old_tok = this.harness.session.context.estimated_tokens,
         ctx = await this.harness.session.compact(),
-        delta_up = ((ctx.tokens_up - old_up || 0)).toFixed(0),
-        delta_down = ((ctx.tokens_down - old_down) || 0).toFixed(0),
+        delta_up = ((ctx.estimated_tokens - old_tok || 0)).toFixed(0),
         pct = (100 * ctx.estimated_tokens / ctx.limits.context_window).toFixed(0),
         msg = {
-          content: `Context compacted: ↑${ctx.tokens_up} (${delta_up}) ↓${ctx.tokens_down} (${delta_down}) (${pct}%).`,
+          content: `Context compacted: ${ctx.tokens_up} ${delta_up} (now ${pct}%).`,
           fg: 'gray'
         };
     this.interface.statusline.showMessage(msg, true);

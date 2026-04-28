@@ -18,6 +18,7 @@ class Session {
   #abortControllers = null;
 
   tools;
+
   get history() { return this.#masterContext.messages; }
   get messages() { return this.#activeContext.messages; }
   set messages(m) { this.#activeContext.messages = m; }

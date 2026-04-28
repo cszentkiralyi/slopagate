@@ -96,7 +96,7 @@ class Context {
         && (diff = Context.estimateTokens(system_prompt) - this.#other_tokens)) {
       this.#other_tokens += diff;
     } else {
-      let tok
+      let tok;
       this.#tokens_up = 0;
       this.#tokens_down = 0;
       this.messages.forEach(m => {
