@@ -50,6 +50,7 @@ const tool_length = ({ messages, tools }) => {
       
       // If truncation is needed, replace content with truncated version
       const trimmedContent = `${TRIM_MSG}\n${middleContent.substring(0, maxLength)}\n${TRIM_MSG}`;
+      Logger.log(`tool_length: trimming from ${msg.content.length} to ${trimmedContent.length})`);
       msg.content = trimmedContent;
     }
   }

@@ -1,6 +1,7 @@
 const { Logger } = require('../../util.js');
 
 const system_prompt = ({ messages, system_prompt, limits, estimated_tokens }) => {
+  /*
   if (!system_prompt || !system_prompt.length
     || !limits || !limits.system_prompt
     || estimated_tokens < limits.system_prompt) {
@@ -19,6 +20,7 @@ const system_prompt = ({ messages, system_prompt, limits, estimated_tokens }) =>
   // We currently allow overshooting if there's no newline.
   Logger.log(`system_prompt: returning (kept ${lines.length} lines)`);
   return { system_prompt: lines.join('\n') };
+  */
 };
 
 module.exports = system_prompt;
