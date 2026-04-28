@@ -11,6 +11,7 @@ const Harness = require('../lib/harness.js');
 const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
 const Context = require('../lib/context.js');
+const Skills = require('../lib/skills.js');
 
 const { Logger } = require('../util.js');
 const Timers = require('../lib/timers.js');
@@ -85,6 +86,14 @@ class Program {
     configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
     let config = this.config = new Config(configData);
     
+    
+    this.skills = new Skills();
+    let skillsFiles = fsSync.globSync(path.join(this.config.get('slop_dir'), 'skills', '*', 'SKILL.md'));
+    if (skillsFiles.length > 0) {
+      let skillFiles = skillsFiles.map(skillPath => fsSync.readFileSync(skillPath, 'utf-8'));
+      this.skills.addSkills(skillFiles);
+    }
+    
     this.timers = new Timers();
     
     this.md = new Slopdown({
@@ -102,17 +111,26 @@ class Program {
         handler: async (args) => this.thinkCommand(args)
       },
       { name: 'compact', handler: async () => this.compactCommand() },
-      { name: 'recap', handler: async () => this.recap() }
+      { name: 'recap', handler: async () => this.recap() },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
       { name: 'shell', prompt: '! ', trigger: '!' }
     ];
 
+    this.skills.names.forEach(skillName => {
+      this.commands.push({
+        name: skillName,
+        // TODO: implement this.handleSkill
+        handler: async (args) => this.handleSkill(skillName, args),
+        hint: this.skills.get(skillName).description
+      });
+    });
+
 
     this.interface = new Interface({
       banner: { content: ANSI.bold(banner), fg: 'white' },
-      commands: this.commands.map(c => ({ name: c.name, arguments: c.arguments }))
+      commands: this.commands.map(c => ({ name: c.name, arguments: c.arguments, hint: c.hint }))
     });
 
     
@@ -256,6 +274,13 @@ class Program {
       this.interface.draw();
     });
     this.updateStatuslineTokens({ inputTokens: 0, outputTokens: 0 });
+
+    if (this.skills.names.length) {
+      this.interface.addMessage({
+        role: 'startup',
+        content: `Skills: loaded ${this.skills.names.length} skills`
+      });
+    }
 
     this.interface.addMessage({ role: 'system', content: `Started session ${this.harness.session.id}.` });
     this.interface.draw();

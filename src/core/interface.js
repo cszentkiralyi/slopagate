@@ -158,34 +158,49 @@ class Interface {
       s = s.substring(1), slen = s.length;
       this.commands.forEach(cmd => {
         len = cmd.name.length;
-        if (len > slen && cmd.name.startsWith(s))
+        if (len > slen && cmd.name.startsWith(s)) {
           hints.push(cmd.name.substring(slen));
+          if (cmd.hint) {
+            // Doesn't get picked :/
+            hints.push(cmd.name.substring(slen) + ' ' + cmd.hint);
+          }
+        }
         // Check for argument hints
         else if (s.startsWith(cmd.name)) {
-          let words = s.substring(cmd.name.length + 1).split(' '),
+          let astr = s.substring(cmd.name.length + 1),
+              words = astr.split(' '),
               wordCount = words.length - (words[words.length - 1] === '' ? 1 : 0);
           if (cmd.arguments && wordCount < cmd.arguments.length) {
             let arg = cmd.arguments[wordCount];
             if (arg) {
               hints.push(arg.possible ? arg.possible.join('|') : arg.name);
             }
+          } 
+          if (cmd.hint && len == slen) {
+            hints.push(' ' + cmd.hint);
           }
         }
       });
     }
     
     if (hints.length) {
+      let allSubsets = true;
       hints.sort((a, b) => {
         let la = a.length, lb = b.length;
-        if (la < lb) return -1;
-        if (lb < la) return 1;
+        allSubsets = allSubsets && (a.startsWith(b) || b.startsWith(a));
         let r, i;
         for (i = 0; i < la && i < lb; i++) {
-          r = b[i] - a[i];
+          //r = a[i] - b[i];
+          r = a.charCodeAt(i) - b.charCodeAt(i);
           if (r != 0) return r;
         }
+        if (la > lb) return -1;
+        if (lb > la) return 1;
         return r;
       });
+      // Pick longest
+      if (allSubsets) return hints[hints.length - 1];
+      // Pick shortest
       return hints[0];
     }
     return null;
