@@ -112,7 +112,7 @@ class BashTool extends Tool {
     
     if (permittedCalls.length == 1) {
       let { command } = permittedCalls[0].args,
-          summary = command.replace('\n', ' ');
+          summary = command.replaceAll('\n', '\\n');
       if (summary.length > 40) summary = summary.substring(0, 40) + '...';
       return `Executing ${ANSI.fg(summary, 250)}`;
     }

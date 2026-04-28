@@ -41,7 +41,7 @@ class EditTool extends Tool {
         await fs.rm(temp_path);
         return `Edited "${file_path}" successfully.`;
       }
-      return `Error: old_str not found in file!`;
+      return `Error: old_str not found in file, must match exactly`;
     } catch (editErr) {
       if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
       
