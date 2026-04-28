@@ -287,7 +287,7 @@ class Program {
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = 100 * (inputTokens + outputTokens) / this.config.get('context_window');
+    pct = 100 * this.harness.session.context.estimated_tokens / this.config.get('context_window');
     if (pct > 50) c = 214;
     if (pct > 70) c = 1;
     pct = `${pct.toFixed(0)}%`;
@@ -325,6 +325,7 @@ class Program {
 
   async compactCommand() {
     Logger.log(`compactCommand`);
+    this.interface.statusline.showSpinner('Compacting...');
     let old_tok = this.harness.session.context.estimated_tokens,
         ctx = await this.harness.session.compact(),
         delta_up = ((ctx.estimated_tokens - old_tok || 0)).toFixed(0),
@@ -333,6 +334,7 @@ class Program {
           content: `Context compacted: ${ctx.tokens_up} ${delta_up} (now ${pct}%).`,
           fg: 'gray'
         };
+    this.interface.statusline.spinner.stop();
     this.interface.statusline.showMessage(msg, true);
     this.interface.draw();
   }
