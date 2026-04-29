@@ -137,10 +137,6 @@ class Program {
     });
 
     
-    this.interface.addMessage({
-      role: 'startup',
-      content: `Project directory: ${path.relative(this.config.get('root_dir'), this.config.get('slop_dir'))}`
-    });
     let system_prompt_paths = [
       path.join(process.env.HOME, '.slopagate'),
       this.config.get('slop_dir')
@@ -160,15 +156,19 @@ class Program {
 
     this.harness = new Harness({
       session: {
-        model: this.config.get('model'),
-        connection: this.config.get('connection'),
+        config: this.config,
         systemPrompt: systemPrompt
-      }
+      },
+      config: this.config
     });
 
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
 
 
+    this.interface.addMessage({
+      role: 'startup',
+      content: `Provider: ${this.config.get('provider')}`
+    });
     this.interface.addMessage({
       role: 'startup',
       content: `Connection: ${this.config.get('connection')}`
@@ -235,7 +235,7 @@ class Program {
               // Old-school MS-DOS nnnn.ext is the minimum
               if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
               if (EXP_FILE_REGEX.test(word)) {
-                #exp_fileReadWhitelist.add(word);
+                this.#exp_fileReadWhitelist.add(word);
               }
             }
           }
@@ -379,8 +379,8 @@ class Program {
 
   async hookToolCall({ toolCall }) {
     if (!toolCall || !toolCall.function
-        || (toolCall.function.name !== 'grep'
-            && toolCall.function.name !== 'read')
+        || (toolCall.function.name !== 'Grep'
+            && toolCall.function.name !== 'Read')
         || !toolCall.arguments || !toolCall.arguments.file_path
         || !toolCall.arguments.file_path.length)
       return null;
@@ -392,13 +392,13 @@ class Program {
       if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
       if (!EXP_FILE_REGEX.test(word)) continue;
       switch (toolCall.function.name) {
-        case 'read':
+        case 'Read':
           if (toolCall.function.arguments.start_line
               || toolCall.function.arguments.end_line)
             continue;
-          return { response: `Error: must use "grep" tool before reading "${word}.`};
-        case 'grep':
-          #exp_fileReadWhitelist.add(word);
+          return { response: `Error: must use "Grep" tool before reading "${word}.`};
+        case 'Grep':
+          this.#exp_fileReadWhitelist.add(word);
           break;
       }
     }
@@ -430,12 +430,7 @@ class Program {
 
     // Use send_private to avoid adding to history
     let summaryMessage = { role: 'user', content: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:\n\n${transcript}` };
-    let summaryContext = new Context({
-      tools: {},
-      limits: {},
-      budgets: {},
-      messages: []
-    });
+    let summaryContext = new Context({ });
 
     let summaryResponse = await this.harness.session.send_private(summaryContext, summaryMessage);
 

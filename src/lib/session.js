@@ -24,31 +24,30 @@ class Session {
   set messages(m) { this.#activeContext.messages = m; }
   get context() { return this.#activeContext; }
   get id() { return this.#id; }
-  get model() { return this.#model; }
-  get think() { return this.#config.think; }
-  get connection() { return this.#connection; }
+  get model() { return this.#config.get('model'); }
+  get think() { return this.#config.get('think'); }
+  get connection() { return this.#config.get('connection'); }
   get systemPrompt() { return this.#systemPrompt; }
   get tempdir() { return this.#tempdir; }
   get temppath() { return this.#tempdir ? this.#tempdir.path : null; }
   
   constructor(props) {
     this.#id = props.id || ID();
-    this.#config = props.config || {};
-    this.#model = props.model;
-
-    this.#connection = props.connection;
+    this.#config = props.config || new Map();
     this.tools = props.tools || [];
+    
+    let ctx_window = this.#config.get('context_window_length');
     this.#masterContext = this.#activeContext = new Context({
       tools: this.tools.reduce((m, t) => {
         m[t.name] = { name: t.name, ttl: t.ttl };
         return m;
       }, {}),
       limits: {
-        window: this.#config.context_window_length,
+        window: ctx_window,
         tool_age: 5
       },
       budgets: {
-        generation: (this.#config.context_window_length && this.#config.context_window_length * 0.1) || 2000
+        generation: ctx_window ? (ctx_window * 0.2) : 2000
       },
       requestSummary: async (transcript) => {
         let summaryContext = new Context({
@@ -79,22 +78,6 @@ class Session {
     }
   }
 
-  setConfig(k, v) {
-    if (typeof this.#config === 'Map') {
-      this.#config.set(k, v);
-    } else {
-      this.#config[k] = v;
-    }
-  }
-
-  getConfig(k) {
-    if (typeof this.#config === 'Map') {
-      return this.#config.get(k);
-    } else {
-      return this.#config[k];
-    }
-  }
-  
   async dispose() {
     this.removeTempDir();
   }
@@ -121,10 +104,10 @@ class Session {
   async send_internal(messages, signal)  {
     let payload = {
       model: this.model,
-      think: (this.#config.think || false),
-      stream: (this.#config.stream || false),
-      keep_alive: (this.#config.keep_alive || '5m'),
-      num_predict: (this.#config.keep_alive || 16384),
+      think: (this.think || false),
+      stream: (this.stream || false),
+      keep_alive: (this.#config.get('keep_alive') || '5m'),
+      num_predict: (this.#config.get('num_predict') || 16384),
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;
@@ -155,7 +138,7 @@ class Session {
         && -1 < (idx = this.#abortControllers.indexOf(controller))) {
         this.#abortControllers.splice(idx, 1);
       }
-      return responseObj;
+      return this.normalizeResponse(responseObj);
     }
   }
 
@@ -165,6 +148,35 @@ class Session {
       ...context.messages,
       message
     ], signal);
+  }
+
+  normalizeResponse(response) {
+    const provider = this.#config.get('provider') || 'ollama';
+
+    if (provider === 'openai') {
+      // This documentation is absolutely atrocious on a 1080p display, whose idea
+      // was it to make you scroll all the way to the bottom to see more than a tiny
+      // fraction of the response example sidebar?? Absolute clown UX.
+      // <https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create>
+      const { usage } = response;
+      let message = response.choices && response.choices.length
+        ? response.choices[0].message
+        : null
+      if (message && message.tool_calls && message.tool_calls.length) {
+        message.tool_calls.forEach(tc => {
+          Logger.log(`tc = ${JSON.stringify(tc)}`);
+          tc.function.arguments = JSON.parse(tc.function.arguments);
+        });
+      }
+      return {
+        error: response.error,
+        message: message,
+        prompt_eval_count: usage.prompt_tokens,
+        eval_count: usage.completion_tokens
+      };
+    }
+    
+    return response;
   }
 
   /**

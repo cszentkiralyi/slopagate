@@ -19,9 +19,9 @@ class ReadTool extends Tool {
   parameters = {
     type: 'object',
     properties: {
-      file_path: { type: 'string '},
-      start_line: { type: 'integer '},
-      end_line: { type: 'integer '}
+      file_path: { type: 'string' },
+      start_line: { type: 'integer' },
+      end_line: { type: 'integer' }
     },
     required: [ 'file_path' ]
   };

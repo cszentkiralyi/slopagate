@@ -109,7 +109,7 @@ class Harness {
       return;
     }
 
-    let { message, done } = response;
+    let { message } = response;
     
     let p = response.prompt_eval_count;
     if (p !== null && p !== undefined && !Number.isNaN(p)) {
@@ -125,6 +125,7 @@ class Harness {
     });
     
     if (message.content || message.tool_calls) {
+      let done = !message.tool_calls;
       this.session.messages.push(message);
       if (done) {
         this.#abortTarget = null;
