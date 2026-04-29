@@ -33,6 +33,7 @@ class Program {
   static AFK_TIMEOUT = 3 * 60 * 1000;
 
   #userMessagesSinceRecap = 0;
+  #turn_start = 0;
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{4,}\.[a-zA-Z0-1]{3,}$/;
   #exp_fileReadWhitelist = new Set();
@@ -255,6 +256,8 @@ class Program {
               content: this.input_modes.find(m => m.name === inst.mode).prompt + input
             });
             this.#userMessagesSinceRecap++;
+            this.#turn_start = Date.now();
+            Events.emit('turn:model');
             this.interface.statusline.showSpinner(this.spinnerMessage);
             this.#startAfkTimer();
             
@@ -279,6 +282,7 @@ class Program {
 
 
     Events.on('user:abort', (event) => {
+      Events.emit('turn:user');
       this.interface.statusline.showMessage({
         content: '^C again to exit.',
         padding: { left: 1 },
@@ -297,6 +301,10 @@ class Program {
       (event.done)
         ? this.interface.statusline.hide()
         : this.interface.statusline.showSpinner(this.spinnerMessage);
+      this.interface.draw();
+    });
+    Events.on('turn:user', (event) => {
+      this.interface.statusline.spinner.hide();
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {

@@ -286,7 +286,7 @@ class Session {
     this.#activeContext.messages.push(...outgoing);
     
     this.#activeContext = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'tool_age', 'tool_redundancy', 'chat_importance', 'tool_error' ]
+      layers: [ 'system_prompt', 'chat_importance', 'tool_age', 'tool_length', 'tool_error' ]
     });
     
     return await this.send_internal([

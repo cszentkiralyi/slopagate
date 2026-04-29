@@ -128,6 +128,7 @@ class Harness {
       let done = !message.tool_calls;
       this.session.messages.push(message);
       if (done) {
+        Events.emit('turn:user');
         this.#abortTarget = null;
         this.#serializeSession();
       }
