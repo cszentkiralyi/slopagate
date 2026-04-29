@@ -1,4 +1,5 @@
 const TUI = require('../lib/tui.js');
+const { Logger } = require('../util.js');
 
 class Interface {
   static CLI_PROMPT = '❯ ';
@@ -173,10 +174,12 @@ class Interface {
           if (cmd.arguments && wordCount < cmd.arguments.length) {
             let arg = cmd.arguments[wordCount];
             if (arg) {
-              hints.push(arg.possible ? arg.possible.join('|') : arg.name);
+              let hint = (slen > cmd.name.length) ? '' : ' ';
+              hint += arg.possible ? arg.possible.join('|') : arg.name
+              hints.push(hint);
             }
           } 
-          if (cmd.hint && len == slen) {
+          if (cmd.hint && slen <= len) {
             hints.push(' ' + cmd.hint);
           }
         }

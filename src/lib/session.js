@@ -116,6 +116,12 @@ class Session {
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;
     
+    if (this.config.get('provider') === 'openai') {
+      if ('think' in payload) {
+        payload.chat_template_kwargs = `{"enable_thinking":${payload.think}}`;
+      }
+    }
+    
     if (signal) {
       controller = signal;
     } else {
@@ -171,13 +177,23 @@ class Session {
       const usage = (response && response.usage) || {};
       let message = response.choices && response.choices.length
         ? response.choices[0].message
-        : null
+        : null, endThink;
       if (message && message.tool_calls && message.tool_calls.length) {
         message.tool_calls.forEach(tc => {
           Logger.log(`tc = ${JSON.stringify(tc)}`);
           tc.function.arguments = JSON.parse(tc.function.arguments);
         });
       }
+
+      // On occasion, we get reasoning='thoughts....</think>main content' instead of
+      // having the reasoning & content split across the proper attributes.
+      if (message && message.reasoning_content.length && !message.content.length
+          && (endThink = message.reasoning_content.indexOf('</think>') > -1
+              && endthink < message.reasoning_content.length - 1 - 7)) {
+        message.reasoning_content = message.reasoning_content.slice(0, endThink);
+        message.content = message.reasoning_content.slice(endThink + 7);
+      }
+
       return {
         error: response.error ? response.error.message : null,
         message: message,

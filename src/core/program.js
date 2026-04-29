@@ -392,7 +392,7 @@ class Program {
     } else {
       this.config.set('think', bstr === 'true' || bstr === 'on');
     }
-    this.harness.session.setConfig('think', this.config.get('think'));
+    this.config.set('think', this.config.get('think'));
     let msg = {
       content: `Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`,
       fg: 'gray'
