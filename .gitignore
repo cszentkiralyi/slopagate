@@ -4,10 +4,10 @@
 # Build artifacts
 slop
 
-# Port artifacts
-legacy/
-
 # Temp files from running
 *.log
 json_log.json
 .sloptmp/
+
+# Misc
+bugs.jsonl

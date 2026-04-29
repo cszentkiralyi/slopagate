@@ -117,6 +117,7 @@ class Program {
       { name: 'compact', handler: async () => this.compactCommand() },
       { name: 'recap', handler: async () => this.recap() },
       { name: 'bug', handler: async (args) => this.bugCommand(args) },
+      { name: 'context', handler: async () => this.contextCommand() },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -413,6 +414,62 @@ class Program {
     this.interface.statusline.spinner.stop();
     this.interface.statusline.showMessage(msg, true);
     this.interface.draw();
+  }
+
+  contextCommand() {
+    let ctx = this.harness.session.context,
+        win = this.config.get('context_window'),
+        sysTok = ctx.other_tokens,
+        upTok = ctx.tokens_up,
+        //downTok = ctx.tokens_down,
+        genReserve = ctx.budgets.generation || (win * 0.2),
+        used = sysTok + upTok /*+ downTok*/,
+        totalUsed = used + (ctx.budgets?.generation || 0),
+        free = Math.max(0, win - totalUsed),
+        barLen = 40,
+        bar = '',
+        i, fillChar;
+
+    // Build the bar
+    let sysEnd = (sysTok / win) * barLen,
+        upEnd = sysEnd + (upTok / win) * barLen,
+        //downEnd = upEnd + (downTok / win) * barLen,
+        genEnd = /*downEnd*/ upEnd + (genReserve / win) * barLen;
+    for (i = 0; i < barLen; i++) {
+      if (i < sysEnd) {
+        fillChar = ANSI.fg('#', 9);   // red - system prompt
+      } else if (i < upEnd) {
+        fillChar = ANSI.fg('#', 11);  // yellow - input
+      //} else if (i < downEnd) {
+      //  fillChar = ANSI.fg('#', 12);  // blue - output
+      } else if (i < genEnd) {
+        fillChar = ANSI.fg('#', 5);   // purple - reserved for generation
+      } else {
+        fillChar = ANSI.fg('.', 238); // dim gray - free
+      }
+      bar += fillChar;
+    }
+    bar += ANSI.fg(']', 238);
+
+    let pct = ((totalUsed / win) * 100).toFixed(1);
+    let pctColor = totalUsed / win > 0.8 ? 1 : totalUsed / win > 0.6 ? 214 : null;
+
+    let lines = [
+      ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
+      ANSI.fg('[', 238) + bar,
+      `  ${ANSI.fg('#', 9)} system   ${sysTok} tokens`,
+      `  ${ANSI.fg('#', 11)} messages ${upTok} tokens`,
+      //`  ${ANSI.fg('#', 12)} output   ${downTok} tokens`,
+      `  ${ANSI.fg('#', 5)} reserve  ${genReserve} tokens (for generation)`,
+      `  ${ANSI.fg('.', 238)} free     ${free} tokens`,
+      `  ${ANSI.fg('─', 238)} window   ${win} tokens total`
+    ];
+
+    this.interface.addMessage({
+      role: 'tool',
+      content: lines.join('\n'),
+      padding: { left: 2, right: 2 }
+    });
   }
 
   async hookToolCall({ toolCall }) {
