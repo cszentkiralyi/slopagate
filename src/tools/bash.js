@@ -16,6 +16,8 @@ class BashTool extends Tool {
     },
     required: ['command']
   };
+  
+  static MAX_OUTPUT_LINES = 20;
 
   static SAFE_BASH_CMDS = [
     //{ pattern: 'npm run test', readonly: false },
@@ -90,7 +92,13 @@ class BashTool extends Tool {
           Logger.log(`BashTool: Command "${command}" returned error: ${stderr.trim()}`);
           resolve(stderr.trim());
         } else {
-          resolve(stdout || '');
+          let output = (stdout || '')
+              .trim()
+              .split('\n'),
+            sliced = output.slice(0, BashTool.MAX_OUTPUT_LINES),
+            missing = output.length - sliced.length;
+      if (missing) sliced.push(`...and ${missing} more.`);
+      resolve(sliced.join('\n'));
         }
       });
     });

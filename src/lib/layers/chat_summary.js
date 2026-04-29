@@ -1,7 +1,6 @@
 const { Logger } = require('../../util.js');
-const Context = require ('../context.js');
 
-const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, estimated_tokens, requestSummary, toTranscript }) => {
+const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, estimated_tokens, estimateTokens, requestSummary, toTranscript }) => {
   // Check if we have at least 4 messages; if not, return as-is
   if (messages.length < 4) {
     return { messages, system_prompt, tools, limits, budgets, estimated_tokens };
@@ -50,7 +49,7 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     ...latestMessages
   ];
 
-  let summaryTok = Context.estimateTokens(summaryText);
+  let summaryTok = estimateTokens(summaryText);
   Logger.log(`chat_summary: compacted (replaced ${summarizeArray.length} messages with ${summaryTok}-token summary)`);
   return { messages: newMessages, system_prompt, tools, limits, budgets, estimated_tokens };
 };

@@ -406,7 +406,7 @@ class Program {
 
   async hookToolCall({ toolCall }) {
     if (!toolCall || !toolCall.function
-        || (toolCall.function.name !== 'Grep'
+        || (toolCall.function.name !== 'StringSearch'
             && toolCall.function.name !== 'Read')
         || !toolCall.arguments || !toolCall.arguments.file_path
         || !toolCall.arguments.file_path.length)
@@ -423,8 +423,8 @@ class Program {
           if (toolCall.function.arguments.start_line
               || toolCall.function.arguments.end_line)
             continue;
-          return { response: `Error: must use "Grep" tool before reading "${word}.`};
-        case 'Grep':
+          return { response: `Error: must use "StringSearch" tool before reading "${word}.`};
+        case 'StringSearch':
           this.#exp_fileReadWhitelist.add(word);
           break;
       }

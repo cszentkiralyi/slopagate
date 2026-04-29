@@ -102,6 +102,10 @@ class Session {
   }
 
   async send_internal(messages, signal)  {
+    messages.forEach((m, idx)=> {
+      if (!m || !('content' in m))
+        throw new Error(`No message or message content! ${JSON.stringify(m)}, idx, ${JSON.stringify(messages)}`);
+    });
     let payload = {
       model: this.model,
       think: (this.think || false),

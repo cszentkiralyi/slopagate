@@ -3,7 +3,7 @@ const { execSync } = require('node:child_process');
 const Tool = require('./tool.js');
 
 class GrepTool extends Tool {
-  name = 'Grep';
+  name = 'StringSearch';
   description = 'Search for a pattern in a file and return matching lines.';
   ttl = 3;
   readonly = true;
@@ -26,8 +26,14 @@ class GrepTool extends Tool {
     let { file_path, search_string } = args;
 
     try {
-      const output = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`);
-      return output.toString().split('\n').slice(0, 20).join('\n');
+      const output = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`)
+              .toString()
+              .trim()
+              .split('\n'),
+            sliced = output.slice(0, 20),
+            missing = output.length - sliced.length;
+      if (missing) sliced.push(`...and ${missing} more.`);
+      return sliced.join('\n');
     } catch (err) {
       if (err.message?.includes('ENOENT')) {
         return `Error: file ${file_path} not found`;
