@@ -116,6 +116,7 @@ class Program {
       },
       { name: 'compact', handler: async () => this.compactCommand() },
       { name: 'recap', handler: async () => this.recap() },
+      { name: 'bug', handler: async (args) => this.bugCommand(args) },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -247,7 +248,9 @@ class Program {
           break;
       case 'normal':
           if (input[0] === '/') {
-            let [cmd, argstr] = input.substring(1).split(' ');
+            let parts = input.substring(1).split(' ');
+            let cmd = parts[0];
+            let argstr = parts.slice(1).join(' ');
             this.command(cmd, argstr);
           } else {
             Events.emit('user:message', { message: input });
@@ -487,6 +490,28 @@ class Program {
       content: content,
       padding: { left: 1, right: 1 }
     });
+  }
+
+  async bugCommand(description) {
+    if (!description || !description.length) {
+      this.interface.statusline.showMessage({
+        content: 'Usage: /bug <description>',
+        fg: 'gray'
+      }, true);
+      return;
+    }
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const entry = JSON.stringify({ description, timestamp });
+    try {
+      fsSync.appendFileSync('./bugs.jsonl', entry + '\n');
+    } catch (err) {
+      fsSync.writeFileSync('./bugs.jsonl', entry + '\n');
+    }
+    this.interface.statusline.showMessage({
+      content: `Bug logged: ${description}`,
+      fg: 'gray'
+    }, true);
   }
 
   #startAfkTimer() {
