@@ -149,7 +149,7 @@ class Program {
         systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
         this.interface.addMessage({
           role: 'startup',
-          content: `System: ${path.relative(this.config.get('root_directory'), systemPath)}`
+          content: `System: ${path.relative(this.config.get('root_dir'), systemPath)}`
         });
       } catch (err) { /* don't care */ }
     });
@@ -157,7 +157,7 @@ class Program {
     // Append SLOP.md files to the system prompt
     let slopMdPaths = [
       { path: path.join(this.config.get('root_dir'), 'SLOP.md'), label: 'project root' },
-      { path: path.join(os.homedir(), 'SLOP.md'), label: '~/.slopagate' }
+      { path: path.join(process.env.HOME, '.slopagate', 'SLOP.md'), label: '~/.slopagate' }
     ];
     let loadedSlopFiles = [];
     for (let { path: slopPath, label } of slopMdPaths) {
@@ -169,7 +169,7 @@ class Program {
           systemPrompt = slopContent;
         }
         let displayPath = label === 'project root'
-          ? path.relative(this.config.get('root_directory'), slopPath)
+          ? path.relative(this.config.get('root_dir'), slopPath)
           : label + '/SLOP.md';
         loadedSlopFiles.push(displayPath);
       } catch (err) { /* don't care */ }
