@@ -158,7 +158,8 @@ class Session {
       // was it to make you scroll all the way to the bottom to see more than a tiny
       // fraction of the response example sidebar?? Absolute clown UX.
       // <https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create>
-      const { usage } = response;
+      //const { usage } = response;
+      const usage = (response && response.usage) || {};
       let message = response.choices && response.choices.length
         ? response.choices[0].message
         : null

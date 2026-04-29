@@ -48,6 +48,7 @@ class Context {
   }
   
   async fork({ system_prompt, layers }) {
+    Logger.log(`Context.fork: passing on ${this.tools ? Object.keys(this.tools).length : 0} tools.`);
     let f = new Context({
       system_prompt: system_prompt || this.system_prompt, 
       tools: { ...this.tools },
@@ -68,19 +69,19 @@ class Context {
     let arg = {
       messages: this.messages,
       system_prompt: this.system_prompt,
-      tools: this.tools, // TODO: feed tool names, ttls
+      tools: Object.values(this.tools),
       limits: this.limits,
       budgets: this.budgets,
       estimated_tokens: this.estimated_tokens,
       requestSummary: (s) => this.requestSummary(s),
       toTranscript: (m) => Context.toTranscript(m),
       estimateTokens: (s) => Context.estimateTokens(s)
-    }, layer;
+    }, layer, result;
     for (const layerName of layers) {
       // Not an accident
       if (layer = Layers[layerName]) {
-        Logger.log(`Context: applying layer '${layerName}'`);
-        Object.assign(arg, await layer(arg));
+        result = await layer(arg);
+        Object.assign(arg, result || {});
       }
     }
     this.messages = arg.messages || this.messages;

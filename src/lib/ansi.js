@@ -80,6 +80,10 @@ class ANSI {
     // 0 = cursor to end of screen, 1 = cursor to beginning, 2 = entire screen
     return `\x1B[0J`;
   }
+  static eraseLine() {
+    // 0 = cursor to right edge
+    return '\x1B[0K';
+  }
 
   static esc(s, esc) {
     if (!s || !esc) return s;
@@ -91,7 +95,7 @@ class ANSI {
     if (!s) return 0;
     let stripped = s.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
     // Replace multi-byte Unicode characters (emojis, etc.) with _M
-    let normalized = stripped.replaceAll(/[\u{1F300}-\u{1F9FF}]/gu, '_M');
+    let normalized = stripped.replaceAll(/[\u{2700}-\u{2757}\u{2795}-\u{27BF}\u{1F300}-\u{1F9FF}]/gu, '_M');
     return normalized.length;
   }
 }

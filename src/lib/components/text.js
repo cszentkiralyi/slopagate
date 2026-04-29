@@ -20,7 +20,7 @@ class Text extends Component {
         blankLine = this.bg ? ' '.repeat(width) : '',
         paddingLines;
     if (this.padding && this.padding.top) {
-      paddingLines = (new Array(this.padding.top).fill(blankLine));
+      paddingLines = (new Array(this.padding.top).fill(ANSI.eraseLine()));
       lines.push(...paddingLines);
     }
     //this.log(`Text: content = ${JSON.stringify(this.content)}`);
@@ -39,7 +39,7 @@ class Text extends Component {
       }));
     });
     if (this.padding && this.padding.bottom) {
-      paddingLines = (new Array(this.padding.bottom).fill(blankLine));
+      paddingLines = (new Array(this.padding.bottom).fill(ANSI.eraseLine()));
       lines.push(...paddingLines);
     }
 
@@ -72,14 +72,14 @@ class Text extends Component {
         rightPad = (padding && padding.right) || 0,
         leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
         rightPadStr = rightPad ? ' '.repeat(rightPad) : '',
-        blank = fill ? ' '.repeat(width) : '',
+        blank = fill ? ANSI.eraseLine() : '',
         currentLine = '', alignStr = '', currentLen = 0,
         rem, m;
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - ANSI.measure(currentLine)}, ${ANSI.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
       currentLine += rightPadStr;
       if (fill && (rem = Math.abs((width - ANSI.measure(currentLine)) % width)) > 0) {
-        currentLine += ' '.repeat(rem);
+        currentLine += ANSI.eraseLine();
       } else if (justify === 'right' && (rem = Math.abs((width - ANSI.measure(currentLine)) % width))) {
         currentLine = ' '.repeat(rem) + currentLine;
       }
