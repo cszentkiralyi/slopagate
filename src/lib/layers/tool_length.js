@@ -1,28 +1,29 @@
 const { Logger } = require('../../util.js');
 
 const TRIM_MSG = '[...trimmed tool output...]';
+const WAIT_UNTIL_USER_TURNS = 1;
+const MAX_LONG_TOOLS_WITHOUT_USER = 5;
 
 const tool_length = ({ messages, tools }) => {
   // Short-circuit if no messages (undefined/null) - return undefined
-  if (!messages) {
+  if (!messages || !messages.length) {
     Logger.log(`tool_length: skipped (no messages)`);
     return;
   }
   
-  // Return empty array object for empty array
-  if (!messages.length) {
-    Logger.log(`tool_length: skipped (empty messages)`);
-    return { messages };
-  }
-  
-  let len = messages.length;
+  let len = messages.length, userSeen = 0, longTools = 0;
   
   // Go backwards from the end (most recent first)
   for (let i = len - 1; i >= 0; i--) {
     const msg = messages[i];
     
+    if (msg.role === 'user') userSeen++;
+    
     // Skip non-tool messages
-    if (msg.role !== 'tool') continue;
+    if (msg.role !== 'tool'
+        || (userSeen < WAIT_UNTIL_USER_TURNS
+            && longTools < MAX_LONG_TOOLS_WITHOUT_USER))
+      continue;
     
     // Get tool config for this tool
     const toolConfig = tools[msg.name];
@@ -30,14 +31,12 @@ const tool_length = ({ messages, tools }) => {
     // Skip if no tool config
     if (!toolConfig) continue;
     
-    // Get tool length limit from config, default to 2000 if not specified
-    let maxLength = toolConfig.maxLength;
-    if (maxLength === undefined) {
-      maxLength = 2000;
-    }
+    // Get tool length limit from config, default to 400 if not specified
+    let maxLength = toolConfig.maxLength || 400;
     
     // If tool response exceeds maxLength, truncate to keep only middle third
     if (msg.content.length > maxLength) {
+      longTools++;
       const originalContent = msg.content;
       const originalLength = originalContent.length;
       

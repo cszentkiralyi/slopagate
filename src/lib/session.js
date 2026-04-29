@@ -125,6 +125,11 @@ class Session {
     }
     
     try {
+      Logger.log(`Session: sending ${JSON.stringify({
+        system: this.#activeContext.other_tokens,
+        up: this.#activeContext.tokens_up,
+        down: this.#activeContext.tokens_down
+      })}`);
       let response = await fetch(this.connection, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

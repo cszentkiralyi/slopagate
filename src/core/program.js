@@ -413,20 +413,20 @@ class Program {
       return null;
 
     
-    const path = call.function.arguments.file_path;
-    for (let word in path.split(' ')) {
-      // Old-school MS-DOS nnnn.ext is the minimum
-      if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
-      if (!EXP_FILE_REGEX.test(word)) continue;
+    const file_path = call.function.arguments.file_path;
+    let last = path.basename(file_path);
+    if (EXP_FILE_REGEX.test(last) && ! this.#exp_fileReadWhitelist.has(last)) {
       switch (toolCall.function.name) {
         case 'Read':
+          Logger.log(`[Experiment] maybe steering ${start_line}-${end_line}`);
           if (toolCall.function.arguments.start_line
               || toolCall.function.arguments.end_line)
-            continue;
+            return;
+          Logger.log(`[Experiment] Steering from ${word} to StringSearch`);
           return { response: `Error: must use "StringSearch" tool before reading "${word}.`};
         case 'StringSearch':
           this.#exp_fileReadWhitelist.add(word);
-          break;
+          return;
       }
     }
 

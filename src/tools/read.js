@@ -50,7 +50,7 @@ class ReadTool extends Tool {
       content = addLineNumbers(content, start_line || 1);
       return content;
     } catch (err) {
-      content = `Error: file ${file_path} not found!`;
+      return `Error: file ${file_path} not found!`;
     }
   }
   
