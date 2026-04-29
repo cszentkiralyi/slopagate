@@ -2,7 +2,7 @@ const fs = require('node:fs/promises');
 
 const Tool = require('./tool.js');
 
-const addLineNumber = (line, no) => `${no} ${line}`;
+const addLineNumber = (line, no) => `${no}: ${line}`;
 const addLineNumbers = (lines, start) => {
   let start_line = start || 1;
   let output = '';
