@@ -154,6 +154,33 @@ class Program {
       } catch (err) { /* don't care */ }
     });
 
+    // Append SLOP.md files to the system prompt
+    let slopMdPaths = [
+      { path: path.join(this.config.get('root_dir'), 'SLOP.md'), label: 'project root' },
+      { path: path.join(os.homedir(), 'SLOP.md'), label: '~/.slopagate' }
+    ];
+    let loadedSlopFiles = [];
+    for (let { path: slopPath, label } of slopMdPaths) {
+      try {
+        let slopContent = fsSync.readFileSync(slopPath, { encoding: 'utf-8' });
+        if (systemPrompt) {
+          systemPrompt += '\n---\n' + slopContent;
+        } else {
+          systemPrompt = slopContent;
+        }
+        let displayPath = label === 'project root'
+          ? path.relative(this.config.get('root_directory'), slopPath)
+          : label + '/SLOP.md';
+        loadedSlopFiles.push(displayPath);
+      } catch (err) { /* don't care */ }
+    }
+    if (loadedSlopFiles.length > 0) {
+      this.interface.addMessage({
+        role: 'startup',
+        content: `Project files: ${loadedSlopFiles.join(', ')}`
+      });
+    }
+
     this.harness = new Harness({
       session: {
         config: this.config,
