@@ -170,7 +170,7 @@ class Session {
         });
       }
       return {
-        error: response.error,
+        error: response.error ? response.error.message : null,
         message: message,
         prompt_eval_count: usage.prompt_tokens,
         eval_count: usage.completion_tokens
