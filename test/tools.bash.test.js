@@ -54,7 +54,7 @@ test('Tool hints for grep commands suggest grep tool', (t) => {
     return 'grep foo' === pattern;
   });
   t.assert.ok(hintMatch);
-  t.assert.equal(hintMatch.hint, 'Grep');
+  t.assert.equal(hintMatch.hint, 'StringSearch');
 });
 
 test('Tool hints for ls commands suggest ls tool', (t) => {
