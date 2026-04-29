@@ -49,6 +49,7 @@ class Context {
   
   async fork({ system_prompt, layers }) {
     Logger.log(`Context.fork: passing on ${this.tools ? Object.keys(this.tools).length : 0} tools.`);
+    Logger.log(`Context.fork: compacting with ${layers ? layers.length : 0} layers.`);
     let f = new Context({
       system_prompt: system_prompt || this.system_prompt, 
       tools: { ...this.tools },
@@ -58,6 +59,7 @@ class Context {
       requestSummary: this.requestSummary ? this.requestSummary.bind(this) : null
     });
     await f.compact(layers);
+    Logger.log(`Context.fork: fork completed.`);
     return f;
   }
   
@@ -69,7 +71,7 @@ class Context {
     let arg = {
       messages: this.messages,
       system_prompt: this.system_prompt,
-      tools: Object.values(this.tools),
+      tools: this.tools,
       limits: this.limits,
       budgets: this.budgets,
       estimated_tokens: this.estimated_tokens,

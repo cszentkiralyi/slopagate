@@ -206,7 +206,7 @@ class Harness {
             // Timeout race
             this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
               Events.off('tool:response', onResponse);
-              reject(new Error(`tool ${name} timed out`));
+              resolve({ id: id, content: `Error: timed out` });
             });
           });
 

@@ -281,18 +281,24 @@ class Session {
   }
 
   async send(...outgoing) {
-    if (this.#masterContext !== this.#activeContext)
-      this.#masterContext.messages.push(...outgoing);
-    this.#activeContext.messages.push(...outgoing);
-    
+    this.addToContext(...outgoing);
+    Logger.log(`Session: outgoing: ${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
       layers: [ 'system_prompt', 'chat_importance', 'tool_age', 'tool_length', 'tool_error' ]
     });
+    
+    Logger.log(`Sessoin: next messages: ${JSON.stringify(this.#activeContext.messages)}`);
     
     return await this.send_internal([
       { role: 'system', content: this.#activeContext.system_prompt },
       ...this.#activeContext.messages
     ]);
+  }
+  
+  addToContext(...messages) {
+    if (this.#masterContext !== this.#activeContext)
+      this.#masterContext.messages.push(...messages);
+    this.#activeContext.messages.push(...messages);
   }
 
   async compact() {

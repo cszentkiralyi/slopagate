@@ -256,10 +256,11 @@ class Program {
               content: this.input_modes.find(m => m.name === inst.mode).prompt + input
             });
             this.#userMessagesSinceRecap++;
+            this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
             this.interface.statusline.showSpinner(this.spinnerMessage);
-            this.#startAfkTimer();
+            this.interface.draw();
             
             for (let word in input.split(' ')) {
               // Old-school MS-DOS nnnn.ext is the minimum
@@ -304,6 +305,7 @@ class Program {
       this.interface.draw();
     });
     Events.on('turn:user', (event) => {
+      this.#startAfkTimer();
       this.interface.statusline.spinner.hide();
       this.interface.draw();
     });
@@ -312,8 +314,6 @@ class Program {
       if (!event.done) this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     });
-    Events.on('model:response', (evt) => this.#resetAfkTimer());
-    Events.on('tool:response', (evt) => this.#resetAfkTimer());
 
     Events.on('metrics:tokens', (event) => {
       this.updateStatuslineTokens(event);
@@ -491,6 +491,9 @@ class Program {
 
   #startAfkTimer() {
     this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
+  }
+  #stopAfkTimer() {
+    this.timers.stop('afk');
   }
 
   #resetAfkTimer() {
