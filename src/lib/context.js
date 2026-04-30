@@ -164,11 +164,12 @@ class Context {
 
   getBudget(overrides) {
     let budget = { ...overrides },
+        ctx = this.config.get('context_window'),
         family = CONTEXT_FAMILIES[this.family],
         bname;
     for (bname of Object.keys(family.budget)) {
       if (bname in budget) continue;
-      budget[bname] = this.resolveValue(family.budget[bname]);
+      budget[bname] = ctx * this.resolveValue(family.budget[bname]);
     }
     return budget;
   }
