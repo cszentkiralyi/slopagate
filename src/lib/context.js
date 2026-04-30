@@ -127,7 +127,8 @@ class Context {
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
       verbatim = null, r = null;
-      if (arg.config.user_turns && arg.messages.length) {
+      // Need at least user + call + resp to bother
+      if (arg.config.user_turns && arg.messages.length > 2) {
         u = 0;
         for (i = arg.messages.length - 1; i >= 0; i--) {
           if (!(m = arg.messages[i])) continue;

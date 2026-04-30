@@ -293,7 +293,7 @@ class Session {
       layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_length', 'tool_error' ]
     });
     
-    Logger.log(`Sessoin: next messages: ${JSON.stringify(this.#activeContext.messages)}`);
+    //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
     
     return await this.send_internal([
       { role: 'system', content: this.#activeContext.system_prompt },
