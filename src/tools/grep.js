@@ -1,4 +1,5 @@
 const { execSync } = require('node:child_process');
+const { Logger } = require('../util.js');
 
 const Tool = require('./tool.js');
 
@@ -26,21 +27,21 @@ class GrepTool extends Tool {
     let { file_path, search_string } = args;
 
     try {
-      const output = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`)
-              .toString()
-              .trim()
-              .split('\n'),
-            sliced = output.slice(0, 20),
-            missing = output.length - sliced.length;
+      const result = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`).toString();
+      if (!result.length) return '';
+      let output = result.split('\n'),
+          sliced = output.slice(0, 20),
+          missing = output.length - sliced.length;
       if (missing) sliced.push(`...and ${missing} more.`);
       return sliced.join('\n');
     } catch (err) {
       if (err.message?.includes('ENOENT')) {
         return `Error: file ${file_path} not found`;
       }
-      if (err.message?.includes('No match')) {
-        return `Error: string "${search_string}" not found in ${file_path}`;
+      if (err.status === 1) {
+        return '';
       }
+      Logger.log(`Grep: ${JSON.stringify(err)}`);
       return `Error: ${err.message}`;
     }
   }
