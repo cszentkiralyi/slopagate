@@ -3,23 +3,25 @@ const { Logger } = require('../../util.js');
 const TRIM_MSG = '[...trimmed tool output...]';
 const TRIM_MSG_LEN = TRIM_MSG.length;
 
-const trim = (s, third) => {
-  return s.substring(0, third) + TRIM_MSG + s.substring(third * 2);
+const trim = (s, start, end) => {
+  return s.substring(0, start) + TRIM_MSG + s.substring(end);
 };
 
 const tool_length = ({ messages, config, estimate }) => {
   let max = config.max,
+      ret = [],
       len, third, start, end, next, args, arg,
       c, i, j, k, m, t, u;
   for (i = messages.length - 1; i >= 0; i--) {
     m = messages[i];
-    u = false;
     if (m.content && (len = m.content.length) > max) {
-      u = true;
-      third = Math.floor((len / 3) - (TRIM_MSG_LEN / 2) - 1);
+      start = Math.floor((len - max) / 2 - (TRIM_MSG_LEN / 2) - 1);
+      end = Math.ceil((len - (max / 2)) - (TRIM_MSG_LEN / 2) - 1);
       m = { ...m };
-      m.message = trim(m.content, third);
+      m.message = trim(m.content, start, end);
+      Logger.log(`[tool_length] reduced from ${len} to ${m.message.length}`);
     }
+    /*
     if (m.tool_calls) {
       for (j = m.tool_calls.length - 1; j >= 0; j--) {
         next = null;
@@ -35,8 +37,10 @@ const tool_length = ({ messages, config, estimate }) => {
           for (k = args.length - 1; k >= 0; k--) {
             arg = c.arguments[k];
             if (typeof arg === 'string' && (len = arg.length) > max) {
-              third = Math.floor((len / 3) - (TRIM_MSG_LEN / 2) - 1);
-              c.arguments[k] = trim(arg, third);
+              start = Math.floor((len - max) / 2 - (TRIM_MSG_LEN / 2) - 1);
+              end = Math.ceil((len - start - (max / 2)) - (TRIM_MSG_LEN / 2) - 1);
+              c.arguments[k] = trim(arg, start, end);
+      Logger.log(`[tool_length] reduced argument from ${len} to ${c.arguments[k].length}`);
             }
           }
         }
@@ -46,11 +50,12 @@ const tool_length = ({ messages, config, estimate }) => {
         }
       }
     }
+    */
     
-    if (u) messages.splice(i, 1, m);
+    ret.push(m);
   }
   
-  return messages;
+  return { messages: ret };
 };
 
 module.exports = tool_length;

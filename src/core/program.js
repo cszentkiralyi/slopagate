@@ -35,7 +35,7 @@ class Program {
   #userMessagesSinceRecap = 0;
   #turn_start = 0;
 
-  static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{4,}\.[a-zA-Z0-1]{3,}$/;
+  static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{4,}\.[a-zA-Z0-9]{3,}$/;
   #exp_fileReadWhitelist = new Set();
 
   config;
@@ -271,10 +271,11 @@ class Program {
             this.interface.statusline.showSpinner(this.spinnerMessage);
             this.interface.draw();
             
-            for (let word in input.split(' ')) {
+            for (let word of input.split(' ')) {
               // Old-school MS-DOS nnnn.ext is the minimum
               if (!word || word.length < 7 || word.indexOf('.') == -1) continue;
-              if (EXP_FILE_REGEX.test(word)) {
+              if (Program.EXP_FILE_REGEX.test(word)) {
+                Logger.log(`[Experiment] Steering: registered word "${word}" from user`);
                 this.#exp_fileReadWhitelist.add(word);
               }
             }
@@ -363,14 +364,19 @@ class Program {
     return `${(n / 1000000).toFixed(2)}M`;
   }
   updateStatuslineTokens({ inputTokens, outputTokens }) {
-    if (Number.isNaN(inputTokens) || inputTokens == null) inputTokens = 0;
-    if (Number.isNaN(outputTokens) || outputTokens == null) outputTokens = 0;
     let txt = this.interface.statusline.right,
         est = this.harness.session.context.estimates, s, pct, c;
+    let estUsed = est.system_prompt + est.messages + est.reserved;
+    if (Number.isNaN(inputTokens) || inputTokens == null)
+      inputTokens = txt.inputTokens ?? estUsed;
+    if (Number.isNaN(outputTokens) || outputTokens == null)
+      outputTokens = txt.outputTokens ?? 0;
+    if (inputTokens) txt.inputTokens = inputTokens;
+    if (outputTokens) txt.outputTokens = outputTokens;
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = 100 * (est.system_prompt + est.messages + est.reserved) / est.context_window;
+    pct = 100 * estUsed / est.context_window;
     if (pct > 70) c = 214;
     if (pct > 85) c = 1;
     pct = `${pct.toFixed(0)}%`;
@@ -489,19 +495,20 @@ class Program {
       return null;
 
     
-    const file_path = call.function.arguments.file_path;
+    const file_path = toolCall.function.arguments.file_path;
     let last = path.basename(file_path);
-    if (EXP_FILE_REGEX.test(last) && ! this.#exp_fileReadWhitelist.has(last)) {
+    if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
       switch (toolCall.function.name) {
         case 'Read':
           Logger.log(`[Experiment] maybe steering ${start_line}-${end_line}`);
           if (toolCall.function.arguments.start_line
               || toolCall.function.arguments.end_line)
             return;
-          Logger.log(`[Experiment] Steering from ${word} to StringSearch`);
-          return { response: `Error: must use "StringSearch" tool before reading "${word}.`};
+          Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
+          return { response: `Error: must use "StringSearch" tool before reading "${last}.`};
         case 'StringSearch':
-          this.#exp_fileReadWhitelist.add(word);
+          Logger.log(`[Experiment] Steering: registered word "${last}" from StringSearch`);
+          this.#exp_fileReadWhitelist.add(last);
           return;
       }
     }

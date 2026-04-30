@@ -106,9 +106,13 @@ class Session {
     }, responseObj, controller, idx;
     
     if (this.config.get('provider') === 'openai') {
+      /*
+      Bugged? I suddenly started getting errors...
+      > Assistant response prefill is incompatible with enable_thinking
       if ('think' in payload) {
         payload.chat_template_kwargs = `{"enable_thinking":${payload.think}}`;
       }
+        */
     }
     
     if (signal) {
