@@ -118,6 +118,11 @@ class Program {
       { name: 'recap', handler: async () => this.recap() },
       { name: 'bug', handler: async (args) => this.bugCommand(args) },
       { name: 'context', handler: async () => this.contextCommand() },
+      {
+        name: 'config',
+        arguments: [{ name: 'key' }, { name: 'value', optional: true }],
+        handler: async (args) => this.configCommand(args)
+      },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -572,6 +577,37 @@ class Program {
       content: `Bug logged: ${description}`,
       fg: 'gray'
     }, true);
+  }
+
+  async configCommand(argstr) {
+    if (!argstr || !argstr.length) {
+      this.interface.statusline.showMessage({
+        content: 'Usage: /config <key> [value]',
+        fg: 'gray'
+      }, true);
+      return;
+    }
+    let parts = argstr.split(' ');
+    let key = parts[0];
+    let value = parts.slice(1).join(' ');
+    
+    if (value === undefined) {
+      let cur = this.config.get(key);
+      this.interface.statusline.showMessage({
+        content: `${key} = ${cur ?? '(not set)'}`,
+        fg: 'gray'
+      }, true);
+    } else {
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+      else if (!isNaN(value) && value.length > 0) value = parseInt(value, 10);
+      
+      this.config.set(key, value);
+      this.interface.statusline.showMessage({
+        content: `Set ${key} = ${this.config.get(key)}`,
+        fg: 'gray'
+      }, true);
+    }
   }
 
   #startAfkTimer() {

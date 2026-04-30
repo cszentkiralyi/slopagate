@@ -21,7 +21,7 @@ const tool_length = ({ messages, config, estimate }) => {
       m.message = trim(m.content, third);
     }
     if (m.tool_calls) {
-      for (j = next.tools_calls.length; j >= 0; j--) {
+      for (j = m.tool_calls.length - 1; j >= 0; j--) {
         next = null;
         c = m.tool_calls[j];
         if (c.function.name === 'Edit'
@@ -32,7 +32,7 @@ const tool_length = ({ messages, config, estimate }) => {
           c = { ...next.tool_calls };
           c.args = args = [ ...args ];
           next.splice(j, 1, c);
-          for (k = args.length; k >= 0; k--) {
+          for (k = args.length - 1; k >= 0; k--) {
             arg = c.arguments[k];
             if (typeof arg === 'string' && (len = arg.length) > max) {
               third = Math.floor((len / 3) - (TRIM_MSG_LEN / 2) - 1);
