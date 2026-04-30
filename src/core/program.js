@@ -360,11 +360,12 @@ class Program {
   updateStatuslineTokens({ inputTokens, outputTokens }) {
     if (Number.isNaN(inputTokens) || inputTokens == null) inputTokens = 0;
     if (Number.isNaN(outputTokens) || outputTokens == null) outputTokens = 0;
-    let txt = this.interface.statusline.right, s, pct, c;
+    let txt = this.interface.statusline.right,
+        est = this.harness.session.context.estimates, s, pct, c;
     s = `↑ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ↓`;
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
-    pct = 100 * this.harness.session.context.estimated_tokens / this.config.get('context_window');
+    pct = 100 * (est.system_prompt + est.messages + est.reserved) / est.context_window;
     if (pct > 50) c = 214;
     if (pct > 70) c = 1;
     pct = `${pct.toFixed(0)}%`;
@@ -403,12 +404,15 @@ class Program {
   async compactCommand() {
     Logger.log(`compactCommand`);
     this.interface.statusline.showSpinner('Compacting...');
-    let old_tok = this.harness.session.context.estimated_tokens,
+    let old_est = this.harness.session.context.estimates,
+        old_tok = old_est.system_prompt + old_est.messages + old_est.reserved,
         ctx = await this.harness.session.compact(),
-        delta_up = ((ctx.estimated_tokens - old_tok || 0)).toFixed(0),
-        pct = (100 * ctx.estimated_tokens / ctx.limits.context_window).toFixed(0),
+        new_est = ctx.estimates,
+        new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
+        delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
+        pct = (100 * new_tok / new_est.context_window).toFixed(0),
         msg = {
-          content: `Context compacted: ${ctx.tokens_up} ${delta_up} (now ${pct}%).`,
+          content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`,
           fg: 'gray'
         };
     this.interface.statusline.spinner.stop();
@@ -417,15 +421,14 @@ class Program {
   }
 
   contextCommand() {
-    let ctx = this.harness.session.context,
-        win = this.config.get('context_window'),
-        sysTok = ctx.other_tokens,
-        upTok = ctx.tokens_up,
-        //downTok = ctx.tokens_down,
-        genReserve = ctx.budgets.generation || (win * 0.2),
-        used = sysTok + upTok /*+ downTok*/,
-        totalUsed = used + (ctx.budgets?.generation || 0),
-        free = Math.max(0, win - totalUsed),
+    let est = this.harness.session.context.estimates,
+        win = est.context_window,
+        sysTok = est.system_prompt,
+        upTok = est.messages,
+        genReserve = est.reserved,
+        used = est.total,
+        totalUsed = used,
+        free = win - used,
         barLen = 40,
         bar = '',
         i, fillChar;
@@ -457,12 +460,12 @@ class Program {
     let lines = [
       ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
       ANSI.fg('[', 238) + bar,
-      `  ${ANSI.fg('#', 9)} system   ${sysTok} tokens`,
-      `  ${ANSI.fg('#', 11)} messages ${upTok} tokens`,
+      `  ${ANSI.fg('#', 9)} system   ${sysTok.toFixed(0)} tokens`,
+      `  ${ANSI.fg('#', 11)} messages ${upTok.toFixed(0)} tokens`,
       //`  ${ANSI.fg('#', 12)} output   ${downTok} tokens`,
-      `  ${ANSI.fg('#', 5)} reserve  ${genReserve} tokens (for generation)`,
-      `  ${ANSI.fg('.', 238)} free     ${free} tokens`,
-      `  ${ANSI.fg('─', 238)} window   ${win} tokens total`
+      `  ${ANSI.fg('#', 5)} reserved ${genReserve.toFixed(0)} tokens`,
+      `  ${ANSI.fg('.', 238)} free     ${free.toFixed(0)} tokens`,
+      `  ${ANSI.fg('─', 238)} window   ${win.toFixed(0)} tokens total`
     ];
 
     this.interface.addMessage({
@@ -520,7 +523,7 @@ class Program {
 
     // Convert to transcript string using toTranscript helper
     let transcript = recentMessages
-      .map(m => Context.toTranscript(m))
+      .map(m => Context.transcript(m))
       .join('\n');
 
     // Use send_private to avoid adding to history

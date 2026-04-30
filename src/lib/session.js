@@ -5,8 +5,8 @@ const Context = require('./context.js');
 
 class Session {
   #id;
-  #config;
   #model;
+  config;
 
   #connection;
   #systemPrompt;
@@ -24,37 +24,25 @@ class Session {
   set messages(m) { this.#activeContext.messages = m; }
   get context() { return this.#activeContext; }
   get id() { return this.#id; }
-  get model() { return this.#config.get('model'); }
-  get think() { return this.#config.get('think'); }
-  get connection() { return this.#config.get('connection'); }
+  get model() { return this.config.get('model'); }
+  get think() { return this.config.get('think'); }
+  get connection() { return this.config.get('connection'); }
   get systemPrompt() { return this.#systemPrompt; }
   get tempdir() { return this.#tempdir; }
   get temppath() { return this.#tempdir ? this.#tempdir.path : null; }
   
   constructor(props) {
     this.#id = props.id || ID();
-    this.#config = props.config || new Map();
+    this.config = props.config || new Map();
     this.tools = props.tools || [];
     
-    let ctx_window = this.#config.get('context_window_length');
     this.#masterContext = this.#activeContext = new Context({
-      tools: this.tools.reduce((m, t) => {
-        m[t.name] = { name: t.name, ttl: t.ttl };
-        return m;
-      }, {}),
-      limits: {
-        window: ctx_window,
-        tool_age: 5
-      },
-      budgets: {
-        generation: ctx_window ? (ctx_window * 0.2) : 2000
-      },
+      config: this.config,
+      /*
       requestSummary: async (transcript) => {
         let summaryContext = new Context({
+          // TODO: maybe move instructions to message, give role in system prompt?
           system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
-          tools: {},
-          limits: {},
-          budgets: {},
           messages: [{ role: 'user', content: transcript }]
         });
         let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
@@ -69,6 +57,7 @@ class Session {
         }
         return null;
       }
+        */
     });
     
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
@@ -110,8 +99,8 @@ class Session {
       model: this.model,
       think: (this.think || false),
       stream: (this.stream || false),
-      keep_alive: (this.#config.get('keep_alive') || '5m'),
-      num_predict: (this.#config.get('num_predict') || 16384),
+      keep_alive: (this.config.get('keep_alive') || '5m'),
+      num_predict: (this.config.get('num_predict') || 16384),
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;
@@ -166,7 +155,7 @@ class Session {
   }
 
   normalizeResponse(response) {
-    const provider = this.#config.get('provider') || 'ollama';
+    const provider = this.config.get('provider') || 'ollama';
 
     if (provider === 'openai') {
       // This documentation is absolutely atrocious on a 1080p display, whose idea
@@ -248,6 +237,7 @@ class Session {
       .map(m => `${m.role}: ${m.content}`)
       .join('\n');
 
+    // TODO
     let summaryContext = new Context({
       system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
       tools: {},
@@ -279,6 +269,7 @@ class Session {
     if (!summaryText) return null;
 
     // Build the new compacted messages array
+    // TODO
     let remaining = context.messages.slice(cutoffIdx + 1);
     let newContext = new Context({
       system_prompt: context.system_prompt,
@@ -313,8 +304,8 @@ class Session {
   
   addToContext(...messages) {
     if (this.#masterContext !== this.#activeContext)
-      this.#masterContext.messages.push(...messages);
-    this.#activeContext.messages.push(...messages);
+      this.#masterContext.add(...messages);
+    this.#activeContext.add(...messages);
   }
 
   async compact() {

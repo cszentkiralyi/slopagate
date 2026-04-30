@@ -260,18 +260,13 @@ class Harness {
   estimateHistoryTokens() {
     return this.session.history.reduce((m, entry) => {
       if (entry.content) {
-        m += Harness.estimteTokens(`${entry.role}: ${entry.content}`);
+        m += Context.estimate(`${entry.role}: ${entry.content}`);
       }
       if (entry.tool_calls) {
-        m += Harness.estimteTokens(JSON.stringify(entry.tool_calls));
+        m += Context.estimate(JSON.stringify(entry.tool_calls));
       }
       return m
     }, 0);
-  }
-  
-  static estimteTokens(s) {
-    // TODO: temporary shim
-    return Context.estimateTokens(s);
   }
 }
 
