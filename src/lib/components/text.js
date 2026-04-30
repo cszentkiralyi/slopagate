@@ -70,14 +70,11 @@ class Text extends Component {
         { padding, align, forceAlign, indent, fill, justify } = (options || {}),
         leftPad = (padding && padding.left) || 0,
         rightPad = (padding && padding.right) || 0,
-        leftPadStr = leftPad ? ' '.repeat(leftPad) : '',
-        rightPadStr = rightPad ? ' '.repeat(rightPad) : '',
         blank = fill ? ANSI.eraseLine() : '',
-        currentLine = '', alignStr = '', currentLen = 0,
+        currentLine = '', alignX = 0, currentLen = 0,
         rem, m;
     let finishLine = () => {
       //Logger.log(`Text: (${fill}, ${width}, ${width - ANSI.measure(currentLine)}, ${ANSI.measure(currentLine)}) ${JSON.stringify(currentLine)}`);
-      currentLine += rightPadStr;
       if (fill && (rem = Math.abs((width - ANSI.measure(currentLine)) % width)) > 0) {
         currentLine += ANSI.eraseLine();
       } else if (justify === 'right' && (rem = Math.abs((width - ANSI.measure(currentLine)) % width))) {
@@ -90,17 +87,18 @@ class Text extends Component {
       if (!line) {
         lines.push(blank);
       } else {
-        alignStr = '';
+        alignX = 0;
         if (indent && (m = line.match(Text.LEADING_WHITESPACE_REGEX))) {
-          alignStr += ' '.repeat(ANSI.measure(m[1]));
+          alignX += ANSI.measure(m[1]);
           //Logger.log(`Text: indent detected ${JSON.stringify(alignStr)}`);
         }
         if ((forceAlign && (m = line.match(Text.LIST_ITEM_REGEX)))
             || (align && (m = line.match(Text.LIST_ITEM_REGEX_STRICT)))) {
-          alignStr += ' '.repeat(ANSI.measure(m[1]));
+          alignX += ANSI.measure(m[1]);
           //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
         }
-        currentLine += leftPadStr;
+        if (fill) currentLine += ANSI.eraseLine();
+        if (leftPad) currentLine += ANSI.cursorHoriz(leftPad);
         currentLen = currentLine.length
         line.split(' ').forEach((word, idx) => {
           let len = ANSI.measure(word);
@@ -113,7 +111,9 @@ class Text extends Component {
             currentLen += len;
           } else {
             finishLine(currentLine);
-            currentLine = leftPadStr + alignStr;
+            currentLine = '';
+            if (fill) currentLine += ANSI.eraseLine();
+            if (leftPad || alignX) currentLine += ANSI.cursorHoriz(leftPad + alignX);
             currentLen = currentLine.length + len;
             currentLine += word;
           }

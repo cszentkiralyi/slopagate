@@ -76,13 +76,18 @@ class ANSI {
     // Move to the beginning of the line, then up n lines
     return `\x1B[${n}F`;
   }
+  static cursorHoriz(n) {
+    if (n == 0) return '';
+    if (n < 0) return `\x1B[${n}D`; // back
+    return `\x1B[${n}C`; // forward
+  }
   static eraseDown() {
     // 0 = cursor to end of screen, 1 = cursor to beginning, 2 = entire screen
     return `\x1B[0J`;
   }
-  static eraseLine() {
+  static eraseLine(n = 0) {
     // 0 = cursor to right edge
-    return '\x1B[0K';
+    return '\x1B[K';
   }
 
   static esc(s, esc) {
