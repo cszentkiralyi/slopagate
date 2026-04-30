@@ -177,7 +177,7 @@ class Session {
       // having the reasoning & content split across the proper attributes.
       if (message && message.reasoning_content.length && !message.content.length
           && (endThink = message.reasoning_content.indexOf('</think>') > -1
-              && endthink < message.reasoning_content.length - 1 - 7)) {
+              && endThink < message.reasoning_content.length - 1 - 7)) {
         message.reasoning_content = message.reasoning_content.slice(0, endThink);
         message.content = message.reasoning_content.slice(endThink + 7);
       }

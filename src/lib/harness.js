@@ -127,14 +127,13 @@ class Harness {
     if (message.content || message.tool_calls) {
       let done = !message.tool_calls;
       this.session.addToContext(message);
+      Events.emit('metrics:tokens', {});
       if (done) {
         Events.emit('turn:user');
         this.#abortTarget = null;
         this.#serializeSession();
       }
       if (message.content) {
-        // TODO: remove me
-        this.session.addToContext(message);
         Events.emit('model:content', { done, content: message.content });
       }
       if (message.tool_calls) {

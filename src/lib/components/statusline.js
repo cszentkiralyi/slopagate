@@ -57,6 +57,7 @@ class Statusline extends HContainer {
     this.spinner.message = message;
     this.dismissable = false;
     this.#setLeftChild(this.spinner);
+    this.spinner.show();
     this.spinner.start();
   }
 

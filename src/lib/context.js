@@ -46,9 +46,9 @@ const CONTEXT_FAMILIES = {
     layers: {
       system_prompt: { soft: true },
       chat_score: { threshold: 0.4 },
-      tool_error: { ttl: 0, hint_ttl: 6, user_turns: 1 }, // "hint"-type errors get more TTL
+      tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
-      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor((ctx / 10) * 3.5) } }
+      tool_length: (ctx) => { return { user_turns: 2, max: Math.floor((ctx / 10) * 3.5) } }
     }
   },
   'fat': {
@@ -99,6 +99,7 @@ class Context {
   constructor({ config, system_prompt, messages, budget, layer_config }) {
     this.config = config;
     this.family = Context.family(this.config.get('context_window'));
+    this.config.set('context_family', this.family);
     this.system_prompt = system_prompt;
     this.messages = messages ? [ ...messages ] : [];
     if (this.messages.length)
@@ -130,12 +131,14 @@ class Context {
       // Need at least user + call + resp to bother
       if (arg.config.user_turns && arg.messages.length > 2) {
         u = 0;
+        Logger.log(`Context: looking for user turn ${arg.config.user_turns}`)
         for (i = arg.messages.length - 1; i >= 0; i--) {
           if (!(m = arg.messages[i])) continue;
           if (u >= arg.config.user_turns) break;
           if (m.role === 'user') u++;
         }
         if (u >= arg.config.user_turns) {
+          Logger.log(`Context: found user turn ${u} at index ${i}`)
           verbatim = arg.messages.slice(i);
           arg.messages = i ? arg.messages.slice(0, i) : [];
         }
@@ -185,8 +188,7 @@ class Context {
       Object.assign(config, this.layer_config[layerName] || undefined);
     if (!(layerName in Object.keys(family.layers))) return config;
     for (let cname of family.layers[layerName]) {
-      if (cname in config) continue;
-      config[cname] = this.resolveValue(family.layers[layerName][cname]);
+      config[cname] = this.resolveValue(config.cname);
     }
     return config;
   }
@@ -200,6 +202,7 @@ class Context {
     return Math.ceil(ANSI.measure(s) / 3.5); // rough estimate: 3.5 char/tok
   }
   static transcript(ms) {
+    if (!ms || !ms.length) return '';
     return ms.map(m => `${m.role}: ${m.content}`).join('\n');
   }
   static family(ctx_win) {
