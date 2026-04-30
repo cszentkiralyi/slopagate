@@ -598,7 +598,7 @@ class Program {
     let key = parts[0];
     let value = parts.slice(1).join(' ');
     
-    if (value === undefined) {
+    if (parts.length <= 1) {
       let cur = this.config.get(key);
       this.interface.statusline.showMessage({
         content: `${key} = ${cur ?? '(not set)'}`,
