@@ -371,8 +371,8 @@ class Program {
     //s = `▲ ${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)} ▼`;
     //s = `△${this.#roundTokens(inputTokens)} │ ${this.#roundTokens(outputTokens)}▽`;
     pct = 100 * (est.system_prompt + est.messages + est.reserved) / est.context_window;
-    if (pct > 50) c = 214;
-    if (pct > 70) c = 1;
+    if (pct > 70) c = 214;
+    if (pct > 85) c = 1;
     pct = `${pct.toFixed(0)}%`;
     s += ` │ ${c ? ANSI.fg(pct, c) : pct}`;
     txt.padding ||= { right: 1 };
