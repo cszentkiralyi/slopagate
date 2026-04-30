@@ -16,7 +16,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.6 }, // Cull messages with importance scores < 0.6
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
-      tool_length: (ctx) => { return { user_turns: 0, max: Math.floor(ctx / 20) } } // No tool response > 20% context length
+      tool_length: (ctx) => { return { user_turns: 0, max: Math.floor((ctx / 20) * 3.5) } } // No tool response > 20% context length
     }
   },
   'hungry': {
@@ -32,7 +32,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.6 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor(ctx / 20) } } // Truncate tools from previous turns
+      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor((ctx / 20) * 3.5) } } // Truncate tools from previous turns
     }
   },
   'healthy': {
@@ -48,7 +48,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.4 },
       tool_error: { ttl: 0, hint_ttl: 6, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
-      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor(ctx / 10) } }
+      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor((ctx / 10) * 3.5) } }
     }
   },
   'fat': {

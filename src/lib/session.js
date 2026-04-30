@@ -290,7 +290,7 @@ class Session {
     this.addToContext(...outgoing);
     Logger.log(`Session: outgoing: ${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_length', 'tool_error' ]
+      layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_error', 'tool_length' ]
     });
     
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
