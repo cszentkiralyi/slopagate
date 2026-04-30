@@ -14,7 +14,7 @@ class TextInput extends Component {
   };
 
   #value = '';
-  #caret = 1;
+  #caret = 0;
   #history = [];
   #historyIdx = -1;
   #hint;
