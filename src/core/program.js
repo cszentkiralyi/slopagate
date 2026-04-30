@@ -406,7 +406,7 @@ class Program {
     this.interface.statusline.showSpinner('Compacting...');
     let old_est = this.harness.session.context.estimates,
         old_tok = old_est.system_prompt + old_est.messages + old_est.reserved,
-        ctx = await this.harness.session.compact(),
+        ctx = await this.harness.session.compact([]),
         new_est = ctx.estimates,
         new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
         delta_tok = ((new_tok - old_tok || 0)).toFixed(0),

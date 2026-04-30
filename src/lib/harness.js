@@ -126,7 +126,7 @@ class Harness {
     
     if (message.content || message.tool_calls) {
       let done = !message.tool_calls;
-      this.session.messages.push(message);
+      this.session.addToContext(message);
       if (done) {
         Events.emit('turn:user');
         this.#abortTarget = null;
@@ -134,7 +134,7 @@ class Harness {
       }
       if (message.content) {
         // TODO: remove me
-        this.session.messages.push(message);
+        this.session.addToContext(message);
         Events.emit('model:content', { done, content: message.content });
       }
       if (message.tool_calls) {

@@ -112,6 +112,7 @@ class Context {
   }
   
   async compact(layers) {
+    if (!layers || !layers.length || !this.messages.length) return;
     let arg = {
       messages: [ ...(this.messages) ],
       system_prompt: this.system_prompt,
@@ -130,13 +131,15 @@ class Context {
         u = 0;
         for (i = arg.messages.length - 1; i >= 0; i--) {
           if (!(m = arg.messages[i])) continue;
-          if (m.role === 'user') u++;
           if (u >= arg.config.user_turns) break;
+          if (m.role === 'user') u++;
         }
-        verbatim = arg.messages.slice(i);
-        arg.messages = arg.messages.slice(0, i);
+        if (u >= arg.config.user_turns) {
+          verbatim = arg.messages.slice(i);
+          arg.messages = i ? arg.messages.slice(0, i) : [];
+        }
       }
-      if (arg.messages.length) r = await layer(arg);
+      r = (arg.messages.length) ? await layer(arg) : null;
       if (verbatim) {
         if (!r) {
           r = { messages: verbatim }
@@ -144,7 +147,7 @@ class Context {
           r.messages.push(...verbatim);
         }
       }
-      Object.assign(arg, r || undefined);
+      Object.assign(arg, (r || undefined));
     }
     this.messages = arg.messages;
     this.system_prompt = arg.system_prompt;

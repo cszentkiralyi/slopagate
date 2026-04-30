@@ -169,7 +169,6 @@ class Session {
         : null, endThink;
       if (message && message.tool_calls && message.tool_calls.length) {
         message.tool_calls.forEach(tc => {
-          Logger.log(`tc = ${JSON.stringify(tc)}`);
           tc.function.arguments = JSON.parse(tc.function.arguments);
         });
       }
@@ -291,7 +290,7 @@ class Session {
     this.addToContext(...outgoing);
     Logger.log(`Session: outgoing: ${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'chat_importance', 'tool_age', 'tool_length', 'tool_error' ]
+      layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_length', 'tool_error' ]
     });
     
     Logger.log(`Sessoin: next messages: ${JSON.stringify(this.#activeContext.messages)}`);
