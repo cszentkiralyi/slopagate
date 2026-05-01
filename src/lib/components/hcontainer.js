@@ -10,7 +10,9 @@ class HContainer extends Container {
     if (this.children && this.children.length) {
       let dirty = false, parts = [],
           gap = (this.children.length - 1) * (this.gap || 0),
-          rem = width - gap,
+          leftPad = (this.padding && this.padding.left) || 0,
+          rightPad = (this.padding && this.padding.right) || 0,
+          rem = width - gap - leftPad - rightPad,
           result;
       this.children.forEach((child, i, children) => {
         if (rem <= 0) return;
@@ -19,7 +21,9 @@ class HContainer extends Container {
         parts.push(...(result.lines));
         rem -= result.lines.reduce((m, l) => m + (l && ANSI.measure(l) || 0), 0);
       });
-      lines.push(parts.join(' '.repeat(gap)));
+      let line = leftPad ? ANSI.cursorHoriz(leftPad) : '';
+      line += parts.join(' '.repeat(gap));
+      lines.push(line);
     }
     
     dirty ||= Component.isDirty(this._lines, lines);
