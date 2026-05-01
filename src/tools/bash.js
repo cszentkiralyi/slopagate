@@ -107,16 +107,9 @@ class BashTool extends Tool {
 
   message(calls) {
     // Filter calls to only include permitted commands
-    const permittedCalls = calls.filter(c => this.permissionGate(c.args.command));
+    const permittedCalls = calls.filter(c => this.permissionGate(c.args.command) && !this.toolHint(c.args.command));
     
-    if (permittedCalls.length === 0) {
-      // Check if all commands have hints; if so, don't display a message
-      const allCalls = calls.filter(c => !this.permissionGate(c.args.command));
-      if (allCalls.length > 0 && allCalls.every(c => this.toolHint(c.args.command))) {
-        return null; // No message to display
-      }
-      return 'No permitted commands to execute';
-    }
+    if (permittedCalls.length === 0) return;
     
     if (permittedCalls.length == 1) {
       let { command } = permittedCalls[0].args,

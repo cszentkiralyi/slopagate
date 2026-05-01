@@ -17,7 +17,7 @@ class Text extends Component {
   
   render(width) {
     let lines = [],
-        blankLine = this.bg ? ' '.repeat(width) : '',
+        blankLine = this.bg ? ANSI.eraseLine() : '',
         paddingLines;
     if (this.padding && this.padding.top) {
       paddingLines = (new Array(this.padding.top).fill(ANSI.eraseLine()));

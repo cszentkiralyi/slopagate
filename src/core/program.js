@@ -484,6 +484,8 @@ class Program {
       content: lines.join('\n'),
       padding: { left: 2, right: 2 }
     });
+    
+    Events.emit('metrics:tokens', {});
   }
 
   async hookToolCall({ toolCall }) {
@@ -533,10 +535,7 @@ class Program {
 
     Logger.log(`Program: recapping ${recentMessages.length} messages.`);
 
-    // Convert to transcript string using toTranscript helper
-    let transcript = recentMessages
-      .map(m => Context.transcript(m))
-      .join('\n');
+    let transcript = Context.transcript(recentMessages);
 
     // Use send_private to avoid adding to history
     let summaryMessage = { role: 'user', content: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:\n\n${transcript}` };

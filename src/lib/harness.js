@@ -179,18 +179,10 @@ class Harness {
           
           if (cancelled) {
             Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
-            if (overrideResponse) {
-              Events.emit('tool:response', {
-                id,
-                role: 'tool',
-                tool_name: name,
-                content: typeof overrideResponse === 'string' ? overrideResponse : JSON.stringify(overrideResponse)
-              });
-            }
             continue;
           }
           
-          Events.emit('tool:call', event);
+         if (!cancelled) Events.emit('tool:call', event);
 
           // Create a promise that resolves when the corresponding tool:response event is received
           let toolPromise = new Promise((resolve, reject) => {
@@ -201,6 +193,17 @@ class Harness {
               }
             };
             Events.on('tool:response', onResponse);
+            if (cancelled) {
+              let content = overrideResponse && (typeof overrideResponse === 'string'
+                ? overrideResponse
+                : JSON.stringify(overrideResponse));
+              Events.emit('tool:response', {
+                id,
+                role: 'tool',
+                tool_name: name,
+                content: content || 'Error: tool call cancelled'
+              });
+            }
 
             // Timeout race
             this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
