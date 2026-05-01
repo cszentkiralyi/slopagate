@@ -123,6 +123,7 @@ class Program {
         arguments: [{ name: 'key' }, { name: 'value', optional: true }],
         handler: async (args) => this.configCommand(args)
       },
+      { name: 'transcript', handler: async (args) => this.transcriptCommand(args), hint: 'Dump session context to a file' },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -626,6 +627,34 @@ class Program {
         content: `Set ${key} = ${this.config.get(key)}`
       });
     }
+  }
+
+  async transcriptCommand(argstr) {
+    if (!argstr || !argstr.length) {
+      this.interface.addMessage({
+        role: 'tool',
+        content: 'Usage: /transcript <filename>'
+      });
+      return;
+    }
+    const history = this.harness.session.history.map(m => {
+      if (m.role !== 'tool') return m;
+      return { ...m, content: m.content.startsWith('Error:') ? '[Error]' : '[Result]' };
+    });
+    const transcript = Context.transcript(history);
+    try {
+      fsSync.writeFileSync(argstr, transcript, { encoding: 'utf-8' });
+    } catch (err) {
+      this.interface.addMessage({
+        role: 'tool',
+        content: `Error writing file: ${err.message}`
+      });
+      return;
+    }
+    this.interface.addMessage({
+      role: 'tool',
+      content: `Transcript written to ${argstr}`
+    });
   }
 
   #startAfkTimer() {
