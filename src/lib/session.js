@@ -313,7 +313,11 @@ class Session {
     Logger.log(`Session: compact() called, forking context.`);
     // Replace activeContext with a full compact fork, keeping masterContext history
     let newActive = await this.#activeContext.fork({
-      layers: [ 'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary' ]
+      layers: [ 'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary' ],
+      summarize: async (transcript) => {
+        // TODO: real summary implementation
+        return 'Summary';
+      }
     });
     Logger.log(`Session: fork completed.`);
     this.#activeContext = newActive;

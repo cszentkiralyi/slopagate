@@ -114,7 +114,8 @@ class Context {
     this.messages.push(...messages);
   }
   
-  async compact(layers) {
+  async compact(opts) {
+    let layers = opts?.layers || [];
     if (!layers || !layers.length || !this.messages.length) return;
     let arg = {
       messages: [ ...(this.messages) ],
@@ -123,7 +124,8 @@ class Context {
       budget: this.budget,
       // TODO: request({ system_prompt, messages }) for one-off
       estimate: (s) => Context.estimate(s),
-      transcript: (s) => Context.transcript(s)
+      transcript: (s) => Context.transcript(s),
+      summarize: opts?.summarize ?? (async () => 'Summary')
     }, verbatim, n_layer, layer, i, u, m, r;
     for (n_layer of layers) {
       if (!(layer = Layers[n_layer])) continue;
@@ -168,7 +170,7 @@ class Context {
       budget: opts.budget || this.budget,
       layer_config: opts.layer_config || this.layer_config
     });
-    if (opts.layers) await f.compact(opts.layers);
+    if (opts.layers) await f.compact(opts);
     return f;
   }
 

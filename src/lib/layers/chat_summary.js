@@ -1,9 +1,8 @@
 const { Logger } = require('../../util.js');
 
-const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, estimated_tokens, estimateTokens, requestSummary, toTranscript }) => {
-  // Check if we have at least 4 messages; if not, return as-is
+const chat_summary = async ({ messages, system_prompt, summarize, estimate }) => {
   if (messages.length < 4) {
-    return { messages, system_prompt, tools, limits, budgets, estimated_tokens };
+    return { messages, system_prompt };
   }
 
   // Work backwards from the end, skipping the 4 most recent messages
@@ -12,7 +11,7 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     summarizeArray.unshift(messages[i]);
   }
 
-  // Find the next message going backwards from the end where role === 'assistant'
+  // Find the next assistant message going backwards
   let assistantIdx = -1;
   for (let i = summarizeArray.length - 1; i >= 0; i--) {
     if (summarizeArray[i].role === 'assistant') {
@@ -21,24 +20,23 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     }
   }
 
-  // If no assistant found, return as-is
   if (assistantIdx === -1) {
-    return { messages, system_prompt, tools, limits, budgets, estimated_tokens };
+    return { messages, system_prompt };
   }
 
   // Extract messages from that assistant to the start of the array
   summarizeArray = summarizeArray.slice(0, assistantIdx + 1);
 
-  // Convert to transcript string using toTranscript helper
+  // Convert to transcript string
   let transcript = summarizeArray
-    .map(m => toTranscript(m))
+    .map(m => `${m.role}: ${m.content}`)
     .join('\n');
 
   // Get summary
-  let summaryText = await requestSummary(transcript);
+  let summaryText = await summarize(transcript);
 
   if (!summaryText) {
-    return { messages, system_prompt, tools, limits, budgets, estimated_tokens };
+    return { messages, system_prompt };
   }
 
   // Build the new compacted messages array
@@ -49,9 +47,9 @@ const chat_summary = async ({ messages, system_prompt, tools, limits, budgets, e
     ...latestMessages
   ];
 
-  let summaryTok = estimateTokens(summaryText);
+  let summaryTok = estimate(summaryText);
   Logger.log(`chat_summary: compacted (replaced ${summarizeArray.length} messages with ${summaryTok}-token summary)`);
-  return { messages: newMessages, system_prompt, tools, limits, budgets, estimated_tokens };
+  return { messages: newMessages, system_prompt };
 };
 
 module.exports = chat_summary;

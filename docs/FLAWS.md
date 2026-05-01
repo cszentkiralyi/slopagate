@@ -7,7 +7,8 @@ These are not complaints, they are notes of things the harness should consider m
 - Sometimes models rewrite the whole file (e.g. -57 +56 in a 56-line file), I think `edit` should prevent that and force existing files to be edited in chunks.
 - These models suck at incorporating their changes into their known file content. If we read something, then edit it, we need to purge those old reads since they might be inaccurate and the model can't possibly recover on its own so we might as well just clap the whole thing and make it re-read from zero.
 - If it screws up a search string for `edit`, it'll start trying to use `bash` to run commands or write/execute scripts to do the edits. It would be nice to catch this and shut it down sooner rather than later.
-- If we detect strings of errors (failed bash calls in a chain, reading the wrong directory over and over, etc) should we just put a stop to things and tell me model to figure its shit out? I'm not sure how to *correct* this behavior, just that it's annoying, detectable, and something I don't want to see. **We should at least detect the same call with the same file or command word erroring out repeatedly**, that happens, silently rescue if we can.
+- If we detect strings of errors (failed bash calls in a chain, reading the wrong directory over and over, etc) should we just put a stop to things and tell me model to figure its shit out? I'm not sure how to *correct* this behavior, just that it's annoying, detectable, and something I don't want to see. **We should at least detect the same call withothe same file or command word erroring out repeatedly**, that happens, silently rescue if we can.
+- Crazy idea: `chat_score` layer culls the below-threshold messages by summarizing them via LLM, only after user turn starts since they'll probably need to type and stuff so we can steal that time to hit the model.
 
   
 ## Implemented mitigations
