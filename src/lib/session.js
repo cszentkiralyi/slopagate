@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 
 const { ID, Logger } = require('../util.js');
+const Events = require('../events.js');
 const Context = require('./context.js');
 
 class Session {
