@@ -16,7 +16,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.6 }, // Cull messages with importance scores < 0.6
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
-      tool_length: (ctx) => { return { user_turns: 0, max: Math.floor((ctx / 20) * 3.5) } } // No tool response > 20% context length
+      tool_length: { user_turns: 0, max: (3.5 / 20) } // No tool response > 20% context length
     }
   },
   'hungry': {
@@ -32,7 +32,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.6 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: (ctx) => { return { user_turns: 1, max: Math.floor((ctx / 20) * 3.5) } } // Truncate tools from previous turns
+      tool_length: { user_turns: 1, max: (3.5 / 20) * 3.5 } // Truncate tools from previous turns
     }
   },
   'healthy': {
@@ -48,7 +48,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.4 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
-      tool_length: (ctx) => { return { user_turns: 2, max: Math.floor((ctx / 10) * 3.5) } }
+      tool_length: { user_turns: 2, max: (3.5 / 10) }
     }
   },
   'fat': {
@@ -63,7 +63,7 @@ const CONTEXT_FAMILIES = {
       chat_score: { threshold: 0.2 },
       tool_error: { disable: true },
       tool_age: { disable: true },
-      tool_length: (ctx) => { return { user_turns: 3, max: Math.floor(ctx / 10) } }
+      tool_length: { user_turns: 3, max: (3.5 / 10) }
     }
   }
 };
@@ -136,8 +136,8 @@ class Context {
         Logger.log(`Context: looking for user turn ${arg.config.user_turns}`)
         for (i = arg.messages.length - 1; i >= 0; i--) {
           if (!(m = arg.messages[i])) continue;
-          if (u >= arg.config.user_turns) break;
           if (m.role === 'user') u++;
+          if (u >= arg.config.user_turns) break;
         }
         if (u >= arg.config.user_turns) {
           Logger.log(`Context: found user turn ${u} at index ${i}`)
@@ -145,6 +145,7 @@ class Context {
           arg.messages = i ? arg.messages.slice(0, i) : [];
         }
       }
+      Logger.log(`Context: layer ${n_layer} sees ${arg.messages.length} messages`);
       r = (arg.messages.length) ? await layer(arg) : null;
       if (verbatim) {
         if (!r) {
@@ -184,14 +185,19 @@ class Context {
   }
   
   getLayerConfig(layerName) {
+    Logger.log(`getLayerConfig: ${this.family} ${JSON.stringify(layerName)} ${JSON.stringify(CONTEXT_FAMILIES)}`)
     let family = CONTEXT_FAMILIES[this.family],
         config = { ...(Context.BASE_LAYER_CONFIG[layerName]) };
+    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
+    if (family.layers[layerName]) Object.assign(config, family.layers[layerName]);
+    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     if (this.layer_config && layerName in this.layer_config)
       Object.assign(config, this.layer_config[layerName] || undefined);
-    if (!(layerName in Object.keys(family.layers))) return config;
-    for (let cname of family.layers[layerName]) {
-      config[cname] = this.resolveValue(config.cname);
+    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
+    for (let opt in config) {
+      config[opt] = this.resolveValue(config[opt]);
     }
+    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     return config;
   }
 

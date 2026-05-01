@@ -7,19 +7,20 @@ const trim = (s, start, end) => {
   return s.substring(0, start) + TRIM_MSG + s.substring(end);
 };
 
-const tool_length = ({ messages, config, estimate }) => {
-  let max = config.max,
+const tool_length = ({ messages, config, context_window }) => {
+  let max = (config.max > 1) ? config.max : (config.max * context_window),
       ret = [],
-      len, third, start, end, next, args, arg,
+      len, d, start, end, next, args, arg,
       c, i, j, k, m, t, u;
   for (i = messages.length - 1; i >= 0; i--) {
     m = messages[i];
     if (m.content && (len = m.content.length) > max) {
-      start = Math.floor((len - max) / 2 - (TRIM_MSG_LEN / 2) - 1);
-      end = Math.ceil((len - (max / 2)) - (TRIM_MSG_LEN / 2) - 1);
+      d = len - max;
+      start = Math.floor((len - d) / 2 - (TRIM_MSG_LEN / 2) - 1);
+      end = Math.ceil((len / 2) + (d / 2) + (TRIM_MSG_LEN / 2) + 1)
       m = { ...m };
-      m.message = trim(m.content, start, end);
-      Logger.log(`[tool_length] (max=${max}) reduced index ${i} from ${len} to ${m.message.length}`);
+      m.content = trim(m.content, start, end);
+      Logger.log(`[tool_length] (max=${max}) reduced index ${i} from ${len} to ${m.content.length}`);
     }
     /*
     if (m.tool_calls) {
