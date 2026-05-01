@@ -185,19 +185,14 @@ class Context {
   }
   
   getLayerConfig(layerName) {
-    Logger.log(`getLayerConfig: ${this.family} ${JSON.stringify(layerName)} ${JSON.stringify(CONTEXT_FAMILIES)}`)
     let family = CONTEXT_FAMILIES[this.family],
         config = { ...(Context.BASE_LAYER_CONFIG[layerName]) };
-    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     if (family.layers[layerName]) Object.assign(config, family.layers[layerName]);
-    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     if (this.layer_config && layerName in this.layer_config)
       Object.assign(config, this.layer_config[layerName] || undefined);
-    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     for (let opt in config) {
       config[opt] = this.resolveValue(config[opt]);
     }
-    Logger.log(`getLayerConfig: ${JSON.stringify(config)}`)
     return config;
   }
 

@@ -46,7 +46,7 @@ class Session {
           messages: [{ role: 'user', content: transcript }]
         });
         let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
-        let response = await this.send_private(summaryContext, summaryMessage);
+        let response = await this.private(summaryContext, summaryMessage);
         if (response.message && response.message.content) {
           return response.message.content;
         } else if (response.message && response.message.tool_calls) {
@@ -146,7 +146,7 @@ class Session {
     }
   }
 
-  async send_private(context, message, signal) {
+  async private(context, message, signal) {
     return await this.send_internal([
       { role: 'system', content: context.system_prompt },
       ...context.messages,
@@ -238,6 +238,7 @@ class Session {
 
     // TODO
     let summaryContext = new Context({
+      config: this.config,
       system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
       tools: {},
       limits: {},
@@ -271,6 +272,7 @@ class Session {
     // TODO
     let remaining = context.messages.slice(cutoffIdx + 1);
     let newContext = new Context({
+      config: this.config,
       system_prompt: context.system_prompt,
       tools: { ...context.tools },
       limits: { ...context.limits },
