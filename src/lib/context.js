@@ -29,7 +29,7 @@ const CONTEXT_FAMILIES = {
     },
     layers: {
       system_prompt: { soft: true }, // Enable section-based trimming if possible
-      chat_score: { threshold: 0.6 },
+      chat_score: { threshold: 0.5 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
       tool_length: { user_turns: 1, max: (3.5 / 20) * 3.5 } // Truncate tools from previous turns
@@ -45,7 +45,7 @@ const CONTEXT_FAMILIES = {
     },
     layers: {
       system_prompt: { soft: true },
-      chat_score: { threshold: 0.4 },
+      chat_score: { threshold: 0.3 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (3.5 / 10) }
@@ -71,7 +71,7 @@ const CONTEXT_FAMILIES = {
 class Context {
   static BASE_LAYER_CONFIG = {
     system_prompt: { disable: false, user_turns: 0, soft: true },
-    chat_score: { disable: false, user_turns: 0, threshold: 0 },
+    chat_score: { disable: false, user_turns: 3, threshold: 0 },
     tool_error: { disable: false, user_turns: 1, ttl: 0, hint_ttl: 0 },
     tool_age: { disable: false, user_turns: 3, ttl: 0 },
     tool_length: { disable: false, user_turns: 0, max: 200 },
@@ -133,18 +133,24 @@ class Context {
       if (arg.config.disable) continue;
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
-      if (arg.config.user_turns && arg.messages.length > 2) {
-        u = 0;
-        Logger.log(`Context: looking for user turn ${arg.config.user_turns}`)
-        for (i = arg.messages.length - 1; i >= 0; i--) {
-          if (!(m = arg.messages[i])) continue;
-          if (m.role === 'user') u++;
-          if (u >= arg.config.user_turns) break;
+      if (arg.config.user_turns) {
+        if (arg.messages.length > 2) {
+          u = 0;
+          Logger.log(`Context: looking for user turn ${arg.config.user_turns}`)
+          for (i = arg.messages.length - 1; i >= 0; i--) {
+            if (!(m = arg.messages[i])) continue;
+            if (m.role === 'user') u++;
+            if (u >= arg.config.user_turns) break;
+          }
+          if (u >= arg.config.user_turns) {
+            Logger.log(`Context: found user turn ${u} at index ${i}`)
+            verbatim = arg.messages.slice(i);
+            arg.messages = i ? arg.messages.slice(0, i) : [];
+          }
         }
-        if (u >= arg.config.user_turns) {
-          Logger.log(`Context: found user turn ${u} at index ${i}`)
-          verbatim = arg.messages.slice(i);
-          arg.messages = i ? arg.messages.slice(0, i) : [];
+        if (verbatim == null) {
+          verbatim = arg.messages;
+          arg.messages = [];
         }
       }
       Logger.log(`Context: layer ${n_layer} sees ${arg.messages.length} messages`);

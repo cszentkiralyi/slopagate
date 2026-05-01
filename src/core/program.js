@@ -538,8 +538,11 @@ class Program {
     let transcript = Context.transcript(recentMessages);
 
     // Use private to avoid adding to history
-    let summaryMessage = { role: 'user', content: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:\n\n${transcript}` };
-    let summaryContext = new Context({ config: this.config });
+    let summaryContext = new Context({
+      config: this.config,
+      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:`
+    });
+    let summaryMessage = { role: 'user', content: transcript };
 
     let summaryResponse = await this.harness.session.private(summaryContext, summaryMessage);
 

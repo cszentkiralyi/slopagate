@@ -249,12 +249,7 @@ class Session {
 
     let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
 
-    let response = await this.send_private(summaryContext, summaryMessage);
-
-    let summaryText = (response.message && response.message.content)
-      || (response.message && response.message.tool_calls)
-      || (response.message && response.message.content)
-      || '';
+    let response = await this.private(summaryContext, summaryMessage);
 
     // Find the summary text — handle both direct content and tool call arguments
     if (response.message && response.message.content) {
@@ -315,8 +310,22 @@ class Session {
     let newActive = await this.#activeContext.fork({
       layers: [ 'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary' ],
       summarize: async (transcript) => {
-        // TODO: real summary implementation
-        return 'Summary';
+        let summaryContext = new Context({
+          config: this.config,
+          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
+          messages: [{ role: 'user', content: transcript }]
+        });
+        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
+        let response = await this.private(summaryContext, summaryMessage);
+        if (response.message && response.message.content) {
+          return response.message.content;
+        } else if (response.message && response.message.tool_calls) {
+          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
+          if (typeof txt === 'string') {
+            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
+          }
+        }
+        return null;
       }
     });
     Logger.log(`Session: fork completed.`);
