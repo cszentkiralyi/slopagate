@@ -108,7 +108,7 @@ class Program {
     });
     
     this.commands = [
-      { name: 'quit', handler: async () => await this.dispose() },
+      { name: 'quit', handler: async () => await this.dispose(), silent: true },
       {
         name: 'think',
         arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
@@ -314,6 +314,11 @@ class Program {
         : this.interface.statusline.showSpinner(this.spinnerMessage);
       this.interface.draw();
     });
+    Events.on('turn:model', (event) => {
+      this.#stopAfkTimer();
+      this.interface.statusline.spinner.hide();
+      this.interface.draw();
+    });
     Events.on('turn:user', (event) => {
       this.#startAfkTimer();
       this.interface.statusline.spinner.hide();
@@ -393,7 +398,11 @@ class Program {
       this.interface.addMessage({ role: 'system', content: `Unknown command "${name}".` });
       return;
     }
-    
+
+    if (!cmd.silent) {
+      this.interface.addMessage({ role: 'command', content: ` /${name} ` });
+    }
+
     await cmd.handler(args);
   }
   
@@ -405,11 +414,10 @@ class Program {
       this.config.set('think', bstr === 'true' || bstr === 'on');
     }
     this.config.set('think', this.config.get('think'));
-    let msg = {
-      content: `Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`,
-      fg: 'gray'
-    };
-    this.interface.statusline.showMessage(msg, true);
+    this.interface.addMessage({
+      role: 'tool',
+      content: `Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`
+    });
   }
 
   async compactCommand() {
@@ -421,14 +429,12 @@ class Program {
         new_est = ctx.estimates,
         new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
         delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
-        pct = (100 * new_tok / new_est.context_window).toFixed(0),
-        msg = {
-          content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`,
-          fg: 'gray'
-        };
+        pct = (100 * new_tok / new_est.context_window).toFixed(0);
     this.interface.statusline.spinner.stop();
-    this.interface.statusline.showMessage(msg, true);
-    this.interface.draw();
+    this.interface.addMessage({
+      role: 'tool',
+      content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`
+    });
   }
 
   contextCommand() {
@@ -519,6 +525,9 @@ class Program {
   }
 
   async recap() {
+    // Don't recap if it's not the user's turn
+    if (this.harness.session.turn !== 'user') return;
+
     // Not enough user activity to summarize
     if (this.#userMessagesSinceRecap < 2) return;
 
@@ -568,10 +577,10 @@ class Program {
 
   async bugCommand(description) {
     if (!description || !description.length) {
-      this.interface.statusline.showMessage({
-        content: 'Usage: /bug <description>',
-        fg: 'gray'
-      }, true);
+      this.interface.addMessage({
+        role: 'tool',
+        content: 'Usage: /bug <description>'
+      });
       return;
     }
     const now = new Date();
@@ -582,18 +591,18 @@ class Program {
     } catch (err) {
       fsSync.writeFileSync('./bugs.jsonl', entry + '\n');
     }
-    this.interface.statusline.showMessage({
-      content: `Bug logged: ${description}`,
-      fg: 'gray'
-    }, true);
+    this.interface.addMessage({
+      role: 'tool',
+      content: `Bug logged: ${description}`
+    });
   }
 
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
-      this.interface.statusline.showMessage({
-        content: 'Usage: /config <key> [value]',
-        fg: 'gray'
-      }, true);
+      this.interface.addMessage({
+        role: 'tool',
+        content: 'Usage: /config <key> [value]'
+      });
       return;
     }
     let parts = argstr.split(' ');
@@ -602,20 +611,20 @@ class Program {
     
     if (parts.length <= 1) {
       let cur = this.config.get(key);
-      this.interface.statusline.showMessage({
-        content: `${key} = ${cur ?? '(not set)'}`,
-        fg: 'gray'
-      }, true);
+      this.interface.addMessage({
+        role: 'tool',
+        content: `${key} = ${cur ?? '(not set)'}`
+      });
     } else {
       if (value === 'true') value = true;
       else if (value === 'false') value = false;
       else if (!isNaN(value) && value.length > 0) value = parseInt(value, 10);
       
       this.config.set(key, value);
-      this.interface.statusline.showMessage({
-        content: `Set ${key} = ${this.config.get(key)}`,
-        fg: 'gray'
-      }, true);
+      this.interface.addMessage({
+        role: 'tool',
+        content: `Set ${key} = ${this.config.get(key)}`
+      });
     }
   }
 

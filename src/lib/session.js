@@ -17,6 +17,8 @@ class Session {
 
   #abortControllers = null;
 
+  turn;
+
   tools;
 
   get history() { return this.#masterContext.messages; }
@@ -33,6 +35,9 @@ class Session {
   
   constructor(props) {
     this.#id = props.id || ID();
+
+    Events.on('turn:user', () => { this.turn = 'user'; });
+    Events.on('turn:model', () => { this.turn = 'model'; });
     this.config = props.config || new Map();
     this.tools = props.tools || [];
     
@@ -69,6 +74,8 @@ class Session {
 
   async dispose() {
     this.removeTempDir();
+    Events.off('turn:user');
+    Events.off('turn:model');
   }
   abort() {
     if (this.#abortControllers && this.#abortControllers.length)

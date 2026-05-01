@@ -9,13 +9,14 @@ class Timers {
       this.#timers.delete(id);
       callback();
     }, duration);
-    this.#timers.set(id, timeout);
+    this.#timers.set(id, { timeout, start: Date.now(), duration, elapsed: 0 });
   }
 
   stop(id) {
-    const timeout = this.#timers.get(id);
-    if (timeout) {
-      clearTimeout(timeout);
+    const timer = this.#timers.get(id);
+    if (timer) {
+      timer.elapsed = (Date.now() - timer.start) + (timer.elapsed || 0);
+      clearTimeout(timer.timeout);
       this.#timers.delete(id);
     }
   }
@@ -29,8 +30,8 @@ class Timers {
   }
 
   clearAll() {
-    for (const [id, timeout] of this.#timers) {
-      clearTimeout(timeout);
+    for (const [, timer] of this.#timers) {
+      clearTimeout(timer.timeout);
     }
     this.#timers.clear();
   }

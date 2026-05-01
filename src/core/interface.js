@@ -140,6 +140,14 @@ class Interface {
       };
     } else if (role === 'system') {
       textProps = { id, content };
+    } else if (role === 'command') {
+      textProps = {
+        id, content,
+        fill: false,
+        fg: 232,
+        bg: 214,
+        padding: { left: 1, right: 1 }
+      };
     }
     
     if (textProps) {

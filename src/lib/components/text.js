@@ -33,7 +33,7 @@ class Text extends Component {
       lines.push(...Text.fit(line, width, {
         padding: this.padding,
         align: !!this.align,
-        fill: !!this.bg,
+        fill: ('fill' in this) ? this.fill : !!this.bg,
         forceAlign: this.forceAlign,
         justify: this.justify
       }));
