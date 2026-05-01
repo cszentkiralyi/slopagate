@@ -59,7 +59,7 @@ class EditTool extends Tool {
         await fs.rm(temp_path);
         return `Created "${file_path}" successfully.`;
       } catch (createErr) {
-        if (editErr.code !== 'ENOENT') return `Error: something went wrong!`;
+        if (createErr.code !== 'ENOENT') return `Error: something went wrong!`;
         return `Error: some or all of the path "${file_path}" doesn't exist!`;
       }
     }

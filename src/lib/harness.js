@@ -119,14 +119,14 @@ class Harness {
     if (e !== null && e !== undefined && !Number.isNaN(e)) {
       this.#outputTokens += e;
     }
-    Events.emit('metrics:tokens', {
-      inputTokens: this.#inputTokens,
-      outputTokens: this.#outputTokens
-    });
     
     if (message.content || message.tool_calls) {
       let done = !message.tool_calls;
       this.session.addToContext(message);
+      Events.emit('metrics:tokens', {
+        inputTokens: this.#inputTokens,
+        outputTokens: this.#outputTokens
+      });
       Events.emit('metrics:tokens', {});
       if (done) {
         Events.emit('turn:user');

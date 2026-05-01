@@ -124,6 +124,7 @@ class Program {
         handler: async (args) => this.configCommand(args)
       },
       { name: 'transcript', handler: async (args) => this.transcriptCommand(args), hint: 'Dump session context to a file' },
+      { name: 'commands', handler: async () => this.commandsCommand() },
     ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
@@ -637,11 +638,16 @@ class Program {
       });
       return;
     }
-    const history = this.harness.session.history.map(m => {
-      if (m.role !== 'tool') return m;
-      return { ...m, content: m.content.startsWith('Error:') ? '[Error]' : '[Result]' };
-    });
-    const transcript = Context.transcript(history);
+    const history = [];
+    let m, r, c;
+    for (m of this.harness.session.history) {
+      if (!m.content) continue;
+      r = m.role;
+      c = m.content;
+      if (m.role === 'tool') m.content = m.content.startsWith('Error') ? '[Error]' : '[Result]';
+      history.push(JSON.stringify(m));
+    }
+    const transcript = history.join('\n');
     try {
       fsSync.writeFileSync(argstr, transcript, { encoding: 'utf-8' });
     } catch (err) {
@@ -655,6 +661,16 @@ class Program {
       role: 'tool',
       content: `Transcript written to ${argstr}`
     });
+  }
+
+  async commandsCommand() {
+    const lines = this.commands
+      .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }))
+      .map(c => c.hint ? `/${c.name} - ${c.hint}` : `/${c.name}`)
+      .join('\n');
+    if (lines) {
+      this.interface.addMessage({ role: 'system', content: lines });
+    }
   }
 
   #startAfkTimer() {
