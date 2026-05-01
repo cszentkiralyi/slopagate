@@ -100,6 +100,7 @@ class Context {
     this.config = config;
     this.family = Context.family(this.config.get('context_window'));
     this.config.set('context_family', this.family);
+    this.config.set('aggression_level', CONTEXT_FAMILIES[this.family].aggression_level);
     this.system_prompt = system_prompt;
     this.messages = messages ? [ ...messages ] : [];
     if (this.messages.length)
@@ -195,7 +196,7 @@ class Context {
 
   resolveValue(v) {
     if (typeof v !== 'function') return v;
-    return v.call(this, this.config.get('context_length'));
+    return v.call(this, this.config.get('context_window'));
   }
   
   static estimate(s) {
