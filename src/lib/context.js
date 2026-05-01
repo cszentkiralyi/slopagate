@@ -109,7 +109,6 @@ class Context {
   }
 
   add(...messages) {
-    Logger.log(`Context: adding to context, ${this.messages.length} + ${messages.length}`);
     this.#messageEstimate += Context.estimate(Context.transcript(messages));
     this.messages.push(...messages);
   }
@@ -136,14 +135,12 @@ class Context {
       if (arg.config.user_turns) {
         if (arg.messages.length > 2) {
           u = 0;
-          Logger.log(`Context: looking for user turn ${arg.config.user_turns}`)
           for (i = arg.messages.length - 1; i >= 0; i--) {
             if (!(m = arg.messages[i])) continue;
             if (m.role === 'user') u++;
             if (u >= arg.config.user_turns) break;
           }
           if (u >= arg.config.user_turns) {
-            Logger.log(`Context: found user turn ${u} at index ${i}`)
             verbatim = arg.messages.slice(i);
             arg.messages = i ? arg.messages.slice(0, i) : [];
           }
@@ -153,7 +150,6 @@ class Context {
           arg.messages = [];
         }
       }
-      Logger.log(`Context: layer ${n_layer} sees ${arg.messages.length} messages`);
       r = (arg.messages.length) ? await layer(arg) : null;
       if (verbatim) {
         if (!r) {

@@ -285,7 +285,7 @@ class Session {
 
   async send(...outgoing) {
     this.addToContext(...outgoing);
-    Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
+    //Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
       layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_error', 'tool_length' ]
     });
