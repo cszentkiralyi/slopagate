@@ -116,8 +116,8 @@ class Program {
       },
       { name: 'compact', handler: async () => this.compactCommand() },
       { name: 'recap', handler: async () => this.recap() },
-      { name: 'bug', handler: async (args) => this.bugCommand(args) },
-      { name: 'context', handler: async () => this.contextCommand() },
+      { name: 'bug', handler: async (args) => this.bugCommand(args), hint: 'Record a brief bug into bugs.jsonl for later' },
+      { name: 'context', handler: async () => this.contextCommand(), hint: 'Display a context window usage visualizer'},
       {
         name: 'config',
         arguments: [{ name: 'key' }, { name: 'value', optional: true }],

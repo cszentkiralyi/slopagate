@@ -109,6 +109,7 @@ class Context {
   }
 
   add(...messages) {
+    Logger.log(`Context: adding to context, ${this.messages.length} + ${messages.length}`);
     this.#messageEstimate += Context.estimate(Context.transcript(messages));
     this.messages.push(...messages);
   }

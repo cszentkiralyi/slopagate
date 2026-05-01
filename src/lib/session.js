@@ -106,13 +106,9 @@ class Session {
     }, responseObj, controller, idx;
     
     if (this.config.get('provider') === 'openai') {
-      /*
-      Bugged? I suddenly started getting errors...
-      > Assistant response prefill is incompatible with enable_thinking
       if ('think' in payload) {
         payload.chat_template_kwargs = `{"enable_thinking":${payload.think}}`;
       }
-        */
     }
     
     if (signal) {
@@ -292,7 +288,7 @@ class Session {
 
   async send(...outgoing) {
     this.addToContext(...outgoing);
-    Logger.log(`Session: outgoing: ${JSON.stringify(outgoing)}`);
+    Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
       layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_error', 'tool_length' ]
     });

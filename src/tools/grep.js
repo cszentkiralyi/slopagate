@@ -27,7 +27,7 @@ class GrepTool extends Tool {
     let { file_path, search_string } = args;
 
     try {
-      const result = execSync(`grep -nd recurse ${JSON.stringify(search_string)} ${file_path}`).toString();
+      const result = execSync(`grep -nr ${JSON.stringify(search_string)} ${file_path}`).toString();
       if (!result.length) return '';
       let output = result.split('\n'),
           sliced = output.slice(0, 20),

@@ -19,7 +19,7 @@ const tool_length = ({ messages, config, estimate }) => {
       end = Math.ceil((len - (max / 2)) - (TRIM_MSG_LEN / 2) - 1);
       m = { ...m };
       m.message = trim(m.content, start, end);
-      Logger.log(`[tool_length] reduced from ${len} to ${m.message.length}`);
+      Logger.log(`[tool_length] reduced index ${i} from ${len} to ${m.message.length}`);
     }
     /*
     if (m.tool_calls) {
