@@ -13,7 +13,8 @@ The system consists of five core components: (1) a `.slop/memory/` directory wit
 - All core memory infrastructure implemented (directory, memory.js module, harness tools, system prompt injection, `/memory` CLI commands)
 - No topictracker or topic-related functionality exists in harness or elsewhere
 - Heuristic auto-triggers not yet implemented
+- Command handlers consolidated: `/quit`, `/think`, `/compact`, `/context`, `/recap`, `/bug`, `/config`, `/transcript`, `/commands`, `/memory` and skill commands all live in `src/lib/harness.js`; `src/core/program.js` no longer has duplicate command methods
 
 ## TODO
-- [ ] Implement heuristic triggers in `src/core/program.js` (context overflow, duplicate mentions)
+- [ ] Implement heuristic triggers (context overflow, duplicate mentions)
 - [ ] Test end-to-end memory flow
