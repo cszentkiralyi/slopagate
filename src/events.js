@@ -9,7 +9,7 @@ class Wrapper extends events.EventEmitter {
   }
 }
 
-const Events = new events.EventEmitter();
-//const Events = new Wrapper();
+//const Events = new events.EventEmitter();
+const Events = new Wrapper();
 
 module.exports = Events;

@@ -1,6 +1,10 @@
 # Libraries, packages, etc
 **/node_modules/
+
+# slopagate artifacts
 .slop/memory/
+TODO.md
+PLAN.md
 
 # Build artifacts
 slop
