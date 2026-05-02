@@ -25,9 +25,10 @@ class Statusline extends HContainer {
     this.appendChild(this.#left);
     this.appendChild(this.#right);
     
-    // Stack of left-side entries: each entry is either a spinner entry
-    // { isSpinner: true, text: string, id?: string } or a message entry
-    // { isSpinner: false, text: object, dismissable: boolean, id?: string, timeout?: number, timer?: Timeout }
+    // Stack of left-side entries: each entry has a 'kind' that defines
+    // how it's rendered:
+    //   { kind: 'spinner', text: string, id?: string }
+    //   { kind: 'message', text: object, dismissable: boolean, id?: string, timeout?: number, timer?: Timeout }
     this.leftSide = [];
     
     this.hide();
@@ -49,7 +50,7 @@ class Statusline extends HContainer {
       this.spinner.hide();
       return;
     }
-    if (entry.isSpinner) {
+    if (entry.kind === 'spinner') {
       this.spinner.message = entry.text;
       this.#setLeftChild(this.spinner);
       this.spinner.show();
@@ -96,7 +97,7 @@ class Statusline extends HContainer {
     this.spinner.stop();
 
     const entry = {
-      isSpinner: false,
+      kind: 'message',
       text: props,
       dismissable: !!dismissable,
       id: id ?? `msg-${this.#nextId++}`,
@@ -116,13 +117,13 @@ class Statusline extends HContainer {
     // Just push the new spinner on top of the stack; it takes priority
     // because #renderTop() only renders the top entry.
     const entryId = id ?? `spin-${this.#nextId++}`;
-    this.leftSide.push({ isSpinner: true, text: message, id: entryId });
+    this.leftSide.push({ kind: 'spinner', text: message, id: entryId });
     this.#renderTop();
     return entryId;
   }
 
   clearSpinners() {
-    this.leftSide = this.leftSide.filter(e => !e.isSpinner);
+    this.leftSide = this.leftSide.filter(e => e.kind !== 'spinner');
     this.#renderTop();
   }
 
