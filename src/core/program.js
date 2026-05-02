@@ -16,6 +16,9 @@ const { Logger } = require('../util.js');
 const Timers = require('../lib/timers.js');
 
 class Program {
+  #currentSpinnerId = null;
+  #currentMessageId = null;
+
   static SPINNER_MESSAGES = [
     'Autofilling',
     'Hallucinating',
@@ -294,7 +297,7 @@ class Program {
             this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
-            this.interface.statusline.showSpinner(this.spinnerMessage);
+            this.#currentSpinnerId = this.interface.statusline.showSpinner(this.spinnerMessage);
             this.interface.draw();
             
             for (let word of input.split(' ')) {
@@ -320,12 +323,12 @@ class Program {
 
     Events.on('user:abort', (event) => {
       Events.emit('turn:user');
-      this.interface.statusline.showMessage({
+      this.#currentMessageId = this.interface.statusline.showMessage({
         content: '^C again to exit.',
         padding: { left: 1 },
         fg: 'gray'
       }, true);
-      setTimeout(() => this.interface.statusline.dismiss() && this.interface.draw(), 2000);
+      setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
       this.interface.draw();
     });
     Events.on('model:content', (event) => {
@@ -336,8 +339,8 @@ class Program {
         });
       }
       (event.done)
-        ? this.interface.statusline.hide()
-        : this.interface.statusline.showSpinner(this.spinnerMessage);
+        ? this.interface.statusline.hide(this.#currentSpinnerId)
+        : this.interface.statusline.spinner.hide();
       this.interface.draw();
     });
     Events.on('turn:model', (event) => {
@@ -436,7 +439,7 @@ class Program {
     if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
       switch (toolCall.function.name) {
         case 'Read':
-          Logger.log(`[Experiment] maybe steering ${start_line}-${end_line}`);
+          Logger.log(`[Experiment] maybe steering ${args.start_line ?? 'none'}-${args.end_line ?? 'none'}`);
           if (args.start_line || args.end_line)
             return;
           Logger.log(`[Experiment] Steering from ${last} to StringSearch`);

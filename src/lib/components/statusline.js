@@ -12,6 +12,7 @@ class Statusline extends HContainer {
   
   #left;
   #right;
+  #nextId = 0;
   get right() { return this.#right; }
 
   constructor(props) {
@@ -25,8 +26,8 @@ class Statusline extends HContainer {
     this.appendChild(this.#right);
     
     // Stack of left-side entries: each entry is either a spinner entry
-    // { isSpinner: true, text: string } or a message entry
-    // { isSpinner: false, text: object, dismissable: boolean, timeout?: number, timer?: Timeout }
+    // { isSpinner: true, text: string, id?: string } or a message entry
+    // { isSpinner: false, text: object, dismissable: boolean, id?: string, timeout?: number, timer?: Timeout }
     this.leftSide = [];
     
     this.hide();
@@ -59,9 +60,16 @@ class Statusline extends HContainer {
     }
   }
   
-  hide() {
+  hide(id) {
     if (!this.leftSide.length) return;
-    const entry = this.leftSide.pop();
+    let entry;
+    if (id !== undefined) {
+      const idx = this.leftSide.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      entry = this.leftSide.splice(idx, 1)[0];
+    } else {
+      entry = this.leftSide.pop();
+    }
     if (entry.timeout && entry.timer) {
       clearTimeout(entry.timer);
       entry.timer = null;
@@ -73,14 +81,16 @@ class Statusline extends HContainer {
     await this.root.draw();
   }
 
-  dismiss() {
-    const entry = this.#peek();
+  dismiss(id) {
+    const entry = id !== undefined
+      ? this.leftSide.find(e => e.id === id)
+      : this.#peek();
     if (!entry || !entry.dismissable) return false;
-    this.hide();
+    this.hide(id);
     return true;
   }
   
-  showMessage(props, dismissable) {
+  showMessage(props, dismissable, id) {
     // Stop spinner animation
     this.spinner.hide();
     this.spinner.stop();
@@ -89,11 +99,12 @@ class Statusline extends HContainer {
       isSpinner: false,
       text: props,
       dismissable: !!dismissable,
+      id: id ?? `msg-${this.#nextId++}`,
     };
 
     if (props.timeout) {
       entry.timer = setTimeout(() => {
-        this.hide();
+        this.hide(id);
       }, props.timeout);
     }
 
@@ -101,20 +112,10 @@ class Statusline extends HContainer {
     this.#renderTop();
   }
   
-  showSpinner(message) {
-    // Pop any non-spinner entries (messages) blocking the spinner
-    let top = this.#peek();
-    while (top && !top.isSpinner) {
-      if (top.timeout && top.timer) {
-        clearTimeout(top.timer);
-        top.timer = null;
-      }
-      this.leftSide.pop();
-      top = this.#peek();
-    }
-    if (top) return;
-
-    this.leftSide.push({ isSpinner: true, text: message });
+  showSpinner(message, id) {
+    // Just push the new spinner on top of the stack; it takes priority
+    // because #renderTop() only renders the top entry.
+    this.leftSide.push({ isSpinner: true, text: message, id: id ?? `spin-${this.#nextId++}` });
     this.#renderTop();
   }
 
