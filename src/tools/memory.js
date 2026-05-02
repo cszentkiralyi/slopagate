@@ -1,8 +1,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const Tool = require('./tool.js');
+const { Logger } = require('../util.js');
 
-const Memory = require('../core/memory.js');
+const Memory = require('../lib/memory.js');
 
 class MemoryTool extends Tool {
   name = 'Memory';
@@ -29,6 +30,7 @@ class MemoryTool extends Tool {
     await memory.init();
 
     if (args.action === 'read') {
+      Logger.log(`Memory action: read ${args.file || '(no file)'}`);
       if (!args.file) {
         return 'Error: Missing file argument';
       }
@@ -40,6 +42,7 @@ class MemoryTool extends Tool {
     }
 
     if (args.action === 'write') {
+      Logger.log(`Memory action: write ${args.file || '(no file)'}`);
       if (!args.file || !args.content) {
         return 'Error: Missing file or content argument';
       }
@@ -49,11 +52,13 @@ class MemoryTool extends Tool {
     }
 
     if (args.action === 'list') {
+      Logger.log(`Memory action: list`);
       const entries = memory.list();
       return entries.length ? entries.map(e => `- ${e.summary} (${e.file})`).join('\n') : 'No memories';
     }
 
     if (args.action === 'search') {
+      Logger.log(`Memory action: search ${args.query || '(no query)'}`);
       if (!args.query) {
         return 'Error: Missing query argument';
       }
@@ -65,7 +70,8 @@ class MemoryTool extends Tool {
   }
 
   message(calls) {
-    return `Memory: ${calls.length} calls`;
+    const action = calls[0]?.args?.action || 'unknown';
+    return `Memory: 1 ${action}`;
   }
 }
 

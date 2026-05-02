@@ -367,13 +367,14 @@ class Harness {
     }
   }
   
-  async memoryCommand(args) {
-    if (!args || !args.action) {
+  async memoryCommand(argstr) {
+    if (!argstr || !argstr.length) {
       this.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>');
       return;
     }
     
-    const action = args.action;
+    const parts = argstr.split(' ');
+    const action = parts[0];
     
     if (action === 'list') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
@@ -384,19 +385,19 @@ class Harness {
     } else if (action === 'read') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
-        let response = await result.handler({ action: 'read', file: args.file }, result);
+        let response = await result.handler({ action: 'read', file: parts[1] }, result);
         this.emitCommandMessage(response);
       }
     } else if (action === 'write') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
-        let response = await result.handler({ action: 'write', file: args.file, content: args.content }, result);
+        let response = await result.handler({ action: 'write', file: parts[1], content: parts.slice(2) }, result);
         this.emitCommandMessage(response);
       }
     } else if (action === 'search') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
-        let response = await result.handler({ action: 'search', query: args.query }, result);
+        let response = await result.handler({ action: 'search', query: parts.slice(1).join(' ') }, result);
         this.emitCommandMessage(response);
       }
     } else {
