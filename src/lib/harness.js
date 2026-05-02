@@ -23,6 +23,61 @@ const { Triggers } = require('../lib/triggers.js');
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
 
+  static makeConfigCommand(key, allowedValues) {
+    const args = [{
+      name: 'value',
+      possible: allowedValues
+    }];
+    const handler = async (bstr) => {
+      if (!bstr || !bstr.length) {
+        this.config.set(key, !this.config.get(key));
+      } else {
+        let value = bstr;
+        if (allowedValues) {
+          const lower = bstr.toLowerCase();
+          if (allowedValues.map(v => v.toLowerCase()).includes(lower)) {
+            value = lower;
+          } else {
+            const display = allowedValues.join(', ');
+            this.emitCommandMessage(`Invalid value. Allowed: ${display}`);
+            return;
+          }
+        } else {
+          if (bstr === 'true') value = true;
+          else if (bstr === 'false') value = false;
+          else if (!isNaN(bstr) && bstr.length > 0) value = parseInt(bstr, 10);
+        }
+        this.config.set(key, value);
+      }
+      const cur = this.config.get(key);
+      this.emitCommandMessage(`${key} = ${cur}`);
+    };
+    return { arguments: args, handler };
+  }
+
+  static makeLevelCommand(key, allowedValues) {
+    const args = [{
+      name: 'value',
+      possible: allowedValues
+    }];
+    const handler = async (bstr) => {
+      if (!bstr || !bstr.length) {
+        const cur = this.config.get(key);
+        const idx = allowedValues.indexOf(cur);
+        this.config.set(key, allowedValues[(idx + 1) % allowedValues.length]);
+      } else {
+        const lower = bstr.toLowerCase();
+        if (!allowedValues.map(v => v.toLowerCase()).includes(lower)) {
+          this.emitCommandMessage(`Invalid value. Allowed: ${allowedValues.join(', ')}`);
+          return;
+        }
+        this.config.set(key, lower);
+      }
+      this.emitCommandMessage(`${key} = ${this.config.get(key)}`);
+    };
+    return { arguments: args, handler };
+  }
+
   #abortTarget = null;
   // Lifetime counts
   #inputTokens = 0;
@@ -95,8 +150,11 @@ class Harness {
     });
     this.commands.push({
       name: 'think',
-      arguments: [{ name: 'setting', possible: ['true', 'false'] }],
-      handler: async (args) => this.thinkCommand(args)
+      ...Harness.makeConfigCommand('think', ['true', 'false'])
+    });
+    this.commands.push({
+      name: 'aggression',
+      ...Harness.makeLevelCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
     });
     this.commands.push({
       name: 'compact', handler: async () => this.compactCommand()
@@ -175,15 +233,6 @@ class Harness {
   }
   
   // Command handlers
-  
-  async thinkCommand(bstr) {
-    if (!bstr || !bstr.length) {
-      this.config.set('think', !this.config.get('think'));
-    } else {
-      this.config.set('think', bstr === 'true' || bstr === 'on');
-    }
-    this.emitCommandMessage(`Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`);
-  }
   
   async compactCommand() {
     Events.emit('status:spinner', { message: 'Compacting...' });
