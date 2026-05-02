@@ -1,6 +1,7 @@
 const { Logger } = require('../../util.js');
 
 const chat_summary = async ({ messages, system_prompt, summarize, estimate, transcript }) => {
+  Logger.log(`chat_summary: running, ${messages.length} messages`);
   // Convert to transcript string
   let tmessages = transcript(messages.filter(m => m.role !== 'tool'));
 
@@ -15,7 +16,7 @@ const chat_summary = async ({ messages, system_prompt, summarize, estimate, tran
   ];
 
   Logger.log(`chat_summary: compacted (replaced ${messages.length} messages with ${estimate(ret.length)}-token summary)`);
-  return { messages: newMessages, system_prompt };
+  return { messages: ret, system_prompt };
 };
 
 module.exports = chat_summary;
