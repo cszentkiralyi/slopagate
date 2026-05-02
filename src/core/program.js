@@ -208,6 +208,15 @@ class Program {
       config: this.config,
       skills: this.skills
     });
+    Events.on('command:name', ({ name }) => this.interface.addMessage({
+      role: 'command',
+      content: ` /${name} `
+    }));
+    Events.on('command:message', ({ content }) => this.interface.addMessage({
+      role: 'tool',
+      content: content
+    }));
+    Events.on('program:quit', () => this.dispose());
     
     addInterfaceCommands(this.harness.getCommands());
 
@@ -356,7 +365,7 @@ class Program {
         content: `Skills: loaded ${this.skills.names.length} skills`
       });
     }
-
+    
     this.interface.addMessage({ role: 'system', content: `Started session ${this.harness.session.id}.` });
     this.interface.draw();
   }

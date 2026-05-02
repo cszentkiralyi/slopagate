@@ -77,46 +77,48 @@ class Harness {
     });
     
     // Build commands from skills
-    this.#buildCommands();
+    this.buildCommands();
     
     this.session.ensureTempDir().then(_ => {
       Events.emit('harness:ready');
     });
   }
   
-  #buildCommands() {
+  buildCommands() {
     // Core commands
     this.commands.push({
-      name: 'quit',
-      handler: async () => {
-        Events.emit('harness:quit');
-      },
-      silent: true
+      name: 'quit', handler: async () => { Events.emit('program:quit'); }, silent: true
     });
     this.commands.push({
       name: 'think',
       arguments: [{ name: 'setting', possible: ['true', 'false'] }],
       handler: async (args) => this.thinkCommand(args)
     });
-    this.commands.push({ name: 'compact', handler: async () => this.compactCommand() });
+    this.commands.push({
+      name: 'compact', handler: async () => this.compactCommand()
+    });
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
     this.commands.push({
-      name: 'bug',
-      handler: async (args) => this.bugCommand(args),
+      name: 'bug', handler: async (args) => this.bugCommand(args),
       hint: 'Record a brief bug into bugs.jsonl for later'
     });
-    this.commands.push({ name: 'context', handler: async () => this.contextCommand(), hint: 'Display a context window usage visualizer' });
+    this.commands.push({
+      name: 'context', handler: async () => this.contextCommand(),
+      hint: 'Display a context window usage visualizer'
+    });
     this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
       handler: async (args) => this.configCommand(args)
     });
     this.commands.push({
-      name: 'transcript',
-      handler: async (args) => this.transcriptCommand(args),
+      name: 'transcript', handler: async (args) => this.transcriptCommand(args),
       hint: 'Dump session context to a file'
     });
-    this.commands.push({ name: 'commands', handler: async () => this.commandsCommand(), hint: 'List available commands' });
+    this.commands.push({
+      name: 'commands', handler: async () => this.commandsCommand(),
+      hint: 'List available commands'
+    });
     this.commands.push({
       name: 'memory',
       arguments: [{ name: 'action', possible: ['list', 'read', 'write', 'search'] }],
@@ -148,15 +150,20 @@ class Harness {
     return this.commands.find(c => c.name === name);
   }
   
+  emitCommandMessage(content) {
+    Events.emit('command:message', { content });
+  }
+
   async command(name, args) {
     let cmd = this.commands.find(c => c.name === name);
     if (!cmd) {
-      Events.emit('model:content', { done: true, content: `Unknown command "${name}".` });
+      Events.emit('command:name', { name });
+      this.emitCommandMessage(`Unknown command "${name}".`);
       return null;
     }
     
     if (!cmd.silent) {
-      Events.emit('model:content', { done: true, content: `/${name} ` });
+      Events.emit('command:name', { name });
     }
     
     await cmd.handler(args);
@@ -171,26 +178,20 @@ class Harness {
     } else {
       this.config.set('think', bstr === 'true' || bstr === 'on');
     }
-    Events.emit('model:content', {
-      done: true,
-      content: `Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`
-    });
+    this.emitCommandMessage(`Thinking ${this.config.get('think') ? 'enabled' : 'disabled'}.`);
   }
   
   async compactCommand() {
     Events.emit('status:spinner', { message: 'Compacting...' });
     let old_est = this.session.context.estimates,
         old_tok = old_est.system_prompt + old_est.messages + old_est.reserved,
-        ctx = await this.session.compact([]),
+        ctx = await this.session.compact(),
         new_est = ctx.estimates,
         new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
         delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
         pct = (100 * new_tok / new_est.context_window).toFixed(0);
     Events.emit('status:spinner', { hide: true });
-    Events.emit('model:content', {
-      done: true,
-      content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`
-    });
+    this.emitCommandMessage(`Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`);
     Events.emit('metrics:tokens', {});
   }
   
@@ -238,12 +239,7 @@ class Harness {
       `  ${ANSI.fg('─', 238)} window   ${win.toFixed(0)} tokens total`
     ];
     
-    Events.emit('model:content', {
-      done: true,
-      content: lines.join('\n'),
-      padding: { left: 2, right: 2 }
-    });
-    
+    this.emitCommandMessage(lines.join('\n'));
     Events.emit('metrics:tokens', {});
   }
   
@@ -301,10 +297,7 @@ class Harness {
   
   async bugCommand(description) {
     if (!description || !description.length) {
-      Events.emit('model:content', {
-        done: true,
-        content: 'Usage: /bug <description>'
-      });
+      this.emitCommandMessage('Usage: /bug <description>');
       return;
     }
     const now = new Date();
@@ -315,18 +308,12 @@ class Harness {
     } catch (err) {
       fs.writeFileSync('./bugs.jsonl', entry + '\n');
     }
-    Events.emit('model:content', {
-      done: true,
-      content: `Bug logged: ${description}`
-    });
+    this.emitCommandMessage(`Bug logged: ${description}`);
   }
   
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
-      Events.emit('model:content', {
-        done: true,
-        content: 'Usage: /config <key> [value]'
-      });
+      this.emitCommandMessage('Usage: /config <key> [value]');
       return;
     }
     let parts = argstr.split(' ');
@@ -335,29 +322,20 @@ class Harness {
     
     if (parts.length <= 1) {
       let cur = this.config.get(key);
-      Events.emit('model:content', {
-        done: true,
-        content: `${key} = ${cur ?? '(not set)'}`
-      });
+      this.emitCommandMessage(`${key} = ${cur ?? '(not set)'}`);
     } else {
       if (value === 'true') value = true;
       else if (value === 'false') value = false;
       else if (!isNaN(value) && value.length > 0) value = parseInt(value, 10);
       
       this.config.set(key, value);
-      Events.emit('model:content', {
-        done: true,
-        content: `Set ${key} = ${this.config.get(key)}`
-      });
+      this.emitCommandMessage(`Set ${key} = ${this.config.get(key)}`);
     }
   }
   
   async transcriptCommand(argstr) {
     if (!argstr || !argstr.length) {
-      Events.emit('model:content', {
-        done: true,
-        content: 'Usage: /transcript <filename>'
-      });
+      this.emitCommandMessage('Usage: /transcript <filename>');
       return;
     }
     const history = [];
@@ -373,16 +351,10 @@ class Harness {
     try {
       fs.writeFileSync(argstr, transcript, { encoding: 'utf-8' });
     } catch (err) {
-      Events.emit('model:content', {
-        done: true,
-        content: `Error writing file: ${err.message}`
-      });
+      this.emitCommandMessage(`Error writing file: ${err.message}`);
       return;
     }
-    Events.emit('model:content', {
-      done: true,
-      content: `Transcript written to ${argstr}`
-    });
+    this.emitCommandMessage(`Transcript written to ${argstr}`);
   }
   
   commandsCommand() {
@@ -391,16 +363,13 @@ class Harness {
       .map(c => c.hint ? `/${c.name} - ${c.hint}` : `/${c.name}`)
       .join('\n');
     if (lines) {
-      Events.emit('model:content', { done: true, content: lines });
+      this.emitCommandMessage(lines);
     }
   }
   
   async memoryCommand(args) {
     if (!args || !args.action) {
-      Events.emit('model:content', {
-        done: true,
-        content: 'Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>'
-      });
+      this.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>');
       return;
     }
     
@@ -410,41 +379,35 @@ class Harness {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
         let response = await result.handler({ action: 'list' }, result);
-        Events.emit('model:content', { done: true, content: response });
+        this.emitCommandMessage(response);
       }
     } else if (action === 'read') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
         let response = await result.handler({ action: 'read', file: args.file }, result);
-        Events.emit('model:content', { done: true, content: response });
+        this.emitCommandMessage(response);
       }
     } else if (action === 'write') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
         let response = await result.handler({ action: 'write', file: args.file, content: args.content }, result);
-        Events.emit('model:content', { done: true, content: response });
+        this.emitCommandMessage(response);
       }
     } else if (action === 'search') {
       let result = await this.toolbox.all().find(t => t.name === 'Memory');
       if (result) {
         let response = await result.handler({ action: 'search', query: args.query }, result);
-        Events.emit('model:content', { done: true, content: response });
+        this.emitCommandMessage(response);
       }
     } else {
-      Events.emit('model:content', {
-        done: true,
-        content: 'Unknown action. Use list, read, write, or search'
-      });
+      this.emitCommandMessage('Unknown action. Use list, read, write, or search');
     }
   }
   
   async handleSkill(skillName, args) {
     const skill = this.skills.get(skillName);
     if (!skill) {
-      Events.emit('model:content', {
-        done: true,
-        content: `Skill "${skillName}" not found.`
-      });
+      this.emitCommandMessage(`Skill "${skillName}" not found.`);
       return;
     }
     
