@@ -226,7 +226,7 @@ class Triggers {
       }
 
       try {
-        const result = await trigger.execute(harness, context);
+        const result = await trigger.execute(harness, context.message || context);
         if (result === true || result === 'cancelled') {
           return { cancelled: true };
         }
