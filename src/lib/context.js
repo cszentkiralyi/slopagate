@@ -4,6 +4,7 @@ const Layers = require('./layers/layers.js');
 
 const CONTEXT_CONFIGS = {
   low: {
+    min_context_window: null, // no upper limit — fallback
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 8),
@@ -18,6 +19,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   medium: {
+    min_context_window: 2 ** 16, // 65K
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 8),
@@ -32,6 +34,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   high: {
+    min_context_window: 2 ** 14, // 16K
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 16),
@@ -46,6 +49,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   xhigh: {
+    min_context_window: 2 ** 13, // 8K
     budget: {
       system_prompt: (ctx) => 500 * (1 + Math.floor(ctx / 2000)),
       injection: (ctx) => 200 + (50 * Math.floor(ctx / 2000)),
@@ -91,7 +95,7 @@ class Context {
   
   constructor(options = {}) {
     this.config = options.config || new Config();
-    this.aggression_level = options.aggression_level || Context.aggressionLevelForContextWindow(this.config.get('context_window'));
+    this.aggression_level = options.aggression_level || Context.aggressionLevel(this.config.get('context_window'));
     this.system_prompt = options.system_prompt || '';
     this.messages = options.messages ? [ ...options.messages ] : [];
     if (this.messages.length)
@@ -205,18 +209,17 @@ class Context {
     if (!ms || !ms.length) return '';
     return ms.map(m => `${m.role}: ${m.content}`).join('\n');
   }
-  static aggressionLevelForContextWindow(ctx_win) {
-    const LEVEL_THRESHOLDS = [
-      { level: 'xhigh', threshold: 2 ** 13 }, // 8K
-      { level: 'high', threshold: 2 ** 14 },   // 16K
-      { level: 'medium', threshold: 2 ** 16 }, // 65K
-      { level: 'low', threshold: null }        // no limit
-    ];
-    for (let { level, threshold } of LEVEL_THRESHOLDS) {
-      if (threshold === null || ctx_win <= threshold)
+  static aggressionLevel(ctx_win) {
+    const levels = Object.entries(CONTEXT_CONFIGS)
+      .filter(([, cfg]) => cfg.min_context_window !== null)
+      .sort((a, b) => a[1].min_context_window - b[1].min_context_window);
+
+    for (let [level, cfg] of levels) {
+      if (ctx_win <= cfg.min_context_window)
         return level;
     }
-    return 'xhigh';
+    // fall back to lowest aggression level (no limit)
+    return 'low';
   }
 }
 
