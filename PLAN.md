@@ -16,5 +16,9 @@ The system consists of five core components: (1) a `.slop/memory/` directory wit
 - Command handlers consolidated: `/quit`, `/think`, `/compact`, `/context`, `/recap`, `/bug`, `/config`, `/transcript`, `/commands`, `/memory` and skill commands all live in `src/lib/harness.js`; `src/core/program.js` no longer has duplicate command methods
 
 ## TODO
-- [ ] Implement heuristic triggers (context overflow, duplicate mentions)
+- [ ] **Write memory heuristics**
+  - Passive/topic detection: model monitors conversation context, extracts key facts, recurring topics, decisions
+  - Explicit triggers: model recognizes "remember that", "note this", "save for later" etc.
+  - System prompt/tool description expansion to guide proactive memorization
+  - Any code hooks needed to support this
 - [ ] Test end-to-end memory flow

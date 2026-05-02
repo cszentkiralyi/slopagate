@@ -49,14 +49,15 @@ class Memory {
   list() {
     if (!fs.existsSync(this.indexFile)) return [];
     const content = fs.readFileSync(this.indexFile, 'utf8');
-    const matches = content.match(/(\w+): (.+)/g) || [];
+    const matches = content.match(/\* (.+?): (.+)/g) || [];
     return matches.map(m => {
-      const parts = m.split(': ');
+      const match = m.match(/\* (.+?): (.+)/);
+      if (!match) return null;
       return {
-        file: parts[0],
-        summary: parts.slice(1).join(': ')
+        file: match[1],
+        summary: match[2]
       };
-    });
+    }).filter(Boolean);
   }
 
   read(file) {

@@ -10,11 +10,12 @@ class MemoryTool extends Tool {
   parameters = {
     type: 'object',
     properties: {
-      read: { type: 'string' },
-      write: { type: 'string' },
-      list: { type: 'string' },
-      search: { type: 'string' }
-    }
+      action: { type: 'string', enum: ['read', 'write', 'list', 'search'] },
+      file: { type: 'string' },
+      content: { type: 'array', items: { type: 'string' } },
+      query: { type: 'string' }
+    },
+    required: ['action']
   };
 
   constructor(props) {
