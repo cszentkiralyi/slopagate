@@ -411,22 +411,25 @@ class Program {
  
 
   async hookToolCall({ toolCall }) {
-    if (!toolCall || !toolCall.function
-        || (toolCall.function.name !== 'StringSearch'
-            && toolCall.function.name !== 'Read')
-        || !toolCall.arguments || !toolCall.arguments.file_path
-        || !toolCall.arguments.file_path.length)
+    if (!toolCall || !toolCall.function) return null;
+
+    const args = toolCall.function.arguments;
+    if (typeof args === 'string') {
+      return { response: `Error: failed to parse arguments for "${toolCall.function.name}" — model returned malformed JSON` };
+    }
+
+    if ((toolCall.function.name !== 'StringSearch'
+        && toolCall.function.name !== 'Read')
+        || !args?.file_path || !args.file_path.length)
       return null;
 
-    
-    const file_path = toolCall.function.arguments.file_path;
+    const file_path = args.file_path;
     let last = path.basename(file_path);
     if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
       switch (toolCall.function.name) {
         case 'Read':
           Logger.log(`[Experiment] maybe steering ${start_line}-${end_line}`);
-          if (toolCall.function.arguments.start_line
-              || toolCall.function.arguments.end_line)
+          if (args.start_line || args.end_line)
             return;
           Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
           return { response: `Error: must use "StringSearch" tool before reading "${last}.`};
