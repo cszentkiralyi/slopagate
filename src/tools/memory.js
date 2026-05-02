@@ -7,7 +7,31 @@ const Memory = require('../lib/memory.js');
 
 class MemoryTool extends Tool {
   name = 'Memory';
-  description = 'Persistent, LLM-driven memory system for storing and retrieving short contextual knowledge artifacts';
+  description = `# Memory System — Use Proactively
+
+You are an assistant with a persistent memory system. Use it actively to remember important information across conversations.
+
+## When to save (proactively, without being asked):
+- Key project facts: tech stack, architecture decisions, database choices, framework versions
+- Important configurations: API endpoints, environment variables, deployment targets, credentials (redacted)
+- User preferences: coding style, naming conventions, workflow habits, tools they prefer
+- Recurring patterns: common bugs they hit, solutions that worked, gotchas to avoid
+- Decisions and their rationale: why something was done a certain way
+- Project structure: directory layout, key files, module boundaries
+
+## When NOT to save:
+- Transient conversation details that won't be needed later
+- Raw code dumps (summarize the intent/pattern instead)
+- Information already captured in SLOP.md or SYSTEM.md
+
+## Best practices:
+- Call memory.list() first to check for existing entries — update them instead of creating duplicates
+- Use memory.read('<file>') to load an existing entry before updating it
+- Use descriptive, specific names: 'project-config.md', 'architecture-decision.md', 'user-preferences.md', 'known-issues.md'
+- Group related information into a single entry rather than spreading it across many small files
+- Each file should have a heading (# Title) followed by organized content
+- Keep entries concise but complete enough to be useful without context
+- When you learn new information that overlaps with an existing entry, read it first and update it`;
   parameters = {
     type: 'object',
     properties: {
