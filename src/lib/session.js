@@ -183,8 +183,10 @@ class Session {
         ? response.choices[0].message
         : null, endThink;
       if (message && message.tool_calls && message.tool_calls.length) {
+        // OpenAI gives us JSON strings, instead of parsing automatically like Ollama
         message.tool_calls.forEach(tc => {
-          tc.function.arguments = JSON.parse(tc.function.arguments);
+          try { tc.function.arguments = JSON.parse(tc.function.arguments); }
+          catch { /* keep raw string if parse fails */ }
         });
       }
 
@@ -204,7 +206,7 @@ class Session {
         eval_count: usage.completion_tokens
       };
     }
-    
+
     return response;
   }
 
