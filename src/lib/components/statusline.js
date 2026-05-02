@@ -115,8 +115,10 @@ class Statusline extends HContainer {
   showSpinner(message, id) {
     // Just push the new spinner on top of the stack; it takes priority
     // because #renderTop() only renders the top entry.
-    this.leftSide.push({ isSpinner: true, text: message, id: id ?? `spin-${this.#nextId++}` });
+    const entryId = id ?? `spin-${this.#nextId++}`;
+    this.leftSide.push({ isSpinner: true, text: message, id: entryId });
     this.#renderTop();
+    return entryId;
   }
 
 }
