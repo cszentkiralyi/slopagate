@@ -18,7 +18,7 @@ const LsTool = require('../tools/ls.js');
 const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 const MemoryTool = require('../tools/memory.js');
-const Triggers = require('../lib/triggers.js');
+const { Triggers } = require('../lib/triggers.js');
 
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
