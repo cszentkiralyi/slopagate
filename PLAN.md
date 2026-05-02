@@ -9,11 +9,11 @@ The system consists of five core components: (1) a `.slop/memory/` directory wit
 ## Implementation Approach
 1. Create `.slop/memory/` directory structure with `MEMORY.md` index template. 2. Build `src/core/memory.js` module with file I/O abstraction, entry management, and search capabilities. 3. Extend `src/lib/harness.js` to register memory tools in the model interface. 4. Modify `src/core/program.js` to load MEMORY.md into system prompt during initialization. 5. Implement heuristic hooks in `src/core/program.js` to detect memory triggers and auto-call write tool. 6. Add `/memory` CLI commands for user interaction. 7. Wire into existing session lifecycle for persistence.
 
+## Status
+- All core memory infrastructure implemented (directory, memory.js module, harness tools, system prompt injection, `/memory` CLI commands)
+- No topictracker or topic-related functionality exists in harness or elsewhere
+- Heuristic auto-triggers not yet implemented
+
 ## TODO
-- [x] Create `.slop/memory/MEMORY.md` and entry template
-- [x] Implement `src/core/memory.js` (CRUD, search)
-- [x] Extend `src/lib/harness.js` to expose memory tools
-- [x] Wire MEMORY.md loading into system prompt in `src/core/program.js`
-- [ ] Implement heuristic triggers in `src/core/program.js`
-- [ ] Add `/memory` CLI commands
+- [ ] Implement heuristic triggers in `src/core/program.js` (context overflow, duplicate mentions)
 - [ ] Test end-to-end memory flow

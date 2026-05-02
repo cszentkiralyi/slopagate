@@ -15,7 +15,7 @@ const chat_summary = async ({ messages, system_prompt, summarize, estimate, tran
     { role: 'assistant', content: 'Thank you, now I have the context I need to continue.' }
   ];
 
-  Logger.log(`chat_summary: compacted (replaced ${messages.length} messages with ${estimate(ret.length)}-token summary)`);
+  Logger.log(`chat_summary: compacted (replaced ${messages.length} messages with ${estimate(summaryText)}-token summary)`);
   return { messages: ret, system_prompt };
 };
 

@@ -8,6 +8,8 @@ const chat_score = ({ messages, config, context_window }) => {
     if (louse(i / max_x) > config.threshold)
       ret.push(messages[i]);
   }
+
+  Logger.log(`chat_score: threshold=${config.threshold}, ${max_x} rows -> ${ret.length}`);
       
   return { messages: ret };
 };

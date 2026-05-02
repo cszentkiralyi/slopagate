@@ -48,8 +48,9 @@ class Session {
     
     this.#masterContext = this.#activeContext = new Context({
       config: this.config,
+      summarize: async (t) => this.summarize(t)
       /*
-      requestSummary: async (transcript) => {
+      summarize: async (transcript) => {
         let summaryContext = new Context({
           // TODO: maybe move instructions to message, give role in system prompt?
           system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
@@ -258,7 +259,7 @@ class Session {
       limits: {},
       budgets: {},
       messages: [{ role: 'user', content: transcript }],
-      requestSummary: this.#masterContext.requestSummary
+      summarize: this.#masterContext.summarize
     });
 
     let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
@@ -291,7 +292,7 @@ class Session {
         { role: 'assistant', content: 'I have the context I need now. Thank you.' },
         ...remaining
       ],
-      requestSummary: context.requestSummary
+      summarize: context.summarize
     });
 
     return newContext;

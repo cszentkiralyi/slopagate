@@ -4,7 +4,6 @@ const ERROR = '[Error]';
 
 const tool_error = ({ messages, config }) => {
   let time = 0, ret = [], seen = new Set(), i, m, t;
-  Logger.log(`[tool_error_2] ${JSON.stringify(config)}`);
   for (let i = messages.length - 1; i >= 0; i--) {
     m = messages[i];
     if (m.role === 'tool') {
