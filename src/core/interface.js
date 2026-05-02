@@ -99,9 +99,7 @@ class Interface {
   
 
   addStartupMessage({ content }) {
-    this.#startup_messages.appendChild(new TUI.Text({
-      content, fg: 'gray'
-    }));
+    this.addMessage({ role: 'startup', content });
   }
 
   addMessage({ role, content, id }) {

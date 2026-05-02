@@ -130,7 +130,7 @@ class Context {
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
-      if ((arg.config.min_messages || 0) < arg.messages.length) continue;
+      if (arg.messages.length < (arg.config.min_messages || 0)) continue;
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
