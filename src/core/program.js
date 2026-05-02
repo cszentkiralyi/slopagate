@@ -16,7 +16,7 @@ const { Logger } = require('../util.js');
 const Timers = require('../lib/timers.js');
 
 class Program {
-  #currentSpinnerId = null;
+  
   #currentMessageId = null;
 
   static SPINNER_MESSAGES = [
@@ -297,7 +297,7 @@ class Program {
             this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
-            this.#currentSpinnerId = this.interface.statusline.showSpinner(this.spinnerMessage);
+            this.interface.statusline.showSpinner(this.spinnerMessage);
             this.interface.draw();
             
             for (let word of input.split(' ')) {
@@ -339,7 +339,7 @@ class Program {
         });
       }
       (event.done)
-        ? this.interface.statusline.hide(this.#currentSpinnerId)
+        ? this.interface.statusline.clearSpinners()
         : this.interface.statusline.spinner.hide();
       this.interface.draw();
     });

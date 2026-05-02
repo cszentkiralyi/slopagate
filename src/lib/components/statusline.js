@@ -121,6 +121,11 @@ class Statusline extends HContainer {
     return entryId;
   }
 
+  clearSpinners() {
+    this.leftSide = this.leftSide.filter(e => !e.isSpinner);
+    this.#renderTop();
+  }
+
 }
 
 module.exports = Statusline;
