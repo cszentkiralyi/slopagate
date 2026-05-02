@@ -125,7 +125,7 @@ class Harness {
     });
     this.commands.push({
       name: 'memory',
-      arguments: [{ name: 'action', possible: ['list', 'read', 'write', 'search'] }],
+      arguments: [{ name: 'action', possible: ['list', 'read', 'write', 'search', 'delete'] }],
       handler: async (args) => this.memoryCommand(args),
       hint: 'Interact with the memory system'
     });
@@ -373,7 +373,7 @@ class Harness {
   
   async memoryCommand(argstr) {
     if (!argstr || !argstr.length) {
-      this.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>');
+      this.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>, delete <file>');
       return;
     }
     
@@ -404,8 +404,14 @@ class Harness {
         let response = await result.handler({ action: 'search', query: parts.slice(1).join(' ') }, result);
         this.emitCommandMessage(response);
       }
+    } else if (action === 'delete') {
+      let result = await this.toolbox.all().find(t => t.name === 'Memory');
+      if (result) {
+        let response = await result.handler({ action: 'delete', file: parts[1] }, result);
+        this.emitCommandMessage(response);
+      }
     } else {
-      this.emitCommandMessage('Unknown action. Use list, read, write, or search');
+      this.emitCommandMessage('Unknown action. Use list, read, write, search, or delete');
     }
   }
   

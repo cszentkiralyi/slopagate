@@ -11,11 +11,11 @@ class MemoryTool extends Tool {
 
 Use proactively across conversations. Save: key project facts, architecture decisions, configs, user preferences, recurring patterns, and design rationale. Don't save: transient details, raw code dumps, or info already in SLOP.md/SYSTEM.md.
 
-Best practices: call memory.list() first to avoid duplicates, use memory.read('<file>') before updating, use descriptive names like 'project-config.md', and keep entries concise but complete.`;
+Best practices: call memory.list() first to avoid duplicates, use memory.read('<file>') before updating, use descriptive names like 'project-config.md', and keep entries concise but complete. Use memory.delete('<file>') to remove outdated or no-longer-relevant memories.`;
   parameters = {
     type: 'object',
     properties: {
-      action: { type: 'string', enum: ['read', 'write', 'list', 'search'] },
+      action: { type: 'string', enum: ['read', 'write', 'list', 'search', 'delete'] },
       file: { type: 'string' },
       content: { type: 'array', items: { type: 'string' } },
       query: { type: 'string' }
@@ -70,7 +70,20 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
       return results.length ? results.map(e => `- ${e.summary} (${e.file})`).join('\n') : 'No matches';
     }
 
-    return 'Error: Invalid action. Use read, write, list, or search';
+    if (args.action === 'delete') {
+      Logger.log(`Memory action: delete ${args.file || '(no file)'}`);
+      if (!args.file) {
+        return 'Error: Missing file argument';
+      }
+      try {
+        memory.delete(args.file);
+        return `Deleted ${args.file}`;
+      } catch (err) {
+        return `Error: ${err.message}`;
+      }
+    }
+
+    return 'Error: Invalid action. Use read, write, list, search, or delete';
   }
 
   message(calls) {
