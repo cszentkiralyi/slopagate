@@ -134,7 +134,6 @@ class Program {
     this.skills.names.forEach(skillName => {
       this.commands.push({
         name: skillName,
-        // TODO: implement this.handleSkill
         handler: async (args) => this.handleSkill(skillName, args),
         hint: this.skills.get(skillName).description
       });
@@ -188,6 +187,29 @@ class Program {
       this.interface.addMessage({
         role: 'startup',
         content: `Project files: ${loadedSlopFiles.join(', ')}`
+      });
+    }
+
+    // Load MEMORY.md into system prompt
+    let memoryPaths = [
+      { path: path.join(this.config.get('slop_dir'), 'memory/MEMORY.md'), label: '.slop/memory' }
+    ];
+    let memoryLoaded = false;
+    for (let { path: memPath, label } of memoryPaths) {
+      try {
+        let memoryContent = fsSync.readFileSync(memPath, { encoding: 'utf-8' });
+        if (systemPrompt) {
+          systemPrompt += '\n---\n' + memoryContent;
+        } else {
+          systemPrompt = memoryContent;
+        }
+        memoryLoaded = true;
+      } catch (err) { /* don't care */ }
+    }
+    if (memoryLoaded) {
+      this.interface.addMessage({
+        role: 'startup',
+        content: `Memory files: loaded .slop/memory/MEMORY.md`
       });
     }
 
@@ -672,6 +694,38 @@ class Program {
     if (lines) {
       this.interface.addMessage({ role: 'system', content: lines });
     }
+  }
+
+  async handleSkill(skillName, args) {
+    const skill = this.skills.get(skillName);
+    if (!skill) {
+      this.interface.addMessage({ role: 'tool', content: `Skill "${skillName}" not found.` });
+      return;
+    }
+
+    // Add the command message to chat history
+    this.interface.addMessage({ role: 'command', content: ` /${skillName} ` });
+
+    // Build skill prompt using SKILL.md content
+    const skillPrompt = `Execute this skill: "${skillName}"\n\nSkill Instructions:\n${skill.content}`;
+
+    // Add skill invocation to the active session context
+    this.harness.session.addToContext({
+      role: 'user',
+      content: `[Skill: ${skillName}]`
+    });
+
+    // Build user message with skill instructions and args
+    const userMessage = {
+      role: 'user',
+      content: `${skillPrompt}\n\nUser Args: ${JSON.stringify(args || {})}`
+    };
+
+    // Use private session on the active harness session
+    const response = await this.harness.session.private(this.harness.session, userMessage);
+
+    // Emit model:response event so harness handles everything
+    Events.emit('model:response', { response });
   }
 
   #startAfkTimer() {

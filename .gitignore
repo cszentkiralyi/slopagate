@@ -6,8 +6,6 @@ slop
 
 # Temp files from running
 *.log
+*.jsonl
 json_log.json
 .sloptmp/
-
-# Misc
-bugs.jsonl

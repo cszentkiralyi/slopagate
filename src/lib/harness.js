@@ -15,6 +15,7 @@ const EditTool = require('../tools/edit.js');
 const LsTool = require('../tools/ls.js');
 const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
+const MemoryTool = require('../tools/memory.js');
 
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
@@ -51,11 +52,15 @@ class Harness {
     this.hooks = new Hooks({ hooks: ['tool-call'] });
     
     this.toolbox = new Toolbox([
-      new ReadTool(),
-      new EditTool(),
-      new LsTool(),
-      new GrepTool(),
-      new BashTool()
+      new ReadTool(this),
+      new EditTool(this),
+      new LsTool(this),
+      new GrepTool(this),
+      new BashTool(this),
+      new MemoryTool({
+        ...this.session,
+        config: this.config
+      })
     ]);
     this.session = new Session({
       tools: this.toolbox.all(),
