@@ -44,7 +44,7 @@ class Memory {
       .sort()
       .map(f => {
         const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
-        const firstLine = content.split('\n')[0]?.trim().replace(/^#+\s*/, '') || f;
+        const firstLine = (content.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || f;
         return { file: f, summary: firstLine };
       });
   }
