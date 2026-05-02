@@ -107,30 +107,12 @@ class Program {
       'code': s => ANSI.fg(s, 213)
     });
     
-    this.commands = [
-      { name: 'quit', handler: async () => await this.dispose(), silent: true },
-      {
-        name: 'think',
-        arguments: [{ name: 'setting', possible: [ 'true', 'false' ]}],
-        handler: async (args) => this.thinkCommand(args)
-      },
-      { name: 'compact', handler: async () => this.compactCommand() },
-      { name: 'recap', handler: async () => this.recap() },
-      { name: 'bug', handler: async (args) => this.bugCommand(args), hint: 'Record a brief bug into bugs.jsonl for later' },
-      { name: 'context', handler: async () => this.contextCommand(), hint: 'Display a context window usage visualizer'},
-      {
-        name: 'config',
-        arguments: [{ name: 'key' }, { name: 'value', optional: true }],
-        handler: async (args) => this.configCommand(args)
-      },
-      { name: 'transcript', handler: async (args) => this.transcriptCommand(args), hint: 'Dump session context to a file' },
-      { name: 'commands', handler: async () => this.commandsCommand() },
-    ];
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
       { name: 'shell', prompt: '! ', trigger: '!' }
     ];
 
+    /*
     this.skills.names.forEach(skillName => {
       this.commands.push({
         name: skillName,
@@ -138,12 +120,17 @@ class Program {
         hint: this.skills.get(skillName).description
       });
     });
+    */
 
 
     this.interface = new Interface({
       banner: { content: ANSI.bold(banner), fg: 'white' },
-      commands: this.commands.map(c => ({ name: c.name, arguments: c.arguments, hint: c.hint }))
+      commands: []
     });
+    let addInterfaceCommands,
+        intefaceCommands = new Promise((resolve, reject) => {
+          addInterfaceCommands = resolve;
+        }).then(cmds => this.interface.commands = cmds);
 
     
     let system_prompt_paths = [
@@ -218,8 +205,11 @@ class Program {
         config: this.config,
         systemPrompt: systemPrompt
       },
-      config: this.config
+      config: this.config,
+      skills: this.skills
     });
+    
+    addInterfaceCommands(this.harness.getCommands());
 
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
 
@@ -281,7 +271,7 @@ class Program {
             let parts = input.substring(1).split(' ');
             let cmd = parts[0];
             let argstr = parts.slice(1).join(' ');
-            this.command(cmd, argstr);
+            await this.harness.command(cmd, argstr);
           } else {
             Events.emit('user:message', { message: input });
             this.interface.addMessage({
