@@ -2,42 +2,22 @@ const { Logger } = require('../util.js');
 const ANSI = require ('./ansi.js');
 const Layers = require('./layers/layers.js');
 
-const CONTEXT_FAMILIES = {
-  'starving': {
-    max_context_window: 2 ** 13, // 8K
-    aggression_level: 'xhigh',
-    budget: {
-      system_prompt: (ctx) => 500 * (1 + Math.floor(ctx / 2000)),
-      injection: (ctx) => 200 + (50 * Math.floor(ctx / 2000)),
-      reserved: (1 / 3)
-    },
-    layers: {
-      system_prompt: { soft: false }, // No section-based trimming, only hard truncation
-      chat_score: { threshold: 0.6 }, // Cull messages with importance scores < 0.6
-      tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
-      tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
-      tool_length: { user_turns: 0, max: (3.5 / 20) } // No tool response > 20% context length
-    }
-  },
-  'hungry': {
-    max_context_window: 2 ** 14, // 16K
-    aggression_level: 'high',
+const CONTEXT_CONFIGS = {
+  low: {
     budget: {
       system_prompt: (1 / 8),
-      injection: (1 / 16),
+      injection: (1 / 8),
       reserved: (1 / 5)
     },
     layers: {
-      system_prompt: { soft: true }, // Enable section-based trimming if possible
-      chat_score: { threshold: 0.5 },
-      tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
-      tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: { user_turns: 1, max: (3.5 / 20) * 3.5 } // Truncate tools from previous turns
+      system_prompt: { soft: true },
+      chat_score: { threshold: 0.2 },
+      tool_error: { disable: true },
+      tool_age: { disable: true },
+      tool_length: { user_turns: 3, max: (3.5 / 10) }
     }
   },
-  'healthy': {
-    max_context_window: 2 ** 16, // 65K
-    aggression_level: 'medium',
+  medium: {
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 8),
@@ -51,19 +31,32 @@ const CONTEXT_FAMILIES = {
       tool_length: { user_turns: 2, max: (3.5 / 10) }
     }
   },
-  'fat': {
-    aggression_level: 'low',
+  high: {
     budget: {
       system_prompt: (1 / 8),
-      injection: (1 / 8),
+      injection: (1 / 16),
       reserved: (1 / 5)
     },
     layers: {
-      system_prompt: { soft: true },
-      chat_score: { threshold: 0.2 },
-      tool_error: { disable: true },
-      tool_age: { disable: true },
-      tool_length: { user_turns: 3, max: (3.5 / 10) }
+      system_prompt: { soft: true }, // Enable section-based trimming if possible
+      chat_score: { threshold: 0.5 },
+      tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
+      tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
+      tool_length: { user_turns: 1, max: (3.5 / 20) * 3.5 } // Truncate tools from previous turns
+    }
+  },
+  xhigh: {
+    budget: {
+      system_prompt: (ctx) => 500 * (1 + Math.floor(ctx / 2000)),
+      injection: (ctx) => 200 + (50 * Math.floor(ctx / 2000)),
+      reserved: (1 / 3)
+    },
+    layers: {
+      system_prompt: { soft: false }, // No section-based trimming, only hard truncation
+      chat_score: { threshold: 0.6 }, // Cull messages with importance scores < 0.6
+      tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
+      tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
+      tool_length: { user_turns: 0, max: (3.5 / 20) } // No tool response > 20% context length
     }
   }
 };
@@ -78,7 +71,7 @@ class Context {
   };
   
   config;
-  family;
+  aggression_level;
   system_prompt;
   messages;
   budget;
@@ -96,16 +89,15 @@ class Context {
     return ret;
   }
   
-  constructor({ config, system_prompt, messages, budget, layer_config }) {
-    this.config = config;
-    this.family = Context.family(this.config.get('context_window'));
-    this.config.set('context_family', this.family);
-    this.config.set('aggression_level', CONTEXT_FAMILIES[this.family].aggression_level);
-    this.system_prompt = system_prompt;
-    this.messages = messages ? [ ...messages ] : [];
+  constructor(options = {}) {
+    this.config = options.config || new Config();
+    this.aggression_level = options.aggression_level || Context.aggressionLevelForContextWindow(this.config.get('context_window'));
+    this.system_prompt = options.system_prompt || '';
+    this.messages = options.messages ? [ ...options.messages ] : [];
     if (this.messages.length)
       this.#messageEstimate = Context.estimate(Context.transcript(this.messages));
-    this.budget = this.getBudget(budget);
+    this.budget = this.getBudget(options.budget);
+    this.layer_config = options.layer_config || {};
   }
 
   add(...messages) {
@@ -180,25 +172,25 @@ class Context {
   getBudget(overrides) {
     let budget = { ...overrides },
         ctx = this.config.get('context_window'),
-        family = CONTEXT_FAMILIES[this.family],
+        config = CONTEXT_CONFIGS[this.aggression_level],
         bname;
-    for (bname of Object.keys(family.budget)) {
+    for (bname of Object.keys(config.budget)) {
       if (bname in budget) continue;
-      budget[bname] = ctx * this.resolveValue(family.budget[bname]);
+      budget[bname] = ctx * this.resolveValue(config.budget[bname]);
     }
     return budget;
   }
   
   getLayerConfig(layerName) {
-    let family = CONTEXT_FAMILIES[this.family],
-        config = { ...(Context.BASE_LAYER_CONFIG[layerName]) };
-    if (family.layers[layerName]) Object.assign(config, family.layers[layerName]);
+    let config = CONTEXT_CONFIGS[this.aggression_level],
+        layer_config = { ...(Context.BASE_LAYER_CONFIG[layerName]) };
+    if (config.layers[layerName]) Object.assign(layer_config, config.layers[layerName]);
     if (this.layer_config && layerName in this.layer_config)
-      Object.assign(config, this.layer_config[layerName] || undefined);
-    for (let opt in config) {
-      config[opt] = this.resolveValue(config[opt]);
+      Object.assign(layer_config, this.layer_config[layerName] || undefined);
+    for (let opt in layer_config) {
+      layer_config[opt] = this.resolveValue(layer_config[opt]);
     }
-    return config;
+    return layer_config;
   }
 
   resolveValue(v) {
@@ -213,20 +205,18 @@ class Context {
     if (!ms || !ms.length) return '';
     return ms.map(m => `${m.role}: ${m.content}`).join('\n');
   }
-  static family(ctx_win) {
-    let possible = [], name, family;
-    for (name of Object.keys(CONTEXT_FAMILIES)) {
-      family = CONTEXT_FAMILIES[name];
-      if (!family.max_context_window || family.max_context_window >= ctx_win)
-        possible.push(name);
+  static aggressionLevelForContextWindow(ctx_win) {
+    const LEVEL_THRESHOLDS = [
+      { level: 'xhigh', threshold: 2 ** 13 }, // 8K
+      { level: 'high', threshold: 2 ** 14 },   // 16K
+      { level: 'medium', threshold: 2 ** 16 }, // 65K
+      { level: 'low', threshold: null }        // no limit
+    ];
+    for (let { level, threshold } of LEVEL_THRESHOLDS) {
+      if (threshold === null || ctx_win <= threshold)
+        return level;
     }
-    if (possible.length == 0) return null;
-    if (possible.length == 1) return possible[0];
-    return possible.sort((a, b) => {
-      if (!CONTEXT_FAMILIES[a].max_context_window) return 1;
-      if (!CONTEXT_FAMILIES[b].max_context_window) return -1;
-      return (CONTEXT_FAMILIES[a].max_context_window - CONTEXT_FAMILIES[b].max_context_window);
-    })[0];
+    return 'xhigh';
   }
 }
 
