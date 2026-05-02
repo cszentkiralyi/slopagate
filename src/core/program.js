@@ -432,7 +432,7 @@ class Program {
         new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
         delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
         pct = (100 * new_tok / new_est.context_window).toFixed(0);
-    this.interface.statusline.spinner.stop();
+    this.interface.statusline.spinner.hide();
     this.interface.addMessage({
       role: 'tool',
       content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`

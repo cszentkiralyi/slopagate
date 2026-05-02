@@ -132,11 +132,13 @@ class Session {
     }
     
     try {
+      /*
       Logger.log(`Session: sending ${JSON.stringify({
         system: this.#activeContext.other_tokens,
         up: this.#activeContext.tokens_up,
         down: this.#activeContext.tokens_down
       })}`);
+      */
       let response = await fetch(this.connection, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -299,7 +301,7 @@ class Session {
     this.addToContext(...outgoing);
     //Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'chat_score', 'tool_age', 'tool_error', 'tool_length' ]
+      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score' ]
     });
     
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
@@ -320,7 +322,7 @@ class Session {
     Logger.log(`Session: compact() called, forking context.`);
     // Replace activeContext with a full compact fork, keeping masterContext history
     let newActive = await this.#activeContext.fork({
-      layers: [ 'tool_age', 'tool_redundancy', 'tool_length', 'tool_error', 'chat_summary' ],
+      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_summary' ],
       summarize: async (transcript) => {
         let summaryContext = new Context({
           config: this.config,

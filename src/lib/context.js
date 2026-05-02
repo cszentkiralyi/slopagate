@@ -71,7 +71,7 @@ const CONTEXT_FAMILIES = {
 class Context {
   static BASE_LAYER_CONFIG = {
     system_prompt: { disable: false, user_turns: 0, soft: true },
-    chat_score: { disable: false, user_turns: 3, threshold: 0 },
+    chat_score: { disable: false, user_turns: 3, min_messages: 20, threshold: 0 },
     tool_error: { disable: false, user_turns: 1, ttl: 0, hint_ttl: 0 },
     tool_age: { disable: false, user_turns: 3, ttl: 0 },
     tool_length: { disable: false, user_turns: 0, max: 200 },
@@ -130,10 +130,11 @@ class Context {
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
+      if ((arg.config.min_messages || 0) < arg.messages.length) continue;
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
-        if (arg.messages.length > 2) {
+        if (arg.messages.length >= arg.config.user_turns) {
           u = 0;
           for (i = arg.messages.length - 1; i >= 0; i--) {
             if (!(m = arg.messages[i])) continue;

@@ -28,7 +28,6 @@ class Interface {
         id: 'global-spinner',
         animation: 'braille-small',
         message: 'Autofilling...',
-        padding: { left: 1, right: 1 },
         loop: false
       })
     });
@@ -182,7 +181,7 @@ class Interface {
           if (cmd.arguments && wordCount < cmd.arguments.length) {
             let arg = cmd.arguments[wordCount];
             if (arg) {
-              let hint = (slen > cmd.name.length) ? '' : ' ';
+              let hint = (slen > cmd.name.length) ? ' ' : '';
               hint += arg.possible ? arg.possible.join('|') : arg.name
               hints.push(hint);
             }
