@@ -437,6 +437,7 @@ class Program {
       role: 'tool',
       content: `Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`
     });
+    Events.emit('metrics:tokens', {});
   }
 
   contextCommand() {
@@ -474,7 +475,7 @@ class Program {
     bar += ANSI.fg(']', 238);
 
     let pct = ((totalUsed / win) * 100).toFixed(1);
-    let pctColor = totalUsed / win > 0.8 ? 1 : totalUsed / win > 0.6 ? 214 : null;
+    let pctColor = totalUsed / win > 0.85 ? 1 : totalUsed / win > 0.7 ? 214 : null;
 
     let lines = [
       ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
