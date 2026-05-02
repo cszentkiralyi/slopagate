@@ -1,5 +1,6 @@
 # Libraries, packages, etc
 **/node_modules/
+.slop/memory/
 
 # Build artifacts
 slop
