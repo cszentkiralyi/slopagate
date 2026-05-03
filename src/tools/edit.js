@@ -2,6 +2,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const ANSI = require('../lib/ansi.js');
+const { ID } = require('../util.js');
 const Tool = require('./tool.js');
 
 class EditTool extends Tool {
@@ -28,7 +29,7 @@ class EditTool extends Tool {
 
   async handler(args, tool) {
     let { file_path, old_str, new_str } = args;
-    let temp_path = path.join(tool.temppath, 'edit');
+    let temp_path = path.join(tool.temppath, 'edit-' + ID());
 
     try {
       await fs.copyFile(file_path, temp_path);
