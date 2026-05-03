@@ -337,7 +337,7 @@ class Harness {
     
     Logger.log(`Harness: recap = ${content}`);
     
-    Events.emit('model:content', {
+    Events.emit('tool:message', {
       done: true,
       content: content,
       padding: { left: 1, right: 1 }
