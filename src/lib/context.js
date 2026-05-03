@@ -15,7 +15,8 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.2 },
       tool_error: { disable: true },
       tool_age: { disable: true },
-      tool_length: { user_turns: 3, max: (3.5 / 10) }
+      tool_length: { user_turns: 3, max: (3.5 / 10) },
+      model_reasoning: { user_turns: 2, ttl: 8 }
     }
   },
   medium: {
@@ -30,7 +31,8 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.25 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
-      tool_length: { user_turns: 2, max: (3.5 / 10) }
+      tool_length: { user_turns: 2, max: (3.5 / 10) },
+      model_reasoning: { user_turns: 1, ttl: 4 }
     }
   },
   high: {
@@ -45,7 +47,8 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.4 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: { user_turns: 1, max: 3.5 / 20 } // Truncate tools from previous turns
+      tool_length: { user_turns: 1, max: 3.5 / 20 }, // Truncate tools from previous turns
+      model_reasoning: { user_turns: 0, ttl: 8 }
     }
   },
   xhigh: {
@@ -60,7 +63,8 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.5 }, // Cull messages with importance scores < 0.6
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
-      tool_length: { user_turns: 0, max: (3.5 / 20) } // No tool response > 20% context length
+      tool_length: { user_turns: 0, max: (3.5 / 20) }, // No tool response > 20% context length
+      model_reasoning: { user_turns: 0, ttl: 4 }
     }
   }
 };
@@ -72,6 +76,7 @@ class Context {
     tool_error: { disable: false, user_turns: 1, ttl: 0, hint_ttl: 0 },
     tool_age: { disable: false, user_turns: 3, ttl: 0 },
     tool_length: { disable: false, user_turns: 0, max: 200 },
+    model_reasoning: { disable: false, user_turns: 1, ttl: 0 }
   };
   
   config;
@@ -127,7 +132,9 @@ class Context {
       transcript: (s) => Context.transcript(s),
       summarize: opts?.summarize ?? (async () => 'Summary')
     }, verbatim, n_layer, layer, i, u, m, r;
+    Logger.log(`compact: Starting with ${this.messages.length} messages`);
     for (n_layer of layers) {
+    Logger.log(`compact: ${n_layer}`);
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
@@ -153,6 +160,7 @@ class Context {
         }
       }
       r = (arg.messages.length) ? await layer(arg) : null;
+      Logger.log(`compact: ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {
         if (!r) {
           r = { messages: verbatim }

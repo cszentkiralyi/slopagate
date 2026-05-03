@@ -5,6 +5,7 @@ const tool_length = require('./tool_length.js');
 const chat_score = require('./chat_score.js');
 const chat_summary = require('./chat_summary.js');
 const tool_error = require('./tool_error.js');
+const model_reasoning = require('./model_reasoning.js');
 
 const placeholder = (arg) => undefined;
 
@@ -17,5 +18,6 @@ module.exports = {
   tool_redundancy: placeholder,
   chat_score,
   chat_summary,
-  tool_error
+  tool_error,
+  model_reasoning
 };

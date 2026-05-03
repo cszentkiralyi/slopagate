@@ -53,7 +53,7 @@ const tool_length = ({ messages, config, context_window }) => {
     }
     */
     
-    ret.push(m);
+    ret.unshift(m);
   }
   
   return { messages: ret };

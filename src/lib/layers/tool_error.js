@@ -26,7 +26,7 @@ const tool_error = ({ messages, config }) => {
         }
       }
     }
-    if (m) ret.push(m);
+    if (m) ret.unshift(m);
   }
 
   return { messages: ret };}
