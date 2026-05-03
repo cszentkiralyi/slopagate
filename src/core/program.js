@@ -298,7 +298,9 @@ class Program {
             this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
-            this.#modelTurnSpinner = this.interface.statusline.showSpinner(this.spinnerMessage);
+            if (!this.#modelTurnSpinner) {
+              this.#modelTurnSpinner = this.interface.statusline.showSpinner(this.spinnerMessage);
+            }
             this.interface.draw();
             
             for (let word of input.split(' ')) {
@@ -355,7 +357,9 @@ class Program {
     });
     Events.on('tool:message', (event) => {
       this.interface.addMessage({ role: 'tool', content: event.content });
-      if (!event.done) this.interface.statusline.showSpinner(this.spinnerMessage);
+      if (!event.done && !this.#modelTurnSpinner) {
+        this.#modelTurnSpinner = this.interface.statusline.showSpinner(this.spinnerMessage);
+      }
       this.interface.draw();
     });
 

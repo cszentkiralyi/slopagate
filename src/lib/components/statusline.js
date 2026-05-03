@@ -2,6 +2,8 @@ const Container = require('./container.js');
 const HContainer = require('./hcontainer.js');
 const Text = require('./text.js');
 
+const { Logger } = require('../../util.js');
+
 class Statusline extends HContainer {
   static BLANK = new Text('');
   
@@ -45,6 +47,7 @@ class Statusline extends HContainer {
 
   #renderTop() {
     const entry = this.#peek();
+    Logger.log(`Statusline: rendering ${JSON.stringify(entry)}`);
     if (!entry) {
       this.#setLeftChild(Statusline.BLANK);
       this.spinner.hide();
@@ -71,6 +74,7 @@ class Statusline extends HContainer {
     } else {
       entry = this.leftSide.pop();
     }
+    Logger.log(`Statusline: stack is now ${this.leftSide.length}, hid ${JSON.stringify(entry)}`);
     if (entry.timeout && entry.timer) {
       clearTimeout(entry.timer);
       entry.timer = null;
@@ -102,6 +106,7 @@ class Statusline extends HContainer {
       dismissable: !!dismissable,
       id: id ?? `msg-${this.#nextId++}`,
     };
+    Logger.log(`Statusline: showing message ${JSON.stringify(entry)}`);
 
     if (props.timeout) {
       entry.timer = setTimeout(() => {
@@ -114,9 +119,10 @@ class Statusline extends HContainer {
   }
   
   showSpinner(message, id) {
-    // Just push the new spinner on top of the stack; it takes priority
-    // because #renderTop() only renders the top entry.
+    // Only show a spinner if that ID isn't already set (prevent duplicates).
     const entryId = id ?? `spin-${this.#nextId++}`;
+    if (this.leftSide.some(e => e.id === entryId)) return entryId;
+    Logger.log(`Statusline: showing spinner ${JSON.stringify({ id, message })}`);
     this.leftSide.push({ kind: 'spinner', text: message, id: entryId });
     this.#renderTop();
     return entryId;

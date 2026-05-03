@@ -39,7 +39,10 @@ class Spinner extends Component {
     Object.assign(this, props);
     
     if (this.loop || typeof this.loop === 'undefined') {
-      setTimeout(() => this.root.draw(), SPINNER.ANIMATIONS[this.animation].delay);
+      if (!this.animation) { this.#loop = false; }
+      else {
+        setTimeout(() => this.root.draw(), Spinner.ANIMATIONS[this.animation].delay);
+      }
     } else {
       this.#loop = false;
     }
@@ -60,6 +63,8 @@ class Spinner extends Component {
   
   render(width) {
     //this.log(`Spinner: render ${this.#lastRenderedFrame} : ${this.#lastRender}`);
+    if (!this.animation) return { lines: [], dirty: true, skip: 0 };
+
     let now = Date.now(),
         diff = (now - this.#lastRender),
         frame = this.#lastRenderedFrame,
