@@ -5,6 +5,8 @@ const Layers = require('./layers/layers.js');
 const CONTEXT_CONFIGS = {
   low: {
     max_context_window: null, // no upper limit — fallback
+    tool_output_limit: 20,
+    tool_line_limit: 256,
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 8),
@@ -21,6 +23,8 @@ const CONTEXT_CONFIGS = {
   },
   medium: {
     max_context_window: 2 ** 16, // 65K
+    tool_output_limit: 20,
+    tool_line_limit: 256,
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 8),
@@ -37,6 +41,8 @@ const CONTEXT_CONFIGS = {
   },
   high: {
     max_context_window: 2 ** 14, // 16K
+    tool_output_limit: 20,
+    tool_line_limit: 256,
     budget: {
       system_prompt: (1 / 8),
       injection: (1 / 16),
@@ -53,6 +59,8 @@ const CONTEXT_CONFIGS = {
   },
   xhigh: {
     max_context_window: 2 ** 13, // 8K
+    tool_output_limit: 20,
+    tool_line_limit: 256,
     budget: {
       system_prompt: (ctx) => 500 * (1 + Math.floor(ctx / 2000)),
       injection: (ctx) => 200 + (50 * Math.floor(ctx / 2000)),

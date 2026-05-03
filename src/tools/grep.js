@@ -29,9 +29,17 @@ class GrepTool extends Tool {
     try {
       const result = execSync(`grep -nr ${JSON.stringify(search_string)} ${file_path}`).toString();
       if (!result.length) return '';
-      let output = result.split('\n'),
-          sliced = output.slice(0, 20),
-          missing = output.length - sliced.length;
+      let output = result.split('\n');
+      // Truncate each line to tool_line_limit chars
+      let maxLineLen = this.config.get('tool_line_limit') || 256;
+      output = output.map(line =>
+        line.length > maxLineLen
+          ? line.substring(0, maxLineLen) + '...'
+          : line
+      );
+      let maxLines = this.config.get('tool_output_limit') || 20;
+      let sliced = output.slice(0, maxLines);
+      let missing = output.length - sliced.length;
       if (missing) sliced.push(`...and ${missing} more.`);
       return sliced.join('\n');
     } catch (err) {

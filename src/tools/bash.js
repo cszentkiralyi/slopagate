@@ -16,8 +16,6 @@ class BashTool extends Tool {
     },
     required: ['command']
   };
-  
-  static MAX_OUTPUT_LINES = 20;
 
   static SAFE_BASH_CMDS = [
     //{ pattern: 'npm run test', readonly: false },
@@ -85,6 +83,9 @@ class BashTool extends Tool {
       return `Error: command "${word}" not allowed.`;
     }
 
+    let maxLines = this.config.get('tool_output_limit') || 20;
+    let maxLineLen = this.config.get('tool_line_limit') || 256;
+
     let p = new Promise((resolve, reject) => {
       exec(command, (error, stdout, stderr) => {
         if (stderr) {
@@ -94,11 +95,17 @@ class BashTool extends Tool {
         } else {
           let output = (stdout || '')
               .trim()
-              .split('\n'),
-            sliced = output.slice(0, BashTool.MAX_OUTPUT_LINES),
-            missing = output.length - sliced.length;
-      if (missing) sliced.push(`...and ${missing} more.`);
-      resolve(sliced.join('\n'));
+              .split('\n');
+          // Truncate each line to maxLineLen chars
+          output = output.map(line =>
+            line.length > maxLineLen
+              ? line.substring(0, maxLineLen) + '...'
+              : line
+          );
+          let sliced = output.slice(0, maxLines);
+          let missing = output.length - sliced.length;
+          if (missing) sliced.push(`...and ${missing} more.`);
+          resolve(sliced.join('\n'));
         }
       });
     });
