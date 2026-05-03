@@ -27,7 +27,7 @@ const CONTEXT_CONFIGS = {
     },
     layers: {
       system_prompt: { soft: true },
-      chat_score: { threshold: 0.3 },
+      chat_score: { threshold: 0.25 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (3.5 / 10) }
@@ -42,7 +42,7 @@ const CONTEXT_CONFIGS = {
     },
     layers: {
       system_prompt: { soft: true }, // Enable section-based trimming if possible
-      chat_score: { threshold: 0.5 },
+      chat_score: { threshold: 0.4 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
       tool_length: { user_turns: 1, max: 3.5 / 20 } // Truncate tools from previous turns
@@ -57,7 +57,7 @@ const CONTEXT_CONFIGS = {
     },
     layers: {
       system_prompt: { soft: false }, // No section-based trimming, only hard truncation
-      chat_score: { threshold: 0.6 }, // Cull messages with importance scores < 0.6
+      chat_score: { threshold: 0.5 }, // Cull messages with importance scores < 0.6
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
       tool_length: { user_turns: 0, max: (3.5 / 20) } // No tool response > 20% context length

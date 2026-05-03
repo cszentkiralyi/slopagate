@@ -551,12 +551,17 @@ class Harness {
      * - prompt_eval_duration / eval_duration / total_duration
      * - thinking
      */
-    if (!response) return;
+    if (!response) {
+      Events.emit('turn:user');
+      return;
+    }
     
     if (response.error) {
       Events.emit('model:content', { done: true, content: ANSI.fg(response.error, 'red') });
+      Events.emit('turn:user');
       return;
     } else if (!response.message) {
+      Events.emit('turn:user');
       return;
     }
 
@@ -724,16 +729,22 @@ class Harness {
   }
   
   async onToolsResponse(messages) {
-    this.#abortTarget = this.session;
-    let response = await this.session.send(...messages);
-    Events.emit('model:response', { response });
-    this.#serializeSession();
-
-    // after-respond: let triggers run at turn completion
     try {
-      await this.triggers.check('after-respond', { harness: this, response, session: this.session, config: this.config });
+      this.#abortTarget = this.session;
+      let response = await this.session.send(...messages);
+      Events.emit('model:response', { response });
+      this.#serializeSession();
+
+      // after-respond: let triggers run at turn completion
+      try {
+        await this.triggers.check('after-respond', { harness: this, response, session: this.session, config: this.config });
+      } catch (err) {
+        Logger.log(`[trigger] after-respond error: ${err.message}`);
+      }
     } catch (err) {
-      Logger.log(`[trigger] after-respond error: ${err.message}`);
+      Logger.log(`[onToolsResponse] error: ${err.message}`);
+      Events.emit('model:content', { done: true, content: ANSI.fg(`Error: ${err.message}`, 'red') });
+      Events.emit('turn:user');
     }
   }
   

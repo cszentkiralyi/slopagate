@@ -148,6 +148,7 @@ class Session {
       });
       responseObj = JSON.parse(await response.text());
     } catch (err) {
+      Logger.log(`Session.send_internal response error: ${JSON.stringify(err)}`);
       if (err.name === 'AbortError') {
         responseObj = { role: 'assistant', message: { } };
       }
@@ -171,6 +172,7 @@ class Session {
 
   normalizeResponse(response) {
     const provider = this.config.get('provider') || 'ollama';
+    Logger.log(`Session.normalize: ${JSON.stringify(response)}`);
 
     if (provider === 'openai') {
       // This documentation is absolutely atrocious on a 1080p display, whose idea
