@@ -576,18 +576,23 @@ class Harness {
       this.#outputTokens += e;
     }
     
-    if (message.content || message.tool_calls) {
-      let done = !message.tool_calls;
-      this.session.addToContext(message);
-      Events.emit('metrics:tokens', {
-        inputTokens: this.#inputTokens,
-        outputTokens: this.#outputTokens
-      });
-      Events.emit('metrics:tokens', {});
-      if (done) {
-        Events.emit('turn:user');
-        this.#abortTarget = null;
-        this.#serializeSession();
+    // finish_reason: "stop" = natural end, "length" = hit output limit, "tool_calls" = intermediate
+    let done = response.finish_reason === 'stop' || response.finish_reason === 'length';
+    
+    if (done || message.content || message.tool_calls) {
+      if (response.finish_reason === 'length' && !message.content) {
+        Events.emit('model:content', {
+          done: true,
+          content: ANSI.fg('(response was truncated)', 'yellow')
+        });
+      }
+      if (message.content || message.tool_calls) {
+        this.session.addToContext(message);
+        Events.emit('metrics:tokens', {
+          inputTokens: this.#inputTokens,
+          outputTokens: this.#outputTokens
+        });
+        Events.emit('metrics:tokens', {});
       }
       if (message.content) {
         Events.emit('model:content', { done, content: message.content });
@@ -718,6 +723,11 @@ class Harness {
           delete msg.name;
         });
         Events.emit('tool_calls:response', results);
+      }
+      if (done) {
+        Events.emit('turn:user');
+        this.#abortTarget = null;
+        this.#serializeSession();
       }
     }
   }

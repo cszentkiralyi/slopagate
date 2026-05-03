@@ -165,31 +165,42 @@ class Interface {
       this.commands.forEach(cmd => {
         len = cmd.name.length;
         if (len > slen && cmd.name.startsWith(s)) {
-          // Partial command name: return suffix + space + argument hint or command hint
+          // Partial command name: display suffix + hint, tab-completes to full name + space
           let suffix = cmd.name.substring(slen);
+          let displaySuffix = suffix;
           if (cmd.arguments && cmd.arguments.length) {
             let arg = cmd.arguments[0];
             if (arg) {
-              hints.push(suffix + ' ' + (arg.possible ? arg.possible.join('|') : arg.name));
+              displaySuffix += ' ' + (arg.possible ? arg.possible.join('|') : arg.name);
             }
           } else if (cmd.hint) {
-            hints.push(suffix + ' ' + cmd.hint);
-          } else {
-            hints.push(suffix);
+            displaySuffix += ' ' + cmd.hint;
           }
+          hints.push({
+            hint: displaySuffix,
+            completion: cmd.name.substring(slen) + ' '
+          });
         }
         else if (s.startsWith(cmd.name) && slen >= len) {
-          // Full command name: show argument or hint
-          let astr = s.substring(len + 1);
-          if (astr.trim().length === 0) {
-            let wordCount = astr.split(' ').length - (astr[astr.length - 1] === ' ' ? 1 : 0);
+          // Full command name: show argument or hint (no tab completion)
+          let astr = s.substring(len);
+          if (astr.trim().length === 0 || cmd.arguments) {
+            let wordCount = astr.trim().length === 0
+              ? (astr[astr.length - 1] === ' ' || astr === '' ? 0 : astr.split(' ').length - 1)
+              : astr.split(' ').length - 1;
             if (cmd.arguments && wordCount < cmd.arguments.length) {
               let arg = cmd.arguments[wordCount];
               if (arg) {
-                hints.push(arg.possible ? arg.possible.join('|') : arg.name);
+                hints.push({
+                  hint: arg.possible ? arg.possible.join('|') : arg.name,
+                  completion: null
+                });
               }
             } else if (cmd.hint && slen === len) {
-              hints.push(' ' + cmd.hint);
+              hints.push({
+                hint: ' ' + cmd.hint,
+                completion: null
+              });
             }
           }
         }
@@ -199,12 +210,11 @@ class Interface {
     if (hints.length) {
       let allSubsets = true;
       hints.sort((a, b) => {
-        let la = a.length, lb = b.length;
-        allSubsets = allSubsets && (a.startsWith(b) || b.startsWith(a));
+        let la = a.hint.length, lb = b.hint.length;
+        allSubsets = allSubsets && (a.hint.startsWith(b.hint) || b.hint.startsWith(a.hint));
         let r, i;
         for (i = 0; i < la && i < lb; i++) {
-          //r = a[i] - b[i];
-          r = a.charCodeAt(i) - b.charCodeAt(i);
+          r = a.hint.charCodeAt(i) - b.hint.charCodeAt(i);
           if (r != 0) return r;
         }
         if (la > lb) return -1;

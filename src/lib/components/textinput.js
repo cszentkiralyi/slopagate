@@ -34,9 +34,11 @@ class TextInput extends Component {
       return this.#hint.content;
     
     let h = this.getHint(this.#value);
-    if (h && h.length) {
-      this.#hint = { value: this.#value, content: h };
-      return h;
+    if (h) {
+      // Normalize to object form: { content: display string, completion: optional }
+      let obj = typeof h === 'string' ? { content: h } : h;
+      this.#hint = { value: this.#value, content: obj };
+      return obj;
     }
     return '';
   }
@@ -57,8 +59,12 @@ class TextInput extends Component {
     if (this.#caret >= this.#value.length) {
       value = this.#value;
       if (hint = this.hint) {
-        value += ANSI.invert(hint.charAt(0));
-        value += ANSI.fg(hint.substring(1), 'gray');       
+        let hintStr = typeof hint === 'object' ? hint.hint : hint;
+        //this.log(`TextInput hint: ${JSON.stringify(hint)}`);
+        if (hintStr.length) {
+          value += ANSI.invert(hintStr.charAt(0));
+          value += ANSI.fg(hintStr.substring(1), 'gray');
+        }
       } else {
         value += '█';
       }
@@ -165,7 +171,9 @@ class TextInput extends Component {
       this.shortcuts['^D'](this);
     } else if (k === '\t' || char === 9) { // tab
       let hint;
-      if ((hint = this.hint).length) this.#value += hint;
+      if ((hint = this.hint) && typeof hint === 'object' && hint.completion) {
+        this.#value += hint.completion;
+      }
       this.#caret = this.#value.length;
     } else if (char >= 32 && (char - 127) != 0) {
       if (this.#caret == len) {
