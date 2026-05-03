@@ -200,6 +200,8 @@ class Session {
         message.reasoning_content = message.reasoning_content.slice(0, endThink);
         message.content = message.reasoning_content.slice(endThink + 7);
       }
+      
+      if (message) message.finish_reason = response.choices[0].finish_reason;
 
       return {
         error: (response && response.error) ? response.error.message : null,
