@@ -165,27 +165,32 @@ class Interface {
       this.commands.forEach(cmd => {
         len = cmd.name.length;
         if (len > slen && cmd.name.startsWith(s)) {
-          hints.push(cmd.name.substring(slen));
-          if (cmd.hint) {
-            // Doesn't get picked :/
-            hints.push(cmd.name.substring(slen) + ' ' + cmd.hint);
+          // Partial command name: return suffix + space + argument hint or command hint
+          let suffix = cmd.name.substring(slen);
+          if (cmd.arguments && cmd.arguments.length) {
+            let arg = cmd.arguments[0];
+            if (arg) {
+              hints.push(suffix + ' ' + (arg.possible ? arg.possible.join('|') : arg.name));
+            }
+          } else if (cmd.hint) {
+            hints.push(suffix + ' ' + cmd.hint);
+          } else {
+            hints.push(suffix);
           }
         }
-        // Check for argument hints
-        else if (s.startsWith(cmd.name)) {
-          let astr = s.substring(cmd.name.length + 1),
-              words = astr.split(' '),
-              wordCount = words.length - (words[words.length - 1] === '' ? 1 : 0);
-          if (cmd.arguments && wordCount < cmd.arguments.length) {
-            let arg = cmd.arguments[wordCount];
-            if (arg) {
-              let hint = (slen > cmd.name.length) ? ' ' : '';
-              hint += arg.possible ? arg.possible.join('|') : arg.name
-              hints.push(hint);
+        else if (s.startsWith(cmd.name) && slen >= len) {
+          // Full command name: show argument or hint
+          let astr = s.substring(len + 1);
+          if (astr.trim().length === 0) {
+            let wordCount = astr.split(' ').length - (astr[astr.length - 1] === ' ' ? 1 : 0);
+            if (cmd.arguments && wordCount < cmd.arguments.length) {
+              let arg = cmd.arguments[wordCount];
+              if (arg) {
+                hints.push(arg.possible ? arg.possible.join('|') : arg.name);
+              }
+            } else if (cmd.hint && slen === len) {
+              hints.push(' ' + cmd.hint);
             }
-          } 
-          if (cmd.hint && slen <= len) {
-            hints.push(' ' + cmd.hint);
           }
         }
       });
