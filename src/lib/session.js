@@ -179,7 +179,7 @@ class Session {
       // <https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create>
       //const { usage } = response;
       const usage = (response && response.usage) || {};
-      let message = response.choices && response.choices.length
+      let message = response && response.choices && response.choices.length
         ? response.choices[0].message
         : null, endThink;
       if (message && message.tool_calls && message.tool_calls.length) {
@@ -200,7 +200,7 @@ class Session {
       }
 
       return {
-        error: response.error ? response.error.message : null,
+        error: (response && response.error) ? response.error.message : null,
         message: message,
         prompt_eval_count: usage.prompt_tokens,
         eval_count: usage.completion_tokens

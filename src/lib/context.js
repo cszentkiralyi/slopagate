@@ -45,7 +45,7 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.5 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: { user_turns: 1, max: (3.5 / 20) * 3.5 } // Truncate tools from previous turns
+      tool_length: { user_turns: 1, max: 3.5 / 20 } // Truncate tools from previous turns
     }
   },
   xhigh: {

@@ -506,6 +506,7 @@ class Harness {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
     this.#abortTarget = this.session;
+    this.#userMessagesSinceRecap++;
 
     // before-send: let triggers intercept the user's message
     try {
