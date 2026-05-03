@@ -15,6 +15,7 @@ class Statusline extends HContainer {
   #left;
   #right;
   #nextId = 0;
+  pendingTimer = null;
   get right() { return this.#right; }
 
   constructor(props) {
@@ -29,7 +30,7 @@ class Statusline extends HContainer {
     
     // Stack of left-side entries: each entry has a 'kind' that defines
     // how it's rendered:
-    //   { kind: 'spinner', text: string, id?: string }
+    //   { kind: 'spinner', text: string, id?: string, start: number }
     //   { kind: 'message', text: object, dismissable: boolean, id?: string, timeout?: number, timer?: Timeout }
     this.leftSide = [];
     
@@ -54,18 +55,33 @@ class Statusline extends HContainer {
       return;
     }
     if (entry.kind === 'spinner') {
-      this.spinner.message = entry.text;
+      const elapsed = this.#formatElapsed(Date.now() - entry.start);
+      this.spinner.message = `${entry.text} (${elapsed})`;
       this.#setLeftChild(this.spinner);
       this.spinner.show();
       this.spinner.start();
+      // Schedule periodic redraws to update the elapsed time.
+      clearTimeout(this.pendingTimer);
+      this.pendingTimer = setTimeout(() => this.draw(), 200);
     } else {
       this.spinner.hide();
       this.#setLeftChild(new Text(entry.text));
     }
   }
+
+  #formatElapsed(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return h > 0
+      ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+      : `${m}:${String(sec).padStart(2, '0')}`;
+  }
   
   hide(id) {
     if (!this.leftSide.length) return;
+    clearTimeout(this.pendingTimer);
     let entry;
     if (id !== undefined) {
       const idx = this.leftSide.findIndex(e => e.id === id);
@@ -82,7 +98,7 @@ class Statusline extends HContainer {
     this.#renderTop();
   }
   async draw() {
-    this.log(`WARNING: draw() called on Statusline!`);
+    this.#renderTop();
     await this.root.draw();
   }
 
@@ -123,12 +139,13 @@ class Statusline extends HContainer {
     const entryId = id ?? `spin-${this.#nextId++}`;
     if (this.leftSide.some(e => e.id === entryId)) return entryId;
     //Logger.log(`Statusline: showing spinner ${JSON.stringify({ id, message })}`);
-    this.leftSide.push({ kind: 'spinner', text: message, id: entryId });
+    this.leftSide.push({ kind: 'spinner', text: message, id: entryId, start: Date.now() });
     this.#renderTop();
     return entryId;
   }
 
   clearSpinners() {
+    clearTimeout(this.pendingTimer);
     this.leftSide = this.leftSide.filter(e => e.kind !== 'spinner');
     this.#renderTop();
   }

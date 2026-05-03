@@ -51,6 +51,9 @@ class Spinner extends Component {
   
   start() {
     this.#loop = true;
+    if (!this.#lastRender && this.root && this.animation) {
+      setTimeout(() => this.root.draw(), 0);
+    }
   }
   
   stop() {
