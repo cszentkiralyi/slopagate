@@ -18,6 +18,7 @@ const Timers = require('../lib/timers.js');
 class Program {
   
   #currentMessageId = null;
+  #modelTurnSpinner = null;
 
   static SPINNER_MESSAGES = [
     'Autofilling',
@@ -297,7 +298,7 @@ class Program {
             this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
-            this.interface.statusline.showSpinner(this.spinnerMessage);
+            this.#modelTurnSpinner = this.interface.statusline.showSpinner(this.spinnerMessage);
             this.interface.draw();
             
             for (let word of input.split(' ')) {
@@ -338,19 +339,18 @@ class Program {
           content: this.md.toAnsi(event.content.trim())
         });
       }
-      (event.done)
-        ? this.interface.statusline.clearSpinners()
-        : this.interface.statusline.spinner.hide();
       this.interface.draw();
     });
     Events.on('turn:model', (event) => {
       this.#stopAfkTimer();
-      this.interface.statusline.spinner.hide();
       this.interface.draw();
     });
     Events.on('turn:user', (event) => {
       this.#startAfkTimer();
-      this.interface.statusline.spinner.hide();
+      if (this.#modelTurnSpinner) {
+        this.interface.statusline.hide(this.#modelTurnSpinner);
+        this.#modelTurnSpinner = null;
+      }
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
