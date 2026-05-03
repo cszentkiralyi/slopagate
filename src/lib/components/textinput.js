@@ -108,8 +108,8 @@ class TextInput extends Component {
     if (this.onKey) await this.onKey(k, later, this);
     if (this.#caret > len) this.#caret = len;
     if (char === TextInput.KEYS.CR && k.length == 1) { // cr
-      this.#historyIdx++;
-      this.#history.push(this.#value);
+      this.#history.unshift(this.#value);
+      this.#historyIdx = -1;
       await this.onInput(this.#value, this);
       if (this.modes && this.#mode !== 'normal')
         this.#mode = 'normal';
@@ -141,17 +141,20 @@ class TextInput extends Component {
           + this.#value.substring(this.#caret + 1);
       }
     } else if (k ===TextInput.KEYS.UP) {  // up
-      if (this.#historyIdx > 0) {
-        this.#historyIdx--;
-        this.#value = this.getHistory(this.#historyIdx);
-        this.#caret = this.#value.length;
-      }
-    } else if (k ===TextInput.KEYS.DOWN) { // down
-      if (this.#historyIdx < this.#history.length - 1) {
+      if (this.#history.length === 0) return;
+      if (this.#historyIdx === -1) {
+        this.#historyIdx = 0;
+      } else if (this.#historyIdx < this.#history.length - 1) {
         this.#historyIdx++;
-        this.#value = this.getHistory(this.#historyIdx);
-      } else if (this.#historyIdx == 0) {
+      }
+      this.#value = this.getHistory(this.#historyIdx);
+      this.#caret = this.#value.length;
+    } else if (k ===TextInput.KEYS.DOWN) { // down
+      if (this.#historyIdx === 0) {
+        this.#historyIdx = -1;
         this.#value = '';
+      } else if (this.#historyIdx > 0) {
+        this.#historyIdx--;
       }
       this.#caret = this.#value.length;
     } else if (k ===TextInput.KEYS.RIGHT) { // right
@@ -209,13 +212,7 @@ class TextInput extends Component {
   }
   
   getHistory(n) {
-    if (n >= 0) {
-      return this.#history[n] || '';
-    } else {
-      let l = this.#history.length,
-          neg = Math.min(0, l - n - 1);
-      return this.#history[neg] || '';
-    }
+    return this.#history[n] || '';
   }
   
   #makeLater() {
