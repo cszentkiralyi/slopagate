@@ -577,10 +577,15 @@ class Harness {
     }
     
     // finish_reason: "stop" = natural end, "length" = hit output limit, "tool_calls" = intermediate
-    let done = response.finish_reason === 'stop' || response.finish_reason === 'length';
+    // Ollama: response.message.finish_reason
+    // OpenAI: response.choices[0].finish_reason
+    let fr = response.message?.finish_reason
+          ?? response.choices?.[0]?.finish_reason
+          ?? response.finish_reason;
+    let done = fr === 'stop' || fr === 'length';
     
     if (done || message.content || message.tool_calls) {
-      if (response.finish_reason === 'length' && !message.content) {
+      if ((fr === 'length' || fr === 4) && !message.content) {
         Events.emit('model:content', {
           done: true,
           content: ANSI.fg('(response was truncated)', 'yellow')
