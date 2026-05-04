@@ -14,6 +14,7 @@ const Skills = require('../lib/skills.js');
 
 const { Logger } = require('../util.js');
 const Timers = require('../lib/timers.js');
+const Permissions = require('../lib/permissions.js');
 
 class Program {
   
@@ -98,6 +99,7 @@ class Program {
       this.skills.addSkills(skillFiles);
     }
     
+    this.permissions = new Permissions();
     this.timers = new Timers();
     
     this.md = new Slopdown({
@@ -428,34 +430,55 @@ class Program {
   async hookToolCall({ toolCall }) {
     if (!toolCall || !toolCall.function) return null;
 
+    const tool = this.harness.toolbox.get(toolCall.function.name);
     const args = toolCall.function.arguments;
     if (typeof args === 'string') {
       return { response: `Error: failed to parse arguments for "${toolCall.function.name}" — model returned malformed JSON` };
     }
-
-    if ((toolCall.function.name !== 'StringSearch'
-        && toolCall.function.name !== 'Read')
-        || !args?.file_path || !args.file_path.length)
-      return null;
-
-    const file_path = args.file_path;
-    let last = path.basename(file_path);
-    if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
-      switch (toolCall.function.name) {
-        case 'Read':
-          Logger.log(`[Experiment] maybe steering ${args.start_line ?? 'none'}-${args.end_line ?? 'none'}`);
-          if (args.start_line || args.end_line)
-            return;
-          Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
-          return { response: `Error: must use "StringSearch" tool before reading "${last}.`};
-        case 'StringSearch':
-          Logger.log(`[Experiment] Steering: registered word "${last}" from StringSearch`);
-          this.#exp_fileReadWhitelist.add(last);
-          return;
+      
+    if ((tool.name === 'StringSearch' || tool.name === 'Read')
+        && args?.file_path) {
+      const file_path = args.file_path;
+      let last = path.basename(file_path);
+      if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
+        switch (tool.name) {
+          case 'Read':
+            Logger.log(`[Experiment] maybe steering ${args.start_line ?? 'none'}-${args.end_line ?? 'none'}`);
+            if (!args.start_line || !args.end_line) {
+              Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
+              return { cancelled: true, response: `Error: must use "StringSearch" tool before reading "${last}.` };
+            }
+            break;
+          case 'StringSearch':
+            Logger.log(`[Experiment] Steering: registered word "${last}" from StringSearch`);
+            this.#exp_fileReadWhitelist.add(last);
+            break;
+        }
       }
     }
+    
+    const perms = tool.permissions(toolCall.function.arguments);
+    if (!perms) return null;
+    let scopes = [ perms.scope, ...(perms.parents || []) ], permResult;
+    do {
+      Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
+      permResult = this.permissions.check(tool.name, scopes.shift());
+      Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
+      permResult.approved = true; // TODO: temp
+      scopes.push(...(permResult.suggestions));
+    } while (!permResult.approved && scopes.length);
+    // TODO: if not approved, determine the "best" scope & ask for permission
+    if (permResult?.approved) {
+      if (!this.permissions.check(tool.name, permResult.scope)) {
+        Logger.log(`Program: approving perm scope ${JSON.stringify(permResult.scope)}`);
+        this.permissions.approve(tool.name, permResult.scope);
+      }
+      Logger.log(`Program: permission granted for scope ${JSON.stringify(permResult.scope)}`);
+      return null;
+    }
 
-    return null;
+    Logger.log(`Program: permission denied`);
+    return { cancelled: true, response: `Error: operation not permitted` };
   }
 
  

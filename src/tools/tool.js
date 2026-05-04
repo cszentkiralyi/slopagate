@@ -40,6 +40,10 @@ class Tool {
     return null;
   }
   
+  permissions(args) {
+    return null;
+  }
+  
   simplifyPath(p) {
     let simplified = path.relative('.', p);
     return (simplified && simplified.length) ? simplified : '.';

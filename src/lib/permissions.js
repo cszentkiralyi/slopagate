@@ -11,20 +11,20 @@ class Permissions {
    */
   check(tool, scope) {
     const toolMap = this.#tree.get(tool);
-    if (!toolMap) return { allowed: false, suggestions: [] };
+    if (!toolMap) return { allowed: false, suggestions: [], scope };
 
     // Exact match
-    if (toolMap.has(scope)) return { allowed: true, suggestions: [] };
+    if (toolMap.has(scope)) return { allowed: true, suggestions: [], scope };
 
     // Prefix match: find existing entries that are prefixes of scope
     const suggestions = [];
     for (const approved of toolMap) {
-      if (scope.startsWith(approved)) {
+      if (scope.endsWith('*') && scope.startsWith(approved)) {
         suggestions.push(approved);
       }
     }
 
-    return { allowed: false, suggestions };
+    return { allowed: false, suggestions, scope };
   }
 
   /**

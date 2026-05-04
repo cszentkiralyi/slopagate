@@ -80,6 +80,17 @@ class EditTool extends Tool {
     }
     return `Editing ${target} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})`;
   }
+  
+  permissions(args) {
+    const { file_path } = args;
+    // TODO: Should use node:path to split
+    let parents = file_path.split('/')
+      .map((_, i, parts) => parts.slice(0, i+1).join('/'))
+      .filter(p => p !== file_path)
+      .map(p => p + '/*')
+      .reverse(); // Check most-specific first, not last
+    return { scope: file_path, parents };
+  }
 }
 
 module.exports = EditTool;
