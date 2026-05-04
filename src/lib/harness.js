@@ -630,9 +630,6 @@ class Harness {
         
         let toolPromises = [], eventsByName = {}, event;
         
-        // Remove existing listener before adding new ones to avoid duplicates
-        Events.off('tool:response', this.#handleToolResponse);
-        
         for (let call of message.tool_calls) {
           let id = call.id,
               name = call.function.name,
@@ -647,31 +644,8 @@ class Harness {
           let cancelError = null;
           let overrideResponse = null;
           
-          try {
-            const results = this.hooks.emitWithResults('tool-call', { toolCall: call });
-            for (const result of results) {
-              if (!result) continue;
-              overrideResponse = result.response || null;
-              if (result && result.cancelled) {
-                cancelled = true;
-                cancelError = result.error || null;
-                break;
-              }
-            }
-          } catch (err) {
-            cancelled = true;
-            cancelError = err;
-          }
-          
-          if (cancelled) {
-            Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
-            continue;
-          }
-          
-         if (!cancelled) Events.emit('tool:call', event);
-
           // Create a promise that resolves when the corresponding tool:response event is received
-          let toolPromise = new Promise((resolve, reject) => {
+          let toolPromise = new Promise(async (resolve, reject) => {
             let onResponse = (evt) => {
               if (evt.id === id) {
                 Events.off('tool:response', onResponse);
@@ -679,7 +653,25 @@ class Harness {
               }
             };
             Events.on('tool:response', onResponse);
+
+            try {
+              const results = await this.hooks.emitWithResultsAsync('tool-call', { toolCall: call });
+              for (const result of results) {
+                if (!result) continue;
+                overrideResponse = result.response || null;
+                if (result && result.cancelled) {
+                  cancelled = true;
+                  cancelError = result.error || null;
+                  break;
+                }
+              }
+            } catch (err) {
+              cancelled = true;
+              cancelError = err;
+            }
+
             if (cancelled) {
+              Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
               let content = overrideResponse && (typeof overrideResponse === 'string'
                 ? overrideResponse
                 : JSON.stringify(overrideResponse));
@@ -689,6 +681,8 @@ class Harness {
                 tool_name: name,
                 content: content || 'Error: tool call cancelled'
               });
+            } else {
+              Events.emit('tool:call', event);
             }
 
             // Timeout race
@@ -735,12 +729,6 @@ class Harness {
         this.#serializeSession();
       }
     }
-  }
-  
-  // Fallback handler for any tool:response events emitted during normal flow
-  #handleToolResponse(event) {
-    // This handler is removed per-tool in onModelResponse above
-    // Kept here for potential global event processing if needed
   }
   
   async onToolsResponse(messages) {

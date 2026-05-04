@@ -99,6 +99,18 @@ class Hooks {
     }
     return results;
   }
+  
+  async emitWithResultsAsync(name, ...args) {
+    if (!this.#isValidHook(name)) {
+      throw new Error(`Invalid hook: ${name}`);
+    }
+    const handlers = this.#handlers.get(name) || [];
+    const results = [];
+    for (const handler of handlers) {
+      results.push(await handler(...args));
+    }
+    return results;
+  }
 
   /**
    * Unregister a handler by exact function reference
