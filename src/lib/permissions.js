@@ -19,7 +19,7 @@ class Permissions {
     // Prefix match: find existing entries that are prefixes of scope
     const suggestions = [];
     for (const approved of toolMap) {
-      if (scope.endsWith('*') && scope.startsWith(approved)) {
+      if (approved.endsWith('*') && scope.startsWith(approved.slice(0, -1))) {
         suggestions.push(approved);
       }
     }
@@ -64,7 +64,7 @@ class Permissions {
     if (!toolMap) return [];
 
     return Array.from(toolMap)
-      .filter(approved => scope.startsWith(approved))
+      .filter(approved => approved.endsWith('*') && scope.startsWith(approved.slice(0, -1)))
       .slice(0, 5);
   }
 
