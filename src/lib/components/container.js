@@ -23,7 +23,9 @@ class Container extends Component {
     let lines = [],
         skip = 0,
         dirty = false,
-        lastChild = this.children.length - 1;
+        lastChild = this.children.length - 1,
+        haveGap;
+    //this.log(`${this.name}: starting render`);
     this.children.forEach((child,  i) => {
       if (!child || child.hidden) return;
       //this.log(`Container: rendering child`);
@@ -32,13 +34,14 @@ class Container extends Component {
         console.log(result);
         throw new Error();
       }
-      //this.log(`Container: child returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
+      //this.log(`${this.name}: child ${child.name} returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
       lines.push(...result.lines);
-      if (this.gap && i < lastChild) lines.push('')
-      if (!dirty) skip += result.skip;
+      haveGap = this.gap && i < lastChild;
+      if (haveGap) lines.push('');
+      if (!dirty && result.skip) skip += result.skip + (haveGap && !result.dirty ? 1 : 0);
       dirty ||= result.dirty;
     });
-    //this.log(`Container: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
+    //this.log(`${this.name}: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
     return { lines, dirty, skip };
   }

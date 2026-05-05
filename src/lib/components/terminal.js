@@ -6,7 +6,7 @@ const Container = require('./container.js');
 
 class Terminal extends Container {
   #first_draw = true;
-  #focused = null;
+  focused = null;
   #was_raw = false;
   
   #last_draw = null;
@@ -32,6 +32,7 @@ class Terminal extends Container {
     process.stdin.on('data', async (k) => await this.key(k));
     process.stdin.on('resize', () => this.draw());
   }
+
   async dispose() {
     console.log(ANSI.showCursor());
     process.stdin.setRawMode(this.#was_raw);
@@ -76,34 +77,35 @@ class Terminal extends Container {
       return;
     }
     
-    if (!dirty) return;
+    let len = lines.length, plen = prev.length;
+    if (!dirty && skip < len) return; // TODO: is this witchcraft? idk why it's here
     
     let output = '',
-        clearHeight = Math.min(
-          height,
-          prev.length - skip
-        );
-    
-    //this.log(`Term: got ${lines.length} lines, last draw ${prev.length}; skipping ${skip} so we clear ${clearHeight}`);
-    //this.log(`Term: ${lines.slice(skip)}`)
-    output += ANSI.cursorUp(clearHeight - 1);
+        clearHeight = Math.min(height, plen - skip) - 1;
+        
+    if (!dirty && clearHeight <= 0) return;
+
+    if (clearHeight > 0) output += ANSI.cursorUp(clearHeight);
     output += ANSI.eraseDown();
-    output += lines.slice(skip).join('\n');
-    //this.log(`Term: end of draw`);
+    if (skip > plen) output += '\n';
+    
+    if (dirty) output += lines.slice(skip).join('\n');
+
+    //this.log(`Term: got ${lines.length} lines, last draw ${plen}; skipping ${skip} so we clear ${clearHeight}`);
 
     fs.writeSync(process.stdout.fd, output);
   }
   
   giveFocus(c) {
-    this.#focused = c;
+    this.focused = c;
   }
   takeFocus() {
-    this.#focused = null;
+    this.focused = null;
   }
   async key(k) {
-    //this.log(`key() going to ${this.#focused} ${this.#focused && this.#focused.key}`)
-    if (this.#focused && this.#focused.key) {
-      await this.#focused.key(k);
+    //this.log(`key() going to ${this.focused} ${this.focused && this.focused.key}`)
+    if (this.focused && this.focused.key) {
+      await this.focused.key(k);
     }
     this.draw();
   }
