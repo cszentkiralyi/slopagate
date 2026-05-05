@@ -491,6 +491,7 @@ class Program {
           { label: 'No', value: 'no' },
         ], result = await this.interface.getUserChoice(msg, choices);
 
+    Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
@@ -506,7 +507,7 @@ class Program {
   async #suggestParent(toolName, perms, matchedScope) {
     let chain = [perms.scope, ...perms.parents];
     let idx = chain.indexOf(matchedScope);
-    Logger.log(`Program: suggestParent ${JSON.stringify({ idx, perm, chain })}`);
+    Logger.log(`Program: suggestParent ${JSON.stringify({ idx, perms, chain })}`);
     if (idx >= 0 && idx < chain.length - 1) {
       let next = chain[idx + 1];
       if (!this.permissions.has(toolName, next)) {
