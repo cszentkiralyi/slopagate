@@ -129,6 +129,18 @@ class BashTool extends Tool {
     if (summary.length > 40) summary = summary.substring(0, 40) + '...';
     return `Executing ${permittedCalls.length} commands (${summary})`;
   }
+  
+  permissions(args) {
+    const { command } = args;
+    
+    let [ cmd, second, ...rem ] = command.split(' ');
+    let scope = second.startsWith('-') ? cmd : (cmd + ' ' + second);
+    
+    return {
+      scope: scope,
+      parents: (scope != cmd) ? [ cmd + '*' ] : []
+    };
+  }
 }
 
 module.exports = BashTool;
