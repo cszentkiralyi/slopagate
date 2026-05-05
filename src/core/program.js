@@ -483,7 +483,7 @@ class Program {
     
     if (permResult.allowed) return;
 
-    let msg = `Allow tool use? ${perms.scope}`,
+    let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [
           { label: 'Yes', value: 'yes', default: true },
           { label: 'Yes for this session', value: 'yes+' },
