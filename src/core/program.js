@@ -481,7 +481,10 @@ class Program {
       scopes.push(...(permResult.suggestions));
     } while (!permResult.allowed && scopes.length);
     
-    if (permResult.allowed) return;
+    if (permResult.allowed) {
+      await this.#suggestParent(tool.name, perms, permResult.scope);
+      return;
+    }
 
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [
@@ -493,11 +496,8 @@ class Program {
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
-        //Logger.log(`Program: approving perm scope ${JSON.stringify(permResult.scope)}`);
       }
-      // TODO: detect 2+ siblings of this (so 3+ total including this),
-      // suggest a parent if there is one
-      //Logger.log(`Program: permission '${result}' granted for scope ${JSON.stringify(permResult.scope)}`);
+      await this.#suggestParent(tool.name, perms, perms.scope);
       return;
     }
 
@@ -505,7 +505,24 @@ class Program {
     return { cancelled: true, response: `Error: operation not permitted` };
   }
 
- 
+  async #suggestParent(toolName, perms, matchedScope) {
+    let chain = [perms.scope, ...perms.parents];
+    let idx = chain.indexOf(matchedScope);
+    if (idx >= 0 && idx < chain.length - 1) {
+      let next = chain[idx + 1];
+      if (!this.permissions.has(toolName, next)) {
+        let msg = `Also allow parent scope? ${toolName}(${next})`;
+        let choices = [
+          { label: 'Yes', value: 'yes', default: true },
+          { label: 'No', value: 'no' },
+        ];
+        let result = await this.interface.getUserChoice(msg, choices);
+        if (result === 'yes') {
+          this.permissions.approve(toolName, next);
+        }
+      }
+    }
+  }
 
   #startAfkTimer() {
     this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
