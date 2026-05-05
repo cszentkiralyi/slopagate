@@ -228,8 +228,21 @@ class Program {
     }));
     Events.on('program:quit', () => this.dispose());
     
-    addInterfaceCommands(this.harness.getCommands());
-
+    this.harness.commands.push({
+      name: 'picker',
+      hint: 'Test the new Picker',
+      handler: async () => {
+        let msg = 'Pick a value:',
+            choices = [
+              { label: 'Yes', value: 'yes', default: true },
+              { label: 'Yes for this session', value: 'yes+' },
+              { label: 'No', value: 'no' },
+            ];
+        let result = await this.interface.getUserChoice(msg, choices);
+        this.interface.addMessage({ role: 'tool', content: `You chose "${result}"`});
+      }
+    });
+    this.interface.commands = this.harness.getCommands();
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
 
 

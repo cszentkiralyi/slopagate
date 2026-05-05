@@ -228,6 +228,24 @@ class Interface {
     }
     return null;
   }
+  
+  getUserChoice(message, choices) {
+    Logger.log(`Interface: received getUserChoice() call`);
+    const picker = new TUI.Picker({ message, choices });
+    const prevFocus = this.#terminal.focused;
+    return new Promise((resolve, reject) => {
+      let select = (v) => {
+        this.#terminal.removeChild(picker);
+        this.#terminal.giveFocus(prevFocus);
+        this.#terminal.draw();
+        resolve(v);
+      };
+      picker.select = select;
+      this.#terminal.appendChild(picker);
+      this.#terminal.giveFocus(picker);
+      this.#terminal.draw();
+    });
+  }
 }
 
 module.exports = Interface;
