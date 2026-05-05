@@ -103,6 +103,8 @@ class Context {
       reserved: this.budget.reserved || 0
     };
     ret.total = ret.system_prompt + ret.messages + ret.reserved;
+    // TODO: fix how we get this everywhere we're calculating it manually
+    ret.saturation = ret.total / ret.context_window;
     return ret;
   }
   
@@ -139,13 +141,15 @@ class Context {
       estimate: (s) => Context.estimate(s),
       transcript: (s) => Context.transcript(s),
       summarize: opts?.summarize ?? (async () => 'Summary')
-    }, verbatim, n_layer, layer, i, u, m, r;
-    Logger.log(`compact: Starting with ${this.messages.length} messages`);
+    }, saturation = this.estimates.saturation,
+      verbatim, n_layer, layer, i, u, m, r;
+    //Logger.log(`compact: Starting with ${this.messages.length} messages`);
     for (n_layer of layers) {
-    Logger.log(`compact: ${n_layer}`);
+      //Logger.log(`compact: ${n_layer}`);
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
+      if (saturation >= (arg.config.saturation || 0)) continue;
       if (arg.messages.length < (arg.config.min_messages || 0)) continue;
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
@@ -168,7 +172,7 @@ class Context {
         }
       }
       r = (arg.messages.length) ? await layer(arg) : null;
-      Logger.log(`compact: ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
+      //Logger.log(`compact: ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {
         if (!r) {
           r = { messages: verbatim }
