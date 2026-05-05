@@ -78,18 +78,21 @@ class Terminal extends Container {
     }
     
     let len = lines.length, plen = prev.length;
+    if (skip > plen && len > plen) skip = plen;
     if (!dirty && skip < len) return; // TODO: is this witchcraft? idk why it's here
     
     let output = '',
-        clearHeight = Math.min(height, plen - skip) - 1;
+        clearHeight = Math.min(height, plen - skip);
         
-    if (!dirty && clearHeight <= 0) return;
-
+    if (!dirty && !clearHeight) return;
+        
     if (clearHeight > 0) output += ANSI.cursorUp(clearHeight);
     output += ANSI.eraseDown();
-    if (skip > plen) output += '\n';
+
+    //this.log(`Term: ${JSON.stringify({ len, plen, skip, clearHeight, dirty })}`)
     
-    if (dirty) output += lines.slice(skip).join('\n');
+    if (dirty || len > plen)
+      output += lines.slice(skip).join('\n') + '\n';
 
     //this.log(`Term: got ${lines.length} lines, last draw ${plen}; skipping ${skip} so we clear ${clearHeight}`);
 

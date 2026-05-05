@@ -39,10 +39,10 @@ class Interface {
       getHint: (v) => this.getInputHint(v)
     });
     
-    if (this.banner)
-      this.#chat_history.appendChild(new TUI.Text(this.banner));
     this.#terminal.appendChild(this.#chat_history);
     this.#terminal.appendChild(this.#lower_panel);
+    if (this.banner)
+      this.#chat_history.appendChild(new TUI.Text(this.banner));
     this.#chat_history.appendChild(this.#startup_messages);
     this.#lower_panel.appendChild(this.#statusline);
     this.#lower_panel.appendChild(this.#chat_input);
@@ -235,6 +235,7 @@ class Interface {
     const prevFocus = this.#terminal.focused;
     return new Promise((resolve, reject) => {
       let select = (v) => {
+        Logger.log(`Interface: selected choice, removing & drawing`);
         this.#terminal.removeChild(picker);
         this.#terminal.giveFocus(prevFocus);
         this.#terminal.draw();

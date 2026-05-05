@@ -4,6 +4,8 @@ const TextInput = require('./textinput.js');
 const Component = require('./component.js');
 
 class Picker extends Component {
+  name = 'Picker';
+
   message;
   choices; // { label, value, default? }
   symbols = { active: '◆', inactive: '◇' };
