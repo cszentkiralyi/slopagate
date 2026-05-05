@@ -170,7 +170,7 @@ class BugTrigger extends Trigger {
 // Create a default set of triggers
 const DEFAULT_TRIGGERS = [
   new CompactTrigger({ priority: 100 }),
-  new MemorySaveTrigger({ priority: 90 }),
+  //new MemorySaveTrigger({ priority: 90 }),
   new MemorySearchTrigger({ priority: 80 }),
   new AutoRecapTrigger({ priority: 70 }),
   new BugTrigger({ priority: 60 })
