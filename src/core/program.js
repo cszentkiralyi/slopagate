@@ -471,7 +471,10 @@ class Program {
     }
     
     const perms = tool.permissions(toolCall.function.arguments);
-    if (!perms) return null;
+    if (!perms || !perms.scope) {
+      if (!perms) return null;
+      return { cancelled: true, response: perms.message || 'Operation not permitted' };
+    }
     let scopes = [ perms.scope, ...(perms.parents || []) ],
         permResult;
     do {
@@ -481,11 +484,6 @@ class Program {
       scopes.push(...(permResult.suggestions));
     } while (!permResult.allowed && scopes.length);
     
-    if (permResult.allowed) {
-      await this.#suggestParent(tool.name, perms, permResult.scope);
-      return;
-    }
-
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [
           { label: 'Yes', value: 'yes', default: true },
@@ -496,8 +494,8 @@ class Program {
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
+        await this.#suggestParent(tool.name, perms, permResult.scope);
       }
-      await this.#suggestParent(tool.name, perms, perms.scope);
       return;
     }
 
@@ -508,6 +506,7 @@ class Program {
   async #suggestParent(toolName, perms, matchedScope) {
     let chain = [perms.scope, ...perms.parents];
     let idx = chain.indexOf(matchedScope);
+    Logger.log(`Program: suggestParent ${JSON.stringify({ idx, perm, chain })}`);
     if (idx >= 0 && idx < chain.length - 1) {
       let next = chain[idx + 1];
       if (!this.permissions.has(toolName, next)) {
