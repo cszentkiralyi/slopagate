@@ -37,7 +37,7 @@ class Picker extends Component {
     this.choices.forEach((choice, i) => {
       active = i == this.#active;
       sym = active ? this.symbols.active : this.symbols.inactive;
-      lines.push(`${sym}${active ? '' : extraLeft} ${choice.label}`);
+      lines.push(`${sym}${active ? '' : extraLeft} ${i + 1}. ${choice.label}`);
     });
     this.#text.content = lines.join('\n');
   }
@@ -57,8 +57,11 @@ class Picker extends Component {
     } else if (k === TextInput.KEYS.DOWN && this.#active < this.choices.length - 1) {
       this.#active++;
       update = true;
-    } else if (char > 60 && char <= 71 && (char - 60) < (this.choices.length + 1)) { // numbers
-      this.select(this.choices[char - 60].value);
+    } else if (k >= '1' && k <= '9') {
+      let idx = parseInt(k) - 1;
+      if (idx < this.choices.length) {
+        this.select(this.choices[idx].value);
+      }
     }
     
     if (!update) return;
