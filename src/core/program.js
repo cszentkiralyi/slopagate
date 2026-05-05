@@ -25,7 +25,7 @@ class Program {
     'Autofilling',
     'Hallucinating',
     'Reticulating splines',
-    'Checking with The Man',
+    //'Checking with The Man',
     'Sidequesting',
     'Leaking API keys',
     'Going rogue',
@@ -472,22 +472,33 @@ class Program {
     
     const perms = tool.permissions(toolCall.function.arguments);
     if (!perms) return null;
-    let scopes = [ perms.scope, ...(perms.parents || []) ], permResult;
+    let scopes = [ perms.scope, ...(perms.parents || []) ],
+        permResult;
     do {
-      Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
+      //Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
       permResult = this.permissions.check(tool.name, scopes.shift());
-      Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
-      permResult.approved = true; // TODO: temp
+      //Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
-    } while (!permResult.approved && scopes.length);
-    // TODO: if not approved, determine the "best" scope & ask for permission
-    if (permResult?.approved) {
-      if (!this.permissions.check(tool.name, permResult.scope)) {
-        Logger.log(`Program: approving perm scope ${JSON.stringify(permResult.scope)}`);
-        this.permissions.approve(tool.name, permResult.scope);
+    } while (!permResult.allowed && scopes.length);
+    
+    if (permResult.allowed) return;
+
+    let msg = `Allow tool use? ${perms.scope}`,
+        choices = [
+          { label: 'Yes', value: 'yes', default: true },
+          { label: 'Yes for this session', value: 'yes+' },
+          { label: 'No', value: 'no' },
+        ], result = await this.interface.getUserChoice(msg, choices);
+
+    if (result === 'yes' || result === 'yes+') {
+      if (result === 'yes+') {
+        this.permissions.approve(tool.name, perms.scope);
+        //Logger.log(`Program: approving perm scope ${JSON.stringify(permResult.scope)}`);
       }
-      Logger.log(`Program: permission granted for scope ${JSON.stringify(permResult.scope)}`);
-      return null;
+      // TODO: detect 2+ siblings of this (so 3+ total including this),
+      // suggest a parent if there is one
+      //Logger.log(`Program: permission '${result}' granted for scope ${JSON.stringify(permResult.scope)}`);
+      return;
     }
 
     Logger.log(`Program: permission denied`);
