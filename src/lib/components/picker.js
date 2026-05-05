@@ -46,7 +46,7 @@ class Picker extends Component {
     /* TODO
      * - [ ] Number keys select directly by index
      * - [x] Up/down changes active, enter selects active
-     * - [ ] Escape returns... null? nothing?
+     * - [x] Escape cancels
      */
     let char = k.charCodeAt(0), update = false;
     if (char === TextInput.KEYS.CR && this.#active > -1 && this.#active < this.choices.length) {
@@ -57,6 +57,12 @@ class Picker extends Component {
     } else if (k === TextInput.KEYS.DOWN && this.#active < this.choices.length - 1) {
       this.#active++;
       update = true;
+    } else if (k === TextInput.KEYS.ESC) {
+      if (typeof this.cancel === 'function') {
+        this.cancel();
+      } else {
+        this.select(null);
+      }
     } else if (k >= '1' && k <= '9') {
       let idx = parseInt(k) - 1;
       if (idx < this.choices.length) {

@@ -5,6 +5,7 @@ const Text = require('./text.js');
 class TextInput extends Component {
   static KEYS = {
     CR: 13,
+    ESC: '\x1B',
     BS: 127,
     DEL: '\x1B[3~',
     UP: '\x1B[A',
