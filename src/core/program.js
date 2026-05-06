@@ -99,7 +99,7 @@ class Program {
       this.skills.addSkills(skillFiles);
     }
     
-    this.permissions = new Permissions();
+    this.permissions = Permissions.deserialize(userConfig.permissions);
     this.timers = new Timers();
     
     this.md = new Slopdown({
@@ -478,11 +478,12 @@ class Program {
     let scopes = [ perms.scope, ...(perms.parents || []) ],
         permResult;
     do {
-      //Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
+      Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
       permResult = this.permissions.check(tool.name, scopes.shift());
-      //Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
+      Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
     } while (!permResult.allowed && scopes.length);
+    Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [
