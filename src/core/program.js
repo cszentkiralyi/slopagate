@@ -99,7 +99,7 @@ class Program {
       this.skills.addSkills(skillFiles);
     }
     
-    this.permissions = new Permissions();
+    this.permissions = Permissions.deserialize(userConfig.permissions);
     this.timers = new Timers();
     
     this.md = new Slopdown({
@@ -471,21 +471,20 @@ class Program {
     }
     
     const perms = tool.permissions(toolCall.function.arguments);
-    if (!perms) return null;
+    if (!perms || !perms.scope) {
+      if (!perms) return null;
+      return { cancelled: true, response: perms.message || 'Operation not permitted' };
+    }
     let scopes = [ perms.scope, ...(perms.parents || []) ],
         permResult;
     do {
-      //Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
+      Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
       permResult = this.permissions.check(tool.name, scopes.shift());
-      //Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
+      Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
     } while (!permResult.allowed && scopes.length);
+    Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
-    if (permResult.allowed) {
-      await this.#suggestParent(tool.name, perms, permResult.scope);
-      return;
-    }
-
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [
           { label: 'Yes', value: 'yes', default: true },
@@ -493,11 +492,12 @@ class Program {
           { label: 'No', value: 'no' },
         ], result = await this.interface.getUserChoice(msg, choices);
 
+    Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
+        await this.#suggestParent(tool.name, perms, permResult.scope);
       }
-      await this.#suggestParent(tool.name, perms, perms.scope);
       return;
     }
 
@@ -509,6 +509,7 @@ class Program {
     // Not backwards, we want longer scopes first
     let chain = [perms.scope, ...perms.parents].sort((a, b) => (b.length || 0) - (a.length || 0));
     let idx = chain.indexOf(matchedScope);
+    Logger.log(`Program: suggestParent ${JSON.stringify({ idx, perms, chain })}`);
     if (idx >= 0 && idx < chain.length - 1) {
       let next = chain[idx + 1];
       if (!this.permissions.has(toolName, next)) {

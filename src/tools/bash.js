@@ -73,14 +73,7 @@ class BashTool extends Tool {
     const { command } = args;
 
     if (!this.permissionGate(command)) {
-      // Check for tool hints
-      let word = command.split(' ')[0],
-          hintMatch = this.toolHint(command);
-      if (hintMatch) {
-        return `Error: command "${word}" not allowed, use "${hintMatch.hint}" tool instead`;
-      }
-      
-      return `Error: command "${word}" not allowed.`;
+      return `Error: command "${command.split(' ')[0]}" not allowed.`;
     }
 
     let maxLines = this.config.get('tool_output_limit') || 20;
@@ -132,7 +125,19 @@ class BashTool extends Tool {
   
   permissions(args) {
     const { command } = args;
-    
+
+    if (!this.permissionGate(command)) {
+      let hintMatch = this.toolHint(command);
+      if (hintMatch) {
+        return {
+          message: `Error: command "${command.split(' ')[0]}" not allowed, use "${hintMatch.hint}" tool instead`
+        };
+      }
+      return {
+        message: `Error: command "${command.split(' ')[0]}" not allowed.`
+      };
+    }
+
     let [ cmd, second, ...rem ] = command.split(' ');
     let scope = second.startsWith('-') ? cmd : (cmd + ' ' + second);
     let parents = [ cmd + '*', cmd + ' ' + second + '*' ];
