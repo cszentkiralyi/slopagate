@@ -37,7 +37,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (1 / 10) },
-      tool_total: { max: 0.1 },
+      tool_total: { max: (1 / 4) },
       model_reasoning: { user_turns: 1, ttl: 4 }
     }
   },
@@ -56,7 +56,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
       tool_length: { user_turns: 1, max: (1 / 20) }, // Truncate tools from previous turns
-      tool_total: { max: 0.07 },
+      tool_total: { max: (1 / 4) },
       model_reasoning: { user_turns: 0, ttl: 8 }
     }
   },
@@ -75,7 +75,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
       tool_length: { user_turns: 0, max: (1 / 20) }, // No tool response > 20% context length
-      tool_total: { max: 0.03 },
+      tool_total: { max: (1 / 2) },
       model_reasoning: { user_turns: 0, ttl: 4 }
     }
   }
