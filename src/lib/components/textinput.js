@@ -54,7 +54,8 @@ class TextInput extends Component {
           { left: 0, right: 1 },
           this.padding
         ),
-        bg = mode.bg || this.bg || 236,
+        bg = mode?.bg || this.bg || 236,
+        fg = mode?.fg || null,
         hint, value, lines, dirty;
     
     if (this.#caret >= this.#value.length) {
@@ -76,7 +77,7 @@ class TextInput extends Component {
     }
     
     lines = Text.fit(
-      prompt + value,
+      fg ? ANSI.fg(prompt + value, fg) : prompt + value,
       width,
       {
         padding,
