@@ -156,7 +156,7 @@ class Context {
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
-      if (saturation >= (arg.config.saturation || 0)) continue;
+      if (saturation < (arg.config.saturation || 0)) continue;
       if (arg.messages.length < (arg.config.min_messages || 0)) continue;
       Logger.log(`compact: running layer ${n_layer}`);
       verbatim = null, r = null;
