@@ -266,18 +266,25 @@ class Program {
     let chatInput = this.interface.getById('chat-input');
     chatInput.modes = this.input_modes;
     chatInput.shortcuts = {
+      // IIFE creates a closure so stage/timeout persist across ^C presses.
+      // (module-level vars would pollute scope; `this` would mix with other instances.)
       '^C': ((inst) => {
-        let ctrl_c = false, ctrl_timeout = null;
+        let stage = 0, timeout = null;
         return async (inst) => {
-          if (ctrl_c) {
-            if (ctrl_timeout) clearTimeout(ctrl_timeout)
-            await this.dispose();
+          if (inst.value?.length && stage === 0) {
+            inst.clear();
+            stage = 1;
             return;
           }
-          inst.clear();
+          if (stage >= 1) {
+            if (timeout) clearTimeout(timeout);
+            await this.dispose();
+            stage = 0;
+            return;
+          }
           Events.emit('user:abort');
-          ctrl_c = true;
-          ctrl_timeout = setTimeout(() => ctrl_c = false, 2000);
+          stage = 1;
+          timeout = setTimeout(() => { stage = 0; }, 2000);
         }
       })()
     };
@@ -471,6 +478,7 @@ class Program {
     }
     
     const perms = tool.permissions(toolCall.function.arguments);
+    Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
     if (!perms || !perms.scope) {
       if (!perms) return null;
       return { cancelled: true, response: perms.message || 'Operation not permitted' };
@@ -482,8 +490,12 @@ class Program {
       permResult = this.permissions.check(tool.name, scopes.shift());
       Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
-    } while (!permResult.allowed && scopes.length);
+    } while ((permResult.allowed == null) && scopes.length);
     Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
+    
+    if (permResult.allowed == false) {
+      return { cancelled: true, response: 'Operation not permitted' };
+    }
     
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
         choices = [

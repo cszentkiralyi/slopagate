@@ -140,7 +140,7 @@ class BashTool extends Tool {
 
     let [ cmd, second, ...rem ] = command.split(' ');
     let scope = second.startsWith('-') ? cmd : (cmd + ' ' + second);
-    let parents = [ cmd + '*', cmd + ' ' + second + '*' ];
+    let parents = [ cmd + '*', cmd + ' ' + second + '*' ].reverse();
     
     return {
       scope: command,

@@ -1,7 +1,7 @@
 const { Logger } = require('../util.js');
 
 class Permissions {
-  #tree = new Map();  // Map<ToolName, Set<scope>>
+  #tree = new Map();  // Map<ToolName, Map<scope, boolean>>
 
   /**
    * Check if a tool request is approved.
@@ -11,20 +11,22 @@ class Permissions {
    */
   check(tool, scope) {
     const toolMap = this.#tree.get(tool);
-    if (!toolMap) return { allowed: false, suggestions: [], scope };
+    if (!toolMap) return { allowed: null, suggestions: [], scope };
 
-    // Exact match
-    if (toolMap.has(scope)) return { allowed: true, suggestions: [], scope };
+    // Exact verdict exists (approved or denied)
+    if (toolMap.has(scope)) {
+      return { allowed: toolMap.get(scope), suggestions: [], scope };
+    }
 
-    // Prefix match: find existing entries that are prefixes of scope
+    // No verdict yet — offer broader scope suggestions
     const suggestions = [];
-    for (const approved of toolMap) {
+    for (const [approved] of toolMap) {
       if (approved.endsWith('*') && scope.startsWith(approved.slice(0, -1))) {
         suggestions.push(approved);
       }
     }
 
-    return { allowed: false, suggestions, scope };
+    return { allowed: null, suggestions, scope };
   }
 
   /**
@@ -34,10 +36,23 @@ class Permissions {
    */
   approve(tool, scope) {
     if (!this.#tree.has(tool)) {
-      this.#tree.set(tool, new Set());
+      this.#tree.set(tool, new Map());
     }
-    this.#tree.get(tool).add(scope);
+    this.#tree.get(tool).set(scope, true);
     Logger.log(`Permissions: approved ${tool}:${scope}`);
+  }
+
+  /**
+   * Deny a scope for a tool.
+   * @param {string} tool - Tool name
+   * @param {string} scope - The scope to deny
+   */
+  deny(tool, scope) {
+    if (!this.#tree.has(tool)) {
+      this.#tree.set(tool, new Map());
+    }
+    this.#tree.get(tool).set(scope, false);
+    Logger.log(`Permissions: denied ${tool}:${scope}`);
   }
 
   /**
@@ -55,6 +70,7 @@ class Permissions {
 
   /**
    * Find potential broader scopes (prefix matches) for a given scope.
+   * Only returns suggestions if no exact verdict exists yet.
    * @param {string} tool - Tool name
    * @param {string} scope - The scope to find parents for
    * @returns {string[]} Array of broader scopes
@@ -63,23 +79,30 @@ class Permissions {
     const toolMap = this.#tree.get(tool);
     if (!toolMap) return [];
 
+    // If verdict already decided, no need to suggest parents
+    if (toolMap.has(scope)) return [];
+
     return Array.from(toolMap)
-      .filter(approved => approved.endsWith('*') && scope.startsWith(approved.slice(0, -1)))
-      .slice(0, 5);
+      .filter(([approved]) => approved.endsWith('*') && scope.startsWith(approved.slice(0, -1)))
+      .slice(0, 5)
+      .map(([approved]) => approved);
   }
 
   /**
-   * Get all approved scopes for a tool.
+   * Get all scopes with their verdicts for a tool.
    * @param {string} tool - Tool name
-   * @returns {string[]} Array of approved scopes
+   * @returns {string[]} Array of scopes (approved ones only, for backwards compat)
    */
   getScopes(tool) {
     const toolMap = this.#tree.get(tool);
-    return toolMap ? Array.from(toolMap) : [];
+    if (!toolMap) return [];
+    return Array.from(toolMap)
+      .filter(([, verdict]) => verdict)
+      .map(([scope]) => scope);
   }
 
   /**
-   * Remove an approved scope.
+   * Remove a scope (regardless of verdict).
    * @param {string} tool - Tool name
    * @param {string} scope - The scope to remove
    */
@@ -92,7 +115,7 @@ class Permissions {
   }
 
   /**
-   * Check if a specific scope is approved.
+   * Check if a specific scope has been decided (approved or denied).
    * @param {string} tool - Tool name
    * @param {string} scope - The scope to check
    * @returns {boolean}
@@ -108,8 +131,8 @@ class Permissions {
    */
   serialize() {
     const result = {};
-    for (const [tool, scopes] of this.#tree) {
-      result[tool] = Array.from(scopes);
+    for (const [tool, scopeMap] of this.#tree) {
+      result[tool] = Array.from(scopeMap.entries()).map(([scope, verdict]) => ({ scope, verdict }));
     }
     return result;
   }
@@ -121,10 +144,14 @@ class Permissions {
    */
   static deserialize(data) {
     const p = new Permissions();
-    for (const [tool, scopes] of Object.entries(data || {})) {
-      if (Array.isArray(scopes)) {
-        for (const scope of scopes) {
-          p.approve(tool, scope);
+    for (const [tool, entries] of Object.entries(data || {})) {
+      if (Array.isArray(entries)) {
+        for (const entry of entries) {
+          if (entry.scope != null) {
+            const scopeMap = p.#tree.get(tool) || new Map();
+            if (!p.#tree.has(tool)) p.#tree.set(tool, scopeMap);
+            scopeMap.set(entry.scope, entry.verdict);
+          }
         }
       }
     }
@@ -132,7 +159,7 @@ class Permissions {
   }
 
   /**
-   * Get the number of approved scopes.
+   * Get the total number of decided scopes (approved + denied).
    * @returns {number}
    */
   get size() {
