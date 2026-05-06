@@ -38,7 +38,7 @@ class Program {
 
   #turn_start = 0;
 
-  static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{4,}\.[a-zA-Z0-9]{3,}$/;
+  static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
   #exp_fileReadWhitelist = new Set();
 
   config;
@@ -487,7 +487,7 @@ class Program {
             Logger.log(`[Experiment] maybe steering ${args.start_line ?? 'none'}-${args.end_line ?? 'none'}`);
             if (!args.start_line || !args.end_line) {
               Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
-              return { cancelled: true, response: `Error: must use "StringSearch" tool before reading "${last}.` };
+              return { cancelled: true, response: `Error: must use "StringSearch" tool before reading "${last}".` };
             }
             break;
           case 'StringSearch':
