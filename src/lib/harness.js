@@ -151,7 +151,6 @@ class Harness {
     */
     Commands.forEach(cmd => {
       let command = { ...cmd };
-      command.handler = command.handler.bind(this);
       this.commands.push(command);
     });
    
@@ -163,9 +162,6 @@ class Harness {
       name: 'aggression',
       ...this.makeLevelCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
     });
-    this.commands.push({
-      name: 'compact', handler: async () => this.compactCommand()
-    });
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
     /*
     this.commands.push({
@@ -174,27 +170,9 @@ class Harness {
     });
     */
     this.commands.push({
-      name: 'context', handler: async () => this.contextCommand(),
-      hint: 'Display a context window usage visualizer'
-    });
-    this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
       handler: async (args) => this.configCommand(args)
-    });
-    this.commands.push({
-      name: 'transcript', handler: async (args) => this.transcriptCommand(args),
-      hint: 'Dump session context to a file'
-    });
-    this.commands.push({
-      name: 'commands', handler: async () => this.commandsCommand(),
-      hint: 'List available commands'
-    });
-    this.commands.push({
-      name: 'memory',
-      arguments: [{ name: 'action', possible: ['list', 'read', 'write', 'search', 'delete'] }],
-      handler: async (args) => this.memoryCommand(args),
-      hint: 'Interact with the memory system'
     });
     
     // Add skill commands
@@ -237,74 +215,11 @@ class Harness {
       Events.emit('command:name', { name });
     }
     
-    await cmd.handler(args);
+    await cmd.handler(this, args);
     return cmd;
   }
   
   // Command handlers
-  
-  async compactCommand() {
-    Events.emit('status:spinner', { message: 'Compacting...' });
-    let old_est = this.session.context.estimates,
-        old_tok = old_est.system_prompt + old_est.messages + old_est.reserved,
-        ctx = await this.session.compact(),
-        new_est = ctx.estimates,
-        new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
-        delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
-        pct = (100 * new_tok / new_est.context_window).toFixed(0);
-    Events.emit('status:spinner', { hide: true });
-    this.emitCommandMessage(`Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`);
-    Events.emit('metrics:tokens', {});
-  }
-  
-  contextCommand() {
-    let est = this.session.context.estimates,
-        win = est.context_window,
-        sysTok = est.system_prompt,
-        upTok = est.messages,
-        genReserve = est.reserved,
-        used = est.total,
-        totalUsed = used,
-        free = win - used,
-        barLen = 40,
-        bar = '',
-        i, fillChar;
-    
-    // Build the bar
-    let sysEnd = (sysTok / win) * barLen,
-        upEnd = sysEnd + (upTok / win) * barLen,
-        genEnd = upEnd + (genReserve / win) * barLen;
-    for (i = 0; i < barLen; i++) {
-      if (i < sysEnd) {
-        fillChar = ANSI.fg('#', 9);
-      } else if (i < upEnd) {
-        fillChar = ANSI.fg('#', 11);
-      } else if (i < genEnd) {
-        fillChar = ANSI.fg('#', 5);
-      } else {
-        fillChar = ANSI.fg('.', 238);
-      }
-      bar += fillChar;
-    }
-    bar += ANSI.fg(']', 238);
-    
-    let pct = ((totalUsed / win) * 100).toFixed(1);
-    let pctColor = totalUsed / win > 0.85 ? 1 : totalUsed / win > 0.7 ? 214 : null;
-    
-    let lines = [
-      ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
-      ANSI.fg('[', 238) + bar,
-      `  ${ANSI.fg('#', 9)} system   ${sysTok.toFixed(0)} tokens`,
-      `  ${ANSI.fg('#', 11)} messages ${upTok.toFixed(0)} tokens`,
-      `  ${ANSI.fg('#', 5)} reserved ${genReserve.toFixed(0)} tokens`,
-      `  ${ANSI.fg('.', 238)} free     ${free.toFixed(0)} tokens`,
-      `  ${ANSI.fg('─', 238)} window   ${win.toFixed(0)} tokens total`
-    ];
-    
-    this.emitCommandMessage(lines.join('\n'));
-    Events.emit('metrics:tokens', {});
-  }
-  
   async recap() {
     // Don't recap if it's not the user's turn
     if (this.session.turn !== 'user') return;
@@ -356,23 +271,7 @@ class Harness {
   }
   
   #userMessagesSinceRecap = 0;
-  
-  async bugCommand(description) {
-    if (!description || !description.length) {
-      this.emitCommandMessage('Usage: /bug <description>');
-      return;
-    }
-    const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const entry = JSON.stringify({ description, timestamp });
-    try {
-      fs.appendFileSync('./bugs.jsonl', entry + '\n');
-    } catch (err) {
-      fs.writeFileSync('./bugs.jsonl', entry + '\n');
-    }
-    this.emitCommandMessage(`Bug logged: ${description}`);
-  }
-  
+
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
       this.emitCommandMessage('Usage: /config <key> [value]');
@@ -394,85 +293,7 @@ class Harness {
       this.emitCommandMessage(`Set ${key} = ${this.config.get(key)}`);
     }
   }
-  
-  async transcriptCommand(argstr) {
-    if (!argstr || !argstr.length) {
-      this.emitCommandMessage('Usage: /transcript <filename>');
-      return;
-    }
-    const history = [];
-    let m, r, c;
-    for (m of this.session.history) {
-      if (!m.content) continue;
-      r = m.role;
-      c = m.content;
-      if (m.role === 'tool') m.content = m.content.startsWith('Error') ? '[Error]' : '[Result]';
-      history.push(JSON.stringify(m));
-    }
-    const transcript = history.join('\n');
-    try {
-      fs.writeFileSync(argstr, transcript, { encoding: 'utf-8' });
-    } catch (err) {
-      this.emitCommandMessage(`Error writing file: ${err.message}`);
-      return;
-    }
-    this.emitCommandMessage(`Transcript written to ${argstr}`);
-  }
-  
-  commandsCommand() {
-    const lines = this.commands
-      .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }))
-      .map(c => c.hint ? `/${c.name} - ${c.hint}` : `/${c.name}`)
-      .join('\n');
-    if (lines) {
-      this.emitCommandMessage(lines);
-    }
-  }
-  
-  async memoryCommand(argstr) {
-    if (!argstr || !argstr.length) {
-      this.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>, delete <file>');
-      return;
-    }
-    
-    const parts = argstr.split(' ');
-    const action = parts[0];
-    
-    if (action === 'list') {
-      let result = await this.toolbox.all().find(t => t.name === 'Memory');
-      if (result) {
-        let response = await result.handler({ action: 'list' }, result);
-        this.emitCommandMessage(response);
-      }
-    } else if (action === 'read') {
-      let result = await this.toolbox.all().find(t => t.name === 'Memory');
-      if (result) {
-        let response = await result.handler({ action: 'read', file: parts[1] }, result);
-        this.emitCommandMessage(response);
-      }
-    } else if (action === 'write') {
-      let result = await this.toolbox.all().find(t => t.name === 'Memory');
-      if (result) {
-        let response = await result.handler({ action: 'write', file: parts[1], content: parts.slice(2) }, result);
-        this.emitCommandMessage(response);
-      }
-    } else if (action === 'search') {
-      let result = await this.toolbox.all().find(t => t.name === 'Memory');
-      if (result) {
-        let response = await result.handler({ action: 'search', query: parts.slice(1).join(' ') }, result);
-        this.emitCommandMessage(response);
-      }
-    } else if (action === 'delete') {
-      let result = await this.toolbox.all().find(t => t.name === 'Memory');
-      if (result) {
-        let response = await result.handler({ action: 'delete', file: parts[1] }, result);
-        this.emitCommandMessage(response);
-      }
-    } else {
-      this.emitCommandMessage('Unknown action. Use list, read, write, search, or delete');
-    }
-  }
-  
+
   async handleSkill(skillName, args) {
     const skill = this.skills.get(skillName);
     if (!skill) {
