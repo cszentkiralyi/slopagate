@@ -73,6 +73,7 @@ class Session {
         */
     });
     
+    await fs.mkdir('.sloptmp', { recursive: true });
     this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
     
     if (props.systemPrompt) {
@@ -96,8 +97,15 @@ class Session {
     delete this._tempdirPromise;
   }
   async removeTempDir() {
+    if (!this.#tempdir) return;
     await this.#tempdir.remove();
     this.#tempdir = null;
+    try {
+      const entries = await fs.readdir('.sloptmp');
+      if (entries.length === 0) {
+        await fs.rmdir('.sloptmp');
+      }
+    } catch { /* parent may not exist or may not be empty */ }
   }
   
   serialize() {
