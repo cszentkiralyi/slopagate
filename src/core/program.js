@@ -111,7 +111,7 @@ class Program {
     
     this.input_modes = [
       { name: 'normal', prompt: Interface.CLI_PROMPT, default: true },
-      { name: 'shell', prompt: '! ', trigger: '!' }
+      { name: 'shell', prompt: '! ', trigger: '!', bg: 238 }
     ];
 
     /*

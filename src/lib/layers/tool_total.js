@@ -12,6 +12,7 @@ const tool_total = ({ messages, config, context_window }) => {
       total += (messages[i].content || '').length;
       if (total > maxBytes && trimIdx === -1) {
         trimIdx = i;
+        break;
       }
     }
   }

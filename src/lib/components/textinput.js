@@ -54,7 +54,7 @@ class TextInput extends Component {
           { left: 0, right: 1 },
           this.padding
         ),
-        bg = this.bg || 236,
+        bg = mode.bg || this.bg || 236,
         hint, value, lines, dirty;
     
     if (this.#caret >= this.#value.length) {
