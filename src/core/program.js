@@ -271,7 +271,7 @@ class Program {
       '^C': (() => {
         let stage = 0, timeout = null;
         return async (inst) => {
-          Logger.log(`Program ^C: stage=${stage}`);
+          //Logger.log(`Program ^C: stage=${stage}`);
           if (stage == 0) {
             stage++;
             if (inst.value?.length || !this.harness.session.canAbort) {
@@ -284,7 +284,7 @@ class Program {
                 }, true);
                 setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               }
-              Logger.log(`Program ^C: returning because we cleared text`);
+              //Logger.log(`Program ^C: returning because we cleared text`);
               return;
             }
           }
@@ -300,12 +300,12 @@ class Program {
               setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               stage = 2;
               timeout = setTimeout(() => { stage = 0; }, 2000);
-              Logger.log(`Program ^C: returning because we aborted`);
+              //Logger.log(`Program ^C: returning because we aborted`);
               return;
             }
           }
           if (stage == 2) {
-            Logger.log(`Program ^C: final stage!`);
+            //Logger.log(`Program ^C: final stage!`);
             if (timeout) clearTimeout(timeout);
             await this.dispose();
             stage = 0;

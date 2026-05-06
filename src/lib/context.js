@@ -158,7 +158,7 @@ class Context {
       if (arg.config.disable) continue;
       if (saturation < (arg.config.saturation || 0)) continue;
       if (arg.messages.length < (arg.config.min_messages || 0)) continue;
-      Logger.log(`compact: running layer ${n_layer}`);
+      //Logger.log(`compact: running layer ${n_layer}`);
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
@@ -185,7 +185,7 @@ class Context {
         Logger.log(`compact: layer ${n_layer} threw error ${JSON.stringify(ex)}`);
         r = null;
       }
-      Logger.log(`compact: layer ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
+      //Logger.log(`compact: layer ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {
         if (!r) {
           r = { messages: verbatim }
