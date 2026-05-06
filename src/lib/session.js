@@ -16,7 +16,7 @@ class Session {
   #activeContext = null;
   #masterContext = null;
 
-  #abortControllers = null;
+  #abortController = null;
   #turnUserHandler;
   #turnModelHandler;
 
@@ -35,6 +35,7 @@ class Session {
   get systemPrompt() { return this.#systemPrompt; }
   get tempdir() { return this.#tempdir; }
   get temppath() { return this.#tempdir ? this.#tempdir.path : null; }
+  get canAbort() { return this.#abortController !== null; }
   
   constructor(props) {
     this.#id = props.id || ID();
@@ -85,9 +86,8 @@ class Session {
     Events.off('turn:model', this.#turnModelHandler);
   }
   abort() {
-    if (this.#abortControllers && this.#abortControllers.length)
-      this.#abortControllers.forEach(c => c.abort());
-    this.#abortControllers = null;
+    this.#abortController?.abort();
+    this.#abortController = new AbortController();
   }
   
   async ensureTempDir() {
@@ -128,9 +128,8 @@ class Session {
     if (signal) {
       controller = signal;
     } else {
-      controller = new AbortController();
-      this.#abortControllers ||= [];
-      this.#abortControllers.push(controller);
+      this.#abortController = new AbortController();
+      controller = this.#abortController;
     }
     
     try {
@@ -154,11 +153,6 @@ class Session {
         responseObj = { role: 'assistant', message: { } };
       }
     } finally {
-      if (!signal
-        && this.#abortControllers
-        && -1 < (idx = this.#abortControllers.indexOf(controller))) {
-        this.#abortControllers.splice(idx, 1);
-      }
       return this.normalizeResponse(responseObj);
     }
   }

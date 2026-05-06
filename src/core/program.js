@@ -274,9 +274,9 @@ class Program {
           Logger.log(`Program ^C: stage=${stage}`);
           if (stage == 0) {
             stage++;
-            if (inst.value?.length || !this.harness.canAbort) {
+            if (inst.value?.length || !this.harness.session.canAbort) {
               inst.clear();
-              if (!this.harness.canAbort) {
+              if (!this.harness.session.canAbort) {
                 this.#currentMessageId = this.interface.statusline.showMessage({
                   content: '^C again to exit.',
                   padding: { left: 1 },
@@ -290,7 +290,7 @@ class Program {
           }
           if (stage == 1) {
             stage++;
-            if (this.harness.canAbort) {
+            if (this.harness.session.canAbort) {
               Events.emit('user:abort');
               this.#currentMessageId = this.interface.statusline.showMessage({
                 content: '^C again to exit.',
@@ -511,12 +511,12 @@ class Program {
       permResult = this.permissions.check(tool.name, scopes.shift());
       Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
-    } while ((permResult.allowed == null) && scopes.length);
+    } while ((permResult.allowed != true) && scopes.length);
     Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
     if (permResult.allowed == true) {
       return;
-    } else if (permResult.allowed == false) {
+    } else if (permResult.scope === perms.scope && permResult.allowed == false) {
       return { cancelled: true, error: 'Error: operation not permitted' };
     }
     
