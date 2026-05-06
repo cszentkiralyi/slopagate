@@ -17,7 +17,7 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.2 },
       tool_error: { disable: true },
       tool_age: { disable: true },
-      tool_length: { user_turns: 3, max: (3.5 / 10) },
+      tool_length: { user_turns: 3, max: (1 / 10) },
       tool_total: { disable: true },
       model_reasoning: { user_turns: 2, ttl: 8 }
     }
@@ -36,7 +36,7 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.25 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
-      tool_length: { user_turns: 2, max: (3.5 / 10) },
+      tool_length: { user_turns: 2, max: (1 / 10) },
       tool_total: { max: 0.1 },
       model_reasoning: { user_turns: 1, ttl: 4 }
     }
@@ -55,7 +55,7 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.4 },
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
-      tool_length: { user_turns: 1, max: 3.5 / 20 }, // Truncate tools from previous turns
+      tool_length: { user_turns: 1, max: (1 / 20) }, // Truncate tools from previous turns
       tool_total: { max: 0.07 },
       model_reasoning: { user_turns: 0, ttl: 8 }
     }
@@ -74,7 +74,7 @@ const CONTEXT_CONFIGS = {
       chat_score: { threshold: 0.5 }, // Cull messages with importance scores < 0.6
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
-      tool_length: { user_turns: 0, max: (3.5 / 20) }, // No tool response > 20% context length
+      tool_length: { user_turns: 0, max: (1 / 20) }, // No tool response > 20% context length
       tool_total: { max: 0.03 },
       model_reasoning: { user_turns: 0, ttl: 4 }
     }
@@ -153,12 +153,12 @@ class Context {
       verbatim, n_layer, layer, i, u, m, r;
     //Logger.log(`compact: Starting with ${this.messages.length} messages`);
     for (n_layer of layers) {
-      //Logger.log(`compact: ${n_layer}`);
       if (!(layer = Layers[n_layer])) continue;
       arg.config = this.getLayerConfig(n_layer);
       if (arg.config.disable) continue;
       if (saturation >= (arg.config.saturation || 0)) continue;
       if (arg.messages.length < (arg.config.min_messages || 0)) continue;
+      Logger.log(`compact: running layer ${n_layer}`);
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
@@ -185,7 +185,7 @@ class Context {
         Logger.log(`compact: layer ${n_layer} threw error ${JSON.stringify(ex)}`);
         r = null;
       }
-      //Logger.log(`compact: ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
+      Logger.log(`compact: layer ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {
         if (!r) {
           r = { messages: verbatim }

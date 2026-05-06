@@ -18,11 +18,18 @@ class Permissions {
       return { allowed: toolMap.get(scope), suggestions: [], scope };
     }
 
-    // No verdict yet — check for wildcard matches that were actually approved
+    // No verdict yet — check for wildcard matches
     const suggestions = [];
     for (const [wildcard, verdict] of toolMap) {
-      if (verdict && wildcard.endsWith('*') && scope.startsWith(wildcard.slice(0, -1))) {
+      if (!wildcard.endsWith('*')) continue;
+      const prefix = wildcard.slice(0, -1);
+      if (!scope.startsWith(prefix)) continue;
+      if (verdict) {
         return { allowed: true, suggestions: [], scope: wildcard };
+      }
+      // Denied glob: only blocks itself, not its children
+      if (scope === wildcard) {
+        return { allowed: false, suggestions: [], scope: wildcard };
       }
     }
 

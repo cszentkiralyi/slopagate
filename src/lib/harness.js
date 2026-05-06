@@ -24,7 +24,6 @@ const { Triggers } = require('../lib/triggers.js');
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
 
-  #abortTarget = null;
   // Lifetime counts
   #inputTokens = 0;
   #outputTokens = 0;
@@ -50,7 +49,6 @@ class Harness {
 
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
-  get canAbort() { return this.#abortTarget !== null; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
@@ -277,7 +275,7 @@ class Harness {
   async onUserMessage(event) {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
-    this.#abortTarget = this.session;
+    this.session.abort();
     this.#userMessagesSinceRecap++;
 
     // before-send: let triggers intercept the user's message
@@ -309,10 +307,7 @@ class Harness {
   }
   
   onUserAbort(event) {
-    if (this.#abortTarget) {
-      this.#abortTarget.abort();
-      this.#abortTarget = null;
-    }
+    this.session.abort();
   }
   
   async onModelResponse(event) {
@@ -395,7 +390,6 @@ class Harness {
 
         if (triggerAborted) {
           Events.emit('turn:user');
-          this.#abortTarget = null;
           this.#serializeSession();
           return;
         }
@@ -444,9 +438,10 @@ class Harness {
 
             if (cancelled) {
               Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
-              let content = overrideResponse && (typeof overrideResponse === 'string'
-                ? overrideResponse
-                : JSON.stringify(overrideResponse));
+              let content = cancelError?.message || cancelError
+                || (overrideResponse && (typeof overrideResponse === 'string'
+                    ? overrideResponse
+                    : JSON.stringify(overrideResponse)));
               Events.emit('tool:response', {
                 id,
                 role: 'tool',
@@ -497,7 +492,6 @@ class Harness {
       }
       if (done) {
         Events.emit('turn:user');
-        this.#abortTarget = null;
         this.#serializeSession();
       }
     }
@@ -505,7 +499,6 @@ class Harness {
   
   async onToolsResponse(messages) {
     try {
-      this.#abortTarget = this.session;
       let response = await this.session.send(...messages);
       Events.emit('model:response', { response });
       this.#serializeSession();

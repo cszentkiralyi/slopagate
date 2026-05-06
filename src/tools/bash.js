@@ -21,14 +21,14 @@ class BashTool extends Tool {
     //{ pattern: 'npm run test', readonly: false },
     { pattern: 'node --test *', readonly: true },
     { pattern: 'git log *', readonly: true },
-    { pattern: 'git status *', readonly: true },
+    { pattern: 'git status*', readonly: true },
     { pattern: 'git diff*', readonly: true },
     { pattern: 'git add *', readonly: true },
     { pattern: 'git reset *', readonly: false },
     { pattern: 'git commit *', readonly: false },
     { pattern: 'pwd', readonly: true },
-    { pattern: 'echo*', readonly: false },
-    { pattern: 'awk*', readonly: false }
+    //{ pattern: 'echo*', readonly: false },
+    //{ pattern: 'awk*', readonly: false }
   ];
   
   static TOOL_HINTS = [
@@ -39,7 +39,7 @@ class BashTool extends Tool {
     { pattern: 'tail *', hint: 'Read' },
     { pattern: 'ls*', hint: 'Ls' },
     { pattern: 'find *', hint: 'Ls' },
-    { pattern: 'grep *', hint: 'Grep' },
+    { pattern: 'grep *', hint: 'StringSearch' },
   ];
 
   constructor(props) {
