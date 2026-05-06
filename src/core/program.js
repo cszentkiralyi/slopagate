@@ -535,6 +535,8 @@ class Program {
       Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
       if (result === 'yes') {
         this.permissions.approve(toolName, firstParent);
+      } else {
+        this.permissions.deny(toolName, firstParent);
       }
     }
   }
