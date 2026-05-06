@@ -268,23 +268,48 @@ class Program {
     chatInput.shortcuts = {
       // IIFE creates a closure so stage/timeout persist across ^C presses.
       // (module-level vars would pollute scope; `this` would mix with other instances.)
-      '^C': ((inst) => {
+      '^C': (() => {
         let stage = 0, timeout = null;
         return async (inst) => {
-          if (inst.value?.length && stage === 0) {
-            inst.clear();
-            stage = 1;
-            return;
+          Logger.log(`Program ^C: stage=${stage}`);
+          if (stage == 0) {
+            stage++;
+            if (inst.value?.length || !this.harness.canAbort) {
+              inst.clear();
+              if (!this.harness.canAbort) {
+                this.#currentMessageId = this.interface.statusline.showMessage({
+                  content: '^C again to exit.',
+                  padding: { left: 1 },
+                  fg: 'gray'
+                }, true);
+                setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
+              }
+              Logger.log(`Program ^C: returning because we cleared text`);
+              return;
+            }
           }
-          if (stage >= 1) {
+          if (stage == 1) {
+            stage++;
+            if (this.harness.canAbort) {
+              Events.emit('user:abort');
+              this.#currentMessageId = this.interface.statusline.showMessage({
+                content: '^C again to exit.',
+                padding: { left: 1 },
+                fg: 'gray'
+              }, true);
+              setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
+              stage = 2;
+              timeout = setTimeout(() => { stage = 0; }, 2000);
+              Logger.log(`Program ^C: returning because we aborted`);
+              return;
+            }
+          }
+          if (stage == 2) {
+            Logger.log(`Program ^C: final stage!`);
             if (timeout) clearTimeout(timeout);
             await this.dispose();
             stage = 0;
-            return;
           }
-          Events.emit('user:abort');
-          stage = 1;
-          timeout = setTimeout(() => { stage = 0; }, 2000);
         }
       })()
     };
@@ -348,13 +373,6 @@ class Program {
 
     Events.on('user:abort', (event) => {
       Events.emit('turn:user');
-      this.#currentMessageId = this.interface.statusline.showMessage({
-        content: '^C again to exit.',
-        padding: { left: 1 },
-        fg: 'gray'
-      }, true);
-      setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
-      this.interface.draw();
     });
     Events.on('model:content', (event) => {
       if (event.content) {

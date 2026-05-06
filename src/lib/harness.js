@@ -50,6 +50,7 @@ class Harness {
 
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
+  get canAbort() { return this.#abortTarget !== null; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
