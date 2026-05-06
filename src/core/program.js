@@ -506,17 +506,20 @@ class Program {
   }
 
   async #suggestParent(toolName, perms, matchedScope) {
-    let chain = [perms.scope, ...perms.parents];
+    // Not backwards, we want longer scopes first
+    let chain = [perms.scope, ...perms.parents].sort((a, b) => (b.length || 0) - (a.length || 0));
     let idx = chain.indexOf(matchedScope);
     if (idx >= 0 && idx < chain.length - 1) {
       let next = chain[idx + 1];
       if (!this.permissions.has(toolName, next)) {
+        Logger.log(`Program: suggestParent found ${JSON.stringify(next)}`);
         let msg = `Also allow parent scope? ${toolName}(${next})`;
         let choices = [
           { label: 'Yes', value: 'yes', default: true },
           { label: 'No', value: 'no' },
         ];
         let result = await this.interface.getUserChoice(msg, choices);
+        Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
         if (result === 'yes') {
           this.permissions.approve(toolName, next);
         }
