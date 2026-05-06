@@ -100,6 +100,7 @@ class Context {
   layer_config;
   
   #messageEstimate = 0;
+  #appendOnly = false;
   get estimates() {
     let ret = {
       context_window: this.config.get('context_window'),
@@ -127,6 +128,7 @@ class Context {
       this.#messageEstimate = Context.estimate(Context.transcript(this.messages));
     this.budget = this.getBudget(options.budget);
     this.layer_config = options.layer_config || {};
+    this.#appendOnly = options.appendOnly ?? false;
   }
 
   add(...messages) {
@@ -135,6 +137,7 @@ class Context {
   }
   
   async compact(opts) {
+    if (this.#appendOnly) throw new Error('Cannot compact an append-only context');
     let layers = opts?.layers || [];
     if (!layers || !layers.length || !this.messages.length) return;
     let arg = {
@@ -176,7 +179,12 @@ class Context {
           arg.messages = [];
         }
       }
-      r = (arg.messages.length) ? await layer(arg) : null;
+      try {
+        r = (arg.messages.length) ? await layer(arg) : null;
+      } catch (ex) {
+        Logger.log(`compact: layer ${n_layer} threw error ${JSON.stringify(ex)}`);
+        r = null;
+      }
       //Logger.log(`compact: ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {
         if (!r) {

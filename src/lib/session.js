@@ -48,6 +48,7 @@ class Session {
     
     this.#masterContext = this.#activeContext = new Context({
       config: this.config,
+      appendOnly: true,
       summarize: async (t) => this.summarize(t)
       /*
       summarize: async (transcript) => {
