@@ -481,7 +481,7 @@ class Program {
     Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
     if (!perms || !perms.scope) {
       if (!perms) return null;
-      return { cancelled: true, response: perms.message || 'Operation not permitted' };
+      return { cancelled: true, error: perms.message || 'Error: operation not permitted' };
     }
     let scopes = [ perms.scope, ...(perms.parents || []) ],
         permResult;
@@ -494,7 +494,7 @@ class Program {
     Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
     if (permResult.allowed == false) {
-      return { cancelled: true, response: 'Operation not permitted' };
+      return { cancelled: true, error: 'Error: operation not permitted' };
     }
     
     let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
@@ -508,34 +508,28 @@ class Program {
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
-        await this.#suggestParent(tool.name, perms, permResult.scope);
+        await this.#suggestParent(tool.name, perms);
       }
       return;
     }
 
     Logger.log(`Program: permission denied`);
-    return { cancelled: true, response: `Error: operation not permitted` };
+    return { cancelled: true, error: `Error: operation not permitted` };
   }
 
-  async #suggestParent(toolName, perms, matchedScope) {
-    // Not backwards, we want longer scopes first
-    let chain = [perms.scope, ...perms.parents].sort((a, b) => (b.length || 0) - (a.length || 0));
-    let idx = chain.indexOf(matchedScope);
-    Logger.log(`Program: suggestParent ${JSON.stringify({ idx, perms, chain })}`);
-    if (idx >= 0 && idx < chain.length - 1) {
-      let next = chain[idx + 1];
-      if (!this.permissions.has(toolName, next)) {
-        Logger.log(`Program: suggestParent found ${JSON.stringify(next)}`);
-        let msg = `Also allow parent scope? ${toolName}(${next})`;
-        let choices = [
-          { label: 'Yes', value: 'yes', default: true },
-          { label: 'No', value: 'no' },
-        ];
-        let result = await this.interface.getUserChoice(msg, choices);
-        Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
-        if (result === 'yes') {
-          this.permissions.approve(toolName, next);
-        }
+  async #suggestParent(toolName, perms) {
+    let firstParent = perms.parents && perms.parents[0];
+    if (firstParent && firstParent.endsWith('*') && !this.permissions.has(toolName, firstParent)) {
+      Logger.log(`Program: suggestParent found ${JSON.stringify(firstParent)}`);
+      let msg = `Also allow parent scope? ${toolName}(${firstParent})`;
+      let choices = [
+        { label: 'Yes', value: 'yes', default: true },
+        { label: 'No', value: 'no' },
+      ];
+      let result = await this.interface.getUserChoice(msg, choices);
+      Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
+      if (result === 'yes') {
+        this.permissions.approve(toolName, firstParent);
       }
     }
   }
