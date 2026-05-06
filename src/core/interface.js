@@ -109,14 +109,14 @@ class Interface {
       textProps = {
         id, content,
         forceAlign: Interface.CLI_PROMPT,
-        padding: { left: 1, right: 1 }
+        padding: { top: 1, left: 1, right: 1, bottom: 1 },
+        bg: 237
       };
     } else if (role === 'model') {
       textProps = {
         id, content,
         align: true,
-        padding: { top: 1, left: 1, right: 1, bottom: 1 },
-        bg: 237
+        padding: { left: 1, right: 1 }
       };
     } else if (role === 'tool') {
       textProps = {

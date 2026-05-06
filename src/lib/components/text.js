@@ -102,7 +102,7 @@ class Text extends Component {
         currentLen = currentLine.length
         line.split(' ').forEach((word, idx) => {
           let len = ANSI.measure(word);
-          if (currentLen + len + 1 + rightPad <= width) {
+          if (currentLen + len + rightPad <= width) {
             if (idx) {
               currentLine += ' ';
               currentLen++;
