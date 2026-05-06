@@ -9,6 +9,7 @@ const Timers = require('./timers.js');
 const Hooks = require('./hooks.js');
 const Skills = require('../lib/skills.js');
 const Config = require('../core/config.js');
+const Commands = require('./commands.js');
 
 const { Logger } = require('../util.js');
 
@@ -143,9 +144,17 @@ class Harness {
   
   buildCommands() {
     // Core commands
+    /*
     this.commands.push({
       name: 'quit', handler: async () => { Events.emit('program:quit'); }, silent: true
     });
+    */
+    Commands.forEach(cmd => {
+      let command = { ...cmd };
+      command.handler = command.handler.bind(this);
+      this.commands.push(command);
+    });
+   
     this.commands.push({
       name: 'think',
       ...this.makeConfigCommand('think', ['true', 'false'])
@@ -158,10 +167,12 @@ class Harness {
       name: 'compact', handler: async () => this.compactCommand()
     });
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
+    /*
     this.commands.push({
       name: 'bug', handler: async (args) => this.bugCommand(args),
       hint: 'Record a brief bug into bugs.jsonl for later'
     });
+    */
     this.commands.push({
       name: 'context', handler: async () => this.contextCommand(),
       hint: 'Display a context window usage visualizer'
@@ -199,7 +210,7 @@ class Harness {
   }
   
   getCommands() {
-    return this.commands.map(c => ({
+    return this.commands.map((c) => ({
       name: c.name,
       arguments: c.arguments,
       hint: c.hint
