@@ -12,7 +12,7 @@ const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
 const Skills = require('../lib/skills.js');
 
-const { Logger } = require('../util.js');
+const { Logger, formatMs } = require('../util.js');
 const Timers = require('../lib/timers.js');
 const Permissions = require('../lib/permissions.js');
 
@@ -372,6 +372,9 @@ class Program {
     Events.on('turn:user', (event) => {
       this.#startAfkTimer();
       if (this.#modelTurnSpinner) {
+        const elapsed = Date.now() - this.#turn_start;
+        const elapsedStr = formatMs(elapsed);
+        this.interface.addMessage({ role: 'tool', content: `Ran for ${elapsedStr}` });
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
       }
@@ -493,7 +496,9 @@ class Program {
     } while ((permResult.allowed == null) && scopes.length);
     Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
-    if (permResult.allowed == false) {
+    if (permResult.allowed == true) {
+      return;
+    } else if (permResult.allowed == false) {
       return { cancelled: true, error: 'Error: operation not permitted' };
     }
     

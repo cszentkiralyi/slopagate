@@ -18,11 +18,11 @@ class Permissions {
       return { allowed: toolMap.get(scope), suggestions: [], scope };
     }
 
-    // No verdict yet — offer broader scope suggestions
+    // No verdict yet — check for wildcard matches that were actually approved
     const suggestions = [];
-    for (const [approved] of toolMap) {
-      if (approved.endsWith('*') && scope.startsWith(approved.slice(0, -1))) {
-        suggestions.push(approved);
+    for (const [wildcard, verdict] of toolMap) {
+      if (verdict && wildcard.endsWith('*') && scope.startsWith(wildcard.slice(0, -1))) {
+        return { allowed: true, suggestions: [], scope: wildcard };
       }
     }
 
@@ -83,9 +83,9 @@ class Permissions {
     if (toolMap.has(scope)) return [];
 
     return Array.from(toolMap)
-      .filter(([approved]) => approved.endsWith('*') && scope.startsWith(approved.slice(0, -1)))
+      .filter(([wildcard, verdict]) => verdict && wildcard.endsWith('*') && scope.startsWith(wildcard.slice(0, -1)))
       .slice(0, 5)
-      .map(([approved]) => approved);
+      .map(([wildcard]) => wildcard);
   }
 
   /**

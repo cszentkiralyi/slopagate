@@ -33,4 +33,13 @@ class SimpleLogger {
 };
 const Logger = new SimpleLogger('debug.log');
 
-module.exports = { ID, lerp, louse, Logger };
+function formatMs(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m > 0 && sec > 0) return `${m}m ${sec}s`;
+  if (m > 0) return `${m}m`;
+  return `${sec}s`;
+}
+
+module.exports = { ID, lerp, louse, Logger, formatMs };

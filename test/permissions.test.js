@@ -70,10 +70,10 @@ test('unapproved scopes return suggestions', (t) => {
   perms.approve('Bash', 'src/lib/*');
   perms.approve('Bash', 'README');
 
-  // Approved wildcard scope matches non-exact requests
+  // Approved wildcard scope auto-approves matching requests
   const result = perms.check('Bash', 'src/lib/context.js');
-  assert.strictEqual(result.allowed, false);
-  assert.deepStrictEqual(result.suggestions, ['src/lib/*']);
+  assert.strictEqual(result.allowed, true);
+  assert.strictEqual(result.scope, 'src/lib/*');
 
   // Approved exact-only scope does NOT match wildcard requests
   const result0 = perms.check('Bash', 'README/*');
