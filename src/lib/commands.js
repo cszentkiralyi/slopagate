@@ -2,6 +2,29 @@ const fs = require('node:fs');
 const ANSI = require('./ansi.js');
 const Events = require('../events.js');
 
+function makeConfigSetCommand(key, allowedValues) {
+  return async function handler(harness, bstr) {
+    if (!bstr || !bstr.length) {
+      harness.emitCommandMessage(`${key} = ${harness.config.get(key)}`);
+      return;
+    }
+    let value = bstr;
+    const lower = bstr.toLowerCase();
+    if (allowedValues.map(v => v.toLowerCase()).includes(lower)) {
+      value = lower;
+    } else {
+      harness.emitCommandMessage(`Invalid value. Allowed: ${allowedValues.join(', ')}`);
+      return;
+    }
+    // Value parsing
+    if (value === 'true') value = true;
+    else if (value === 'false') value = false;
+    else if (!isNaN(value) && value.length > 0) value = parseInt(value, 10);
+    harness.config.set(key, value);
+    harness.emitCommandMessage(`${key} = ${harness.config.get(key)}`);
+  };
+}
+
 const Commands = [
   
   {
@@ -156,6 +179,18 @@ const Commands = [
       harness.emitCommandMessage(response);
     },
     hint: 'Interact with the memory system'
+  },
+  
+  {
+    name: 'think',
+    hint: 'Toggle thinking mode',
+    handler: makeConfigSetCommand('think', ['true', 'false'])
+  },
+  
+  {
+    name: 'aggression',
+    hint: 'Set aggression level',
+    handler: makeConfigSetCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
   },
   
   {

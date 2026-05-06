@@ -24,59 +24,6 @@ const { Triggers } = require('../lib/triggers.js');
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
 
-  makeConfigCommand(key, allowedValues) {
-    const args = [{
-      name: 'value',
-      possible: allowedValues
-    }];
-    const handler = async (bstr) => {
-      if (!bstr || !bstr.length) {
-        this.emitCommandMessage(`${key} = ${this.config.get(key)}`);
-        return;
-      }
-      let value = bstr;
-      if (allowedValues) {
-        const lower = bstr.toLowerCase();
-        if (allowedValues.map(v => v.toLowerCase()).includes(lower)) {
-          value = lower;
-        } else {
-          const display = allowedValues.join(', ');
-          this.emitCommandMessage(`Invalid value. Allowed: ${display}`);
-          return;
-        }
-      } else {
-        if (bstr === 'true') value = true;
-        else if (bstr === 'false') value = false;
-        else if (!isNaN(bstr) && bstr.length > 0) value = parseInt(bstr, 10);
-      }
-      this.config.set(key, value);
-      this.emitCommandMessage(`${key} = ${this.config.get(key)}`);
-    };
-    return { arguments: args, handler };
-  }
-
-  makeLevelCommand(key, allowedValues) {
-    const args = [{
-      name: 'value',
-      possible: allowedValues
-    }];
-    const handler = async (bstr) => {
-      if (!bstr || (typeof bstr !== 'string' && !bstr.length)) {
-        this.emitCommandMessage(`${key} = ${this.config.get(key)}`);
-        return;
-      }
-      const str = typeof bstr === 'string' ? bstr : bstr[0];
-      const lower = str.toLowerCase();
-      if (!allowedValues.map(v => v.toLowerCase()).includes(lower)) {
-        this.emitCommandMessage(`Invalid value. Allowed: ${allowedValues.join(', ')}`);
-        return;
-      }
-      this.config.set(key, lower);
-      this.emitCommandMessage(`${key} = ${this.config.get(key)}`);
-    };
-    return { arguments: args, handler };
-  }
-
   #abortTarget = null;
   // Lifetime counts
   #inputTokens = 0;
@@ -154,14 +101,6 @@ class Harness {
       this.commands.push(command);
     });
    
-    this.commands.push({
-      name: 'think',
-      ...this.makeConfigCommand('think', ['true', 'false'])
-    });
-    this.commands.push({
-      name: 'aggression',
-      ...this.makeLevelCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
-    });
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
     /*
     this.commands.push({
