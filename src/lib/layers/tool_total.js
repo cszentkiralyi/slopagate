@@ -18,6 +18,7 @@ const tool_total = ({ messages, config, context_window }) => {
 
   // If we need to trim, replace older tool responses
   if (trimIdx !== -1) {
+    Logger.log(`[tool_total] exceeded ${maxBytes} bytes at index ${trimIdx}`);
     const ret = [ ...messages ];
     for (let i = 0; i <= trimIdx; i++) {
       if (ret[i].role === 'tool') {
