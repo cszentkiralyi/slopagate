@@ -499,7 +499,7 @@ class Program {
     }
     
     const perms = tool.permissions(toolCall.function.arguments);
-    Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
+    //Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
     if (!perms || !perms.scope) {
       if (!perms) return null;
       return { cancelled: true, error: perms.message || 'Error: operation not permitted' };
@@ -507,12 +507,12 @@ class Program {
     let scopes = [ perms.scope, ...(perms.parents || []) ],
         permResult;
     do {
-      Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
+      //Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
       permResult = this.permissions.check(tool.name, scopes.shift());
-      Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
+      //Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
       scopes.push(...(permResult.suggestions));
     } while ((permResult.allowed != true) && scopes.length);
-    Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
+    //Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
     if (permResult.allowed == true) {
       return;
@@ -527,7 +527,7 @@ class Program {
           { label: 'No', value: 'no' },
         ], result = await this.interface.getUserChoice(msg, choices);
 
-    Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
+    //Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
     if (result === 'yes' || result === 'yes+') {
       if (result === 'yes+') {
         this.permissions.approve(tool.name, perms.scope);
@@ -536,7 +536,7 @@ class Program {
       return;
     }
 
-    Logger.log(`Program: permission denied`);
+    //Logger.log(`Program: permission denied`);
     return { cancelled: true, error: `Error: operation not permitted` };
   }
 

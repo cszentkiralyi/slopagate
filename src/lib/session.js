@@ -51,30 +51,12 @@ class Session {
       config: this.config,
       appendOnly: true,
       summarize: async (t) => this.summarize(t)
-      /*
-      summarize: async (transcript) => {
-        let summaryContext = new Context({
-          // TODO: maybe move instructions to message, give role in system prompt?
-          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
-          messages: [{ role: 'user', content: transcript }]
-        });
-        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
-        let response = await this.private(summaryContext, summaryMessage);
-        if (response.message && response.message.content) {
-          return response.message.content;
-        } else if (response.message && response.message.tool_calls) {
-          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
-          if (typeof txt === 'string') {
-            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
-          }
-        }
-        return null;
-      }
-        */
     });
     
-    await fs.mkdir('.sloptmp', { recursive: true });
-    this._tempdirPromise = fs.mkdtempDisposable('.sloptmp/');
+    this._tempdirPromise = new Promise(async (resolve, reject) => {
+     await fs.mkdir('.sloptmp', { recursive: true });
+     await fs.mkdtempDisposable('.sloptmp/').then(resolve);
+    });
     
     if (props.systemPrompt) {
       this.#masterContext.system_prompt = props.systemPrompt;
