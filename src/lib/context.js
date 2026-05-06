@@ -18,6 +18,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { disable: true },
       tool_age: { disable: true },
       tool_length: { user_turns: 3, max: (3.5 / 10) },
+      tool_total: { disable: true },
       model_reasoning: { user_turns: 2, ttl: 8 }
     }
   },
@@ -36,6 +37,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (3.5 / 10) },
+      tool_total: { max: 0.1 },
       model_reasoning: { user_turns: 1, ttl: 4 }
     }
   },
@@ -54,6 +56,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 0, user_turns: 1 }, // Remove tool errors from previous turns
       tool_age: { ttl: 0, user_turns: 2 }, // Remove tool responses older than the previous turn
       tool_length: { user_turns: 1, max: 3.5 / 20 }, // Truncate tools from previous turns
+      tool_total: { max: 0.07 },
       model_reasoning: { user_turns: 0, ttl: 8 }
     }
   },
@@ -72,6 +75,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 3, user_turns: 0 }, // Remove tool errors more than 3 tool calls old this turn
       tool_age: { ttl: 0, user_turns: 1 }, // Remove all tool responses after this turn
       tool_length: { user_turns: 0, max: (3.5 / 20) }, // No tool response > 20% context length
+      tool_total: { max: 0.03 },
       model_reasoning: { user_turns: 0, ttl: 4 }
     }
   }
@@ -84,6 +88,7 @@ class Context {
     tool_error: { disable: false, user_turns: 1, ttl: 0, hint_ttl: 0 },
     tool_age: { disable: false, user_turns: 3, ttl: 0 },
     tool_length: { disable: false, user_turns: 0, max: 200 },
+    tool_total: { disable: false, user_turns: 0, max: 0.05 },
     model_reasoning: { disable: false, user_turns: 1, ttl: 0 }
   };
   

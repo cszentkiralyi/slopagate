@@ -6,6 +6,7 @@ const chat_score = require('./chat_score.js');
 const chat_summary = require('./chat_summary.js');
 const tool_error = require('./tool_error.js');
 const model_reasoning = require('./model_reasoning.js');
+const tool_total = require('./tool_total.js');
 
 const placeholder = (arg) => undefined;
 
@@ -19,5 +20,6 @@ module.exports = {
   chat_score,
   chat_summary,
   tool_error,
-  model_reasoning
+  model_reasoning,
+  tool_total
 };

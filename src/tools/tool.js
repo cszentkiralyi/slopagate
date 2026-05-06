@@ -3,6 +3,7 @@ const path = require('node:path');
 const { Logger } = require('../util.js');
 
 class Tool {
+  static TRIM_MSG = '[...trimmed tool output...]';
   name;
   description;
   readonly = false;

@@ -1,6 +1,7 @@
 const { Logger } = require('../../util.js');
+const Tool = require('../../tools/tool.js');
 
-const TRIM_MSG = '[...trimmed tool output...]';
+const TRIM_MSG = Tool.TRIM_MSG;
 const TRIM_MSG_LEN = TRIM_MSG.length;
 
 const trim = (s, start, end) => {
@@ -8,7 +9,7 @@ const trim = (s, start, end) => {
 };
 
 const tool_length = ({ messages, config, context_window }) => {
-  let max = (config.max > 1) ? config.max : (config.max * context_window),
+  let max = (config.max > 1) ? config.max : (config.max * context_window * 3.5),
       ret = [],
       len, d, start, end, next, args, arg,
       c, i, j, k, m, t, u;
