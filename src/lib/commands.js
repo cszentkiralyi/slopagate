@@ -84,30 +84,31 @@ const Commands = [
       let sysEnd = (sysTok / win) * barLen,
           upEnd = sysEnd + (upTok / win) * barLen,
           genEnd = upEnd + (genReserve / win) * barLen;
+      bar += ANSI.fg('▐', 238);
       for (i = 0; i < barLen; i++) {
         if (i < sysEnd) {
-          fillChar = ANSI.fg('#', 9);
+          fillChar = ANSI.fg('█', 9);
         } else if (i < upEnd) {
-          fillChar = ANSI.fg('#', 11);
+          fillChar = ANSI.fg('█', 11);
         } else if (i < genEnd) {
-          fillChar = ANSI.fg('#', 5);
+          fillChar = ANSI.fg('█', 5);
         } else {
-          fillChar = ANSI.fg('.', 238);
+          fillChar = ANSI.fg('░', 238);
         }
         bar += fillChar;
       }
-      bar += ANSI.fg(']', 238);
+      bar += ANSI.fg('▌', 238);
       
       let pct = ((totalUsed / win) * 100).toFixed(1);
       let pctColor = totalUsed / win > 0.85 ? 1 : totalUsed / win > 0.7 ? 214 : null;
       
       let lines = [
         ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
-        ANSI.fg('[', 238) + bar,
-        `  ${ANSI.fg('#', 9)} system   ${sysTok.toFixed(0)} tokens`,
-        `  ${ANSI.fg('#', 11)} messages ${upTok.toFixed(0)} tokens`,
-        `  ${ANSI.fg('#', 5)} reserved ${genReserve.toFixed(0)} tokens`,
-        `  ${ANSI.fg('.', 238)} free     ${free.toFixed(0)} tokens`,
+        bar,
+        `  ${ANSI.fg('█', 9)} system   ${sysTok.toFixed(0)} tokens`,
+        `  ${ANSI.fg('█', 11)} messages ${upTok.toFixed(0)} tokens`,
+        `  ${ANSI.fg('█', 5)} reserved ${genReserve.toFixed(0)} tokens`,
+        `  ${ANSI.fg('░', 238)} free     ${free.toFixed(0)} tokens`,
         `  ${ANSI.fg('─', 238)} window   ${win.toFixed(0)} tokens total`
       ];
       
