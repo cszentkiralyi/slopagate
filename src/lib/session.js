@@ -18,6 +18,7 @@ class Session {
   #masterContext = null;
 
   #abortController = null;
+  #loggedSystemMessage = false;
   #turnUserHandler;
   #turnModelHandler;
 
@@ -300,8 +301,14 @@ class Session {
     
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
     
+    const systemMsg = this.#promptDoc?.render(this.config) ?? this.#activeContext.system_prompt;
+    if (!this.#loggedSystemMessage) {
+      Logger.log(`Session: system message = ${systemMsg}`);
+      this.#loggedSystemMessage = true;
+    }
+    
     return await this.send_internal([
-      { role: 'system', content: this.#promptDoc?.render(this.config) ?? this.#activeContext.system_prompt },
+      { role: 'system', content: systemMsg },
       ...this.#activeContext.messages
     ]);
   }

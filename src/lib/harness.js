@@ -336,6 +336,7 @@ class Harness {
         });
       }
       if (message.content || message.tool_calls) {
+        if (message.content) message.content = message.content.trim();
         this.session.addToContext(message);
         Events.emit('metrics:tokens', {
           inputTokens: this.#inputTokens,
@@ -344,7 +345,7 @@ class Harness {
         Events.emit('metrics:tokens', {});
       }
       if (message.content) {
-        Events.emit('model:content', { done, content: message.content });
+        Events.emit('model:content', { done, content: message.content.trim() });
       }
       if (message.tool_calls) {
         await this.session.ensureTempDir();
