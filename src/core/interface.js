@@ -121,7 +121,7 @@ class Interface {
     } else if (role === 'tool') {
       textProps = {
         id, content,
-        padding: { right: 2 },
+        padding: { left: 1, right: 2 },
         fg: 245 /* muted */
       }
     } else if (role === 'startup') {
