@@ -8,6 +8,7 @@ const Events = require('../events.js');
 const { Config } = require('../core/config.js');
 const ANSI = require('../lib/ansi.js');
 const Harness = require('../lib/harness.js');
+const { PromptDoc } = require('../lib/promptdoc.js');
 const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
 const Skills = require('../lib/skills.js');
@@ -135,6 +136,7 @@ class Program {
         }).then(cmds => this.interface.commands = cmds);
 
     
+    // Load SYSTEM.md as base
     let system_prompt_paths = [
       path.join(process.env.HOME, '.slopagate'),
       this.config.get('slop_dir')
@@ -143,7 +145,7 @@ class Program {
     system_prompt_paths.forEach(possiblePath => {
       if (systemPrompt) return;
       try {
-        let systemPath = path.join(possiblePath, 'SYSTEM.md') 
+        let systemPath = path.join(possiblePath, 'SYSTEM.md')
         systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
         this.interface.addMessage({
           role: 'startup',
@@ -152,7 +154,8 @@ class Program {
       } catch (err) { /* don't care */ }
     });
 
-    // Append SLOP.md files to the system prompt
+    // SLOP.md as sub-prompt
+    let subPrompts = new Map();
     let slopMdPaths = [
       { path: path.join(this.config.get('root_dir'), 'SLOP.md'), label: 'project root' },
       { path: path.join(process.env.HOME, '.slopagate', 'SLOP.md'), label: '~/.slopagate' }
@@ -161,11 +164,7 @@ class Program {
     for (let { path: slopPath, label } of slopMdPaths) {
       try {
         let slopContent = fsSync.readFileSync(slopPath, { encoding: 'utf-8' });
-        if (systemPrompt) {
-          systemPrompt += '\n---\n' + slopContent;
-        } else {
-          systemPrompt = slopContent;
-        }
+        subPrompts.set('SLOP', slopContent);
         let displayPath = label === 'project root'
           ? path.relative(this.config.get('root_dir'), slopPath)
           : label + '/SLOP.md';
@@ -179,15 +178,11 @@ class Program {
       });
     }
 
-    // Append memory guidelines to system prompt
+    // Memory guidelines as sub-prompt
     const memoryGuidelines = `\n---\n# Memory Guidelines\n\nThe memory system is available via the Memory tool (read, write, list, search, delete). Use it proactively:\n- Save key project facts, architecture decisions, important configurations, and user preferences\n- Update existing entries when you learn new related information (call list() first to check)\n- Use descriptive names like 'project-config.md', 'architecture-decision.md', 'user-preferences.md'\n- Keep entries concise but complete enough to be useful without additional context\n- Delete outdated or irrelevant memories when they are no longer useful (call memory.delete('filename.md'))`;
-    if (systemPrompt) {
-      systemPrompt += memoryGuidelines;
-    } else {
-      systemPrompt = memoryGuidelines;
-    }
+    subPrompts.set('MEMORY_GUIDELINES', memoryGuidelines);
 
-    // Load MEMORY.md into system prompt
+    // MEMORY.md as sub-prompt
     let memoryPaths = [
       { path: path.join(this.config.get('slop_dir'), 'memory/MEMORY.md'), label: '.slop/memory' }
     ];
@@ -195,11 +190,7 @@ class Program {
     for (let { path: memPath, label } of memoryPaths) {
       try {
         let memoryContent = fsSync.readFileSync(memPath, { encoding: 'utf-8' });
-        if (systemPrompt) {
-          systemPrompt += '\n---\n' + memoryContent;
-        } else {
-          systemPrompt = memoryContent;
-        }
+        subPrompts.set('MEMORY', memoryContent);
         memoryLoaded = true;
       } catch (err) { /* don't care */ }
     }
@@ -210,10 +201,16 @@ class Program {
       });
     }
 
+   // Create PromptDoc and pass it to session
+    let promptDoc = null;
+    if (systemPrompt) {
+      promptDoc = new PromptDoc(systemPrompt, subPrompts);
+    }
+
     this.harness = new Harness({
       session: {
         config: this.config,
-        systemPrompt: systemPrompt
+        promptDoc: promptDoc
       },
       config: this.config,
       skills: this.skills
@@ -271,7 +268,7 @@ class Program {
       '^C': (() => {
         let stage = 0, timeout = null;
         return async (inst) => {
-          //Logger.log(`Program ^C: stage=${stage}`);
+          Logger.log(`Program ^C: stage=${stage}`);
           if (stage == 0) {
             stage++;
             if (inst.value?.length || !this.harness.session.canAbort) {
@@ -284,7 +281,7 @@ class Program {
                 }, true);
                 setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               }
-              //Logger.log(`Program ^C: returning because we cleared text`);
+              Logger.log(`Program ^C: returning because we cleared text`);
               return;
             }
           }
@@ -300,12 +297,12 @@ class Program {
               setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               stage = 2;
               timeout = setTimeout(() => { stage = 0; }, 2000);
-              //Logger.log(`Program ^C: returning because we aborted`);
+              Logger.log(`Program ^C: returning because we aborted`);
               return;
             }
           }
           if (stage == 2) {
-            //Logger.log(`Program ^C: final stage!`);
+            Logger.log(`Program ^C: final stage!`);
             if (timeout) clearTimeout(timeout);
             await this.dispose();
             stage = 0;

@@ -11,6 +11,7 @@ class Session {
 
   #connection;
   #systemPrompt;
+  #promptDoc;
   #tempdir = null;
   
   #activeContext = null;
@@ -58,8 +59,9 @@ class Session {
      await fs.mkdtempDisposable('.sloptmp/').then(resolve);
     });
     
-    if (props.systemPrompt) {
-      this.#masterContext.system_prompt = props.systemPrompt;
+    if (props.promptDoc) {
+      this.#promptDoc = props.promptDoc;
+      this.#masterContext.system_prompt = this.#promptDoc.render(this.config);
     }
   }
 
@@ -299,7 +301,7 @@ class Session {
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
     
     return await this.send_internal([
-      { role: 'system', content: this.#activeContext.system_prompt },
+      { role: 'system', content: this.#promptDoc?.render(this.config) ?? this.#activeContext.system_prompt },
       ...this.#activeContext.messages
     ]);
   }

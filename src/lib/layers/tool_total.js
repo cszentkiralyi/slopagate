@@ -8,7 +8,7 @@ const tool_total = ({ messages, config, context_window }) => {
 
   // Walk backwards, summing tool response lengths
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === 'tool') {
+    if (messages[i].role === 'tool' && messages[i].content !== Tool.TRIM_MSG) {
       total += (messages[i].content || '').length;
       if (total > maxBytes && trimIdx === -1) {
         trimIdx = i;
