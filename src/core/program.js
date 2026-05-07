@@ -154,8 +154,7 @@ class Program {
       } catch (err) { /* don't care */ }
     });
 
-    // SLOP.md as sub-prompt
-    let subPrompts = new Map();
+    // SLOP.md as injectable config value
     let slopMdPaths = [
       { path: path.join(this.config.get('root_dir'), 'SLOP.md'), label: 'project root' },
       { path: path.join(process.env.HOME, '.slopagate', 'SLOP.md'), label: '~/.slopagate' }
@@ -164,7 +163,7 @@ class Program {
     for (let { path: slopPath, label } of slopMdPaths) {
       try {
         let slopContent = fsSync.readFileSync(slopPath, { encoding: 'utf-8' });
-        subPrompts.set('SLOP', slopContent);
+        this.config.set('SLOP', slopContent);
         let displayPath = label === 'project root'
           ? path.relative(this.config.get('root_dir'), slopPath)
           : label + '/SLOP.md';
@@ -178,11 +177,11 @@ class Program {
       });
     }
 
-    // Memory guidelines as sub-prompt
+    // Memory guidelines as injectable config value
     const memoryGuidelines = `\n---\n# Memory Guidelines\n\nThe memory system is available via the Memory tool (read, write, list, search, delete). Use it proactively:\n- Save key project facts, architecture decisions, important configurations, and user preferences\n- Update existing entries when you learn new related information (call list() first to check)\n- Use descriptive names like 'project-config.md', 'architecture-decision.md', 'user-preferences.md'\n- Keep entries concise but complete enough to be useful without additional context\n- Delete outdated or irrelevant memories when they are no longer useful (call memory.delete('filename.md'))`;
-    subPrompts.set('MEMORY_GUIDELINES', memoryGuidelines);
+    this.config.set('MEMORY_GUIDELINES', memoryGuidelines);
 
-    // MEMORY.md as sub-prompt
+    // MEMORY.md as injectable config value
     let memoryPaths = [
       { path: path.join(this.config.get('slop_dir'), 'memory/MEMORY.md'), label: '.slop/memory' }
     ];
@@ -190,7 +189,7 @@ class Program {
     for (let { path: memPath, label } of memoryPaths) {
       try {
         let memoryContent = fsSync.readFileSync(memPath, { encoding: 'utf-8' });
-        subPrompts.set('MEMORY', memoryContent);
+        this.config.set('MEMORY', memoryContent);
         memoryLoaded = true;
       } catch (err) { /* don't care */ }
     }
@@ -204,7 +203,7 @@ class Program {
    // Create PromptDoc and pass it to session
     let promptDoc = null;
     if (systemPrompt) {
-      promptDoc = new PromptDoc(systemPrompt, subPrompts);
+      promptDoc = new PromptDoc(systemPrompt);
     }
 
     this.harness = new Harness({

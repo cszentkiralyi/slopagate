@@ -3,10 +3,9 @@ const { Logger } = require('../util.js');
 class PromptDoc {
   static #id = 0;
 
-  constructor(basePrompt, subPrompts) {
+  constructor(basePrompt) {
     this.id = ++PromptDoc.#id;
     this.basePrompt = basePrompt;
-    this.subPrompts = subPrompts;
   }
 
   render(config) {
@@ -22,17 +21,17 @@ class PromptDoc {
     // 2. Collapse consecutive newlines left by removed guards
     text = text.replace(/\n{2,}/g, '\n');
 
-    // 3. Resolve {Inject(name)} sub-prompt references
+    // 3. Resolve {Inject(name)} references
     text = text.replace(
       /\{Inject\(([^)]+)\)\}/g,
       (_, name) => {
-        const subText = this.subPrompts.get(name);
-        if (!subText) {
+        const injectedText = config.get(name);
+        if (!injectedText) {
           Logger.log(`[${this.id}] PromptDoc: inject missing: ${name}`);
           return `{Inject(${name})}`;
         }
         Logger.log(`[${this.id}] PromptDoc: injecting ${name}`);
-        return new PromptDoc(subText, this.subPrompts).render(config);
+        return new PromptDoc(injectedText).render(config);
       }
     );
 
