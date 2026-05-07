@@ -25,5 +25,4 @@ Terminal-based AI coding assistant that uses a local LLM model to perform action
 - CommonJS module system
 
 # Rules
-
 You must preface all your commit messages with "VIBE:".

@@ -312,9 +312,10 @@ class Program {
     chatInput.onInput = async (input, inst) => {
       switch (inst.mode) {
         case 'shell':
+          let shellMode = this.input_modes.find(m => m.name === inst.mode);
           this.interface.addMessage({
             role: 'user',
-            content: this.input_modes.find(m => m.name === inst.mode).prompt + input
+            content: ANSI.fg(shellMode.prompt + input, shellMode.fg)
           });
           let result = await new Promise((resolve) => {
             exec(input, (error, stdout, stderr) => {

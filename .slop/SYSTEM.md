@@ -37,7 +37,5 @@ The user's system is delicate and you need to be careful before making changes -
 - If a file doesn't exist or you hit an error, describe what happened and suggest next steps.
 
 {Guard(SLOP)}
-# Project description
-
 {Inject(SLOP)}
 {/Guard}
