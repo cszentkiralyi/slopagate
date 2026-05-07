@@ -23,16 +23,16 @@ class Program {
   #modelTurnSpinner = null;
 
   static SPINNER_MESSAGES = [
-    'Autofilling',
-    'Hallucinating',
-    'Reticulating splines',
-    //'Checking with The Man',
-    'Sidequesting',
-    'Leaking API keys',
-    'Going rogue',
-    'Gobbling tokens',
-    'Nuking production',
-    'Babbling'
+    { present: 'Autofilling', past: 'Autofilled' },
+    { present: 'Hallucinating', past: 'Hallucinated' },
+    { present: 'Reticulating splines', past: 'Reticulated splines' },
+    // { present: 'Checking with The Man', past: 'Checked with The Man' },
+    { present: 'Sidequesting', past: 'Sidequested' },
+    { present: 'Leaking API keys', past: 'Leaked API keys' },
+    { present: 'Going rogue', past: 'Went rogue' },
+    { present: 'Gobbling tokens', past: 'Gobbled tokens' },
+    { present: 'Nuking production', past: 'Nuked production' },
+    { present: 'Babbling', past: 'Babbled' }
   ];
 
   static AFK_TIMEOUT = 3 * 60 * 1000;
@@ -49,8 +49,8 @@ class Program {
   md;
 
   get spinnerMessage() {
-    let idx = Math.floor(Math.random() * Program.SPINNER_MESSAGES.length);
-    return Program.SPINNER_MESSAGES[idx] + '...';
+    let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
+    return msg.present + '...';
   }
 
   constructor({ banner }) {
@@ -388,7 +388,8 @@ class Program {
       if (this.#modelTurnSpinner) {
         const elapsed = Date.now() - this.#turn_start;
         const elapsedStr = formatMs(elapsed);
-        this.interface.addMessage({ role: 'tool', content: `Ran for ${elapsedStr}` });
+        let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
+        this.interface.addMessage({ role: 'tool', content: `${msg.past} for ${elapsedStr}` });
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
       }
