@@ -1,10 +1,16 @@
+const { Logger } = require('../util.js');
+
 class PromptDoc {
+  static #id = 0;
+
   constructor(basePrompt, subPrompts) {
+    this.id = ++PromptDoc.#id;
     this.basePrompt = basePrompt;
     this.subPrompts = subPrompts;
   }
 
   render(config) {
+    Logger.log(`[${this.id}] PromptDoc: rendering`);
     let text = this.basePrompt;
 
     // 1. Resolve {Guard(cond)}...{/Guard} blocks
@@ -21,11 +27,16 @@ class PromptDoc {
       /\{Inject\(([^)]+)\)\}/g,
       (_, name) => {
         const subText = this.subPrompts.get(name);
-        if (!subText) return `{Inject(${name})}`;
+        if (!subText) {
+          Logger.log(`[${this.id}] PromptDoc: inject missing: ${name}`);
+          return `{Inject(${name})}`;
+        }
+        Logger.log(`[${this.id}] PromptDoc: injecting ${name}`);
         return new PromptDoc(subText, this.subPrompts).render(config);
       }
     );
 
+    Logger.log(`[${this.id}] PromptDoc: done`);
     return text;
   }
 
