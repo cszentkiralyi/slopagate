@@ -37,7 +37,7 @@ const CONTEXT_CONFIGS = {
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (1 / 10) },
-      tool_total: { max: (1 / 4) },
+      tool_total: { max: (1 / 3) },
       model_reasoning: { user_turns: 1, ttl: 4 }
     }
   },
