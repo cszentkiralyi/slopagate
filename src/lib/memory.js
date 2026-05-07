@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const fs = require('node:fs');
 const path = require('node:path');
 const { Logger } = require('../util.js');
 
