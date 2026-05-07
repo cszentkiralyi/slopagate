@@ -19,7 +19,6 @@ const LsTool = require('../tools/ls.js');
 const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 const MemoryTool = require('../tools/memory.js');
-const { Triggers } = require('../lib/triggers.js');
 
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
@@ -79,9 +78,6 @@ class Harness {
     
     // Build commands from skills
     this.buildCommands();
-    
-    // Triggers
-    this.triggers = new Triggers({ config: this.config });
     
     this.session.ensureTempDir().then(_ => {
       Events.emit('harness:ready');
@@ -278,25 +274,6 @@ class Harness {
     this.session.abort();
     this.#userMessagesSinceRecap++;
 
-    // before-send: let triggers intercept the user's message
-    try {
-      let result = await this.triggers.check('before-send', { harness: this, message, session: this.session, config: this.config });
-      if (result) {
-        if (result.cancelled) {
-          Events.emit('model:content', { done: true, content: result.error?.message || 'Message cancelled by trigger' });
-          Logger.log(`[trigger] before-send cancelled: ${result.error?.message || 'cancelled'}`);
-          return;
-        }
-        if (result.response) {
-          let response = { message: { role: 'assistant', content: result.response }, prompt_eval_count: 0, eval_count: 0 };
-          Events.emit('model:response', { response });
-          return;
-        }
-      }
-    } catch (err) {
-      Logger.log(`[trigger] before-send error: ${err.message}`);
-    }
-
     // Update statusline tokens when message is actually sent
     Events.emit('metrics:tokens', {
       inputTokens: this.#inputTokens,
@@ -375,25 +352,6 @@ class Harness {
         //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
 
-        // between-respond: let triggers intercept before tool execution
-        let triggerAborted = false;
-        try {
-          let result = await this.triggers.check('between-respond', { harness: this, message, session: this.session, config: this.config });
-          if (result && result.cancelled) {
-            triggerAborted = true;
-            Events.emit('model:content', { done: true, content: result.error?.message || 'Execution cancelled by trigger' });
-            Logger.log(`[trigger] between-respond cancelled: ${result.error?.message || 'cancelled'}`);
-          }
-        } catch (err) {
-          Logger.log(`[trigger] between-respond error: ${err.message}`);
-        }
-
-        if (triggerAborted) {
-          Events.emit('turn:user');
-          this.#serializeSession();
-          return;
-        }
-        
         let toolPromises = [], eventsByName = {}, event;
         
         for (let call of message.tool_calls) {
@@ -502,13 +460,6 @@ class Harness {
       let response = await this.session.send(...messages);
       Events.emit('model:response', { response });
       this.#serializeSession();
-
-      // after-respond: let triggers run at turn completion
-      try {
-        await this.triggers.check('after-respond', { harness: this, response, session: this.session, config: this.config });
-      } catch (err) {
-        Logger.log(`[trigger] after-respond error: ${err.message}`);
-      }
     } catch (err) {
       Logger.log(`[onToolsResponse] error: ${err.message}`);
       Events.emit('model:content', { done: true, content: ANSI.fg(`Error: ${err.message}`, 'red') });
