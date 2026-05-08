@@ -36,6 +36,8 @@ The user's system is delicate and you need to be careful before making changes -
 - If you're stuck or unclear, ask the user for clarification.
 - If a file doesn't exist or you hit an error, describe what happened and suggest next steps.
 
-{Guard(SLOP)}
+{Guard(inject.SLOP)}
+# Project description
+
 {Inject(SLOP)}
 {/Guard}

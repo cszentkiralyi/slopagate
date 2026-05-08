@@ -154,7 +154,13 @@ class Program {
       } catch (err) { /* don't care */ }
     });
 
-    // SLOP.md as injectable config value
+    // Create PromptDoc and pass it to session
+    let promptDoc = null;
+    if (systemPrompt) {
+      promptDoc = new PromptDoc(systemPrompt);
+    }
+
+    // SLOP.md as injectable sub-prompt
     let slopMdPaths = [
       { path: path.join(this.config.get('root_dir'), 'SLOP.md'), label: 'project root' },
       { path: path.join(process.env.HOME, '.slopagate', 'SLOP.md'), label: '~/.slopagate' }
@@ -163,7 +169,9 @@ class Program {
     for (let { path: slopPath, label } of slopMdPaths) {
       try {
         let slopContent = fsSync.readFileSync(slopPath, { encoding: 'utf-8' });
-        this.config.set('SLOP', slopContent);
+        if (promptDoc) {
+          promptDoc.setSubPrompt('SLOP', new PromptDoc(slopContent));
+        }
         let displayPath = label === 'project root'
           ? path.relative(this.config.get('root_dir'), slopPath)
           : label + '/SLOP.md';
@@ -198,12 +206,6 @@ class Program {
         role: 'startup',
         content: `Memory files: loaded .slop/memory/MEMORY.md`
       });
-    }
-
-   // Create PromptDoc and pass it to session
-    let promptDoc = null;
-    if (systemPrompt) {
-      promptDoc = new PromptDoc(systemPrompt);
     }
 
     this.harness = new Harness({
