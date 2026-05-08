@@ -49,7 +49,7 @@ The memory system uses individual files in `.slop/memory/` for persistent storag
 ## How It Works
 
 - **Index**: `MEMORY.md` in `.slop/memory/` is auto-generated and lists all memory entries (name + summary).
-- **Entries**: Individual `.md` files. Each has YAML frontmatter with `lastUpdated` (ISO timestamp) and optionally `summary`.
+- **Entries**: Individual `.md` files with `lastUpdated`, `type`, and optionally `summary`.
 - **Tools**: `memory.list()`, `memory.read(file)`, `memory.write(file, content)`, `memory.delete(file)`, `memory.search(query)`
 
 ## Memory Types
