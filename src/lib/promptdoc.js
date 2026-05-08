@@ -45,7 +45,7 @@ class PromptDoc {
         const injectedText = config.get(name);
         if (!injectedText) {
           Logger.log(`[${this.id}] PromptDoc: inject missing: ${name}`);
-          return `{Inject(${name})}`;
+          return '';
         }
         Logger.log(`[${this.id}] PromptDoc: injecting from config: ${name}`);
         return new PromptDoc(injectedText).render(config);

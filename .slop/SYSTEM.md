@@ -42,14 +42,40 @@ The user's system is delicate and you need to be careful before making changes -
 {Inject(SLOP)}
 {/Guard}
 
-{Guard(inject.MEMORY)}
 # MEMORY.md
 
-The memory system uses individual files in .slop/memory/ for persistent storage.
-Each entry should include frontmatter with a lastUpdated ISO timestamp.
+The memory system uses individual files in `.slop/memory/` for persistent storage.
 
-Staleness: Entries older than 1 day should be reviewed for relevance.
-If a memory entry has not been updated in over a day, flag it as potentially stale
-and suggest archiving or deleting it during the next memory cleanup cycle.
+## How It Works
+
+- **Index**: `MEMORY.md` in `.slop/memory/` is auto-generated and lists all memory entries (name + summary).
+- **Entries**: Individual `.md` files. Each has YAML frontmatter with `lastUpdated` (ISO timestamp) and optionally `summary`.
+- **Tools**: `memory.list()`, `memory.read(file)`, `memory.write(file, content)`, `memory.delete(file)`, `memory.search(query)`
+
+## Memory Types
+
+| Type | Purpose |
+|---|---|
+| **user** | Role, goals, knowledge, preferences — who the user is and what they want |
+| **feedback** | Guidance on how to work (corrections AND confirmations). Lead with the rule, then: **Why:** | **How to apply:** |
+| **project** | Ongoing work, decisions, deadlines not already in git history |
+| **reference** | Pointers to external systems, files, or resources |
+
+## When to Save
+
+- User corrects you → save as **feedback**
+- User confirms an approach → save as **feedback** (quiet confirmations matter)
+- User shares preferences or goals → save as **user**
+- Project decisions or context not derivable from codebase → save as **project**
+
+## What NOT to Save
+
+- Anything derivable from the codebase (architecture, file paths, git history, code patterns)
+- Anything already in `SYSTEM.md`, `SLOP.md`, or `CLAUDE.md`
+- Ephemeral task state or debugging fixes
+
+## Staleness
+
+Entries older than 1 day should be reviewed for relevance. Flag stale entries during cleanup cycles and suggest archiving or deleting them.
+
 {Inject(MEMORY)}
-{/Guard}

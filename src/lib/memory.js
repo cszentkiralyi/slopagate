@@ -12,29 +12,39 @@ class Memory {
   }
 
   async init() {
-    if (!fs.existsSync(this.memoryDir)) {
-      fs.mkdirSync(this.memoryDir, { recursive: true });
-    }
-    if (!fs.existsSync(this.indexFile)) {
-      this.createIndex();
+    try {
+      if (!fs.existsSync(this.memoryDir)) {
+        fs.mkdirSync(this.memoryDir, { recursive: true });
+      }
+      if (!fs.existsSync(this.indexFile)) {
+        this.createIndex();
+      }
+    } catch (e) {
+      Logger.log(`Memory init failed: ${e.message}`);
+      return 'Error: tool use failed';
     }
   }
 
   createIndex() {
-    const files = fs.readdirSync(this.memoryDir)
-      .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
-      .sort();
+    try {
+      const files = fs.readdirSync(this.memoryDir)
+        .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
+        .sort();
 
-    const entries = files.map(f => {
-      const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
-      const { metadata, content: body } = this.parseFrontmatter(content);
-      const name = f.replace(/\.md$/, '');
-      const description = metadata.summary || body.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '';
-      return `- ${name}: ${description}`;
-    });
+      const entries = files.map(f => {
+        const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
+        const { metadata, content: body } = this.parseFrontmatter(content);
+        const name = f.replace(/\.md$/, '');
+        const description = metadata.summary || body.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '';
+        return `- ${name}: ${description}`;
+      });
 
-    const index = entries.join('\n') + (entries.length ? '\n' : '');
-    fs.writeFileSync(this.indexFile, index);
+      const index = entries.join('\n') + (entries.length ? '\n' : '');
+      fs.writeFileSync(this.indexFile, index);
+    } catch (e) {
+      Logger.log(`createIndex failed: ${e.message}`);
+      return 'Error: tool use failed';
+    }
   }
 
   parseFrontmatter(content) {
@@ -63,70 +73,96 @@ class Memory {
   }
 
   list() {
-    Logger.log(`Listing memory entries`);
-    if (!fs.existsSync(this.memoryDir)) return [];
-    this.createIndex();
-    const entries = fs.readdirSync(this.memoryDir)
-      .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
-      .sort()
-      .map(f => {
-        const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
-        const { metadata, content: body, hasFrontmatter } = this.parseFrontmatter(content);
-        const summary = metadata.summary || (body.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || f;
-        const lastUpdated = metadata.lastUpdated;
+    try {
+      Logger.log(`Listing memory entries`);
+      if (!fs.existsSync(this.memoryDir)) return [];
+      this.createIndex();
+      const entries = fs.readdirSync(this.memoryDir)
+        .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
+        .sort()
+        .map(f => {
+          const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
+          const { metadata, content: body, hasFrontmatter } = this.parseFrontmatter(content);
+          const summary = metadata.summary || (body.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || f;
+          const lastUpdated = metadata.lastUpdated;
 
-        // Validate lastUpdated
-        if (lastUpdated && !this.validateLastUpdated(lastUpdated)) {
-          Logger.warn(`Memory file "${f}" has invalid lastUpdated date: ${lastUpdated}`);
-        }
+          if (lastUpdated && !this.validateLastUpdated(lastUpdated)) {
+            Logger.warn(`Memory file "${f}" has invalid lastUpdated date: ${lastUpdated}`);
+          }
+          if (this.isStale(lastUpdated)) {
+            Logger.warn(`Memory file "${f}" is stale (last updated: ${lastUpdated || 'never'})`);
+          }
 
-        // Staleness warning
-        if (this.isStale(lastUpdated)) {
-          Logger.warn(`Memory file "${f}" is stale (last updated: ${lastUpdated || 'never'})`);
-        }
-
-        return { file: f, summary, lastUpdated };
-      });
-    return entries;
+          return { file: f, summary, lastUpdated };
+        });
+      return entries;
+    } catch (e) {
+      Logger.log(`list failed: ${e.message}`);
+      return 'Error: tool use failed';
+    }
   }
 
   read(file) {
-    Logger.log(`Reading memory file: ${file}`);
-    const filePath = path.join(this.memoryDir, file);
-    if (!fs.existsSync(filePath)) return null;
-    const content = fs.readFileSync(filePath, 'utf8');
-    const { content: body, hasFrontmatter } = this.parseFrontmatter(content);
-    if (!hasFrontmatter) {
-      Logger.warn(`Memory file "${file}" is missing frontmatter — consider adding lastUpdated and summary fields`);
+    try {
+      Logger.log(`Reading memory file: ${file}`);
+      const filePath = path.join(this.memoryDir, file);
+      if (!fs.existsSync(filePath)) return null;
+      const content = fs.readFileSync(filePath, 'utf8');
+      const { content: body, hasFrontmatter } = this.parseFrontmatter(content);
+      if (!hasFrontmatter) {
+        Logger.warn(`Memory file "${file}" is missing frontmatter — consider adding lastUpdated and summary fields`);
+      }
+      return body;
+    } catch (e) {
+      Logger.log(`read failed: ${e.message}`);
+      return 'Error: tool use failed';
     }
-    return body;
   }
 
   write(file, content) {
-    Logger.log(`Writing memory file: ${file}`);
-    if (!content || !content.trim()) {
-      throw new Error('Empty content');
+    try {
+      Logger.log(`Writing memory file: ${file}`);
+      if (!content || !content.trim()) {
+        throw new Error('Empty content');
+      }
+      const filePath = path.join(this.memoryDir, file);
+      const timestamp = new Date().toISOString();
+      const frontmatter = `---\nlastUpdated: ${timestamp}\n---\n`;
+      fs.writeFileSync(filePath, frontmatter + content);
+      this.createIndex();
+    } catch (e) {
+      Logger.log(`write failed: ${e.message}`);
+      return 'Error: tool use failed';
     }
-    const filePath = path.join(this.memoryDir, file);
-    const timestamp = new Date().toISOString();
-    const frontmatter = `---\nlastUpdated: ${timestamp}\n---\n`;
-    fs.writeFileSync(filePath, frontmatter + content);
-    this.createIndex();
   }
 
   delete(file) {
-    Logger.log(`Deleting memory file: ${file}`);
-    const filePath = path.join(this.memoryDir, file);
-    if (!fs.existsSync(filePath)) throw new Error('File not found');
-    fs.unlinkSync(filePath);
-    this.createIndex();
+    try {
+      Logger.log(`Deleting memory file: ${file}`);
+      const filePath = path.join(this.memoryDir, file);
+      if (!fs.existsSync(filePath)) throw new Error('File not found');
+      fs.unlinkSync(filePath);
+      this.createIndex();
+    } catch (e) {
+      Logger.log(`delete failed: ${e.message}`);
+      return 'Error: tool use failed';
+    }
   }
 
   search(query) {
-    Logger.log(`Searching memory for: ${query}`);
-    const q = query.toLowerCase();
-    return this.list()
-      .filter(e => fs.readFileSync(path.join(this.memoryDir, e.file), 'utf8').toLowerCase().includes(q));
+    try {
+      Logger.log(`Searching memory for: ${query}`);
+      const q = query.toLowerCase();
+      const entries = this.list();
+      if (entries === 'Error: tool use failed') return entries;
+      return entries.filter(e => {
+        const content = fs.readFileSync(path.join(this.memoryDir, e.file), 'utf8');
+        return content.toLowerCase().includes(q);
+      });
+    } catch (e) {
+      Logger.log(`search failed: ${e.message}`);
+      return 'Error: tool use failed';
+    }
   }
 }
 
