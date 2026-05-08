@@ -1,26 +1,70 @@
 const { Logger } = require('../../util.js');
 
-const system_prompt = ({ messages, system_prompt, limits, estimated_tokens }) => {
-  /*
-  if (!system_prompt || !system_prompt.length
-    || !limits || !limits.system_prompt
-    || estimated_tokens < limits.system_prompt) {
-    Logger.log(`system_prompt: skipped (estimated_tokens=${estimated_tokens}, limit=${limits?.system_prompt})`);
-    return;
+const system_prompt = ({ system_prompt, messages, estimate, budget }) => {
+  if (!system_prompt || !system_prompt.length) return {};
+
+  // Stage 1: Split prompt into sections by top-level Markdown headers
+  const lines = system_prompt.split('\n');
+  const sections = [];
+  let currentHeader = null;
+  let currentContent = [];
+
+  for (const line of lines) {
+    const headerMatch = line.match(/^#\s+(.+)$/);
+    if (headerMatch) {
+      if (currentHeader !== null) {
+        sections.push({ header: currentHeader, content: currentContent.join('\n') });
+      }
+      currentHeader = headerMatch[1].trim();
+      currentContent = [];
+    } else {
+      currentContent.push(line);
+    }
   }
-  Logger.log(`system_prompt: triggered (estimated_tokens=${estimated_tokens}, limit=${limits.system_prompt})`);
-  let budget = limits.system_prompt,
-    prompt = system_prompt.split('\n'),
-    lines = [];
-  i;
-  for (i = 0; i < prompt.length && budget > 0; i++) {
-    lines.push(prompt[i]);
-    budget -= Context.estimateTokens(prompt[i]);
+  // Push final section
+  if (currentHeader !== null) {
+    sections.push({ header: currentHeader, content: currentContent.join('\n') });
+  } else if (lines.length) {
+    // No headers — treat entire prompt as one section, return as-is
+    return { system_prompt };
   }
-  // We currently allow overshooting if there's no newline.
-  Logger.log(`system_prompt: returning (kept ${lines.length} lines)`);
-  return { system_prompt: lines.join('\n') };
-  */
+
+  const reassemble = () => sections.map(s => `# ${s.header}\n${s.content}`).join('\n');
+
+  // Stage 2: Soft truncation — remove low-priority sections
+  if (estimate(reassemble()) > budget) {
+    const lowPriorityHeaders = [
+      'Tips', 'Examples', 'Notes', 'Extra', 'Additional', 'Supplementary',
+      'Common Mistakes', 'Edge Cases', 'References', 'See Also',
+    ];
+    for (const hp of lowPriorityHeaders) {
+      const idx = sections.findIndex(s => s.header === hp);
+      if (idx !== -1 && estimate(reassemble()) > budget) {
+        const removed = sections.splice(idx, 1)[0];
+        Logger.log(`system_prompt: soft-trimmed section "${removed.header}"`);
+      }
+    }
+  }
+
+  // Stage 3: Hard truncation — sentence-by-sentence from the end
+  if (estimate(reassemble()) > budget) {
+    let result = reassemble();
+    const sentences = result.match(/[^.!?]+[.!?]+/g) || [result];
+    while (sentences.length > 1 && estimate(sentences.slice(0, -1).join(' ')) > budget) {
+      sentences.pop();
+    }
+    result = sentences.join(' ');
+    if (result !== reassemble()) {
+      result += '\n\n[system prompt truncated due to context limits]';
+    }
+    Logger.log(`system_prompt: hard-trimmed to ${result.length} chars`);
+    return { system_prompt: result };
+  }
+
+  if (sections.length < lines.filter(l => l.startsWith('#')).length || sections.length > 1) {
+    Logger.log(`system_prompt: kept ${sections.length} sections`);
+  }
+  return { system_prompt: reassemble() };
 };
 
 module.exports = system_prompt;
