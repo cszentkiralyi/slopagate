@@ -93,7 +93,7 @@ class Memory {
             Logger.warn(`Memory file "${f}" is stale (last updated: ${lastUpdated || 'never'})`);
           }
 
-          return { file: f, summary, lastUpdated };
+          return { file: f, summary, lastUpdated, type: metadata.type || null };
         });
       return entries;
     } catch (e) {
@@ -119,7 +119,7 @@ class Memory {
     }
   }
 
-  write(file, content) {
+  write(file, content, type) {
     try {
       Logger.log(`Writing memory file: ${file}`);
       if (!content || !content.trim()) {
@@ -127,7 +127,8 @@ class Memory {
       }
       const filePath = path.join(this.memoryDir, file);
       const timestamp = new Date().toISOString();
-      const frontmatter = `---\nlastUpdated: ${timestamp}\n---\n`;
+      const typeLine = type ? `type: ${type}\n` : '';
+      const frontmatter = `---\nlastUpdated: ${timestamp}\n${typeLine}---\n`;
       fs.writeFileSync(filePath, frontmatter + content);
       this.createIndex();
     } catch (e) {

@@ -149,7 +149,7 @@ const Commands = [
     name: 'memory',
     handler: async (harness, argstr) => {
       if (!argstr || !argstr.length) {
-        harness.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <content>, search <query>, delete <file>');
+        harness.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <type> <content>, search <query>, delete <file>');
         return;
       }
       
@@ -168,7 +168,12 @@ const Commands = [
       } else if (action === 'read') {
         response = await memoryTool.handler({ action: 'read', file: parts[1] }, memoryTool);
       } else if (action === 'write') {
-        response = await memoryTool.handler({ action: 'write', file: parts[1], content: parts.slice(2) }, memoryTool);
+        const file = parts[1];
+        const validTypes = ['user', 'feedback', 'project', 'reference'];
+        const maybeType = parts[2];
+        const type = maybeType && validTypes.includes(maybeType) ? maybeType : null;
+        const content = type ? parts.slice(3).join(' ') : parts.slice(2).join(' ');
+        response = await memoryTool.handler({ action: 'write', file, content: [content], type }, memoryTool);
       } else if (action === 'search') {
         response = await memoryTool.handler({ action: 'search', query: parts.slice(1).join(' ') }, memoryTool);
       } else if (action === 'delete') {

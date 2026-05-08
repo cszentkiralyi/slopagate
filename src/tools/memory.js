@@ -18,7 +18,8 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
       action: { type: 'string', enum: ['read', 'write', 'list', 'search', 'delete'] },
       file: { type: 'string' },
       content: { type: 'array', items: { type: 'string' } },
-      query: { type: 'string' }
+      query: { type: 'string' },
+      type: { type: 'string', enum: ['user', 'feedback', 'project', 'reference'] }
     },
     required: ['action']
   };
@@ -50,15 +51,18 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
       if (!args.file || !args.content) {
         return 'Error: Missing file or content argument';
       }
+      if (args.type && !['user', 'feedback', 'project', 'reference'].includes(args.type)) {
+        return 'Error: Invalid type. Use user, feedback, project, or reference';
+      }
       const content = args.content.join('\n');
-      memory.write(args.file, content);
+      memory.write(args.file, content, args.type);
       return `Wrote to ${args.file}`;
     }
 
     if (args.action === 'list') {
       Logger.log(`Memory action: list`);
       const entries = memory.list();
-      return entries.length ? entries.map(e => `- ${e.summary} (${e.file})`).join('\n') : 'No memories';
+      return entries.length ? entries.map(e => `- ${e.summary} (${e.file}) [${e.type || 'uncategorized'}]`).join('\n') : 'No memories';
     }
 
     if (args.action === 'search') {
@@ -67,7 +71,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
         return 'Error: Missing query argument';
       }
       const results = memory.search(args.query);
-      return results.length ? results.map(e => `- ${e.summary} (${e.file})`).join('\n') : 'No matches';
+      return results.length ? results.map(e => `- ${e.summary} (${e.file}) [${e.type || 'uncategorized'}]`).join('\n') : 'No matches';
     }
 
     if (args.action === 'delete') {
