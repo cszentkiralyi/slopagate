@@ -41,3 +41,15 @@ The user's system is delicate and you need to be careful before making changes -
 
 {Inject(SLOP)}
 {/Guard}
+
+{Guard(inject.MEMORY)}
+# MEMORY.md
+
+The memory system uses individual files in .slop/memory/ for persistent storage.
+Each entry should include frontmatter with a lastUpdated ISO timestamp.
+
+Staleness: Entries older than 1 day should be reviewed for relevance.
+If a memory entry has not been updated in over a day, flag it as potentially stale
+and suggest archiving or deleting it during the next memory cleanup cycle.
+{Inject(MEMORY)}
+{/Guard}

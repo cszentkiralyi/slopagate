@@ -189,7 +189,7 @@ class Program {
     const memoryGuidelines = `\n---\n# Memory Guidelines\n\nThe memory system is available via the Memory tool (read, write, list, search, delete). Use it proactively:\n- Save key project facts, architecture decisions, important configurations, and user preferences\n- Update existing entries when you learn new related information (call list() first to check)\n- Use descriptive names like 'project-config.md', 'architecture-decision.md', 'user-preferences.md'\n- Keep entries concise but complete enough to be useful without additional context\n- Delete outdated or irrelevant memories when they are no longer useful (call memory.delete('filename.md'))`;
     this.config.set('MEMORY_GUIDELINES', memoryGuidelines);
 
-    // MEMORY.md as injectable config value
+    // MEMORY.md as injectable sub-prompt
     let memoryPaths = [
       { path: path.join(this.config.get('slop_dir'), 'memory/MEMORY.md'), label: '.slop/memory' }
     ];
@@ -197,7 +197,9 @@ class Program {
     for (let { path: memPath, label } of memoryPaths) {
       try {
         let memoryContent = fsSync.readFileSync(memPath, { encoding: 'utf-8' });
-        this.config.set('MEMORY', memoryContent);
+        if (promptDoc) {
+          promptDoc.setSubPrompt('MEMORY', new PromptDoc(memoryContent));
+        }
         memoryLoaded = true;
       } catch (err) { /* don't care */ }
     }
