@@ -1,5 +1,4 @@
 const fs = require('node:fs');
-const fs = require('node:fs');
 const path = require('node:path');
 const { Logger } = require('../util.js');
 
@@ -22,18 +21,19 @@ class Memory {
   }
 
   createIndex() {
-    Logger.log(`Rebuilding memory index (${fs.readdirSync(this.memoryDir).filter(f => f.endsWith('.md') && f !== 'MEMORY.md').length} files)`);
     const files = fs.readdirSync(this.memoryDir)
       .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
       .sort();
 
     const entries = files.map(f => {
       const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
-      const firstLine = content.split('\n')[0]?.trim() || f;
-      return `${f}: ${firstLine}`;
+      const { metadata, content: body } = this.parseFrontmatter(content);
+      const name = f.replace(/\.md$/, '');
+      const description = metadata.summary || body.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '';
+      return `- ${name}: ${description}`;
     });
 
-    const index = `# Memory Index\n\n* ${entries.join('\n* ')}\n`;
+    const index = entries.join('\n') + (entries.length ? '\n' : '');
     fs.writeFileSync(this.indexFile, index);
   }
 
@@ -52,6 +52,7 @@ class Memory {
   list() {
     Logger.log(`Listing memory entries`);
     if (!fs.existsSync(this.memoryDir)) return [];
+    this.createIndex();
     return fs.readdirSync(this.memoryDir)
       .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
       .sort()
