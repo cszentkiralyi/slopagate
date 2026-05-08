@@ -1,5 +1,3 @@
-# Slopagate Project Summary
-
 ## Project Type
 Terminal-based AI coding assistant that uses a local LLM model to perform actions.
 
