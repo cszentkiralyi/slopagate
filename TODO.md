@@ -7,9 +7,9 @@
 - [x] Auto-update `lastUpdated` on every write
 
 ## Phase 2: MEMORY.md index
-- [ ] Rewrite `MEMORY.md` as a flat index: `"- memory.name: memory.description"` per line
-- [ ] Update `memory.list()` to regenerate `MEMORY.md` from all memory files
-- [ ] Extract name/description from filename and frontmatter
+- [x] Rewrite `MEMORY.md` as a flat index: `"- memory.name: memory.description"` per line
+- [x] Update `memory.list()` to regenerate `MEMORY.md` from all memory files
+- [x] Extract name/description from filename and frontmatter
 
 ## Phase 3: Validation
 - [ ] Validate frontmatter exists on read — warn if missing (legacy entries)
