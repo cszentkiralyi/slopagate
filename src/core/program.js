@@ -322,10 +322,12 @@ class Program {
               resolve((stderr ? stderr.trim() : stdout.trim()) || '');
             });
           });
-          this.interface.addMessage({
-            role: 'shell',
-            content: result
-          });
+          if (result) {
+            this.interface.addMessage({
+              role: 'shell',
+              content: result
+            });
+          }
           break;
       case 'normal':
           if (input[0] === '/') {
