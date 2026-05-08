@@ -30,6 +30,15 @@ class SimpleLogger {
     }
     this.#stream.write(x + '\n');
   }
+  warn(x) {
+    let s;
+    if (typeof x === 'string') {
+      s = x;
+    } else {
+      x = JSON.stringify(x);
+    }
+    this.#stream.write('[WARN] ' + s + '\n');
+  }
 };
 const Logger = new SimpleLogger('debug.log');
 

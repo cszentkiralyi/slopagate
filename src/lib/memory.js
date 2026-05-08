@@ -40,28 +40,54 @@ class Memory {
   parseFrontmatter(content) {
     const fmRegex = /^---\n([\s\S]*?)\n---\n?([\s\S]*)$/;
     const match = content.match(fmRegex);
-    if (!match) return { metadata: {}, content: content };
+    if (!match) return { metadata: {}, content: content, hasFrontmatter: false };
     const meta = {};
     match[1].split('\n').forEach(line => {
       const [key, ...val] = line.split(':');
       if (key && val.length) meta[key.trim()] = val.join(':').trim();
     });
-    return { metadata: meta, content: match[2] };
+    return { metadata: meta, content: match[2], hasFrontmatter: true };
+  }
+
+  validateLastUpdated(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return !isNaN(d.getTime());
+  }
+
+  isStale(dateStr) {
+    if (!dateStr) return true;
+    const d = new Date(dateStr);
+    const now = new Date();
+    return (now - d) > 86400000; // 1 day in ms
   }
 
   list() {
     Logger.log(`Listing memory entries`);
     if (!fs.existsSync(this.memoryDir)) return [];
     this.createIndex();
-    return fs.readdirSync(this.memoryDir)
+    const entries = fs.readdirSync(this.memoryDir)
       .filter(f => f.endsWith('.md') && f !== 'MEMORY.md')
       .sort()
       .map(f => {
         const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
-        const { metadata, content: body } = this.parseFrontmatter(content);
+        const { metadata, content: body, hasFrontmatter } = this.parseFrontmatter(content);
         const summary = metadata.summary || (body.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || f;
-        return { file: f, summary, lastUpdated: metadata.lastUpdated };
+        const lastUpdated = metadata.lastUpdated;
+
+        // Validate lastUpdated
+        if (lastUpdated && !this.validateLastUpdated(lastUpdated)) {
+          Logger.warn(`Memory file "${f}" has invalid lastUpdated date: ${lastUpdated}`);
+        }
+
+        // Staleness warning
+        if (this.isStale(lastUpdated)) {
+          Logger.warn(`Memory file "${f}" is stale (last updated: ${lastUpdated || 'never'})`);
+        }
+
+        return { file: f, summary, lastUpdated };
       });
+    return entries;
   }
 
   read(file) {
@@ -69,7 +95,10 @@ class Memory {
     const filePath = path.join(this.memoryDir, file);
     if (!fs.existsSync(filePath)) return null;
     const content = fs.readFileSync(filePath, 'utf8');
-    const { content: body } = this.parseFrontmatter(content);
+    const { content: body, hasFrontmatter } = this.parseFrontmatter(content);
+    if (!hasFrontmatter) {
+      Logger.warn(`Memory file "${file}" is missing frontmatter — consider adding lastUpdated and summary fields`);
+    }
     return body;
   }
 

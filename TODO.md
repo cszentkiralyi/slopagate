@@ -12,9 +12,9 @@
 - [x] Extract name/description from filename and frontmatter
 
 ## Phase 3: Validation
-- [ ] Validate frontmatter exists on read — warn if missing (legacy entries)
-- [ ] Validate `lastUpdated` is a valid date
-- [ ] Add staleness warning to `memory.list()` for entries > 1 day old
+- [x] Validate frontmatter exists on read — warn if missing (legacy entries)
+- [x] Validate `lastUpdated` is a valid date
+- [x] Add staleness warning to `memory.list()` for entries > 1 day old
 
 ## Phase 4: SYSTEM.md integration
 - [ ] Add `# MEMORY.md` header to `SYSTEM.md` with sub-prompt describing frontmatter format
