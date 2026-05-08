@@ -296,12 +296,13 @@ class Session {
     this.addToContext(...outgoing);
     //Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
+      system_prompt: this.#promptDoc?.render(this.config),
       layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning' ]
     });
     
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
     
-    const systemMsg = this.#promptDoc?.render(this.config) ?? this.#activeContext.system_prompt;
+    const systemMsg = this.#activeContext.system_prompt;
     if (!this.#loggedSystemMessage) {
       Logger.log(`Session: system message = ${systemMsg}`);
       this.#loggedSystemMessage = true;
