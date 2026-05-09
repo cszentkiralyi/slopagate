@@ -21,7 +21,7 @@ class PromptDoc {
   }
 
   render(config) {
-    Logger.log(`[${this.id}] PromptDoc: rendering`);
+    //Logger.log(`[${this.id}] PromptDoc: rendering`);
     let text = this.basePrompt;
 
     // 1. Resolve {Guard(cond)}...{/Guard} blocks
@@ -39,20 +39,20 @@ class PromptDoc {
       (_, name) => {
         const sub = this.#subPrompts.get(name);
         if (sub) {
-          Logger.log(`[${this.id}] PromptDoc: injecting sub-prompt: ${name}`);
+          //Logger.log(`[${this.id}] PromptDoc: injecting sub-prompt: ${name}`);
           return sub.render(config);
         }
         const injectedText = config.get(name);
         if (!injectedText) {
-          Logger.log(`[${this.id}] PromptDoc: inject missing: ${name}`);
+          //Logger.log(`[${this.id}] PromptDoc: inject missing: ${name}`);
           return '';
         }
-        Logger.log(`[${this.id}] PromptDoc: injecting from config: ${name}`);
+        //Logger.log(`[${this.id}] PromptDoc: injecting from config: ${name}`);
         return new PromptDoc(injectedText).render(config);
       }
     );
 
-    Logger.log(`[${this.id}] PromptDoc: done`);
+    //Logger.log(`[${this.id}] PromptDoc: done`);
     return text;
   }
 

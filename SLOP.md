@@ -22,5 +22,5 @@ Terminal-based AI coding assistant that uses a local LLM model to perform action
 - `esbuild` ^0.28.0 (devDependency)
 - CommonJS module system
 
-# Rules
-You must preface all your commit messages with "VIBE:".
+## Rules
+You must preface all your commit messages with "VIBE:", and end with the line "Co-authored-by: Qwen <qwen@slopagate.fake>".
