@@ -75,6 +75,16 @@ class Session {
     this.#abortController?.abort();
     this.#abortController = new AbortController();
   }
+  removeLastUserMessage() {
+    let msgs = this.#activeContext.messages;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === 'user') {
+        msgs.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
   
   async ensureTempDir() {
     if (this.#tempdir) return;

@@ -106,16 +106,17 @@ class Interface {
     return this.#chat_history.children.filter(c => c instanceof TUI.Text);
   }
   removeMessage(msg) {
-    if (!msg || !msg.id) return false;
-    let found = false;
+    if (!msg) return false;
     const target = msg.role === 'startup' ? this.#startup_messages : this.#chat_history;
-    target.children.forEach(c => {
-      if (c.id === msg.id) {
+    // Find the last matching child (iterate backwards)
+    for (let i = target.children.length - 1; i >= 0; i--) {
+      const c = target.children[i];
+      if ((msg.id && c.id === msg.id) || (c.content === msg.content && c.role === msg.role)) {
         this.#terminal.removeChild(c);
-        found = true;
+        return true;
       }
-    });
-    return found;
+    }
+    return false;
   }
 
   addMessage({ role, content, id }) {
@@ -123,39 +124,39 @@ class Interface {
     
     if (role === 'user') {
       textProps = {
-        id, content,
+        id, role, content,
         forceAlign: Interface.CLI_PROMPT,
         padding: { left: 1, right: 1 },
         bg: 237
       };
     } else if (role === 'model') {
       textProps = {
-        id, content,
+        id, role, content,
         align: true,
         padding: { left: 1, right: 1 }
       };
     } else if (role === 'tool') {
       textProps = {
-        id, content,
+        id, role, content,
         padding: { left: 1, right: 2 },
         fg: 245 /* muted */
       }
     } else if (role === 'startup') {
       textProps = {
-        id, content,
+        id, role, content,
         fg: 'gray'
       };
     } else if (role === 'shell') {
       textProps = {
-        id, content,
+        id, role, content,
         fg: 250,
         padding: { left: 2, right: 2 }
       };
     } else if (role === 'system') {
-      textProps = { id, content };
+      textProps = { id, role, content };
     } else if (role === 'command') {
       textProps = {
-        id, content,
+        id, role, content,
         fill: false,
         fg: 232,
         bg: 214,

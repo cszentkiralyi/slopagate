@@ -308,6 +308,7 @@ class Harness {
   
   onUserAbort(event) {
     this.session.abort();
+    this.session.removeLastUserMessage();
   }
   
   async onModelResponse(event) {
