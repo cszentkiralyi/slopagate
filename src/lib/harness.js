@@ -173,20 +173,26 @@ class Harness {
     // Not enough user activity to summarize
     if (this.#userMessagesSinceRecap < 2) return;
     
-    // Filter to only 'user' and 'assistant' role messages
+    // Filter to only 'user' and 'assistant' role messages with content
     const filteredMessages = this.session.context.messages.filter(
-      m => m.role === 'user' || m.role === 'assistant'
+      m => (m.role === 'user' || m.role === 'assistant') && m.content?.length > 0
     );
     
-    // Get the most-recent filtered messages
-    const recentMessages = filteredMessages.slice(-(this.#userMessagesSinceRecap * 2));
+    // Get the most-recent filtered messages (only if we have enough user messages)
+    const recentMessages = filteredMessages.slice(-Math.max(0, this.#userMessagesSinceRecap * 2));
     
     // Not enough messages to be worth summarizing
     if (recentMessages.length < 4) return;
     
-    Logger.log(`Harness: recapping ${recentMessages.length} messages.`);
+    // Not enough content to summarize
+    const contentMessages = recentMessages.filter(m => m.content?.length > 0);
+    if (contentMessages.length < 4) return;
     
-    let transcript = Context.transcript(recentMessages);
+    Logger.log(`Harness: recapping ${contentMessages.length} messages.`);
+    
+    let transcript = Context.transcript(contentMessages);
+    
+    Logger.log(`Harness: transcript length = ${transcript.length}, content: ${JSON.stringify(transcript)}`);
     
     // Use private session
     let summaryContext = new Context({
@@ -208,6 +214,7 @@ class Harness {
     this.#userMessagesSinceRecap = 0;
     
     Logger.log(`Harness: recap = ${content}`);
+    Logger.log(`Harness: summaryContext.messages = ${JSON.stringify(summaryContext.messages)}`);
     
     Events.emit('tool:message', {
       done: true,
