@@ -369,68 +369,95 @@ class Harness {
         //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
 
-        // Phase 1: Classify calls — auto-approved vs pending
-        let autoRun = [], pending = [];
+        // Split tool calls into auto-run (approved) and pending (need user approval)
+        let autoRun = [];
+        let pending = [];
+        
         for (let call of message.tool_calls) {
           let tool = this.toolbox.get(call.function.name);
           let perms = tool?.permissions(call.function.arguments);
           
+          // Skip calls without permission requirements
           if (!perms || !perms.scope) {
-            pending.push(call);
-            continue;
+            autoRun.push({ call, skipPermsCheck: true });
+          } else {
+            // Check if already auto-approved
+            let scopes = [perms.scope, ...(perms.parents || [])];
+            let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+            if (approved) {
+              autoRun.push({ call, approved });
+            }
+            // If not approved, skip adding to autoRun and let it fall through to the pending phase
           }
-          
-          let scopes = [perms.scope, ...(perms.parents || [])];
-          let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-          
-          if (approved) autoRun.push(call);
-          else pending.push(call);
         }
         
-        // Phase 2: Run auto-approved in parallel
-        let toolPromises = [];
-        for (let call of autoRun) {
-          toolPromises.push(this.runToolCall(call));
-        }
-        
-        // Collect events for auto-approved calls
+        let results = [];
         let eventsByName = {};
-        autoRun.forEach(call => {
-          let name = call.function.name;
-          eventsByName[name] ||= [];
-          eventsByName[name].push({
-            id: call.id,
-            name,
-            args: call.function.arguments,
-            temppath: this.session.temppath
+        
+        // Run auto-approved tools in parallel
+        if (autoRun.length) {
+          let autoPromises = autoRun.map(async ({ call, skipPermsCheck, approved }) => {
+            let callResult;
+            if (skipPermsCheck) {
+              callResult = await this.handleToolCallWithHook(call);
+            } else if (approved) {
+              callResult = await this.runToolCall(call);
+            } else {
+              callResult = await this.handleToolCallWithHook(call);
+            }
+            
+            results.push(callResult);
+            eventsByName[call.function.name] ||= [];
+            eventsByName[call.function.name].push({
+              id: call.id,
+              name: call.function.name,
+              args: call.function.arguments,
+              temppath: this.session.temppath
+            });
           });
-        });
+          await Promise.all(autoPromises);
+        }
         
-        let results = await Promise.all(toolPromises);
-        
-        // Phase 3: Process pending sequentially (re-check permissions each iteration)
-        for (let call of pending) {
+        // Run pending tools sequentially (one permission prompt at a time)
+        for (let call of message.tool_calls) {
           let tool = this.toolbox.get(call.function.name);
           let perms = tool?.permissions(call.function.arguments);
           
-          if (perms?.scope) {
-            let scopes = [perms.scope, ...(perms.parents || [])];
-            let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-            
-            if (approved) {
-              results.push(await this.runToolCall(call));
-              eventsByName[call.function.name] ||= [];
-              eventsByName[call.function.name].push({
-                id: call.id,
-                name: call.function.name,
-                args: call.function.arguments,
-                temppath: this.session.temppath
-              });
-              continue;
-            }
+          // Skip if already processed in auto-run
+          if (eventsByName[call.function.name]?.length > 0) continue;
+          
+          // Skip calls without permission requirements
+          if (!perms || !perms.scope) {
+            let callResult = await this.handleToolCallWithHook(call);
+            results.push(callResult);
+            eventsByName[call.function.name] ||= [];
+            eventsByName[call.function.name].push({
+              id: call.id,
+              name: call.function.name,
+              args: call.function.arguments,
+              temppath: this.session.temppath
+            });
+            continue;
           }
           
-          // Still needs user approval — fire hook
+          // Check if already auto-approved
+          let scopes = [perms.scope, ...(perms.parents || [])];
+          let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+          
+          if (approved) {
+            let callResult = await this.runToolCall(call);
+            results.push(callResult);
+            eventsByName[call.function.name] ||= [];
+            eventsByName[call.function.name].push({
+              id: call.id,
+              name: call.function.name,
+              args: call.function.arguments,
+              temppath: this.session.temppath
+            });
+            continue;
+          }
+          
+          // Needs user approval — fire hook (will prompt user)
           let callResult = await this.handleToolCallWithHook(call);
           results.push(callResult);
           eventsByName[call.function.name] ||= [];
