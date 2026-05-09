@@ -9,13 +9,16 @@ These are not complaints, they are notes of things the harness should consider m
 - If it screws up a search string for `edit`, it'll start trying to use `bash` to run commands or write/execute scripts to do the edits. It would be nice to catch this and shut it down sooner rather than later.
 - If we detect strings of errors (failed bash calls in a chain, reading the wrong directory over and over, etc) should we just put a stop to things and tell me model to figure its shit out? I'm not sure how to *correct* this behavior, just that it's annoying, detectable, and something I don't want to see. **We should at least detect the same call withothe same file or command word erroring out repeatedly**, that happens, silently rescue if we can.
 - Crazy idea: `chat_score` layer culls the below-threshold messages by summarizing them via LLM, only after user turn starts since they'll probably need to type and stuff so we can steal that time to hit the model.
+- Models love reading whole files, how can we prevent that without just making them pointlessly search before reading while researching?
 
   
 ## Implemented mitigations
 
 ### Grep before Read steering
 
-**Status: ongoing**. Right now, if the user mentions a file or the model has used `grep` on it, it can `read` without line limitations. I'm not sure how effective it is, I think it's bugged right now.
+**Status: failed**. ~~Right now, if the user mentions a file or the model has used `grep` on it, it can `read` without line limitations. I'm not sure how effective it is, I think it's bugged right now.~~
+
+**Post-mortem**: I should have added parsing of greps in folders too, but still there were many cases of the LLM being forced to Grep("" in $file) just toget something it didn't know the name of, which is perfectly reasonable behavior and I shouldn't gate it. This will require more evaluation.
 
 > Qwen especially *loves* reading whole files instead of using `grep` to narrow down ranges. What if we block whole-file `read` until the agent searches or the user mentions the file by name? Or even harder, the LLM _has_ to use `grep` before reading every turn, or _every time_?
 

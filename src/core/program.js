@@ -128,17 +128,6 @@ class Program {
       { name: 'shell', prompt: '! ', trigger: '!', fg: 33 }
     ];
 
-    /*
-    this.skills.names.forEach(skillName => {
-      this.commands.push({
-        name: skillName,
-        handler: async (args) => this.handleSkill(skillName, args),
-        hint: this.skills.get(skillName).description
-      });
-    });
-    */
-
-
     this.interface = new Interface({
       banner: { content: ANSI.bold(banner), fg: 'white' },
       commands: []
@@ -498,7 +487,8 @@ class Program {
     if (typeof args === 'string') {
       return { response: `Error: failed to parse arguments for "${toolCall.function.name}" — model returned malformed JSON` };
     }
-      
+    
+    /*
     if ((tool.name === 'StringSearch' || tool.name === 'Read')
         && args?.file_path) {
       const file_path = args.file_path;
@@ -519,6 +509,8 @@ class Program {
         }
       }
     }
+    EXPERIMENT DISABLED
+      */
     
     const perms = tool.permissions(toolCall.function.arguments);
     //Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
