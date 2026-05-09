@@ -345,7 +345,11 @@ class Program {
             let parts = input.substring(1).split(' ');
             let cmd = parts[0];
             let argstr = parts.slice(1).join(' ');
+            this.#commandSpinner = this.interface.statusline.showSpinner(`Running /${cmd}...`);
+            this.interface.draw();
             await this.harness.command(cmd, argstr);
+            this.interface.statusline.hide(this.#commandSpinner);
+            this.#commandSpinner = null;
           } else {
             Events.emit('user:message', { message: input });
             this.interface.addMessage({
@@ -576,6 +580,7 @@ class Program {
   #startAfkTimer() {
     this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
   }
+  #commandSpinner = null;
   #stopAfkTimer() {
     this.timers.stop('afk');
   }

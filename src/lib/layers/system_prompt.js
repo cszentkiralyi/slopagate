@@ -38,6 +38,7 @@ const system_prompt = ({ system_prompt, messages, estimate, budget }) => {
 
   // Stage 2: Soft truncation — remove low-priority sections
   if (estimate(reassemble()) > budget) {
+    // TODO
     const lowPriorityHeaders = [
       'Tips', 'Examples', 'Notes', 'Extra', 'Additional', 'Supplementary',
       'Common Mistakes', 'Edge Cases', 'References', 'See Also',
