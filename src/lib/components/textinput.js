@@ -16,8 +16,8 @@ class TextInput extends Component {
 
   #value = '';
   #caret = 0;
-  #history = [];
-  #historyIdx = -1;
+  #history = {};
+  #historyIdx = {};
   #hint;
   #mode = 'normal';
   
@@ -110,8 +110,9 @@ class TextInput extends Component {
     if (this.onKey) await this.onKey(k, later, this);
     if (this.#caret > len) this.#caret = len;
     if (char === TextInput.KEYS.CR && k.length == 1) { // cr
-      this.#history.unshift(this.#value);
-      this.#historyIdx = -1;
+      if (!this.#history[this.#mode]) this.#history[this.#mode] = [];
+      this.#history[this.#mode].unshift(this.#value);
+      this.#historyIdx[this.#mode] = -1;
       await this.onInput(this.#value, this);
       if (this.modes && this.#mode !== 'normal')
         this.#mode = 'normal';
@@ -123,6 +124,7 @@ class TextInput extends Component {
           this.#caret = this.#value.length;
           this.#mode = next.name;
           this.prompt = next.prompt;
+          this.#historyIdx[this.#mode] = -1;
         } else {
           return;
         }
@@ -143,20 +145,25 @@ class TextInput extends Component {
           + this.#value.substring(this.#caret + 1);
       }
     } else if (k ===TextInput.KEYS.UP) {  // up
-      if (this.#history.length === 0) return;
-      if (this.#historyIdx === -1) {
-        this.#historyIdx = 0;
-      } else if (this.#historyIdx < this.#history.length - 1) {
-        this.#historyIdx++;
+      const modeHistory = this.#history[this.#mode] || [];
+      if (modeHistory.length === 0) return;
+      if (this.#historyIdx[this.#mode] === undefined || this.#historyIdx[this.#mode] === -1) {
+        this.#historyIdx[this.#mode] = 0;
+      } else if (this.#historyIdx[this.#mode] < modeHistory.length - 1) {
+        this.#historyIdx[this.#mode]++;
       }
-      this.#value = this.getHistory(this.#historyIdx);
+      this.#value = modeHistory[this.#historyIdx[this.#mode]];
       this.#caret = this.#value.length;
     } else if (k ===TextInput.KEYS.DOWN) { // down
-      if (this.#historyIdx === 0) {
-        this.#historyIdx = -1;
+      const modeHistory = this.#history[this.#mode] || [];
+      if (this.#historyIdx[this.#mode] === 0) {
+        this.#historyIdx[this.#mode] = -1;
         this.#value = '';
-      } else if (this.#historyIdx > 0) {
-        this.#historyIdx--;
+      } else if (this.#historyIdx[this.#mode] > 0) {
+        this.#historyIdx[this.#mode]--;
+      }
+      if (this.#historyIdx[this.#mode] !== -1) {
+        this.#value = modeHistory[this.#historyIdx[this.#mode]];
       }
       this.#caret = this.#value.length;
     } else if (k ===TextInput.KEYS.RIGHT) { // right
@@ -195,6 +202,7 @@ class TextInput extends Component {
           this.#value = '';
           this.#caret = 0;
           this.prompt = nextMode.prompt;
+          this.#historyIdx[this.#mode] = -1;
           return;
         }
       }
@@ -213,8 +221,9 @@ class TextInput extends Component {
     this.#value = '';
   }
   
-  getHistory(n) {
-    return this.#history[n] || '';
+  getHistory(n, mode) {
+    const h = this.#history[mode || this.#mode] || [];
+    return h[n] || '';
   }
   
   #makeLater() {
