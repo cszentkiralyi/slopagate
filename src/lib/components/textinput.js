@@ -20,6 +20,8 @@ class TextInput extends Component {
   #historyIdx = {};
   #hint;
   #mode = 'normal';
+  #_keyQueue = Promise.resolve();
+  #_keyPromise = Promise.resolve();
   
   shortcuts;
   modes;
@@ -98,6 +100,15 @@ class TextInput extends Component {
   }
   
   async key(k) {
+    // Serialize key handlers to prevent race conditions when typing quickly
+    // under heavy load. Each key waits for the previous one to finish.
+    let resolve;
+    const p = new Promise(r => { resolve = r; });
+    this.#_keyQueue = this.#_keyQueue.then(() => this.#handleKey(k)).then(resolve, resolve);
+    await p;
+  }
+  
+  async #handleKey(k) {
     // TODO: URGENT: premature returns shouldn't prevent laters
     // TODO: this.shortcuts is basically shitty shorthand... I don't feel
     //       great about it now that I've taken another look.
