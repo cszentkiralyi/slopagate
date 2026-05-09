@@ -102,6 +102,22 @@ class Interface {
     this.addMessage({ role: 'startup', content });
   }
 
+  getChatHistory() {
+    return this.#chat_history.children.filter(c => c instanceof TUI.Text);
+  }
+  removeMessage(msg) {
+    if (!msg || !msg.id) return false;
+    let found = false;
+    const target = msg.role === 'startup' ? this.#startup_messages : this.#chat_history;
+    target.children.forEach(c => {
+      if (c.id === msg.id) {
+        this.#terminal.removeChild(c);
+        found = true;
+      }
+    });
+    return found;
+  }
+
   addMessage({ role, content, id }) {
     let textProps;
     

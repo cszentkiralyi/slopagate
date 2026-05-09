@@ -39,6 +39,7 @@ class Program {
   static AFK_TIMEOUT = 3 * 60 * 1000;
 
   #turn_start = 0;
+  #pendingMessages = [];
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
   #exp_fileReadWhitelist = new Set();
@@ -359,6 +360,7 @@ class Program {
               role: 'user',
               content: this.input_modes.find(m => m.name === inst.mode).prompt + input
             });
+            this.#pendingMessages.push({ message: input, mode: inst.mode, id: Date.now() });
             this.#stopAfkTimer();
             this.#turn_start = Date.now();
             Events.emit('turn:model');
@@ -389,6 +391,16 @@ class Program {
 
 
     Events.on('user:abort', (event) => {
+      // Undo the user message if we have pending messages
+      if (this.#pendingMessages.length > 0) {
+        const pending = this.#pendingMessages.pop();
+        const displayMsg = this.input_modes.find(m => m.name === pending.mode).prompt + pending.message;
+        const userMsg = this.interface.getChatHistory().find(m => m.role === 'user' && m.content === displayMsg);
+        if (userMsg) {
+          this.interface.removeMessage(userMsg);
+        }
+        chatInput.clear();
+      }
       Events.emit('turn:user');
     });
     Events.on('model:content', (event) => {
@@ -414,6 +426,7 @@ class Program {
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
       }
+      this.#pendingMessages = [];
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
