@@ -491,6 +491,12 @@ class Harness {
       };
       Events.on('tool:response', onResponse);
 
+      try {
+        Events.emit('tool:call', { id, name, args, temppath });
+      } catch (err) {
+        Logger.log(`tool:call event error: ${err.message}`);
+      }
+
       this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
         Events.off('tool:response', onResponse);
         if (!resolved) {
@@ -498,12 +504,6 @@ class Harness {
           resolve({ id, name, content: `Error: tool ${name} timed out` });
         }
       });
-
-      try {
-        Events.emit('tool:call', { id, name, args, temppath });
-      } catch (err) {
-        Logger.log(`tool:call event error: ${err.message}`);
-      }
     }).catch(async () => {
       return { id, name, content: `Error: tool ${name} timed out` };
     });
@@ -523,14 +523,6 @@ class Harness {
         }
       };
       Events.on('tool:response', onResponse);
-
-      this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
-        Events.off('tool:response', onResponse);
-        if (!resolved) {
-          resolved = true;
-          resolve({ id, name, content: `Error: tool ${name} timed out` });
-        }
-      });
 
       try {
         let cancelled = false;
@@ -576,6 +568,14 @@ class Harness {
           content: `Error: ${err.message}`
         });
       }
+
+      this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
+        Events.off('tool:response', onResponse);
+        if (!resolved) {
+          resolved = true;
+          resolve({ id, name, content: `Error: tool ${name} timed out` });
+        }
+      });
     }).catch(async () => {
       return { id, name, content: `Error: tool ${name} timed out` };
     });
