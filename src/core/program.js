@@ -328,6 +328,8 @@ class Program {
             role: 'user',
             content: ANSI.fg(shellMode.prompt + input, shellMode.fg)
           });
+          inst.clear();
+          this.interface.draw();
           let result = await new Promise((resolve) => {
             exec(input, (error, stdout, stderr) => {
               resolve((stderr ? stderr.trim() : stdout.trim()) || '');
