@@ -2,7 +2,7 @@ const Container = require('./container.js');
 const HContainer = require('./hcontainer.js');
 const Text = require('./text.js');
 
-const { Logger } = require('../../util.js');
+const { Logger, formatMs } = require('../../util.js');
 
 class Statusline extends HContainer {
   static BLANK = new Text('');
@@ -55,7 +55,7 @@ class Statusline extends HContainer {
       return;
     }
     if (entry.kind === 'spinner') {
-      const elapsed = this.#formatElapsed(Date.now() - entry.start);
+      const elapsed = formatMs(Date.now() - entry.start);
       this.spinner.message = `${entry.text} (${elapsed})`;
       this.#setLeftChild(this.spinner);
       this.spinner.show();
@@ -69,15 +69,7 @@ class Statusline extends HContainer {
     }
   }
 
-  #formatElapsed(ms) {
-    const s = Math.floor(ms / 1000);
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return h > 0
-      ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-      : `${m}:${String(sec).padStart(2, '0')}`;
-  }
+ 
   
   hide(id) {
     if (!this.leftSide.length) return;

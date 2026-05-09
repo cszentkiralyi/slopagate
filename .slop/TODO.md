@@ -1,1 +1,0 @@
-- [x] Update the "How It Works" section in `.slop/SYSTEM.md` to mention the `type` field in the memory entries
