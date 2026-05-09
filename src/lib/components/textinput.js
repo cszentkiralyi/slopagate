@@ -187,6 +187,7 @@ class TextInput extends Component {
         this.#value += hint.completion;
       }
       this.#caret = this.#value.length;
+      return;
     } else if (char >= 32 && (char - 127) != 0) {
       if (this.#caret == len) {
         this.#value += k;
