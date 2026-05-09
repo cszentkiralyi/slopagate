@@ -546,6 +546,7 @@ class Program {
           { label: 'Yes', value: 'yes', default: true },
           { label: 'Yes for this session', value: 'yes+' },
           { label: 'No', value: 'no' },
+          { label: 'No for this session', value: 'no+' },
         ], result = await this.interface.getUserChoice(msg, choices);
 
     //Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
@@ -555,6 +556,9 @@ class Program {
         await this.#suggestParent(tool.name, perms);
       }
       return null;
+    } else if (result === 'no+') {
+      this.permissions.deny(tool.name, perms.scope);
+      return { cancelled: true, error: `Error: operation not permitted` };
     }
 
     //Logger.log(`Program: permission denied`);
