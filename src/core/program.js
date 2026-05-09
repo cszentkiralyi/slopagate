@@ -105,6 +105,7 @@ class Program {
       try {
         let assetKeys = sea.getAssetKeys();
         let skillKeys = assetKeys.filter(k => k.startsWith('skills/'));
+        Logger.log(`Program SEA: loading skills ${JSON.stringify(skillKeys)}`);
         if (skillKeys.length > 0) {
           let skillContents = skillKeys.map(k => sea.getAsset(k, 'utf-8'));
           this.skills.addSkills(skillContents);
