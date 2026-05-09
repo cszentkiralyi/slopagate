@@ -3,6 +3,7 @@ const path = require('node:path');
 const fsSync = require('node:fs');
 const os = require('node:os');
 const { exec } = require('node:child_process');
+const sea = require('node:sea');
 
 const Events = require('../events.js');
 const { Config } = require('../core/config.js');
@@ -142,22 +143,31 @@ class Program {
       this.config.get('slop_dir')
     ];
     let systemPrompt = null;
+    let systemSource = null;
     system_prompt_paths.forEach(possiblePath => {
       if (systemPrompt) return;
       try {
         let systemPath = path.join(possiblePath, 'SYSTEM.md')
         systemPrompt = fsSync.readFileSync(systemPath, { encoding: 'utf-8' });
-        this.interface.addMessage({
-          role: 'startup',
-          content: `System: ${path.relative(this.config.get('root_dir'), systemPath)}`
-        });
+        systemSource = path.relative(this.config.get('root_dir'), systemPath);
       } catch (err) { /* don't care */ }
     });
+    // Binary fallback: bundled asset via node:sea
+    if (!systemPrompt && sea.isSea()) {
+      try {
+        systemPrompt = sea.getAsset('SYSTEM.md', 'utf-8');
+        systemSource = 'bundled asset';
+      } catch (err) { /* no asset found */ }
+    }
 
     // Create PromptDoc and pass it to session
     let promptDoc = null;
     if (systemPrompt) {
       promptDoc = new PromptDoc(systemPrompt);
+      this.interface.addMessage({
+        role: 'startup',
+        content: `System: ${systemSource}`
+      });
     }
 
     // SLOP.md as injectable sub-prompt

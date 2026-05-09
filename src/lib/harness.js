@@ -257,7 +257,11 @@ class Harness {
     };
     
     // Use private session
-    const response = await this.session.private(this.session, userMessage);
+    const skillContext = new Context({
+      config: this.session.config,
+      system_prompt: ''
+    });
+    const response = await this.session.private(skillContext, userMessage);
     
     // Emit model:response event
     Events.emit('model:response', { response });

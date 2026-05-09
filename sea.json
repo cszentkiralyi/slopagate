@@ -4,5 +4,9 @@
   "output": "slop",
 
   "useCodeCache": true,
-  "disableExperimentalSEAWarning": true
+  "disableExperimentalSEAWarning": true,
+
+  "assets": {
+    "SYSTEM.md": "assets/SYSTEM.md"
+  }
 }
