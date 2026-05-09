@@ -348,6 +348,7 @@ class Program {
             let cmd = parts[0];
             let argstr = parts.slice(1).join(' ');
             this.#commandSpinner = this.interface.statusline.showSpinner(`Running /${cmd}...`);
+            inst.clear();
             this.interface.draw();
             await this.harness.command(cmd, argstr);
             this.interface.statusline.hide(this.#commandSpinner);
