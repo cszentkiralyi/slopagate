@@ -16,6 +16,18 @@ const lerp = (pct, min, max) => min + (pct * (max - min));
  */
 const louse = (x) => Math.min(1, 1 - (0.9 * (Math.E ** (- ((x - 0.5) ** 2) / (2 * (0.25 ** 2))))));
 
+const noop = () => {};
+
+let _SeaLogger;
+try {
+  const { isSea } = require('node:sea');
+  if (isSea()) {
+    _SeaLogger = { log: noop, warn: noop };
+  }
+} catch {
+  // node:sea not available (pre-20.6 or not in SEA build)
+}
+
 class SimpleLogger {
   #stream;
   constructor(path, flags) {
@@ -40,7 +52,7 @@ class SimpleLogger {
     this.#stream.write('[WARN] ' + s + '\n');
   }
 };
-const Logger = new SimpleLogger('debug.log');
+const Logger = _SeaLogger || new SimpleLogger('debug.log');
 
 function formatMs(ms) {
   const s = Math.floor(ms / 1000);
