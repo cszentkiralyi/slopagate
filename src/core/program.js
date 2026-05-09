@@ -563,20 +563,30 @@ class Program {
 
   async #suggestParent(toolName, perms) {
     let firstParent = perms.parents && perms.parents[0];
-    if (firstParent && firstParent.endsWith('*') && !this.permissions.has(toolName, firstParent)) {
-      Logger.log(`Program: suggestParent found ${JSON.stringify(firstParent)}`);
-      let msg = `Also allow parent scope? ${toolName}(${firstParent})`;
-      let choices = [
-        { label: 'Yes', value: 'yes', default: true },
-        { label: 'No', value: 'no' },
-      ];
-      let result = await this.interface.getUserChoice(msg, choices);
-      Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
-      if (result === 'yes') {
-        this.permissions.approve(toolName, firstParent);
-      } else {
-        this.permissions.deny(toolName, firstParent);
-      }
+    if (!firstParent || !firstParent.endsWith('*')) return;
+    if (this.permissions.has(toolName, firstParent)) return;
+    
+    // Track how many times we've seen this parent glob during the session
+    let count = (this.#parentSuggestionCounts.get(firstParent) || 0) + 1;
+    this.#parentSuggestionCounts.set(firstParent, count);
+    
+    if (count < 3) {
+      Logger.log(`Program: suggestParent skipped (count ${count}/3 for ${firstParent})`);
+      return;
+    }
+    
+    Logger.log(`Program: suggestParent prompting (count ${count} for ${firstParent})`);
+    let msg = `Also allow parent scope? ${toolName}(${firstParent})`;
+    let choices = [
+      { label: 'Yes', value: 'yes', default: true },
+      { label: 'No', value: 'no' },
+    ];
+    let result = await this.interface.getUserChoice(msg, choices);
+    Logger.log(`Program: got parent suggestion result = ${JSON.stringify(result)}`);
+    if (result === 'yes') {
+      this.permissions.approve(toolName, firstParent);
+    } else {
+      this.permissions.deny(toolName, firstParent);
     }
   }
 
@@ -584,6 +594,7 @@ class Program {
     this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
   }
   #commandSpinner = null;
+  #parentSuggestionCounts = new Map();
   #stopAfkTimer() {
     this.timers.stop('afk');
   }
