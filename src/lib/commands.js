@@ -121,29 +121,29 @@ const Commands = [
   {
     name: 'transcript',
     handler: async (harness, argstr) => {
-      if (!argstr || !argstr.length) {
-        harness.emitCommandMessage('Usage: /transcript <filename>');
-        return;
-      }
-      const history = [];
-      let m, r, c;
-      for (m of harness.session.history) {
+      const now = new Date();
+      const timestamp = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+      const defaultFilename = `${timestamp}.transcript.json`;
+      const useActive = argstr && (argstr.includes('--active') || argstr.includes('-a'));
+      const filename = useActive ? argstr.replace(/--active|-a/g, '').trim() || defaultFilename : (argstr || defaultFilename);
+      const source = useActive ? harness.session.messages : harness.session.history;
+      const lines = [];
+      for (const m of source) {
         if (!m.content) continue;
-        r = m.role;
-        c = m.content;
-        if (m.role === 'tool') m.content = m.content.startsWith('Error') ? '[Error]' : '[Result]';
-        history.push(JSON.stringify(m));
+        const copy = { ...m };
+        if (copy.role === 'tool') copy.content = copy.content.startsWith('Error') ? '[Error]' : '[Result]';
+        lines.push(JSON.stringify(copy));
       }
-      const transcript = history.join('\n');
+      const transcript = lines.join('\n');
       try {
-        fs.writeFileSync(argstr, transcript, { encoding: 'utf-8' });
+        fs.writeFileSync(filename, transcript, { encoding: 'utf-8' });
       } catch (err) {
         harness.emitCommandMessage(`Error writing file: ${err.message}`);
         return;
       }
-      harness.emitCommandMessage(`Transcript written to ${argstr}`);
+      harness.emitCommandMessage(`Transcript written to ${filename}`);
     },
-    hint: 'Dump session context to a file'
+    hint: 'Dump session history to a file (default: YYMMDD-hhmm.transcript.json). Use --active or -a to export current context instead of full history.'
   },
   
   {
