@@ -369,86 +369,77 @@ class Harness {
         //this.#abortTarget = this.toolbox;
         //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
 
-        let toolPromises = [], eventsByName = {}, event;
-        
+        // Phase 1: Classify calls — auto-approved vs pending
+        let autoRun = [], pending = [];
         for (let call of message.tool_calls) {
-          let id = call.id,
-              name = call.function.name,
-              args = call.function.arguments,
-              event = { id, name, args, temppath: this.session.temppath };
+          let tool = this.toolbox.get(call.function.name);
+          let perms = tool?.permissions(call.function.arguments);
+          
+          if (!perms || !perms.scope) {
+            pending.push(call);
+            continue;
+          }
+          
+          let scopes = [perms.scope, ...(perms.parents || [])];
+          let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+          
+          if (approved) autoRun.push(call);
+          else pending.push(call);
+        }
+        
+        // Phase 2: Run auto-approved in parallel
+        let toolPromises = [];
+        for (let call of autoRun) {
+          toolPromises.push(this.runToolCall(call));
+        }
+        
+        // Collect events for auto-approved calls
+        let eventsByName = {};
+        autoRun.forEach(call => {
+          let name = call.function.name;
           eventsByName[name] ||= [];
-          eventsByName[name].push(event);
-          //Logger.log(`tool_call: ${JSON.stringify(call)}`);
+          eventsByName[name].push({
+            id: call.id,
+            name,
+            args: call.function.arguments,
+            temppath: this.session.temppath
+          });
+        });
+        
+        let results = await Promise.all(toolPromises);
+        
+        // Phase 3: Process pending sequentially (re-check permissions each iteration)
+        for (let call of pending) {
+          let tool = this.toolbox.get(call.function.name);
+          let perms = tool?.permissions(call.function.arguments);
           
-          // Emit hook before tool:call event
-          let cancelled = false;
-          let cancelError = null;
-          let overrideResponse = null;
-          
-          // Create a promise that resolves when the corresponding tool:response event is received
-          let toolPromise = new Promise(async (resolve, reject) => {
-            let onResponse = (evt) => {
-              if (evt.id === id) {
-                Events.off('tool:response', onResponse);
-                resolve(evt);
-              }
-            };
-            Events.on('tool:response', onResponse);
-
-            try {
-              const results = await this.hooks.emitWithResultsAsync('tool-call', { toolCall: call });
-              for (const result of results) {
-                if (!result) continue;
-                overrideResponse = result.response || null;
-                if (result && result.cancelled) {
-                  cancelled = true;
-                  cancelError = result.error || null;
-                  break;
-                }
-              }
-            } catch (err) {
-              cancelled = true;
-              cancelError = err;
-            }
-
-            if (cancelled) {
-              Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
-              let content = cancelError?.message || cancelError
-                || (overrideResponse && (typeof overrideResponse === 'string'
-                    ? overrideResponse
-                    : JSON.stringify(overrideResponse)));
-              Events.emit('tool:response', {
-                id,
-                role: 'tool',
-                tool_name: name,
-                content: content || 'Error: tool call cancelled'
+          if (perms?.scope) {
+            let scopes = [perms.scope, ...(perms.parents || [])];
+            let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+            
+            if (approved) {
+              results.push(await this.runToolCall(call));
+              eventsByName[call.function.name] ||= [];
+              eventsByName[call.function.name].push({
+                id: call.id,
+                name: call.function.name,
+                args: call.function.arguments,
+                temppath: this.session.temppath
               });
-            } else {
-              Events.emit('tool:call', event);
+              continue;
             }
-
-            // Timeout race
-            this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
-              Events.off('tool:response', onResponse);
-              resolve({ id: id, content: `Error: timed out` });
-            });
+          }
+          
+          // Still needs user approval — fire hook
+          let callResult = await this.handleToolCallWithHook(call);
+          results.push(callResult);
+          eventsByName[call.function.name] ||= [];
+          eventsByName[call.function.name].push({
+            id: call.id,
+            name: call.function.name,
+            args: call.function.arguments,
+            temppath: this.session.temppath
           });
-
-          // Wrap to clean up timer on resolution
-          toolPromise = toolPromise.catch(err => {
-            this.#timers.stop(`tool:${id}`);
-            throw err;
-          }).catch(async () => {
-            // On timeout, emit a tool:response so the harness can continue
-            return {
-              id,
-              role: 'tool',
-              tool_name: name,
-              content: `Error: tool ${name} timed out`
-            };
-          });
-
-          toolPromises.push(toolPromise);
         }
         
         Object.keys(eventsByName).map(name => {
@@ -457,7 +448,6 @@ class Harness {
             Events.emit('tool:message', { content: msg });
         });
         
-        let results = await Promise.all(toolPromises);
         results.forEach(msg => {
           msg.role = 'tool';
           msg.tool_name = msg.name;
@@ -482,6 +472,113 @@ class Harness {
       Events.emit('model:content', { done: true, content: ANSI.fg(`Error: ${err.message}`, 'red') });
       Events.emit('turn:user');
     }
+  }
+  
+  async runToolCall(call) {
+    let id = call.id;
+    let name = call.function.name;
+    let args = call.function.arguments;
+    let temppath = this.session.temppath;
+    
+    return new Promise(async (resolve) => {
+      let resolved = false;
+      let onResponse = (evt) => {
+        if (evt.id === id && !resolved) {
+          resolved = true;
+          Events.off('tool:response', onResponse);
+          resolve(evt);
+        }
+      };
+      Events.on('tool:response', onResponse);
+
+      this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
+        Events.off('tool:response', onResponse);
+        if (!resolved) {
+          resolved = true;
+          resolve({ id, name, content: `Error: tool ${name} timed out` });
+        }
+      });
+
+      try {
+        Events.emit('tool:call', { id, name, args, temppath });
+      } catch (err) {
+        Logger.log(`tool:call event error: ${err.message}`);
+      }
+    }).catch(async () => {
+      return { id, name, content: `Error: tool ${name} timed out` };
+    });
+  }
+  
+  async handleToolCallWithHook(call) {
+    let id = call.id;
+    let name = call.function.name;
+    
+    return new Promise(async (resolve) => {
+      let resolved = false;
+      let onResponse = (evt) => {
+        if (evt.id === id && !resolved) {
+          resolved = true;
+          Events.off('tool:response', onResponse);
+          resolve(evt);
+        }
+      };
+      Events.on('tool:response', onResponse);
+
+      this.#timers.start(`tool:${id}`, Harness.TOOL_TIMEOUT, () => {
+        Events.off('tool:response', onResponse);
+        if (!resolved) {
+          resolved = true;
+          resolve({ id, name, content: `Error: tool ${name} timed out` });
+        }
+      });
+
+      try {
+        let cancelled = false;
+        let cancelError = null;
+        let overrideResponse = null;
+        
+        const results = await this.hooks.emitWithResultsAsync('tool-call', { toolCall: call });
+        for (const result of results) {
+          if (!result) continue;
+          overrideResponse = result.response || null;
+          if (result.cancelled) {
+            cancelled = true;
+            cancelError = result.error || null;
+            break;
+          }
+        }
+
+        if (cancelled) {
+          Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
+          let content = cancelError?.message || cancelError
+            || (overrideResponse && (typeof overrideResponse === 'string'
+                ? overrideResponse
+                : JSON.stringify(overrideResponse)));
+          Events.emit('tool:response', {
+            id,
+            name,
+            content: content || 'Error: tool call cancelled'
+          });
+        } else if (overrideResponse !== null) {
+          Events.emit('tool:response', {
+            id,
+            name,
+            content: overrideResponse
+          });
+        } else {
+          Events.emit('tool:call', { id, name, args: call.function.arguments, temppath: this.session.temppath });
+        }
+      } catch (err) {
+        Logger.log(`tool-call hook error: ${err.message}`);
+        Events.emit('tool:response', {
+          id,
+          name,
+          content: `Error: ${err.message}`
+        });
+      }
+    }).catch(async () => {
+      return { id, name, content: `Error: tool ${name} timed out` };
+    });
   }
   
   estimateHistoryTokens() {

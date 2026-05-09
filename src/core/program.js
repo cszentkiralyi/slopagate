@@ -533,7 +533,7 @@ class Program {
     //Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
     
     if (permResult.allowed == true) {
-      return;
+      return null;
     } else if (permResult.scope === perms.scope && permResult.allowed == false) {
       return { cancelled: true, error: 'Error: operation not permitted' };
     }
@@ -551,7 +551,7 @@ class Program {
         this.permissions.approve(tool.name, perms.scope);
         await this.#suggestParent(tool.name, perms);
       }
-      return;
+      return null;
     }
 
     //Logger.log(`Program: permission denied`);
