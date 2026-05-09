@@ -121,7 +121,10 @@ class Program {
       'strong': s => ANSI.fg(ANSI.bold(s), 'white'),
       'emphasis': s => ANSI.italic(s),
       'inline-code': s => ANSI.fg(s, 213),
-      'code': s => ANSI.fg(s, 213)
+      'code': s => ANSI.fg(s, 213),
+      'heading-1': s => ANSI.bold(ANSI.underline(s.toUpperCase())),
+      'heading-2': s => ANSI.bold(ANSI.underline(s)),
+      'heading': s => ANSI.underline(s)
     });
     
     this.input_modes = [

@@ -57,6 +57,17 @@ class Slopdown {
         return;
       }
 
+      // Heading detection: # H1, ## H2, ### H3+
+      let headingMatch = line.match(/^(#{1,6})\s+(.*)/);
+      if (headingMatch) {
+        let level = headingMatch[1].length;
+        let text = headingMatch[2].trim();
+        let key = level <= 2 ? (level === 1 ? 'heading-1' : 'heading-2') : 'heading';
+        fmt = this.#fmtByKind[key] || Slopdown.IDENTITY;
+        lines.push(fmt(text));
+        return;
+      }
+
       rem = line, ret = '';
       while (m = Slopdown.INLINE_MARKUP_REGEX.exec(rem)) {
         [search, sym, inner] = m;
