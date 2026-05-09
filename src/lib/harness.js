@@ -112,8 +112,20 @@ class Harness {
     // Add skill commands
     if (this.skills && this.skills.names.length) {
       this.skills.names.forEach(skillName => {
+        let baseName = skillName;
+        let existing = this.commands.map(c => c.name);
+        // Find the first available name: baseName, baseName-skill, baseName-skill-skill, ...
+        let suffixCount = 0;
+        let cmdName = baseName;
+        while (existing.includes(cmdName)) {
+          suffixCount++;
+          cmdName = baseName + '-skill'.repeat(suffixCount);
+        }
+        if (cmdName !== baseName) {
+          this.emitCommandMessage(`Skill "${skillName}" conflicts — registered as "${cmdName}"`);
+        }
         this.commands.push({
-          name: skillName,
+          name: cmdName,
           handler: async (args) => this.handleSkill(skillName, args),
           hint: this.skills.get(skillName).description
         });
