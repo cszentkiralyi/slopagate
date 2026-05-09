@@ -297,7 +297,15 @@ class Session {
     //Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
     this.#activeContext = await this.#activeContext.fork({
       system_prompt: this.#promptDoc?.render(this.config),
-      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning' ]
+      layers: [
+        //'system_prompt',
+        'tool_age',
+        'tool_error',
+        'tool_length',
+        'tool_total',
+        'chat_score',
+        'model_reasoning'
+      ]
     });
     
     //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
@@ -324,7 +332,15 @@ class Session {
     Logger.log(`Session: compact() called, forking context.`);
     // Replace activeContext with a full compact fork, keeping masterContext history
     let newActive = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'tool_total', 'model_reasoning', 'chat_summary' ],
+      layers: [
+        //'system_prompt',
+        'tool_age',
+        'tool_error',
+        'tool_length',
+        'tool_total',
+        'model_reasoning',
+        'chat_summary'
+      ],
       summarize: async (transcript) => {
         let summaryContext = new Context({
           config: this.config,
