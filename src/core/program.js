@@ -100,6 +100,17 @@ class Program {
       let skillFiles = skillsFiles.map(skillPath => fsSync.readFileSync(skillPath, 'utf-8'));
       this.skills.addSkills(skillFiles);
     }
+    // Binary fallback: bundled skills as assets
+    if (sea.isSea()) {
+      try {
+        let assetKeys = sea.getAssetKeys();
+        let skillKeys = assetKeys.filter(k => k.startsWith('skills/'));
+        if (skillKeys.length > 0) {
+          let skillContents = skillKeys.map(k => sea.getAsset(k, 'utf-8'));
+          this.skills.addSkills(skillContents);
+        }
+      } catch (err) { /* no bundled skills */ }
+    }
     
     this.permissions = Permissions.deserialize(userConfig.permissions);
     this.timers = new Timers();
