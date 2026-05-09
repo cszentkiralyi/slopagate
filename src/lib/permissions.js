@@ -20,10 +20,16 @@ class Permissions {
 
     // No verdict yet — check for wildcard matches
     const suggestions = [];
+    const matchingWildcards = [];
     for (const [wildcard, verdict] of toolMap) {
       if (!wildcard.endsWith('*')) continue;
       const prefix = wildcard.slice(0, -1);
       if (!scope.startsWith(prefix)) continue;
+      matchingWildcards.push({ wildcard, verdict, prefix });
+    }
+    // Sort by specificity: longer prefix = more specific = check first
+    matchingWildcards.sort((a, b) => b.prefix.length - a.prefix.length);
+    for (const { wildcard, verdict } of matchingWildcards) {
       if (verdict) {
         return { allowed: true, suggestions: [], scope: wildcard };
       }
