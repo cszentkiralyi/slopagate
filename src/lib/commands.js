@@ -105,6 +105,7 @@ const Commands = [
       let lines = [
         ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
         bar,
+        '',
         `  ${ANSI.fg('█', 9)} system   ${sysTok.toFixed(0)} tokens`,
         `  ${ANSI.fg('█', 11)} messages ${upTok.toFixed(0)} tokens`,
         `  ${ANSI.fg('█', 5)} reserved ${genReserve.toFixed(0)} tokens`,
