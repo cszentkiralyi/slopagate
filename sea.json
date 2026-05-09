@@ -7,6 +7,8 @@
   "disableExperimentalSEAWarning": true,
 
   "assets": {
-    "SYSTEM.md": "assets/SYSTEM.md"
+    "SYSTEM.md": "assets/SYSTEM.md",
+    ".slop/skills/init/SKILL.md": "assets/skills/init/SKILL.md",
+    ".slop/skills/plan/SKILL.md": "assets/skills/plan/SKILL.md"
   }
 }
