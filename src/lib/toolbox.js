@@ -21,7 +21,12 @@ class Toolbox {
       if (tool) {
         if (this._handledCalls.has(id)) return;
         this._handledCalls.add(id);
-        content = await tool.run(args, temppath);
+        try {
+          content = await tool.run(args, temppath);
+        } catch (err) {
+          Logger.log(`tool.run error (${name}): ${err.message}`);
+          content = `Error: ${err.message}`;
+        }
       } else {
         content = `Error: tool "${name}" not found!`;
       }

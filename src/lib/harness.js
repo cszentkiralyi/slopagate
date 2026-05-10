@@ -383,15 +383,26 @@ class Harness {
         
         for (let call of message.tool_calls) {
           let tool = this.toolbox.get(call.function.name);
-          let perms = tool?.permissions(call.function.arguments);
+          let perms;
+          try {
+            perms = tool?.permissions(call.function.arguments);
+          } catch (err) {
+            Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
+          }
           
-          // Skip calls without permission requirements
+          // Skip calls without permission requirements (or if permissions check failed)
           if (!perms || !perms.scope) {
             autoRun.push({ call, skipPermsCheck: true });
           } else {
             // Check if already auto-approved
             let scopes = [perms.scope, ...(perms.parents || [])];
-            let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+            let approved;
+            try {
+              approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+            } catch (err) {
+              Logger.log(`permission check error (${call.function.name}): ${err.message}`);
+              approved = false;
+            }
             if (approved) {
               autoRun.push({ call, approved });
             }
@@ -429,12 +440,17 @@ class Harness {
         // Run pending tools sequentially (one permission prompt at a time)
         for (let call of message.tool_calls) {
           let tool = this.toolbox.get(call.function.name);
-          let perms = tool?.permissions(call.function.arguments);
+          let perms;
+          try {
+            perms = tool?.permissions(call.function.arguments);
+          } catch (err) {
+            Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
+          }
           
           // Skip if already processed in auto-run
           if (eventsByName[call.function.name]?.length > 0) continue;
           
-          // Skip calls without permission requirements
+          // Skip calls without permission requirements (or if permissions check failed)
           if (!perms || !perms.scope) {
             let callResult = await this.handleToolCallWithHook(call);
             results.push(callResult);
@@ -450,7 +466,13 @@ class Harness {
           
           // Check if already auto-approved
           let scopes = [perms.scope, ...(perms.parents || [])];
-          let approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+          let approved;
+          try {
+            approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+          } catch (err) {
+            Logger.log(`permission check error (${call.function.name}): ${err.message}`);
+            approved = false;
+          }
           
           if (approved) {
             let callResult = await this.runToolCall(call);
@@ -479,8 +501,16 @@ class Harness {
         
         Object.keys(eventsByName).map(name => {
           let tool = this.toolbox.get(name), msg;
-          if (tool && (msg = tool.message(eventsByName[name])))
-            Events.emit('tool:message', { content: msg });
+          if (tool) {
+            try {
+              msg = tool.message(eventsByName[name]);
+            } catch (err) {
+              Logger.log(`tool message error (${name}): ${err.message}`);
+              msg = null;
+            }
+            if (msg)
+              Events.emit('tool:message', { content: msg });
+          }
         });
         
         results.forEach(msg => {
