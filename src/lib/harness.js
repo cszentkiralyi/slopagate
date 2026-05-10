@@ -19,6 +19,7 @@ const LsTool = require('../tools/ls.js');
 const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 const MemoryTool = require('../tools/memory.js');
+const ActivateSkillTool = require('../tools/activate-skill.js');
 
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
@@ -68,6 +69,9 @@ class Harness {
       new MemoryTool({
         ...this.session,
         config: this.config
+      }),
+      new ActivateSkillTool({
+        skills: this.skills
       })
     ]);
     this.session = new Session({
