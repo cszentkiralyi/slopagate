@@ -37,17 +37,35 @@ class Skills {
         lines = content.split('\n'),
         ret = {}, line, i, k, s_k, v;
         
+    let collecting = false, valueLines = [], vStart;
     lines.forEach(line => {
+      if (collecting) {
+        if (line.length > 0 && line[0] === ' ') {
+          let trimmed = line.trim();
+          if (trimmed.length > 0) valueLines.push(trimmed);
+        } else {
+          collecting = false;
+        }
+        return;
+      }
       for (i in Skills.FRONT_MATTER_KEYS) {
         k = Skills.FRONT_MATTER_KEYS[i];
         s_k = k + ':';
         if (line.startsWith(s_k)) {
           v = line.substring(s_k.length).trim();
-          ret[k] = v;
+          if (v === '>') {
+            collecting = true;
+            valueLines = [];
+          } else {
+            ret[k] = v;
+          }
           break;
         }
       }
     });
+    if (collecting && valueLines.length > 0) {
+      ret.description = valueLines.join(' ');
+    }
     
     let name = ret.name, desc = ret.description;
     
