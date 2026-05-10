@@ -265,7 +265,8 @@ class Harness {
     });
     
     // Build skill prompt (include marker so it appears in chat)
-    const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}\n\nUser Args: ${JSON.stringify(args || {})}`;
+    const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
+    const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
     
     // Trigger normal model turn by emitting user:message event.
     // onUserMessage will add to context, fork, and send — piggybacking on the active session.
