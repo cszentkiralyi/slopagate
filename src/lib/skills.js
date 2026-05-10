@@ -63,6 +63,13 @@ class Skills {
     // Name format: lowercase alphanumeric and hyphens, no consecutive hyphens, no start/end with hyphen
     if (!Skills.NAME_RE.test(name)) return null;
     
+    // Description must be 1-1024 characters
+    if (!desc || desc.length < 1) return null;
+    if (desc.length > 1024) {
+      console.warn(`[skills] Description for '${name}' truncated from ${desc.length} to 1024 characters`);
+      desc = desc.substring(0, 1024);
+    }
+    
     ret.content = skillText.substring(blockEnd + 3);
     return ret;
   }

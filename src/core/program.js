@@ -120,6 +120,20 @@ class Program {
       } catch (err) { /* no bundled skills */ }
     }
     
+    // Log skill loading metrics
+    const metadataText = this.skills.names.map(name => {
+      const skill = this.skills.get(name);
+      const desc = skill?.description || 'No description';
+      return `- ${name}: ${desc}`;
+    }).join('\n');
+    const metadataTokens = Math.ceil(ANSI.measure(metadataText) / 3.5);
+    Logger.log(`skills: metadata ~${metadataTokens} tokens (${this.skills.names.length} skills)`);
+    for (const name of this.skills.names) {
+      const skill = this.skills.get(name);
+      const contentTokens = Math.ceil(ANSI.measure(skill.content) / 3.5);
+      Logger.log(`skills: ${name} ${contentTokens} tokens`);
+    }
+    
     this.permissions = Permissions.deserialize(userConfig.permissions);
     this.timers = new Timers();
     
