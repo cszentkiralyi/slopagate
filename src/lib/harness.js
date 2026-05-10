@@ -36,6 +36,8 @@ class Harness {
   
   commands = [];
 
+  #modelResponded = false;
+  
   #serializeSession() {
     try {
       let historyPath = path.join(process.env.HOME, '.slopagate', 'history');
@@ -283,6 +285,7 @@ class Harness {
     let message = { role: 'user', content: event.message };
     this.session.abort();
     this.#userMessagesSinceRecap++;
+    this.#modelResponded = false;
 
     // Update statusline tokens when message is actually sent
     Events.emit('metrics:tokens', {
@@ -295,7 +298,10 @@ class Harness {
   
   onUserAbort(event) {
     this.session.abort();
-    this.session.removeLastUserMessage();
+    // Only undo the last user message if the model hasn't responded yet
+    if (!this.#modelResponded) {
+      this.session.removeLastUserMessage();
+    }
   }
   
   async onModelResponse(event) {
@@ -319,6 +325,9 @@ class Harness {
       Events.emit('turn:user');
       return;
     }
+
+    // Model has responded — mark so abort won't undo the user message
+    this.#modelResponded = true;
 
     let { message } = response;
     
