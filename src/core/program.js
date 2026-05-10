@@ -98,8 +98,11 @@ class Program {
     this.skills = new Skills();
     let skillsFiles = fsSync.globSync(path.join(this.config.get('slop_dir'), 'skills', '*', 'SKILL.md'));
     if (skillsFiles.length > 0) {
-      let skillFiles = skillsFiles.map(skillPath => fsSync.readFileSync(skillPath, 'utf-8'));
-      this.skills.addSkills(skillFiles);
+      let skillEntries = skillsFiles.map(skillPath => ({
+        text: fsSync.readFileSync(skillPath, 'utf-8'),
+        dirName: path.basename(path.dirname(skillPath))
+      }));
+      this.skills.addSkills(skillEntries);
     }
     // Binary fallback: bundled skills as assets
     if (sea.isSea()) {
@@ -108,8 +111,11 @@ class Program {
         let skillKeys = assetKeys.filter(k => k.startsWith('skills/'));
         Logger.log(`Program SEA: loading skills ${JSON.stringify(skillKeys)}`);
         if (skillKeys.length > 0) {
-          let skillContents = skillKeys.map(k => sea.getAsset(k, 'utf-8'));
-          this.skills.addSkills(skillContents);
+          let skillEntries = skillKeys.map(k => ({
+            text: sea.getAsset(k, 'utf-8'),
+            dirName: k.split('/')[1]
+          }));
+          this.skills.addSkills(skillEntries);
         }
       } catch (err) { /* no bundled skills */ }
     }

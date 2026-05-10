@@ -1,5 +1,6 @@
 class Skills {
   static FRONT_MATTER_KEYS = [ 'name', 'description' ];
+  static NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
   
   #skills = new Map();
   
@@ -19,16 +20,16 @@ class Skills {
   }
   
   addSkills(skillTexts) {
-    let skill;
-    for (let i in skillTexts) {
-      if (skill = Skills.parse(skillTexts[i])) {
+    for (let { text, dirName } of skillTexts) {
+      let skill = Skills.parse(text, dirName);
+      if (skill) {
         this.#skills.set(skill.name, skill);
       }
     }
   }
   
-  static parse(skillText) {
-    if (!skillText || !skillText.length || skillText.length < 6) return null;
+  static parse(skillText, dirName) {
+    if (!skillText || typeof skillText !== 'string') return null;
     let blockStart = skillText.indexOf('---'),
         blockEnd = skillText.indexOf('---', 3),
         content = skillText.substring(blockStart + 3, blockEnd),
@@ -47,12 +48,19 @@ class Skills {
       }
     });
     
-    if (Object.keys(ret).length) {
-      ret.content = skillText.substring(blockEnd + 3);
-      return ret;
-    }
+    let name = ret.name, desc = ret.description;
     
-    return null;
+    // Validate required fields
+    if (!name || !desc) return null;
+    
+    // Name must match directory name
+    if (dirName && name !== dirName) return null;
+    
+    // Name format: lowercase alphanumeric and hyphens, no consecutive hyphens, no start/end with hyphen
+    if (!Skills.NAME_RE.test(name)) return null;
+    
+    ret.content = skillText.substring(blockEnd + 3);
+    return ret;
   }
 
 }
