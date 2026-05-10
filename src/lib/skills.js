@@ -20,6 +20,7 @@ class Skills {
   }
   
   addSkills(skillTexts) {
+    if (!skillTexts) return;
     for (let { text, dirName } of skillTexts) {
       let skill = Skills.parse(text, dirName);
       if (skill) {
@@ -52,6 +53,9 @@ class Skills {
     
     // Validate required fields
     if (!name || !desc) return null;
+    
+    // Name must be 1-64 characters
+    if (name.length < 1 || name.length > 64) return null;
     
     // Name must match directory name
     if (dirName && name !== dirName) return null;
