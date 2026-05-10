@@ -117,7 +117,8 @@ class Session {
       think: (this.think || false),
       stream: (this.stream || false),
       keep_alive: (this.config.get('keep_alive') || '5m'),
-      num_predict: (this.config.get('num_predict') || 16384),
+      num_predict: (this.config.get('num_predict') || 2 ** 14), // 16K
+      thinking_budget_tokens: (this.config.get('reasoning_budget') || 2 ** 18), // 256K
       messages: messages,
       tools: this.tools.map(t => t.spec)
     }, responseObj, controller, idx;
@@ -195,9 +196,11 @@ class Session {
       if (message && message.reasoning_content.length && !message.content.length
           && (endThink = message.reasoning_content.indexOf('</think>')) > -1
               && endThink < message.reasoning_content.length - 1 - 7) {
+        message.content = message.reasoning_content.slice(endThink + 8);
         message.reasoning_content = message.reasoning_content.slice(0, endThink);
-        message.content = message.reasoning_content.slice(endThink + 7);
       }
+      
+      Logger.log(`Session: final message ${JSON.stringify(message)}`);
       
       if (message) message.finish_reason = response.choices[0].finish_reason;
 
