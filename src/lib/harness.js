@@ -260,30 +260,12 @@ class Harness {
       content: ` /${skillName} `
     });
     
-    // Build skill prompt
-    const skillPrompt = `Execute this skill: "${skillName}"\n\nSkill Instructions:\n${skill.content}`;
+    // Build skill prompt (include marker so it appears in chat)
+    const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}\n\nUser Args: ${JSON.stringify(args || {})}`;
     
-    // Add skill invocation to context
-    this.session.addToContext({
-      role: 'user',
-      content: `[Skill: ${skillName}]`
-    });
-    
-    // Build user message
-    const userMessage = {
-      role: 'user',
-      content: `${skillPrompt}\n\nUser Args: ${JSON.stringify(args || {})}`
-    };
-    
-    // Use private session
-    const skillContext = new Context({
-      config: this.session.config,
-      system_prompt: ''
-    });
-    const response = await this.session.private(skillContext, userMessage);
-    
-    // Emit model:response event
-    Events.emit('model:response', { response });
+    // Trigger normal model turn by emitting user:message event.
+    // onUserMessage will add to context, fork, and send — piggybacking on the active session.
+    Events.emit('user:message', { message: skillPrompt });
   }
   
   async dispose() {
