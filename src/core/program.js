@@ -38,7 +38,7 @@ class Program {
 
   static AFK_TIMEOUT = 3 * 60 * 1000;
 
-  #turn_start = 0;
+  #turn_start = Date.now();
   #pendingMessages = [];
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
@@ -122,8 +122,8 @@ class Program {
       'emphasis': s => ANSI.italic(s),
       'inline-code': s => ANSI.fg(s, 213),
       'code': s => ANSI.fg(s, 213),
-      'heading-1': s => ANSI.bold(ANSI.underline(s.toUpperCase())),
-      'heading-2': s => ANSI.bold(ANSI.underline(s)),
+      'heading-1': s => ANSI.fg(ANSI.bold(ANSI.underline(s.toUpperCase())), 'white'),
+      'heading-2': s => ANSI.fg(ANSI.bold(ANSI.underline(s)), 'white'),
       'heading': s => ANSI.underline(s)
     });
     
