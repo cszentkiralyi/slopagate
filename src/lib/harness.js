@@ -82,6 +82,29 @@ class Harness {
       ...(props && props.session || null)
     });
     
+    // Stub Agent instance (not yet used in flow, but wired up for Agent class)
+    this.agent = new Agent({
+      context: this.session,
+      tools: this.toolbox.all(),
+      callbacks: {
+        onToolCalls: async (toolCalls) => {
+          // Emit tool:call events for logging
+          toolCalls.forEach(tc => {
+            Events.emit('tool:call', { id: tc.id, name: tc.name, args: tc.arguments, temppath: this.session.temppath });
+          });
+          // Execute all tool calls via Harness's handleToolCalls
+          return await this.handleToolCalls(toolCalls);
+        },
+        onModelContent: (content) => Events.emit('model:content', { content }),
+        onTurnEnd: () => {
+          Events.emit('turn:user');
+          this.#serializeSession();
+        }
+      },
+      config: this.config,
+      abortController: null
+    });
+    
     // Build commands from skills
     this.buildCommands();
     
@@ -368,153 +391,7 @@ class Harness {
         Events.emit('model:content', { done, content: message.content.trim() });
       }
       if (message.tool_calls) {
-        await this.session.ensureTempDir();
-        // Toolbox doesn't support abort() yet
-        //this.#abortTarget = this.toolbox;
-        //Logger.log(`tool_calls: ${JSON.stringify(message.tool_calls)}`);
-
-        // Split tool calls into auto-run (approved) and pending (need user approval)
-        let autoRun = [];
-        let pending = [];
-        
-        for (let call of message.tool_calls) {
-          let tool = this.toolbox.get(call.function.name);
-          let perms;
-          try {
-            perms = tool?.permissions(call.function.arguments);
-          } catch (err) {
-            Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
-          }
-          
-          // Skip calls without permission requirements (or if permissions check failed)
-          if (!perms || !perms.scope) {
-            autoRun.push({ call, skipPermsCheck: true });
-          } else {
-            // Check if already auto-approved
-            let scopes = [perms.scope, ...(perms.parents || [])];
-            let approved;
-            try {
-              approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-            } catch (err) {
-              Logger.log(`permission check error (${call.function.name}): ${err.message}`);
-              approved = false;
-            }
-            if (approved) {
-              autoRun.push({ call, approved });
-            }
-            // If not approved, skip adding to autoRun and let it fall through to the pending phase
-          }
-        }
-        
-        let results = [];
-        let eventsByName = {};
-        
-        // Run auto-approved tools in parallel
-        if (autoRun.length) {
-          let autoPromises = autoRun.map(async ({ call, skipPermsCheck, approved }) => {
-            let callResult;
-            if (skipPermsCheck) {
-              callResult = await this.handleToolCallWithHook(call);
-            } else if (approved) {
-              callResult = await this.runToolCall(call);
-            } else {
-              callResult = await this.handleToolCallWithHook(call);
-            }
-            
-            results.push(callResult);
-            eventsByName[call.function.name] ||= [];
-            eventsByName[call.function.name].push({
-              id: call.id,
-              name: call.function.name,
-              args: call.function.arguments,
-              temppath: this.session.temppath
-            });
-          });
-          await Promise.all(autoPromises);
-        }
-        
-        // Run pending tools sequentially (one permission prompt at a time)
-        for (let call of message.tool_calls) {
-          let tool = this.toolbox.get(call.function.name);
-          let perms;
-          try {
-            perms = tool?.permissions(call.function.arguments);
-          } catch (err) {
-            Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
-          }
-          
-          // Skip if already processed in auto-run
-          if (eventsByName[call.function.name]?.length > 0) continue;
-          
-          // Skip calls without permission requirements (or if permissions check failed)
-          if (!perms || !perms.scope) {
-            let callResult = await this.handleToolCallWithHook(call);
-            results.push(callResult);
-            eventsByName[call.function.name] ||= [];
-            eventsByName[call.function.name].push({
-              id: call.id,
-              name: call.function.name,
-              args: call.function.arguments,
-              temppath: this.session.temppath
-            });
-            continue;
-          }
-          
-          // Check if already auto-approved
-          let scopes = [perms.scope, ...(perms.parents || [])];
-          let approved;
-          try {
-            approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-          } catch (err) {
-            Logger.log(`permission check error (${call.function.name}): ${err.message}`);
-            approved = false;
-          }
-          
-          if (approved) {
-            let callResult = await this.runToolCall(call);
-            results.push(callResult);
-            eventsByName[call.function.name] ||= [];
-            eventsByName[call.function.name].push({
-              id: call.id,
-              name: call.function.name,
-              args: call.function.arguments,
-              temppath: this.session.temppath
-            });
-            continue;
-          }
-          
-          // Needs user approval — fire hook (will prompt user)
-          let callResult = await this.handleToolCallWithHook(call);
-          results.push(callResult);
-          eventsByName[call.function.name] ||= [];
-          eventsByName[call.function.name].push({
-            id: call.id,
-            name: call.function.name,
-            args: call.function.arguments,
-            temppath: this.session.temppath
-          });
-        }
-        
-        Object.keys(eventsByName).map(name => {
-          let tool = this.toolbox.get(name), msg;
-          if (tool) {
-            try {
-              msg = tool.message(eventsByName[name]);
-            } catch (err) {
-              Logger.log(`tool message error (${name}): ${err.message}`);
-              msg = null;
-            }
-            if (msg)
-              Events.emit('tool:message', { content: msg });
-          }
-        });
-        
-        results.forEach(msg => {
-          msg.role = 'tool';
-          msg.tool_name = msg.name;
-          delete msg.name;
-        });
-        Events.emit('tool_calls:response', results);
+        // Tool calls handled by Agent via onToolCalls callback
       }
       if (done) {
         Events.emit('turn:user');
@@ -640,6 +517,158 @@ class Harness {
     }).catch(async () => {
       return { id, name, content: `Error: tool ${name} timed out` };
     });
+  }
+  
+  /**
+   * Handle tool calls from model response.
+   * @param {Array} tool_calls - List of tool calls from model
+   * @returns {Promise<Array>} Tool results
+   */
+  async handleToolCalls(tool_calls) {
+    await this.session.ensureTempDir();
+    
+    // Split tool calls into auto-run (approved) and pending (need user approval)
+    let autoRun = [];
+    let pending = [];
+    
+    for (let call of tool_calls) {
+      let tool = this.toolbox.get(call.function.name);
+      let perms;
+      try {
+        perms = tool?.permissions(call.function.arguments);
+      } catch (err) {
+        Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
+      }
+      
+      // Skip calls without permission requirements (or if permissions check failed)
+      if (!perms || !perms.scope) {
+        autoRun.push({ call, skipPermsCheck: true });
+      } else {
+        // Check if already auto-approved
+        let scopes = [perms.scope, ...(perms.parents || [])];
+        let approved;
+        try {
+          approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+        } catch (err) {
+          Logger.log(`permission check error (${call.function.name}): ${err.message}`);
+          approved = false;
+        }
+        if (approved) {
+          autoRun.push({ call, approved });
+        }
+        // If not approved, skip adding to autoRun and let it fall through to the pending phase
+      }
+    }
+    
+    let results = [];
+    let eventsByName = {};
+    
+    // Run auto-approved tools in parallel
+    if (autoRun.length) {
+      let autoPromises = autoRun.map(async ({ call, skipPermsCheck, approved }) => {
+        let callResult;
+        if (skipPermsCheck) {
+          callResult = await this.handleToolCallWithHook(call);
+        } else if (approved) {
+          callResult = await this.runToolCall(call);
+        } else {
+          callResult = await this.handleToolCallWithHook(call);
+        }
+        
+        results.push(callResult);
+        eventsByName[call.function.name] ||= [];
+        eventsByName[call.function.name].push({
+          id: call.id,
+          name: call.function.name,
+          args: call.function.arguments,
+          temppath: this.session.temppath
+        });
+      });
+      await Promise.all(autoPromises);
+    }
+    
+    // Run pending tools sequentially (one permission prompt at a time)
+    for (let call of tool_calls) {
+      let tool = this.toolbox.get(call.function.name);
+      let perms;
+      try {
+        perms = tool?.permissions(call.function.arguments);
+      } catch (err) {
+        Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
+      }
+      
+      // Skip if already processed in auto-run
+      if (eventsByName[call.function.name]?.length > 0) continue;
+      
+      // Skip calls without permission requirements (or if permissions check failed)
+      if (!perms || !perms.scope) {
+        let callResult = await this.handleToolCallWithHook(call);
+        results.push(callResult);
+        eventsByName[call.function.name] ||= [];
+        eventsByName[call.function.name].push({
+          id: call.id,
+          name: call.function.name,
+          args: call.function.arguments,
+          temppath: this.session.temppath
+        });
+        continue;
+      }
+      
+      // Check if already auto-approved
+      let scopes = [perms.scope, ...(perms.parents || [])];
+      let approved;
+      try {
+        approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+      } catch (err) {
+        Logger.log(`permission check error (${call.function.name}): ${err.message}`);
+        approved = false;
+      }
+      
+      if (approved) {
+        let callResult = await this.runToolCall(call);
+        results.push(callResult);
+        eventsByName[call.function.name] ||= [];
+        eventsByName[call.function.name].push({
+          id: call.id,
+          name: call.function.name,
+          args: call.function.arguments,
+          temppath: this.session.temppath
+        });
+        continue;
+      }
+      
+      // Needs user approval — fire hook (will prompt user)
+      let callResult = await this.handleToolCallWithHook(call);
+      results.push(callResult);
+      eventsByName[call.function.name] ||= [];
+      eventsByName[call.function.name].push({
+        id: call.id,
+        name: call.function.name,
+        args: call.function.arguments,
+        temppath: this.session.temppath
+      });
+    }
+    
+    Object.keys(eventsByName).map(name => {
+      let tool = this.toolbox.get(name), msg;
+      if (tool) {
+        try {
+          msg = tool.message(eventsByName[name]);
+        } catch (err) {
+          Logger.log(`tool message error (${name}): ${err.message}`);
+          msg = null;
+        }
+        if (msg)
+          Events.emit('tool:message', { content: msg });
+      }
+    });
+    
+    results.forEach(msg => {
+      msg.role = 'tool';
+      msg.tool_name = msg.name;
+      delete msg.name;
+    });
+    Events.emit('tool_calls:response', results);
   }
   
   estimateHistoryTokens() {

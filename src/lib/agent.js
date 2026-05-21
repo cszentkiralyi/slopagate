@@ -50,9 +50,9 @@ class Agent {
         this.callbacks.onModelContent(content);
       }
       
-      // If tool calls, get results and send back
+      // If tool calls, call callback with array (caller executes and returns results)
       if (toolCalls && toolCalls.length > 0) {
-        toolResults = await this.handleToolCalls(toolCalls);
+        toolResults = await this.callbacks.onToolCalls(toolCalls);
         // Send tool results back to continue turn
         context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
       }
@@ -182,37 +182,7 @@ class Agent {
     return { content, toolCalls };
   }
 
-  /**
-   * Handle tool calls.
-   * @param {Array} toolCalls - List of tool calls
-   * @returns {Promise<Object>} Tool results
-   */
-  async handleToolCalls(toolCalls) {
-    const results = [];
-    
-    for (const tc of toolCalls) {
-      let args;
-      try {
-        args = typeof tc.arguments === 'string' ? JSON.parse(tc.arguments) : tc.arguments;
-      } catch (err) {
-        results.push({
-          id: tc.id,
-          name: tc.name,
-          content: `Error: failed to parse arguments for "${tc.name}"`
-        });
-        continue;
-      }
-      
-      const toolResult = await this.callbacks.onToolCall(tc.name, args);
-      results.push({
-        id: tc.id,
-        name: tc.name,
-        content: toolResult
-      });
-    }
-    
-    return results;
-  }
+ 
   
   /**
    * Abort the current model turn.
