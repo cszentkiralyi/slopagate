@@ -14,7 +14,6 @@ class Session {
   #promptDoc;
   #tempdir = null;
   
-  #activeContext = null;
   #masterContext = null;
 
   #abortController = null;
@@ -27,9 +26,7 @@ class Session {
   tools;
 
   get history() { return this.#masterContext.messages; }
-  get messages() { return this.#activeContext.messages; }
-  set messages(m) { this.#activeContext.messages = m; }
-  get context() { return this.#activeContext; }
+  get messages() { return this.#masterContext.messages; }
   get id() { return this.#id; }
   get model() { return this.config.get('model'); }
   get think() { return this.config.get('think'); }
@@ -49,7 +46,7 @@ class Session {
     this.config = props.config || new Map();
     this.tools = props.tools || [];
     
-    this.#masterContext = this.#activeContext = new Context({
+    this.#masterContext = new Context({
       config: this.config,
       appendOnly: true,
       summarize: async (t) => this.summarize(t)
@@ -76,7 +73,7 @@ class Session {
     this.#abortController = new AbortController();
   }
   removeLastUserMessage() {
-    let msgs = this.#activeContext.messages;
+    let msgs = this.#masterContext.messages;
     for (let i = msgs.length - 1; i >= 0; i--) {
       if (msgs[i].role === 'user') {
         msgs.splice(i, 1);
@@ -139,9 +136,9 @@ class Session {
     try {
       /*
       Logger.log(`Session: sending ${JSON.stringify({
-        system: this.#activeContext.other_tokens,
-        up: this.#activeContext.tokens_up,
-        down: this.#activeContext.tokens_down
+        system: this.#masterContext.other_tokens,
+        up: this.#masterContext.tokens_up,
+        down: this.#masterContext.tokens_down
       })}`);
       */
       let response = await fetch(this.connection, {
@@ -306,9 +303,8 @@ class Session {
   }
 
   async send(...outgoing) {
-    this.addToContext(...outgoing);
-    //Logger.log(`Session: len=${this.context.messages.length} outgoing=${JSON.stringify(outgoing)}`);
-    this.#activeContext = await this.#activeContext.fork({
+    // Fork from master context
+    let forked = await this.#masterContext.fork({
       system_prompt: this.#promptDoc?.render(this.config),
       layers: [
         //'system_prompt',
@@ -321,9 +317,12 @@ class Session {
       ]
     });
     
-    //Logger.log(`Session next messages: ${JSON.stringify(this.#activeContext.messages)}`);
+    // Add outgoing messages to forked context
+    for (let msg of outgoing) {
+      forked.add(msg);
+    }
     
-    const systemMsg = this.#activeContext.system_prompt;
+    const systemMsg = forked.system_prompt;
     if (!this.#loggedSystemMessage) {
       Logger.log(`Session: system message = ${systemMsg}`);
       this.#loggedSystemMessage = true;
@@ -331,20 +330,18 @@ class Session {
     
     return await this.send_internal([
       { role: 'system', content: systemMsg },
-      ...this.#activeContext.messages
+      ...forked.messages
     ]);
   }
   
   addToContext(...messages) {
-    if (this.#masterContext !== this.#activeContext)
-      this.#masterContext.add(...messages);
-    this.#activeContext.add(...messages);
+    this.#masterContext.add(...messages);
   }
 
   async compact() {
     Logger.log(`Session: compact() called, forking context.`);
-    // Replace activeContext with a full compact fork, keeping masterContext history
-    let newActive = await this.#activeContext.fork({
+    // Fork from master context with compaction layers
+    let newContext = await this.#masterContext.fork({
       layers: [
         //'system_prompt',
         'tool_age',
@@ -374,8 +371,7 @@ class Session {
       }
     });
     Logger.log(`Session: fork completed.`);
-    this.#activeContext = newActive;
-    return this.#activeContext;
+    return newContext;
   }
   
   
@@ -386,7 +382,7 @@ class Session {
       think: session.think,
       connection: session.connection,
       tools: session.tools.map(t => t.name),
-      history: session.history
+      history: session.#masterContext.messages
     };
     return JSON.stringify(data);
   }

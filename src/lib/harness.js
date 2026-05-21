@@ -29,7 +29,7 @@ class Harness {
   #outputTokens = 0;
   #timers = new Timers();
   
-  session = null;
+ session = null;
   toolbox = null;
   skills = null;
   config = null;
@@ -37,6 +37,7 @@ class Harness {
   commands = [];
 
   #modelResponded = false;
+  #activeContext = null;
   
   #serializeSession() {
     try {
@@ -82,9 +83,12 @@ class Harness {
       ...(props && props.session || null)
     });
     
+    // Initialize active context from session's master context
+    this.#activeContext = await this.session.compact();
+    
     // Stub Agent instance (not yet used in flow, but wired up for Agent class)
     this.agent = new Agent({
-      context: this.session,
+      context: this.#activeContext,
       tools: this.toolbox.all(),
       callbacks: {
         onToolCalls: async (toolCalls) => {
@@ -203,7 +207,7 @@ class Harness {
     if (this.#userMessagesSinceRecap < 2) return;
     
     // Filter to only 'user' and 'assistant' role messages with content
-    const filteredMessages = this.session.context.messages.filter(
+    const filteredMessages = this.session.messages.filter(
       m => (m.role === 'user' || m.role === 'assistant') && m.content?.length > 0
     );
     
@@ -310,12 +314,18 @@ class Harness {
     this.#userMessagesSinceRecap++;
     this.#modelResponded = false;
 
+    // Fork from session's master context
+    this.#activeContext = await this.session.compact();
+    this.#activeContext.add(message);
+    
     // Update statusline tokens when message is actually sent
     Events.emit('metrics:tokens', {
       inputTokens: this.#inputTokens,
       outputTokens: this.#outputTokens
     });
-    let response = await this.session.send(message);
+    
+    // Pass active context to Agent
+    let response = await this.agent.startTurn(event.message, this.session.abortController, this.#activeContext);
     Events.emit('model:response', { response });
   }
   
@@ -380,7 +390,7 @@ class Harness {
       }
       if (message.content || message.tool_calls) {
         if (message.content) message.content = message.content.trim();
-        this.session.addToContext(message);
+        this.#activeContext.add(message);
         Events.emit('metrics:tokens', {
           inputTokens: this.#inputTokens,
           outputTokens: this.#outputTokens
@@ -402,7 +412,8 @@ class Harness {
   
   async onToolsResponse(messages) {
     try {
-      let response = await this.session.send(...messages);
+      // Use active context for tool response
+      let response = await this.session.send_internal(messages, this.session.abortController);
       Events.emit('model:response', { response });
       this.#serializeSession();
     } catch (err) {
