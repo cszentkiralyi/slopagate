@@ -1,4 +1,5 @@
 const { Logger } = require('../util.js');
+const { Hooks } = require('./hooks.js');
 
 /**
  * Agent - Pure turn loop orchestrator.
@@ -17,6 +18,11 @@ class Agent {
     this.config = props.config;
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props.abortController || null;
+    this.hooks = new Hooks({ hooks: ['message'] });  // Own isolated hooks
+    // Accept hooks prop but ignore it - use internal Hooks instance
+    if (props.hooks) {
+      // Can be extended later to support registering handlers
+    }
   }
   
   #abortController;
@@ -33,6 +39,9 @@ class Agent {
       this.context = context;
     }
     
+    // Fire 'message' hook before adding to context
+    this.hooks.emit('message', { role: 'user', content: userMessage });
+    
     // Add user message to context
     this.context.messages.push({ role: 'user', content: userMessage });
     
@@ -47,16 +56,21 @@ class Agent {
       // Parse response
       const { content, toolCalls } = this.handleResponse(response);
       
-      // If model content, send to callback
+      // If model content, send to callback and add to context
       if (content) {
         this.callbacks.onModelContent(content);
+        const message = { role: 'assistant', content };
+        this.hooks.emit('message', message);
+        this.context.messages.push(message);
       }
       
       // If tool calls, call callback with array (caller executes and returns results)
       if (toolCalls && toolCalls.length > 0) {
         toolResults = await this.callbacks.onToolCalls(toolCalls);
         // Send tool results back to continue turn
-        this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
+        const message = { role: 'tool', content: JSON.stringify(toolResults) };
+        this.hooks.emit('message', message);
+        this.context.messages.push(message);
       }
     } while (toolResults !== null);
     

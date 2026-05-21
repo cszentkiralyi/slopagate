@@ -20,6 +20,7 @@ const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 const MemoryTool = require('../tools/memory.js');
 const ActivateSkillTool = require('../tools/activate-skill.js');
+const Agent = require('../lib/agent.js');
 
 class Harness {
   static TOOL_TIMEOUT = 15 * 1000;
@@ -83,12 +84,9 @@ class Harness {
       ...(props && props.session || null)
     });
     
-    // Initialize active context from session's master context
-    this.#activeContext = await this.session.compact();
-    
-    // Stub Agent instance (not yet used in flow, but wired up for Agent class)
+    // Stub Agent instance — will fork from session master context per-turn
     this.agent = new Agent({
-      context: this.#activeContext,
+      context: this.session.context,
       tools: this.toolbox.all(),
       callbacks: {
         onToolCalls: async (toolCalls) => {
@@ -105,8 +103,6 @@ class Harness {
           this.#serializeSession();
         }
       },
-      // Register hook handler on Agent's isolated Hooks instance
-     this.agent.hooks.on('message', (userMessage) => Events.emit('agent:message', { userMessage }));
       config: this.config,
       abortController: null
     });
