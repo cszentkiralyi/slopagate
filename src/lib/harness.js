@@ -105,8 +105,16 @@ class Harness {
           this.#serializeSession();
         }
       },
+      // Register hook handler on Agent's isolated Hooks instance
+     this.agent.hooks.on('message', (userMessage) => Events.emit('agent:message', { userMessage }));
       config: this.config,
       abortController: null
+    });
+    
+    // Register hook handler to add messages to session master context
+    this.agent.hooks.on('message', (message) => {
+      // Add to session master context
+      this.session.context.add(message);
     });
     
     // Build commands from skills
