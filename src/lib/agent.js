@@ -25,14 +25,16 @@ class Agent {
    * Start a model turn with the given user message.
    * @param {string} userMessage - User's input
    * @param {AbortController} abortController - Optional abort controller
+   * @param {Object} context - Optional context (sets this.context if provided)
    * @returns {Promise<Object>} Final result (model content or tool results)
    */
-  async startTurn(userMessage, abortController) {
-    // Fork context from session's master
-    const context = { ...this.context.masterContext };
+  async startTurn(userMessage, abortController, context) {
+    if (context !== null && context !== undefined) {
+      this.context = context;
+    }
     
     // Add user message to context
-    context.messages.push({ role: 'user', content: userMessage });
+    this.context.messages.push({ role: 'user', content: userMessage });
     
     // Turn loop: send, parse, handle tools, repeat
     let response;
@@ -40,7 +42,7 @@ class Agent {
     
     do {
       // Send context to model endpoint
-      response = await this.sendToEndpoint(context, abortController);
+      response = await this.sendToEndpoint(this.context, abortController);
       
       // Parse response
       const { content, toolCalls } = this.handleResponse(response);
@@ -54,7 +56,7 @@ class Agent {
       if (toolCalls && toolCalls.length > 0) {
         toolResults = await this.callbacks.onToolCalls(toolCalls);
         // Send tool results back to continue turn
-        context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
+        this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
       }
     } while (toolResults !== null);
     
