@@ -9,7 +9,7 @@ const Hooks = require('./hooks.js');
  * - Run the turn loop: send → parse → handle tools → repeat
  * - NO business logic, NO decision-making
  * 
- * @param {Object} props - { context, callbacks, config }
+ * @param {Object} props - { context, callbacks?, config }
  */
 class Agent {
   constructor(props) {
@@ -66,13 +66,13 @@ class Agent {
       content = currentContent;
       
       // Add model's single message to context once
-      this.callbacks.onModelContent(content);
+      this.callbacks.onModelContent?.(content);
       this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
       this.context.messages.push({ role: 'assistant', content, tool_calls: toolCalls });
 
       // If tool calls, execute them and return results for next iteration
       if (toolCalls && toolCalls.length > 0) {
-        toolResults = await this.callbacks.onToolCalls(toolCalls);
+        toolResults = this.callbacks.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
         this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
         this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
       }
@@ -196,11 +196,15 @@ class Agent {
       content = message.content;
     }
     if (message && message.tool_calls && message.tool_calls.length) {
-      toolCalls = message.tool_calls.map(tc => ({
-        id: tc.id,
-        name: tc.function.name,
-        arguments: tc.function.arguments
-      }));
+      toolCalls = message.tool_calls
+        .filter(tc => tc.function && tc.function.name)
+        .map(tc => ({
+          id: tc.id,
+          function: {
+            name: tc.function.name,
+            arguments: tc.function.arguments
+          }
+        }));
     }
     
     return { content, toolCalls };

@@ -336,19 +336,17 @@ class Harness {
         let summaryContext = new Context({
           config: this.session.config,
           system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
-          messages: [{ role: 'user', content: transcript }]
+          messages: []
         });
-        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
-        let response = await this.session.private(summaryContext, summaryMessage);
-        if (response.message && response.message.content) {
-          return response.message.content;
-        } else if (response.message && response.message.tool_calls) {
-          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
-          if (typeof txt === 'string') {
-            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
-          }
-        }
-        return null;
+        
+        let agent = new Agent({
+          context: summaryContext,
+          config: this.session.config,
+          abortController: this.session.abortController
+        });
+        
+        let result = await agent.startTurn(transcript, this.session.abortController);
+        return result.content;
       }
     });
     this.#activeContext.add(message);
@@ -446,16 +444,8 @@ class Harness {
   }
   
   async onToolsResponse(messages) {
-    try {
-      // Use active context for tool response
-      let response = await this.session.send_internal(messages, this.session.abortController);
-      Events.emit('model:response', { response });
-      this.#serializeSession();
-    } catch (err) {
-      Logger.log(`[onToolsResponse] error: ${err.message}`);
-      Events.emit('model:content', { done: true, content: ANSI.fg(`Error: ${err.message}`, 'red') });
-      Events.emit('turn:user');
-    }
+    // Agent loop handles the next sendToEndpoint call
+    this.#serializeSession();
   }
   
   async runToolCall(call) {
