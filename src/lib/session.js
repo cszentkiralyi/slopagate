@@ -191,7 +191,7 @@ class Session {
 
       // On occasion, we get reasoning='thoughts....</think>main content' instead of
       // having the reasoning & content split across the proper attributes.
-      if (message && message.reasoning_content.length && !message.content.length
+      if (message?.reasoning_content?.length && !message?.content?.length
           && (endThink = message.reasoning_content.indexOf('</think>')) > -1
               && endThink < message.reasoning_content.length - 1 - 7) {
         message.content = message.reasoning_content.slice(endThink + 8);

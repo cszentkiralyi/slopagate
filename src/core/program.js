@@ -22,6 +22,7 @@ class Program {
   
   #currentMessageId = null;
   #modelTurnSpinner = null;
+  #commandSpinner = null;
 
   static SPINNER_MESSAGES = [
     { present: 'Autofilling', past: 'Autofilled' },
@@ -582,7 +583,7 @@ class Program {
           { label: 'Yes', value: 'yes', default: true },
           { label: 'Yes for this session', value: 'yes+' },
           { label: 'No', value: 'no' },
-          { label: 'No for this session', value: 'no+' },
+          // { label: 'No for this session', value: 'no+' },
         ], result = await this.interface.getUserChoice(msg, choices);
 
     //Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
@@ -592,9 +593,9 @@ class Program {
         await this.#suggestParent(tool.name, perms);
       }
       return null;
-    } else if (result === 'no+') {
-      this.permissions.deny(tool.name, perms.scope);
-      return { cancelled: true, error: `Error: operation not permitted` };
+    // } else if (result === 'no+') {
+    //   this.permissions.deny(tool.name, perms.scope);
+    //   return { cancelled: true, error: `Error: operation not permitted` };
     }
 
     //Logger.log(`Program: permission denied`);
@@ -633,7 +634,6 @@ class Program {
   #startAfkTimer() {
     this.timers.start('afk', Program.AFK_TIMEOUT, () => this.#onAfkTimeout());
   }
-  #commandSpinner = null;
   #parentSuggestionCounts = new Map();
   #stopAfkTimer() {
     this.timers.stop('afk');

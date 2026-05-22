@@ -158,7 +158,7 @@ class Agent {
         });
       }
 
-      if (message && message.reasoning_content.length && !message.content.length) {
+      if (message?.reasoning_content?.length && !message?.content?.length) {
         const endThink = message.reasoning_content.indexOf('</think>');
         if (endThink > -1 && endThink < message.reasoning_content.length - 1 - 7) {
           message.content = message.reasoning_content.slice(endThink + 8);
@@ -199,6 +199,7 @@ class Agent {
       toolCalls = message.tool_calls
         .filter(tc => tc.function && tc.function.name)
         .map(tc => ({
+          type: 'function',
           id: tc.id,
           function: {
             name: tc.function.name,

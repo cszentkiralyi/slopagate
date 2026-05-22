@@ -1,0 +1,290 @@
+# Natural Language Loop Detection in AI Harnesses
+
+## Overview
+
+When an AI model generates content in chunks (streaming responses), it can enter reasoning loops—either repeating the same thoughts consecutively or cycling through patterns. Detecting these loops before they consume excessive tokens or time is critical for harness stability.
+
+## Problem Statement
+
+A model might produce:
+
+```
+[Chunk 1] "Let me analyze the file structure..."
+[Chunk 2] "I should check the imports..."
+[Chunk 3] "The dependencies look fine..."
+[Chunk 4] "Let me analyze the file structure..."
+[Chunk 5] "I should check the imports..."
+[Chunk 6] "The dependencies look fine..."
+```
+
+This is **non-consecutive pattern repetition** (A→B→C→A→B→C). Consecutive repetition is easier to detect but misses this more insidious form.
+
+---
+
+## Why This Matters: Real-World Context
+
+Loop detection isn't an academic exercise—it's a stability requirement for production AI systems. Consider these scenarios:
+
+### Token Economy
+A single looping response can consume hundreds or thousands of tokens. In a commercial setting where tokens cost money, this translates to real expenses. A 10-minute loop at 10 tokens/second = 600 tokens. Multiply by 100 concurrent users, and you're talking significant waste.
+
+### User Experience
+Users don't appreciate seeing the same thoughts repeated:
+- "Let me check the imports..." (x5)
+- "I should verify the dependencies..." (x5)
+
+This erodes trust in the AI system. Users interpret loops as the model being "stuck" or confused, leading to abandonment.
+
+### System Stability
+Loops can cascade:
+1. Model loops → consumes excessive tokens
+2. API quota exhausted → service degraded
+3. Rate limit triggers → other users affected
+
+In high-throughput environments, one looping session can impact the entire user base.
+
+### Where This Applies
+
+| Domain | Why Loops Matter |
+|--------|------------------|
+| **IDE assistants** | Code generation is iterative; loops indicate the model can't progress |
+| **Customer support bots** | A looping response means the user gets no help |
+| **Data analysis tools** | Analysis loops waste compute resources |
+| **Long-form content** | A 10k token essay with a 500-token loop is unacceptable |
+
+### The Progress vs. Repetition Distinction
+
+The core challenge: **repetition isn't inherently bad, but unproductive repetition is.**
+
+- *Good repetition*: "The answer is 42. The answer is definitely 42." (emphasis, not loop)
+- *Bad repetition*: "Let me think. Let me think. Let me think." (stuck in place)
+
+The heuristic must distinguish between **reinforcement** and **looping**. This is why we track *pattern sequences* rather than just individual chunk similarity.
+
+---
+
+## Detection Strategies
+
+### 1. Sliding Window Similarity
+
+Maintain a window of recent chunks and compare each new chunk against all previous ones in the window.
+
+**Algorithm:**
+
+```
+window_size = 10
+similarity_threshold = 0.75  # 75% similarity = ~2 bits Hamming distance
+
+for each new_chunk:
+    max_sim = max(similarity(new_chunk, old_chunk) for old_chunk in window)
+    if max_sim > similarity_threshold:
+        count_matches(new_chunk, window)
+        if match_count >= 3:
+            FLAG_LOOP
+    window.append(new_chunk)
+    if len(window) > window_size:
+        window.pop(0)
+```
+
+**Key tuning parameters:**
+
+| Parameter | Range | Effect |
+|-----------|-------|--------|
+| `window_size` | 6-15 | Larger windows catch slower cycles; smaller windows catch faster loops |
+| `similarity_threshold` | 0.65-0.85 | Higher = fewer false positives but more missed loops |
+| `match_count` | 2-5 | Lower = more sensitive but more aggressive |
+
+### 2. Dominant Pattern Detection
+
+Cluster chunks by similarity and track which patterns dominate the window.
+
+```
+patterns = {}  # pattern_id → count
+
+for each new_chunk:
+    best_pattern = find_closest_pattern(new_chunk, patterns)
+    if best_pattern is None:
+        patterns[new_chunk] = 1
+    else:
+        patterns[best_pattern] += 1
+    
+    for pattern_id, count in patterns.items():
+        if count >= 3 and pattern_id in [last_3_patterns]:
+            FLAG_LOOP
+```
+
+This catches when the model keeps returning to the same ideas, even if interleaved with different phrasing.
+
+---
+
+## Example: Interleaved Pattern Detection
+
+Given chunks:
+
+```
+0: "Let me think about this..." (A)
+1: "I need to verify..." (B)
+2: "The output seems..." (C)
+3: "Let me think about this..." (A')
+4: "I need to verify..." (B')
+5: "The output seems..." (C')
+6: "Let me think about this..." (A'')
+```
+
+**Sliding window trace (window_size=10, threshold=0.75):**
+
+| Chunk | Similarity to window | Max similarity | Match count | Action |
+|-------|---------------------|----------------|-------------|--------|
+| 0 | N/A | N/A | 0 | Add to window |
+| 1 | 0.12 | 0.12 | 0 | Add to window |
+| 2 | 0.08 | 0.08 | 0 | Add to window |
+| 3 | 0.78 (vs chunk 0) | 0.78 | 1 | Add to window |
+| 4 | 0.76 (vs chunk 1) | 0.76 | 1 | Add to window |
+| 5 | 0.74 (vs chunk 2) | 0.74 | 1 | Add to window |
+| 6 | 0.79 (vs chunk 0, 3) | 0.79 | 2 | Add to window |
+
+At chunk 6, we have 2 matches for pattern A. If we wait for chunk 7 (another A), we'd have 3 matches and trigger the loop.
+
+**Optimization:** Instead of waiting for 3 matches, we can detect the **pattern emerging** (2 matches in a row) and interrupt early.
+
+---
+
+## Sensitivity Tuning
+
+### Conservative (fewer false positives)
+```
+window_size = 15
+similarity_threshold = 0.80
+match_count = 4
+```
+- Best for: Long, complex reasoning tasks
+- Risk: May miss subtle loops, waste more tokens
+
+### Balanced (default)
+```
+window_size = 10
+similarity_threshold = 0.75
+match_count = 3
+```
+- Best for: General-purpose harness
+- Risk: Some false positives on legitimate repetition
+
+### Aggressive (more sensitive)
+```
+window_size = 6
+similarity_threshold = 0.70
+match_count = 2
+```
+- Best for: Token-limited or high-cost scenarios
+- Risk: May interrupt valid reasoning patterns
+
+### Context-Aware
+```
+if task_type == "code_generation":
+    # Code often repeats patterns legitimately
+    similarity_threshold = 0.80
+    match_count = 4
+elif task_type == "reasoning":
+    # Reasoning should not loop
+    similarity_threshold = 0.70
+    match_count = 2
+```
+
+---
+
+## Interruption Methods
+
+### 1. Immediate Termination
+Stop the stream as soon as a loop is detected.
+
+```
+if detect_loop():
+    stream.abort()
+    return cached_response or fallback_message
+```
+
+**Pros:** Fast, saves tokens  
+**Cons:** May cut off valid reasoning, no recovery
+
+### 2. Timeout with Reset
+Allow N more chunks, then interrupt if loop continues.
+
+```
+loop_start_chunk = current_chunk - N
+if detect_loop() and current_chunk - loop_start_chunk > N:
+    stream.abort()
+    reset_context()
+    continue_stream()
+```
+
+**Pros:** Gives model one more chance to break the cycle  
+**Cons:** Wastes additional tokens
+
+### 3. Context Pruning
+Remove the looping pattern from context instead of aborting.
+
+```
+if detect_loop():
+    # Remove chunks that form the loop pattern
+    remove_chunks(window[0:3])  # Remove the repeating A, B, C
+    continue_stream()
+```
+
+**Pros:** Allows model to recover without full abort  
+**Cons:** May lose important context
+
+### 4. Prompt Injection
+Send a "break the loop" instruction to the model.
+
+```
+if detect_loop():
+    inject_prompt("Break your current thought pattern and try a different approach.")
+    continue_stream()
+```
+
+**Pros:** Non-destructive, model can self-correct  
+**Cons:** Doesn't guarantee the model will listen
+
+### 5. Hybrid (recommended)
+Combine multiple methods for robustness:
+
+```
+if detect_loop():
+    # Method 1: Inject break signal
+    inject_break_signal()
+    
+    # Method 2: Allow recovery window
+    recovery_window = 3  # chunks
+    
+    # Method 3: If loop persists, prune context
+    if detect_loop_after_recovery():
+        prune_context()
+        abort_stream()
+```
+
+---
+
+## Implementation Considerations
+
+### Similarity Metric
+- **SimHash** (recommended): Fast, captures semantic similarity
+- **Cosine similarity** on embeddings: More accurate but slower
+- **Levenshtein distance**: Good for near-identical text, poor for semantic
+
+### Performance
+- Window operations: O(window_size) per chunk
+- For window_size=10, this is negligible even at 100 chunks/sec
+- Consider caching similarity results for repeated patterns
+
+### Edge Cases
+- **Legitimate repetition**: "The answer is 42. The answer is 42." → Should not flag
+- **Progressive refinement**: "Let me check X. Let me check X again but with Y." → Should not flag
+- **Long-term patterns**: Model may loop across minutes of generation → Larger window needed
+
+---
+
+## Conclusion
+
+NL loop detection is essential for harness stability. The sliding window similarity approach with configurable sensitivity parameters provides a flexible foundation. Combining detection with tiered interruption strategies (immediate abort, recovery windows, context pruning) allows the harness to balance between preventing waste and allowing legitimate reasoning.
+
+The key insight: **loops are not just about repetition—they're about lack of progress**. The detection should measure whether new chunks are advancing the reasoning, not just whether they're similar to old ones.

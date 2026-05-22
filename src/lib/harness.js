@@ -597,7 +597,7 @@ class Harness {
     }
     
     let results = [];
-    let eventsByName = {};
+    let eventsById = {};
     
     // Run auto-approved tools in parallel
     if (autoRun.length) {
@@ -612,8 +612,8 @@ class Harness {
         }
         
         results.push(callResult);
-        eventsByName[call.function.name] ||= [];
-        eventsByName[call.function.name].push({
+        eventsById[call.id] ||= [];
+        eventsById[call.id].push({
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
@@ -634,14 +634,14 @@ class Harness {
       }
       
       // Skip if already processed in auto-run
-      if (eventsByName[call.function.name]?.length > 0) continue;
+      if (eventsById[call.id]) continue;
       
       // Skip calls without permission requirements (or if permissions check failed)
       if (!perms || !perms.scope) {
         let callResult = await this.handleToolCallWithHook(call);
         results.push(callResult);
-        eventsByName[call.function.name] ||= [];
-        eventsByName[call.function.name].push({
+        eventsById[call.id] ||= [];
+        eventsById[call.id].push({
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
@@ -663,8 +663,8 @@ class Harness {
       if (approved) {
         let callResult = await this.runToolCall(call);
         results.push(callResult);
-        eventsByName[call.function.name] ||= [];
-        eventsByName[call.function.name].push({
+        eventsById[call.id] ||= [];
+        eventsById[call.id].push({
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
@@ -676,8 +676,8 @@ class Harness {
       // Needs user approval — fire hook (will prompt user)
       let callResult = await this.handleToolCallWithHook(call);
       results.push(callResult);
-      eventsByName[call.function.name] ||= [];
-      eventsByName[call.function.name].push({
+      eventsById[call.id] ||= [];
+      eventsById[call.id].push({
         id: call.id,
         name: call.function.name,
         args: call.function.arguments,
@@ -685,17 +685,28 @@ class Harness {
       });
     }
     
-    Object.keys(eventsByName).map(name => {
-      let tool = this.toolbox.get(name), msg;
+    // Group events by tool name for message display
+    let eventsByName = {};
+    for (let call of tool_calls) {
+      let evt = eventsById[call.id];
+      if (evt) {
+        let toolName = call.function.name;
+        eventsByName[toolName] ||= [];
+        eventsByName[toolName].push(...evt);
+      }
+    }
+    Object.keys(eventsByName).forEach(toolName => {
+      let tool = this.toolbox.get(toolName);
       if (tool) {
+        let msg;
         try {
-          msg = tool.message(eventsByName[name]);
+          msg = tool.message(eventsByName[toolName]);
+          if (msg)
+            Events.emit('tool:message', { content: msg });
         } catch (err) {
-          Logger.log(`tool message error (${name}): ${err.message}`);
+          Logger.log(`tool message error (${toolName}): ${err.message}`);
           msg = null;
         }
-        if (msg)
-          Events.emit('tool:message', { content: msg });
       }
     });
     
@@ -705,6 +716,7 @@ class Harness {
       delete msg.name;
     });
     Events.emit('tool_calls:response', results);
+    return results;
   }
   
   estimateHistoryTokens() {
