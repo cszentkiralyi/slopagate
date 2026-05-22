@@ -101,7 +101,7 @@ class Agent {
     const keep_alive = this.config.get('keep_alive') || '5m';
     const num_predict = this.config.get('num_predict') || 2 ** 14;
     const reasoning_budget = this.config.get('reasoning_budget') || 2 ** 18;
-    const tools = this.tools || [];
+    const tools = (this.tools || []).map(t => t.spec);
     
     let payload = {
       model: model,
