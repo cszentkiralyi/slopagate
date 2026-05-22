@@ -500,7 +500,7 @@ class Program {
   }
   updateStatuslineTokens({ inputTokens, outputTokens }) {
     let txt = this.interface.statusline.right,
-        est = this.harness.session.context.estimates, s, pct, c;
+        est = this.harness.context.estimates, s, pct, c;
     let estUsed = est.system_prompt + est.messages + est.reserved;
     if (Number.isNaN(inputTokens) || inputTokens == null)
       inputTokens = txt.inputTokens ?? estUsed;
@@ -531,7 +531,7 @@ class Program {
       return { response: `Error: failed to parse arguments for "${toolCall.function.name}" — model returned malformed JSON` };
     }
     
-    /*
+    //*
     if ((tool.name === 'StringSearch' || tool.name === 'Read')
         && args?.file_path) {
       const file_path = args.file_path;
@@ -552,8 +552,8 @@ class Program {
         }
       }
     }
-    EXPERIMENT DISABLED
-      */
+    //EXPERIMENT DISABLED
+    //  */
     
     const perms = tool.permissions(toolCall.function.arguments);
     //Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);

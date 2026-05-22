@@ -53,6 +53,7 @@ class Harness {
 
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
+  get context() { return this.#activeContext; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
@@ -84,9 +85,12 @@ class Harness {
       ...(props && props.session || null)
     });
     
-    // Stub Agent instance — will fork from session master context per-turn
+    // Active context starts as a reference to session's context
+    this.#activeContext = this.session.context;
+    
+    // Agent instance — forks from our active context per-turn
     this.agent = new Agent({
-      context: this.session.context,
+      context: this.#activeContext,
       tools: this.toolbox.all(),
       callbacks: {
         onToolCalls: async (toolCalls) => {
@@ -107,9 +111,9 @@ class Harness {
       abortController: null
     });
     
-    // Register hook handler to add messages to session master context
+    // Register hook handler to add messages to session context
     this.agent.hooks.on('message', (message) => {
-      // Add to session master context
+      // Add to session context
       this.session.context.add(message);
     });
     
@@ -318,8 +322,35 @@ class Harness {
     this.#userMessagesSinceRecap++;
     this.#modelResponded = false;
 
-    // Fork from session's master context
-    this.#activeContext = await this.session.compact();
+    // Fork from our own active context and apply compaction layers
+    this.#activeContext = await this.#activeContext.fork({
+      layers: [
+        'tool_age',
+        'tool_error',
+        'tool_length',
+        'tool_total',
+        'model_reasoning',
+        'chat_summary'
+      ],
+      summarize: async (transcript) => {
+        let summaryContext = new Context({
+          config: this.session.config,
+          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
+          messages: [{ role: 'user', content: transcript }]
+        });
+        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
+        let response = await this.session.private(summaryContext, summaryMessage);
+        if (response.message && response.message.content) {
+          return response.message.content;
+        } else if (response.message && response.message.tool_calls) {
+          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
+          if (typeof txt === 'string') {
+            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
+          }
+        }
+        return null;
+      }
+    });
     this.#activeContext.add(message);
     
     // Update statusline tokens when message is actually sent

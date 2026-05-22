@@ -25,6 +25,7 @@ class Session {
 
   tools;
 
+  get context() { return this.#masterContext; }
   get history() { return this.#masterContext.messages; }
   get messages() { return this.#masterContext.messages; }
   get id() { return this.#id; }

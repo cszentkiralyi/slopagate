@@ -1,5 +1,5 @@
 const { Logger } = require('../util.js');
-const { Hooks } = require('./hooks.js');
+const Hooks = require('./hooks.js');
 
 /**
  * Agent - Pure turn loop orchestrator.
@@ -47,32 +47,41 @@ class Agent {
     
     // Turn loop: send, parse, handle tools, repeat
     let response;
+    let content = null;
     let toolResults = null;
+    let hasError = false;
     
     do {
       // Send context to model endpoint
-      response = await this.sendToEndpoint(this.context, abortController);
+      try {
+        response = await this.sendToEndpoint(this.context, abortController);
+      } catch (err) {
+        hasError = true;
+        Logger.log(`Agent.startTurn request error: ${err.message || JSON.stringify(err)}`);
+        response = { error: err.message || 'Request failed', message: null };
+      }
       
       // Parse response
-      const { content, toolCalls } = this.handleResponse(response);
+      const { content: currentContent, toolCalls } = this.handleResponse(response);
+      content = currentContent;
       
-      // If model content, send to callback and add to context
-      if (content) {
-        this.callbacks.onModelContent(content);
-        const message = { role: 'assistant', content };
-        this.hooks.emit('message', message);
-        this.context.messages.push(message);
-      }
-      
-      // If tool calls, call callback with array (caller executes and returns results)
+      // Add model's single message to context once
+      this.callbacks.onModelContent(content);
+      this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
+      this.context.messages.push({ role: 'assistant', content, tool_calls: toolCalls });
+
+      // If tool calls, execute them and return results for next iteration
       if (toolCalls && toolCalls.length > 0) {
         toolResults = await this.callbacks.onToolCalls(toolCalls);
-        // Send tool results back to continue turn
-        const message = { role: 'tool', content: JSON.stringify(toolResults) };
-        this.hooks.emit('message', message);
-        this.context.messages.push(message);
+        this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
+        this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
       }
-    } while (toolResults !== null);
+      
+      // Break on error or no more tool calls
+      if (hasError || response.error || !toolCalls || toolCalls.length === 0) {
+        break;
+      }
+    } while (true);
     
     return { content, toolResults };
   }
@@ -126,10 +135,8 @@ class Agent {
       });
       responseObj = JSON.parse(await responseObj.text());
     } catch (err) {
-      Logger.log(`Session.send_internal response error: ${JSON.stringify(err)}`);
-      if (err.name === 'AbortError') {
-        responseObj = { role: 'assistant', message: { } };
-      }
+      Logger.log(`Agent.sendToEndpoint error: ${err.message || JSON.stringify(err)}`);
+      responseObj = { error: err.message || 'Request failed', message: null };
     }
     
     return this.normalizeResponse(responseObj);
@@ -151,11 +158,12 @@ class Agent {
         });
       }
 
-      if (message && message.reasoning_content.length && !message.content.length
-          && (endThink = message.reasoning_content.indexOf('</think>')) > -1
-              && endThink < message.reasoning_content.length - 1 - 7) {
-        message.content = message.reasoning_content.slice(endThink + 8);
-        message.reasoning_content = message.reasoning_content.slice(0, endThink);
+      if (message && message.reasoning_content.length && !message.content.length) {
+        const endThink = message.reasoning_content.indexOf('</think>');
+        if (endThink > -1 && endThink < message.reasoning_content.length - 1 - 7) {
+          message.content = message.reasoning_content.slice(endThink + 8);
+          message.reasoning_content = message.reasoning_content.slice(0, endThink);
+        }
       }
       
       Logger.log(`Session: final message ${JSON.stringify(message)}`);
