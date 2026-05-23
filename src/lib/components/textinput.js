@@ -175,6 +175,8 @@ class TextInput extends Component {
       }
       if (this.#historyIdx[this.#mode] !== -1) {
         this.#value = modeHistory[this.#historyIdx[this.#mode]];
+      } else {
+        this.#value = '';
       }
       this.#caret = this.#value.length;
     } else if (k ===TextInput.KEYS.RIGHT) { // right

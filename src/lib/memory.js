@@ -35,7 +35,7 @@ class Memory {
         const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
         const { metadata, content: body } = this.parseFrontmatter(content);
         const name = f.replace(/\.md$/, '');
-        const description = metadata.summary || body.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '';
+        const description = metadata.summary || this.autoSummary(body);
         return `- ${name}: ${description}`;
       });
 
@@ -57,6 +57,17 @@ class Memory {
       if (key && val.length) meta[key.trim()] = val.join(':').trim();
     });
     return { metadata: meta, content: match[2], hasFrontmatter: true };
+  }
+
+  autoSummary(body) {
+    const firstLine = body.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '';
+    return this.truncateSummary(firstLine);
+  }
+
+  truncateSummary(text) {
+    const MAX = (30 * 3.5);
+    if (text.length <= MAX) return text;
+    return text.slice(0, MAX);
   }
 
   validateLastUpdated(dateStr) {
@@ -83,7 +94,7 @@ class Memory {
         .map(f => {
           const content = fs.readFileSync(path.join(this.memoryDir, f), 'utf8');
           const { metadata, content: body, hasFrontmatter } = this.parseFrontmatter(content);
-          const summary = metadata.summary || (body.split('\n')[0] || '').trim().replace(/^#+\s*/, '') || f;
+          const summary = metadata.summary || this.autoSummary(body);
           const lastUpdated = metadata.lastUpdated;
 
           if (lastUpdated && !this.validateLastUpdated(lastUpdated)) {
@@ -119,7 +130,7 @@ class Memory {
     }
   }
 
-  write(file, content, type) {
+  write(file, content, type, summary) {
     try {
       Logger.log(`Writing memory file: ${file}`);
       if (!content || !content.trim()) {
@@ -128,7 +139,13 @@ class Memory {
       const filePath = path.join(this.memoryDir, file);
       const timestamp = new Date().toISOString();
       const typeLine = type ? `type: ${type}\n` : '';
-      const frontmatter = `---\nlastUpdated: ${timestamp}\n${typeLine}---\n`;
+      let summaryLine = '';
+      if (summary) {
+        summaryLine = `summary: ${this.truncateSummary(summary)}\n`;
+      } else {
+        summaryLine = `summary: ${this.truncateSummary(content.split('\n')[0]?.trim().replace(/^#+\s*/, '') || '')}\n`;
+      }
+      const frontmatter = `---\nlastUpdated: ${timestamp}\n${typeLine}${summaryLine}---\n`;
       fs.writeFileSync(filePath, frontmatter + content);
       this.createIndex();
     } catch (e) {
