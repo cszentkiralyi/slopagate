@@ -39,6 +39,10 @@ class Agent {
       this.context = context;
     }
     
+    // Store abort controller so agent.abort() can fire it
+    this.#abortController = abortController;
+    const startTime = Date.now();
+    
     // Fire 'message' hook before adding to context
     this.hooks.emit('message', { role: 'user', content: userMessage });
     
@@ -77,13 +81,16 @@ class Agent {
         this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
       }
       
-      // Break on error or no more tool calls
+      // Break on error, no more tool calls, or abort signal
       if (hasError || response.error || !toolCalls || toolCalls.length === 0) {
+        break;
+      }
+      if (this.#abortController?.signal.aborted) {
         break;
       }
     } while (true);
     
-    return { content, toolResults };
+    return { content, toolResults, aborted: !!this.#abortController?.signal.aborted, duration: Date.now() - startTime };
   }
 
   /**

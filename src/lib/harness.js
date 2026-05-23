@@ -11,7 +11,7 @@ const Skills = require('../lib/skills.js');
 const Config = require('../core/config.js');
 const Commands = require('./commands.js');
 
-const { Logger } = require('../util.js');
+const { Logger, formatMs } = require('../util.js');
 
 const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
@@ -360,11 +360,17 @@ class Harness {
     
     // Pass active context to Agent
     let response = await this.agent.startTurn(event.message, this.session.abortController, this.#activeContext);
+    if (response.aborted) {
+      const elapsed = formatMs(response.duration);
+      Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 'red') });
+      Events.emit('turn:user');
+      return;
+    }
     Events.emit('model:response', { response });
   }
   
   onUserAbort(event) {
-    this.session.abort();
+    this.agent.abort();
     // Only undo the last user message if the model hasn't responded yet
     if (!this.#modelResponded) {
       this.session.removeLastUserMessage();
