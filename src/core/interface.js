@@ -1,4 +1,5 @@
 const TUI = require('../lib/tui.js');
+const ANSI = require('../lib/ansi.js');
 const { Logger } = require('../util.js');
 
 class Interface {
@@ -144,11 +145,19 @@ class Interface {
         padding: { left: 1, right: 1 }
       };
     } else if (role === 'tool') {
-      textProps = {
-        id, role, content,
-        padding: { left: 1, right: 2 },
-        fg: 245 /* muted */
-      }
+      let inst = new TUI.StructuredMessage({
+        id,
+        role,
+        /*
+        subject: content,
+        state: 'static',
+        */
+      });
+      this.#chat_history.appendChild(inst);
+      inst.subject = ANSI.fg(content, 245);
+      inst.state = 'static';
+      //this.draw();
+      return;
     } else if (role === 'startup') {
       textProps = {
         id, role, content,

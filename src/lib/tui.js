@@ -7,6 +7,7 @@ const TextInput = require('./components/textinput.js');
 const Spinner = require('./components/spinner.js');
 const Statusline = require('./components/statusline.js');
 const Picker = require('./components/picker.js');
+const StructuredMessage = require('./components/structured-message.js');
 
 module.exports = {
   Component,
@@ -17,5 +18,6 @@ module.exports = {
   TextInput,
   Spinner,
   Statusline,
-  Picker
+  Picker,
+  StructuredMessage
 };
