@@ -39,6 +39,7 @@ class Harness {
 
   #modelResponded = false;
   #activeContext = null;
+  #abortController = new AbortController();
   
   #serializeSession() {
     try {
@@ -333,6 +334,10 @@ class Harness {
     this.#userMessagesSinceRecap++;
     this.#modelResponded = false;
 
+    // Create fresh abort controller for this turn
+    const turnController = new AbortController();
+    this.#abortController = turnController;
+    
     // Fork from our own active context and apply compaction layers
     this.#activeContext = await this.#activeContext.fork({
       layers: [
@@ -353,10 +358,10 @@ class Harness {
         let agent = new Agent({
           context: summaryContext,
           config: this.session.config,
-          abortController: this.session.abortController
+          abortController: turnController
         });
         
-        let result = await agent.startTurn(transcript, this.session.abortController);
+        let result = await agent.startTurn(transcript, turnController);
         return result.content;
       }
     });
@@ -369,7 +374,7 @@ class Harness {
     });
     
     // Pass active context to Agent
-    let response = await this.agent.startTurn(event.message, this.session.abortController, this.#activeContext);
+    let response = await this.agent.startTurn(event.message, turnController, this.#activeContext);
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
       Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 'red') });
@@ -380,7 +385,7 @@ class Harness {
   }
   
   onUserAbort(event) {
-    this.agent.abort();
+    this.#abortController.abort();
     // Only undo the last user message if the model hasn't responded yet
     if (!this.#modelResponded) {
       this.session.removeLastUserMessage();
