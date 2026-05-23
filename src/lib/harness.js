@@ -67,7 +67,7 @@ class Harness {
     
     this.hooks = new Hooks({ hooks: ['tool-call'] });
     
-    this.toolbox = new Toolbox([
+    this.toolbox = new Toolbox(this, [
       new ReadTool(this),
       new EditTool(this),
       new LsTool(this),
@@ -322,6 +322,23 @@ class Harness {
     Events.on('turn:user', hideSpinner);
   }
   
+  /**
+   * Create a message callback for a tool call.
+   * Tools receive this via the `tool` context during execution.
+   * @param {string} callId - The tool call ID
+   * @returns {Function} message callback
+   */
+  createToolMessageCallback(callId) {
+    return ({ state, subject, body }) => {
+      Events.emit('tool:message', {
+        state,
+        subject,
+        body,
+        callId
+      });
+    };
+  }
+
   async dispose() {
     this.#timers.clearAll();
     await this.session.dispose();
@@ -378,7 +395,7 @@ class Harness {
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
       Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 'red') });
-      Events.emit('turn:user');
+      Events.emit('turn:user', { interrupted: true });
       return;
     }
     Events.emit('model:response', { response });

@@ -76,6 +76,10 @@ class BashTool extends Tool {
       return `Error: command "${command.split(' ')[0]}" not allowed.`;
     }
 
+    let summary = command.replaceAll('\n', '\\n');
+    if (summary.length > 40) summary = summary.substring(0, 40) + '...';
+    tool.message({ state: 'static', subject: `Bash(${ANSI.fg(summary, 250)})` });
+
     let maxLines = this.config.get('tool_output_limit') || 20;
     let maxLineLen = this.config.get('tool_line_limit') || 256;
 
@@ -105,24 +109,6 @@ class BashTool extends Tool {
     return await p;
   }
 
-  message(calls) {
-    // Filter calls to only include permitted commands
-    const permittedCalls = calls.filter(c => this.permissionGate(c.args.command) && !this.toolHint(c.args.command));
-    
-    if (permittedCalls.length === 0) return;
-    
-    if (permittedCalls.length == 1) {
-      let { command } = permittedCalls[0].args,
-          summary = command.replaceAll('\n', '\\n');
-      if (summary.length > 40) summary = summary.substring(0, 40) + '...';
-      return `Executing ${ANSI.fg(summary, 250)}`;
-    }
-    let summaries = permittedCalls.map(c => c.args.command.split(' ')[0]),
-        summary = summaries.join(', ');
-    if (summary.length > 40) summary = summary.substring(0, 40) + '...';
-    return `Executing ${permittedCalls.length} commands (${summary})`;
-  }
-  
   permissions(args) {
     const { command } = args;
 

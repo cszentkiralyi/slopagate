@@ -4,9 +4,11 @@ const { Logger } = require('../util.js');
 class Toolbox {
   _handledCalls = new Set();
   _tools = new Map();
+  #harness = null;
   get tools() { return this._tools; }
   
-  constructor(tools) {
+  constructor(harness, tools) {
+    this.#harness = harness;
     if (tools) tools.forEach(t => this.register(t));
   }
 
@@ -22,7 +24,8 @@ class Toolbox {
         if (this._handledCalls.has(id)) return;
         this._handledCalls.add(id);
         try {
-          content = await tool.run(args, temppath);
+          const message = this.#harness?.createToolMessageCallback?.(id);
+          content = await tool.run(args, { temppath, message });
         } catch (err) {
           Logger.log(`tool.run error (${name}): ${err.message}`);
           content = `Error: ${err.message}`;

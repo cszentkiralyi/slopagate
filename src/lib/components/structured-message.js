@@ -7,28 +7,32 @@ class StructuredMessage extends Container {
   #subject = '';
 
   constructor(props) {
-    super(props);
-    Object.assign(this, props);
+    const { subject, state, body, content, ...rest } = props;
+    super(rest);
+    Object.assign(this, rest);
 
     this.spinner = new Spinner({ animation: this.animation, message: '', loop: true, hidden: true });
     this.subjectText = new Text({ content: '', padding: { left: 2 } });
     this.bodyText = new Text({ content: '' });
 
-    this.children = [];
+    this.#subject = subject ?? content;
+    if (state !== undefined) this.#state = state;
+    if (body !== undefined) this.bodyText.content = body;
     this.#rebuildChildren();
   }
 
   #rebuildChildren() {
+    this.children.length = 0;
     if (this.#state === 'spin') {
       this.spinner.hidden = false;
       this.spinner.message = this.#subject || '';
       this.spinner.start();
-      this.children = [this.spinner];
+      this.children.push(this.spinner);
     } else {
       this.spinner.hidden = true;
       this.spinner.stop();
       this.subjectText.content = this.#subject || '';
-      this.children = [this.subjectText];
+      this.children.push(this.subjectText);
     }
     if (this.bodyText.content && this.bodyText.content.length) {
       this.children.push(this.bodyText);
@@ -44,6 +48,8 @@ class StructuredMessage extends Container {
 
   get state() { return this.#state; }
 
+  get subject() { return this.#subject; }
+
   set subject(v) {
     this.#subject = v;
     if (this.#state === 'spin') {
@@ -56,9 +62,13 @@ class StructuredMessage extends Container {
 
   set body(v) {
     this.bodyText.content = v;
-    if (!this.children.includes(this.bodyText)) {
-      this.children.push(this.bodyText);
-      this.children.forEach(c => { c.root = this.root || this; });
+    if (this.bodyText.content && this.bodyText.content.length) {
+      if (!this.children.includes(this.bodyText)) {
+        this.children.push(this.bodyText);
+        this.children.forEach(c => { c.root = this.root || this; });
+      }
+    } else if (this.children.includes(this.bodyText)) {
+      this.children.splice(this.children.indexOf(this.bodyText), 1);
     }
     this.root?.draw();
   }

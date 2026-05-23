@@ -437,11 +437,14 @@ class Program {
     });
     Events.on('turn:user', (event) => {
       this.#startAfkTimer();
-      if (this.#modelTurnSpinner) {
+      if (this.#modelTurnSpinner && !event?.interrupted) {
         const elapsed = Date.now() - this.#turn_start;
         const elapsedStr = formatMs(elapsed);
         let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
         this.interface.addMessage({ role: 'tool', content: `${msg.past} for ${elapsedStr}` });
+        this.interface.statusline.hide(this.#modelTurnSpinner);
+        this.#modelTurnSpinner = null;
+      } else if (this.#modelTurnSpinner) {
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
       }
@@ -449,10 +452,7 @@ class Program {
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
-      this.interface.addMessage({ role: 'tool', content: event.content });
-      if (!event.done && !this.#modelTurnSpinner) {
-        this.#modelTurnSpinner = this.interface.statusline.showSpinner(this.spinnerMessage);
-      }
+      this.interface.addMessage({ role: 'tool', ...event });
       this.interface.draw();
     });
 

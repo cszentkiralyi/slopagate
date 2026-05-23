@@ -128,7 +128,7 @@ class Interface {
     return true;
   }
 
-  addMessage({ role, content, id }) {
+  addMessage({ role, content, id, state, subject, body }) {
     let textProps;
     
     if (role === 'user') {
@@ -144,18 +144,12 @@ class Interface {
         padding: { left: 2 }
       };
     } else if (role === 'tool') {
-      let inst = new TUI.StructuredMessage({
-        id,
-        role,
-        /*
-        subject: content,
-        state: 'static',
-        */
-      });
+      let inst = new TUI.StructuredMessage({ id, role });
       this.#chat_history.appendChild(inst);
-      inst.subject = ANSI.fg(content, 245);
-      inst.state = 'static';
-      //this.draw();
+      inst.subject = ANSI.fg(subject || content, 245);
+      inst.state = state || 'static';
+      inst.body = body || null;
+      this.draw();
       return;
     } else if (role === 'startup') {
       textProps = {

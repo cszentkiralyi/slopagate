@@ -37,9 +37,14 @@ class ReadTool extends Tool {
     try { start_line = parseInt(start_line, 10) } catch (e) { start_line = null; }
     try { end_line = parseInt(end_line, 10) } catch (e) { end_line = null; }
     
-    let content;
+    let message = '';
+    if (start_line || end_line)
+      message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
+    tool.message({ state: 'spin', subject: `Read(${this.simplifyPath(file_path)}${message})` });
+    
+    let result;
     try {
-      content = await fs.readFile(file_path, { encoding: 'utf-8' });
+      let content = await fs.readFile(file_path, { encoding: 'utf-8' });
       content = content.split('\n');
       if (start_line) {
         content.splice(0, start_line);
@@ -47,24 +52,13 @@ class ReadTool extends Tool {
       if (end_line) {
         content.splice(end_line);
       }
-      content = addLineNumbers(content, start_line || 1);
-      return content;
+      result = addLineNumbers(content, start_line || 1);
     } catch (err) {
-      return `Error: file ${file_path} not found!`;
+      result = `Error: file ${file_path} not found!`;
     }
-  }
-  
-  message(calls) {
-    if (calls.length == 1) {
-      let { file_path, start_line, end_line } = calls[0].args, message = '';
-      if (start_line || end_line)
-        message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
-      return `Reading ${this.simplifyPath(file_path)}${message}`;
-    }
-    let filenames = calls.map(c => c.args.file_path.split('/').slice(-1)),
-        fstr = filenames.join(', ');
-    if (fstr.length > 20) fstr = fstr.substring(0, 40) + '...';
-    return `Reading ${calls.length} files (${fstr})`;
+    
+    tool.message({ state: 'done', subject: `Read(${this.simplifyPath(file_path)}${message})` });
+    return result;
   }
 }
 

@@ -28,9 +28,10 @@ class Tool {
   
   constructor(props) { Object.assign(this, props); }
   
-  async run(args, temppath) {
+  async run(args, { temppath, message } = {}) {
     let tool = {
-      temppath: temppath,
+      temppath,
+      message: typeof message === 'function' ? message : null,
     };
     return await this.handler(args, tool);
   }

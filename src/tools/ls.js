@@ -27,30 +27,21 @@ class LsTool extends Tool {
     
     directory = directory || '.';
     
+    tool.message({ state: 'spin', subject: `Ls(${this.simplifyPath(directory)}/)` });
+    
+    let result;
     try {
       const files = await fs.readdir(directory, { withFileTypes: true });
       
-      const result = files.map(file => {
+      result = files.map(file => {
         return file.isDirectory() ? `${file.name}/` : file.name;
       }).join('\n');
-      
-      return result;
     } catch (err) {
-      return `Error: Cannot list ${directory}: ${err.message}`;
+      result = `Error: Cannot list ${directory}: ${err.message}`;
     }
-  }
-
-  message(calls) {
-    if (calls.length == 1) {
-      let { directory } = calls[0].args;
-      return `Listing ${this.simplifyPath(directory)}/`;
-    }
-    let dirnames = calls
-          .map(c => c.args.directory) 
-          .map(d => this.simplifyPath(d)),
-        dstr = dirnames.join(', ');
-    if (dstr.length > 40) dstr = dstr.substring(0, 40) + '...';
-    return `Listing ${calls.length} directories (${dstr})`;
+    
+    tool.message({ state: 'done', subject: `Ls(${this.simplifyPath(directory)}/)` });
+    return result;
   }
 }
 
