@@ -1,3 +1,4 @@
+const ANSI = require('../ansi.js');
 const Component = require('./component.js');
 
 class Spinner extends Component {
@@ -25,6 +26,13 @@ class Spinner extends Component {
     'bar': {
       delay: 300,
       frames: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
+    },
+    'blink-diamond-gray': {
+      delay: 750,
+      frames: [
+        ANSI.fg('◆', 242),
+        ANSI.fg('◆', 255)
+      ]
     }
   }
   

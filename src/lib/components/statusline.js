@@ -10,7 +10,6 @@ class Statusline extends HContainer {
   name = 'Statusline';
 
   spinner;
-  padding = { left: 1 };
   
   #left;
   #right;

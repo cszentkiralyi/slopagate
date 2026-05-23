@@ -37,7 +37,6 @@ class Interface {
       id: 'chat-input',
       prompt: Interface.CLI_PROMPT,
       state: 'normal',
-      padding: { left: 1, right: 1 },
       getHint: (v) => this.getInputHint(v)
     });
     
@@ -135,14 +134,13 @@ class Interface {
       textProps = {
         id, role, content,
         forceAlign: Interface.CLI_PROMPT,
-        padding: { left: 1, right: 1 },
         bg: 237
       };
     } else if (role === 'model') {
       textProps = {
         id, role, content,
         align: true,
-        padding: { left: 1, right: 1 }
+        padding: { left: 2 }
       };
     } else if (role === 'tool') {
       let inst = new TUI.StructuredMessage({

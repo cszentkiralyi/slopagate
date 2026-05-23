@@ -52,10 +52,7 @@ class TextInput extends Component {
           ? this.modes.find(m => m.name === activeMode)
           : null,
         prompt = (mode ? mode.prompt : this.prompt) || '',
-        padding = Object.assign(
-          { left: 0, right: 1 },
-          this.padding
-        ),
+        padding = this.padding || {},
         bg = mode?.bg || this.bg || 236,
         fg = mode?.fg || null,
         hint, value, lines, dirty;
