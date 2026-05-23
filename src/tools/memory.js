@@ -19,6 +19,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
       file: { type: 'string' },
       content: { type: 'array', items: { type: 'string' } },
       query: { type: 'string' },
+      summary: { type: 'string' },
       type: { type: 'string', enum: ['user', 'feedback', 'project', 'reference'] }
     },
     required: ['action']
@@ -55,7 +56,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
         return 'Error: Invalid type. Use user, feedback, project, or reference';
       }
       const content = args.content.join('\n');
-      memory.write(args.file, content, args.type);
+      memory.write(args.file, content, args.type, args.summary);
       return `Wrote to ${args.file}`;
     }
 
