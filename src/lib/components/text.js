@@ -13,6 +13,7 @@ class Text extends Component {
     super(props);
 
     Object.assign(this, props);
+    this._lines = [];
   }
   
   render(width) {

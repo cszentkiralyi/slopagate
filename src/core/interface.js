@@ -4,6 +4,7 @@ const { Logger } = require('../util.js');
 
 class Interface {
   static CLI_PROMPT = '❯ ';
+  //static CLI_PROMPT = 'Ⓢ ';
 
   #terminal;
   #chat_history;

@@ -31,7 +31,7 @@ class StructuredMessage extends Container {
       this.children = [this.subjectText];
     }
     if (this.bodyText.content && this.bodyText.content.length) {
-      this.children.push(bodyText);
+      this.children.push(this.bodyText);
     }
     this.children.forEach(c => { c.root = this.root || this; });
   }
@@ -39,7 +39,7 @@ class StructuredMessage extends Container {
   set state(v) {
     this.#state = v;
     this.#rebuildChildren();
-    this.root.render();
+    this.root?.draw();
   }
 
   get state() { return this.#state; }
@@ -51,12 +51,16 @@ class StructuredMessage extends Container {
     } else {
       this.subjectText.content = v;
     }
-    this.root.render();
+    this.root?.draw();
   }
 
   set body(v) {
     this.bodyText.content = v;
-    this.root.render();
+    if (!this.children.includes(this.bodyText)) {
+      this.children.push(this.bodyText);
+      this.children.forEach(c => { c.root = this.root || this; });
+    }
+    this.root?.draw();
   }
 }
 
