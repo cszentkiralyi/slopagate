@@ -272,11 +272,11 @@ class Harness {
       this.emitCommandMessage('Usage: /config <key> [value]');
       return;
     }
-    let parts = argstr.split(' ');
+    let parts = argstr.trim().split(/\s+/);
     let key = parts[0];
     let value = parts.slice(1).join(' ');
     
-    if (parts.length <= 1) {
+    if (value === '') {
       let cur = this.config.get(key);
       this.emitCommandMessage(`${key} = ${cur ?? '(not set)'}`);
     } else {
