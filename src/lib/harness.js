@@ -306,9 +306,19 @@ class Harness {
     const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
     const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
     
+    // Show spinner while skill runs
+    Events.emit('status:spinner', { message: `Running ${skillName}...` });
+    
     // Trigger normal model turn by emitting user:message event.
     // onUserMessage will add to context, fork, and send — piggybacking on the active session.
     Events.emit('user:message', { message: skillPrompt });
+    
+    // Spinner is hidden when the turn goes back to the user
+    const hideSpinner = () => {
+      Events.off('turn:user', hideSpinner);
+      Events.emit('status:spinner', { hide: true });
+    };
+    Events.on('turn:user', hideSpinner);
   }
   
   async dispose() {
