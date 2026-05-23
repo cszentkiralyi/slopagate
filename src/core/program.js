@@ -415,16 +415,11 @@ class Program {
 
 
     Events.on('user:abort', (event) => {
-      // Undo the user message if we have pending messages
-      if (this.#pendingMessages.length > 0) {
-        const pending = this.#pendingMessages.pop();
-        const displayMsg = this.input_modes.find(m => m.name === pending.mode).prompt + pending.message;
-        const userMsg = this.interface.getChatHistory().find(m => m.role === 'user' && m.content === displayMsg);
-        if (userMsg) {
-          this.interface.removeMessage(userMsg);
-        }
-        chatInput.clear();
+      if (!this.harness.modelResponded) {
+        // Model hasn't responded — undo the user message
+        this.interface.removeLastUserMessage();
       }
+      chatInput.clear();
       Events.emit('turn:user');
     });
     Events.on('model:content', (event) => {

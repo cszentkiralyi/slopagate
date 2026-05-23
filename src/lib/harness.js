@@ -54,6 +54,7 @@ class Harness {
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
+  get modelResponded() { return this.#modelResponded; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));

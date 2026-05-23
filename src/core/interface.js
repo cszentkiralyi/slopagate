@@ -13,6 +13,7 @@ class Interface {
   
   #elements_by_id = new Map();
   #draw_timeout;
+  #lastUserMessage = null;
   
   get statusline() { return this.#statusline; }
 
@@ -118,6 +119,13 @@ class Interface {
     }
     return false;
   }
+  removeLastUserMessage() {
+    if (!this.#lastUserMessage) return false;
+    this.#terminal.removeChild(this.#lastUserMessage);
+    this.#lastUserMessage = null;
+    this.draw();
+    return true;
+  }
 
   addMessage({ role, content, id }) {
     let textProps;
@@ -168,6 +176,9 @@ class Interface {
       let inst = new TUI.Text(textProps),
           target = role === 'startup' ? this.#startup_messages : this.#chat_history;
       target.appendChild(inst);
+      if (role === 'user') {
+        this.#lastUserMessage = inst;
+      }
       // TODO: may be wrong for us to trigger this?
       this.draw();
     }
