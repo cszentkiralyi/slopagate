@@ -148,7 +148,7 @@ class Harness {
     this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
-      handler: async (args) => this.configCommand(args)
+      handler: async (harness, args) => harness.configCommand(args)
     });
     
     // Add skill commands
@@ -168,7 +168,7 @@ class Harness {
         }
         this.commands.push({
           name: cmdName,
-          handler: async (args) => this.handleSkill(skillName, args),
+          handler: async (harness, args) => harness.handleSkill(skillName, args),
           hint: this.skills.get(skillName).description
         });
       });
