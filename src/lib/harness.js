@@ -724,31 +724,6 @@ class Harness {
       });
     }
     
-    // Group events by tool name for message display
-    let eventsByName = {};
-    for (let call of tool_calls) {
-      let evt = eventsById[call.id];
-      if (evt) {
-        let toolName = call.function.name;
-        eventsByName[toolName] ||= [];
-        eventsByName[toolName].push(...evt);
-      }
-    }
-    Object.keys(eventsByName).forEach(toolName => {
-      let tool = this.toolbox.get(toolName);
-      if (tool) {
-        let msg;
-        try {
-          msg = tool.message(eventsByName[toolName]);
-          if (msg)
-            Events.emit('tool:message', { content: msg });
-        } catch (err) {
-          Logger.log(`tool message error (${toolName}): ${err.message}`);
-          msg = null;
-        }
-      }
-    });
-    
     results.forEach(msg => {
       msg.role = 'tool';
       msg.tool_name = msg.name;

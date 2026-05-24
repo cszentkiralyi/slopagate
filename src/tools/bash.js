@@ -78,7 +78,7 @@ class BashTool extends Tool {
 
     let summary = command.replaceAll('\n', '\\n');
     if (summary.length > 40) summary = summary.substring(0, 40) + '...';
-    tool.message({ state: 'static', subject: `Bash(${ANSI.fg(summary, 250)})` });
+    tool.message({ state: 'spin', subject: `${this.name}(${ANSI.fg(summary, 250)})` });
 
     let maxLines = this.config.get('tool_output_limit') || 20;
     let maxLineLen = this.config.get('tool_line_limit') || 256;
@@ -106,7 +106,9 @@ class BashTool extends Tool {
         }
       });
     });
-    return await p;
+    let result = await p;
+    tool.message({ state: 'done', subject: `${this.name}(${ANSI.fg(summary, 250)})` });
+    return result;
   }
 
   permissions(args) {

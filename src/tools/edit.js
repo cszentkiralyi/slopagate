@@ -33,7 +33,7 @@ class EditTool extends Tool {
 
     let linesNeg = old_str.split('\n').length;
     let linesPos = new_str.split('\n').length;
-    tool.message({ state: 'spin', subject: `Edit(${file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}))` });
+    tool.message({ state: 'spin', subject: `${this.name}(${file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}))` });
 
     let result;
     try {
@@ -68,7 +68,7 @@ class EditTool extends Tool {
       }
     }
 
-    tool.message({ state: 'done', subject: `Edit(${file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}))` });
+    tool.message({ state: 'done', subject: `${this.name}(${file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}))` });
     return result;
   }
   

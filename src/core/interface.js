@@ -150,7 +150,7 @@ class Interface {
       inst.state = state || 'static';
       inst.body = body || null;
       this.draw();
-      return;
+      return inst;
     } else if (role === 'startup') {
       textProps = {
         id, role, content,

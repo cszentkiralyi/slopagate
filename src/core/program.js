@@ -41,6 +41,7 @@ class Program {
 
   #turn_start = Date.now();
   #pendingMessages = [];
+   #structuredMessages = new Map();
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
   #exp_fileReadWhitelist = new Set();
@@ -452,7 +453,16 @@ class Program {
       this.interface.draw();
     });
     Events.on('tool:message', (event) => {
-      this.interface.addMessage({ role: 'tool', ...event });
+      let { callId, ...rest } = event;
+      let inst = this.#structuredMessages.get(callId);
+      if (!inst) {
+        inst = this.interface.addMessage({ role: 'tool', callId, ...rest });
+        this.#structuredMessages.set(callId, inst);
+      } else {
+        if (rest.state !== undefined) inst.state = rest.state;
+        if (rest.subject !== undefined) inst.subject = rest.subject;
+        if (rest.body !== undefined) inst.body = rest.body;
+      }
       this.interface.draw();
     });
 
