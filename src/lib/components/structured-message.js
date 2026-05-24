@@ -6,6 +6,7 @@ const ANSI = require('../ansi.js');
 class StructuredMessage extends Container {
   #state = 'static';
   #subject = '';
+  #iconText;
 
   constructor(props) {
     const { subject, state, body, content, ...rest } = props;

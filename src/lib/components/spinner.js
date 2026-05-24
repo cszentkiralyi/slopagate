@@ -48,7 +48,7 @@ class Spinner extends Component {
     
     if (this.loop || typeof this.loop === 'undefined') {
       if (!this.animation) { this.#loop = false; }
-      else {
+      else if (this.root) {
         setTimeout(() => this.root.draw(), Spinner.ANIMATIONS[this.animation].delay);
       }
     } else {
@@ -111,7 +111,7 @@ class Spinner extends Component {
       this.#lastRender = now;
     }
 
-    if (this.#loop) {
+    if (this.#loop && this.root) {
       //this.log(`Spinner: looping to a root.draw() call in ${timeout}ms`);
       setTimeout(() => this.root.draw(), timeout);
     }
