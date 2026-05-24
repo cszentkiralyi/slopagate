@@ -1,6 +1,7 @@
 const Container = require('./container.js');
 const Spinner = require('./spinner.js');
 const Text = require('./text.js');
+const ANSI = require('../ansi.js');
 
 class StructuredMessage extends Container {
   #state = 'static';
@@ -11,9 +12,10 @@ class StructuredMessage extends Container {
     super(rest);
     Object.assign(this, rest);
 
-    this.spinner = new Spinner({ animation: this.animation, message: '', loop: true, hidden: true });
-    this.subjectText = new Text({ content: '', padding: { left: 2 } });
+    this.spinner = new Spinner({ animation: 'blink-diamond-gray', message: '', loop: true, hidden: true });
+    this.subjectText = new Text({ content: '' });
     this.bodyText = new Text({ content: '' });
+    this.#iconText = new Text({ content: '' });
 
     this.#subject = subject ?? content;
     if (state !== undefined) this.#state = state;
@@ -31,7 +33,17 @@ class StructuredMessage extends Container {
     } else {
       this.spinner.hidden = true;
       this.spinner.stop();
+      let icon = '';
+      if (this.#state === 'done') {
+        icon = ANSI.fg('◆ ', 2);
+      } else if (this.#state === 'error') {
+        icon = ANSI.fg('◆ ', 1);
+      } else if (this.#state === 'static') {
+        icon = '  ';
+      }
+      this.#iconText.content = icon;
       this.subjectText.content = this.#subject || '';
+      this.children.push(this.#iconText);
       this.children.push(this.subjectText);
     }
     if (this.bodyText.content && this.bodyText.content.length) {
@@ -57,6 +69,9 @@ class StructuredMessage extends Container {
       this.spinner.message = v;
     } else {
       this.subjectText.content = v;
+    }
+    if (this.#state !== 'spin' && this.#iconText) {
+      this.#rebuildChildren();
     }
     this._dirty = true;
     this.root?.draw();
