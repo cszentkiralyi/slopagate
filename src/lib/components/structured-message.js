@@ -16,7 +16,6 @@ class StructuredMessage extends Container {
     this.spinner = new Spinner({ animation: 'blink-diamond-gray', message: '', loop: true, hidden: true });
     this.subjectText = new Text({ content: '' });
     this.bodyText = new Text({ content: '' });
-    this.#iconText = new Text({ content: '' });
 
     this.#subject = subject ?? content;
     if (state !== undefined) this.#state = state;
@@ -42,9 +41,7 @@ class StructuredMessage extends Container {
       } else if (this.#state === 'static') {
         icon = '  ';
       }
-      this.#iconText.content = icon;
-      this.subjectText.content = this.#subject || '';
-      this.children.push(this.#iconText);
+      this.subjectText.content = `${icon}${this.#subject || ''}`;
       this.children.push(this.subjectText);
     }
     if (this.bodyText.content && this.bodyText.content.length) {
