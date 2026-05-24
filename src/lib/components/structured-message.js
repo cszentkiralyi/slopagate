@@ -28,6 +28,7 @@ class StructuredMessage extends Container {
     if (this.#state === 'spin') {
       this.spinner.hidden = false;
       this.spinner.message = this.#subject || '';
+      this.spinner.root = this.root || this;
       this.spinner.start();
       this.children.push(this.spinner);
     } else {
@@ -68,9 +69,7 @@ class StructuredMessage extends Container {
     } else {
       this.subjectText.content = v;
     }
-    if (this.#state !== 'spin' && this.#iconText) {
-      this.#rebuildChildren();
-    }
+    this.#rebuildChildren();
     this._dirty = true;
     this.root?.draw();
   }
