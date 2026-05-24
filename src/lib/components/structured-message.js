@@ -43,6 +43,7 @@ class StructuredMessage extends Container {
   set state(v) {
     this.#state = v;
     this.#rebuildChildren();
+    this._dirty = true;
     this.root?.draw();
   }
 
@@ -57,6 +58,7 @@ class StructuredMessage extends Container {
     } else {
       this.subjectText.content = v;
     }
+    this._dirty = true;
     this.root?.draw();
   }
 
@@ -70,6 +72,7 @@ class StructuredMessage extends Container {
     } else if (this.children.includes(this.bodyText)) {
       this.children.splice(this.children.indexOf(this.bodyText), 1);
     }
+    this._dirty = true;
     this.root?.draw();
   }
 }
