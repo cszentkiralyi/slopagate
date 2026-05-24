@@ -24,7 +24,9 @@ class Toolbox {
         if (this._handledCalls.has(id)) return;
         this._handledCalls.add(id);
         try {
-          const message = this.#harness?.createToolMessageCallback?.(id);
+          const message = ({ state, subject, body }) => {
+            Events.emit('tool:message', { callId: id, state, subject, body });
+          };
           content = await tool.run(args, { temppath, message });
         } catch (err) {
           Logger.log(`tool.run error (${name}): ${err.message}`);

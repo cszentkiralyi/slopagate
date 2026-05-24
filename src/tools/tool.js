@@ -1,5 +1,4 @@
 const path = require('node:path');
-
 const { Logger } = require('../util.js');
 
 class Tool {
@@ -28,16 +27,21 @@ class Tool {
   
   constructor(props) { Object.assign(this, props); }
   
+  #messageCallback = null;
+
   async run(args, { temppath, message } = {}) {
+    this.#messageCallback = typeof message === 'function' ? message : null;
     let tool = {
       temppath,
-      message: typeof message === 'function' ? message : null,
+      message: this.#messageCallback,
     };
     return await this.handler(args, tool);
   }
-  
-  message(calls) {
-    return null;
+
+  message({ state, subject, body } = {}) {
+    if (this.#messageCallback) {
+      this.#messageCallback({ state, subject, body });
+    }
   }
   
   permissions(args) {

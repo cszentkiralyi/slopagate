@@ -37,7 +37,6 @@ class Harness {
   
   commands = [];
 
-  #modelResponded = false;
   #activeContext = null;
   #abortController = new AbortController();
   
@@ -55,7 +54,7 @@ class Harness {
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
-  get modelResponded() { return this.#modelResponded; }
+  get modelResponded() { return this.agent?.modelResponded ?? false; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
@@ -322,22 +321,7 @@ class Harness {
     Events.on('turn:user', hideSpinner);
   }
   
-  /**
-   * Create a message callback for a tool call.
-   * Tools receive this via the `tool` context during execution.
-   * @param {string} callId - The tool call ID
-   * @returns {Function} message callback
-   */
-  createToolMessageCallback(callId) {
-    return ({ state, subject, body }) => {
-      Events.emit('tool:message', {
-        state,
-        subject,
-        body,
-        callId
-      });
-    };
-  }
+ 
 
   async dispose() {
     this.#timers.clearAll();
@@ -349,7 +333,6 @@ class Harness {
     let message = { role: 'user', content: event.message };
     this.session.abort();
     this.#userMessagesSinceRecap++;
-    this.#modelResponded = false;
 
     // Create fresh abort controller for this turn
     const turnController = new AbortController();
@@ -403,10 +386,6 @@ class Harness {
   
   onUserAbort(event) {
     this.#abortController.abort();
-    // Only undo the last user message if the model hasn't responded yet
-    if (!this.#modelResponded) {
-      this.session.removeLastUserMessage();
-    }
   }
   
   async onModelResponse(event) {
@@ -430,9 +409,6 @@ class Harness {
       Events.emit('turn:user');
       return;
     }
-
-    // Model has responded — mark so abort won't undo the user message
-    this.#modelResponded = true;
 
     let { message } = response;
     

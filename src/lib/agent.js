@@ -26,6 +26,9 @@ class Agent {
   }
   
   #abortController;
+  #modelResponded = false;
+
+  get modelResponded() { return this.#modelResponded; }
 
   /**
    * Start a model turn with the given user message.
@@ -38,6 +41,9 @@ class Agent {
     if (context !== null && context !== undefined) {
       this.context = context;
     }
+    
+    // Reset per-turn
+    this.#modelResponded = false;
     
     // Store abort controller so agent.abort() can fire it
     this.#abortController = abortController;
@@ -73,6 +79,11 @@ class Agent {
       this.callbacks.onModelContent?.(content);
       this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
       this.context.messages.push({ role: 'assistant', content, tool_calls: toolCalls });
+      
+      // Mark that the model has responded — no longer safe to undo user message
+      if (!this.#modelResponded) {
+        this.#modelResponded = true;
+      }
 
       // If tool calls, execute them and return results for next iteration
       if (toolCalls && toolCalls.length > 0) {
