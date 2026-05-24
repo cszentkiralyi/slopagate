@@ -27,7 +27,7 @@ class GrepTool extends Tool {
     let { file_path, search_string } = args;
 
     let s = JSON.stringify(search_string);
-    let subject = `${this.name}(${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path || '.')}`;
+    let subject = `${this.name}(${s.length > 17 ? s.substring(0, 14) + '..."' : s}) in ${this.simplifyPath(file_path || '.')}`;
     tool.message({ state: 'static', subject });
 
     try {

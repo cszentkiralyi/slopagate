@@ -38,7 +38,8 @@ class Container extends Component {
       lines.push(...result.lines);
       haveGap = this.gap && i < lastChild;
       if (haveGap) lines.push('');
-      if (!dirty && result.skip) skip += result.skip + (haveGap && !result.dirty ? 1 : 0);
+      if (haveGap && i === lastChild - 1 && !result.dirty) dirty = true;
+      if (!dirty && result.skip) skip += result.skip + (haveGap ? 1 : 0);
       dirty ||= result.dirty;
     });
     //this.log(`${this.name}: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
