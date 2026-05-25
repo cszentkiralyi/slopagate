@@ -39,8 +39,9 @@ class Terminal extends Container {
   }
   
   draw() {
-    let nextDrawMs = (this.#last_draw + Terminal.DRAW_GAP_MS) | 0,
+    let nextDrawMs = this.#last_draw + Terminal.DRAW_GAP_MS,
         now = Date.now();
+    //this.log(JSON.stringify({ nextDrawMs, now, last_draw: this.#last_draw, gap: Terminal.DRAW_GAP_MS }))
     let impl = () => {
       if (this.#next_draw_id) {
         clearTimeout(this.#next_draw_id);
@@ -49,14 +50,14 @@ class Terminal extends Container {
       this.#last_draw = Date.now();
       this.#draw_inner();
     };
+    if (this.#next_draw_id) return;
     if (!this.#last_draw || now >= nextDrawMs) {
-      //this.log('Drawing immediately!');
+      //this.log(`Drawing immediately! last_draw=${this.#last_draw} delta=${nextDrawMs - now}`);
       impl();
       return;
     }
-    if (this.#next_draw_id) { this.log('Already queued a draw, noop'); return; }
     //this.log(`Queueing draw for ${nextDrawMs - now}ms in the future`);
-    this.#next_draw_id = setTimeout(impl, nextDrawMs - now);
+    this.#next_draw_id = setTimeout(impl, Math.max(nextDrawMs - now, 0));
     return;
   }
   
