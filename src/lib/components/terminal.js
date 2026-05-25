@@ -83,7 +83,7 @@ class Terminal extends Container {
     if (!dirty && skip < len) return; // TODO: is this witchcraft? idk why it's here
     
     let output = '',
-        clearHeight = Math.min(height, plen - skip);
+        clearHeight = plen - skip;
         
     if (!dirty && !clearHeight) return;
         

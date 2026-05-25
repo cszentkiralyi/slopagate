@@ -153,7 +153,16 @@ class Agent {
       });
       responseObj = JSON.parse(await responseObj.text());
     } catch (err) {
-      Logger.log(`Agent.sendToEndpoint error: ${err.message || JSON.stringify(err)}`);
+      const errorDetails = {
+        message: err.message,
+        stack: err.stack,
+        provider: provider,
+        connection: connection,
+        model: model,
+        errorType: err.constructor.name,
+        isAbort: err.name === 'AbortError'
+      };
+      Logger.log(`Agent.sendToEndpoint error: ${JSON.stringify(errorDetails)}`);
       responseObj = { error: err.message || 'Request failed', message: null };
     }
     

@@ -304,7 +304,6 @@ class Program {
       '^C': (() => {
         let stage = 0, timeout = null;
         return async (inst) => {
-          Logger.log(`Program ^C: stage=${stage}`);
           if (stage == 0) {
             stage++;
             if (inst.value?.length || !this.harness.session.canAbort) {
@@ -317,7 +316,6 @@ class Program {
                 }, true);
                 setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               }
-              Logger.log(`Program ^C: returning because we cleared text`);
               return;
             }
           }
@@ -333,12 +331,10 @@ class Program {
               setTimeout(() => this.interface.statusline.dismiss(this.#currentMessageId) && this.interface.draw(), 2000);
               stage = 2;
               timeout = setTimeout(() => { stage = 0; }, 2000);
-              Logger.log(`Program ^C: returning because we aborted`);
               return;
             }
           }
           if (stage == 2) {
-            Logger.log(`Program ^C: final stage!`);
             if (timeout) clearTimeout(timeout);
             await this.dispose();
             stage = 0;
@@ -459,9 +455,9 @@ class Program {
         inst = this.interface.addMessage({ role: 'tool', callId, ...rest });
         this.#structuredMessages.set(callId, inst);
       } else {
-        if (rest.state !== undefined) inst.state = rest.state;
-        if (rest.subject !== undefined) inst.subject = rest.subject;
         if (rest.body !== undefined) inst.body = rest.body;
+        if (rest.subject !== undefined) inst.subject = rest.subject;
+        if (rest.state !== undefined) inst.state = rest.state;
       }
       this.interface.draw();
     });

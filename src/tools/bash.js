@@ -73,6 +73,7 @@ class BashTool extends Tool {
     const { command } = args;
 
     if (!this.permissionGate(command)) {
+      //tool.message({ state: 'error', subject: `${this.name}("${command.split(' ')[0]}")` });
       return `Error: command "${command.split(' ')[0]}" not allowed.`;
     }
 
@@ -80,7 +81,7 @@ class BashTool extends Tool {
     if (summary.length > 40) summary = summary.substring(0, 40) + '...';
     tool.message({ state: 'spin', subject: `${this.name}(${ANSI.fg(summary, 250)})` });
 
-    let maxLines = this.config.get('tool_output_limit') || 20;
+    let maxLines = this.config.get('tool_output_limit') || 50;
     let maxLineLen = this.config.get('tool_line_limit') || 256;
 
     let p = new Promise((resolve, reject) => {

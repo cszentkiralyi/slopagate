@@ -144,11 +144,13 @@ class Interface {
         padding: { left: 2 }
       };
     } else if (role === 'tool') {
-      let inst = new TUI.StructuredMessage({ id, role });
+      let inst = new TUI.StructuredMessage({
+        subject: ANSI.fg(subject || content, 248),
+        body
+      });
       this.#chat_history.appendChild(inst);
-      inst.subject = ANSI.fg(subject || content, 245);
       inst.state = state || 'static';
-      inst.body = body || null;
+      //Logger.log(`[interface] tool message: state=${state}, subject=${subject}, content=${content}`);
       this.draw();
       return inst;
     } else if (role === 'startup') {

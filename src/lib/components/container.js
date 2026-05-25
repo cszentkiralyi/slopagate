@@ -45,6 +45,7 @@ class Container extends Component {
     this.#childrenDirty = false;
     //this.log(`${this.name}: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
+    //if (this.name === 'SM') { this.log(`${this.name}: ${JSON.stringify({ lines, dirty, skip })}`)};
     return { lines, dirty, skip };
   }
   

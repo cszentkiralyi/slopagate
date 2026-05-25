@@ -28,7 +28,7 @@ class Spinner extends Component {
       frames: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
     },
     'blink-diamond-gray': {
-      delay: 750,
+      delay: 500,
       frames: [
         ANSI.fg('◆', 242),
         ANSI.fg('◆', 255)
@@ -39,6 +39,7 @@ class Spinner extends Component {
   #lastRender = null;
   #lastRenderedFrame = -1;
   #loop = true;
+  #timer = null;
   message = null;
   animation = null;
   
@@ -47,9 +48,9 @@ class Spinner extends Component {
     Object.assign(this, props);
     
     if (this.loop || typeof this.loop === 'undefined') {
-      if (!this.animation) { this.#loop = false; }
+      if (!this.animation) { this.log('no animation, not looping'); this.#loop = false; }
       else if (this.root) {
-        setTimeout(() => this.root.draw(), Spinner.ANIMATIONS[this.animation].delay);
+        this.#timer = setTimeout(() => this.drawTimer(), Spinner.ANIMATIONS[this.animation].delay);
       }
     } else {
       this.#loop = false;
@@ -59,17 +60,26 @@ class Spinner extends Component {
   
   start() {
     this.#loop = true;
-    if (!this.#lastRender && this.root && this.animation) {
-      setTimeout(() => this.root.draw(), 0);
+    if (this.root && this.animation && !this.#timer) {
+      this.#timer = setTimeout(() => this.drawTimer(), 0);
     }
   }
   
   stop() {
     this.#loop = false;
+    if (this.#timer) {
+      clearTimeout(this.#timer);
+      this.#timer = null;
+    }
   }
   
   dispose() {
     this.stop();
+  }
+  
+  drawTimer() {
+    this.#timer = null;
+    this.root.draw();
   }
   
   render(width) {
@@ -84,7 +94,7 @@ class Spinner extends Component {
     if (!this.#lastRender || diff >= delay) 
       frame++;
 
-    //this.log(`Spinner: ${this.#lastRenderedFrame} -> ${frame} after ${diff}ms`);
+    //this.log(`Spinner: ${this.animation} ${this.#lastRenderedFrame} -> ${frame} after ${diff}ms`);
     if (frame > frames.length - 1)
        frame = 0;
     let lines, dirty = false;
@@ -93,6 +103,7 @@ class Spinner extends Component {
       timeout = Math.max(delay - diff, 0);
       lines = this._lines;
     } else {
+      //this.log(`Spinner: ${this.animation} rendering frame ${frame} after ${diff}ms`);
       //this.log(`Spinner: rendering frame with padding ${JSON.stringify(this.padding)}`);
       let leftPad = this.padding && this.padding.left ? ' '.repeat(this.padding.left) : '',
           rightPad = this.padding && this.padding.right ? ' '.repeat(this.padding.right) : '',
@@ -111,9 +122,8 @@ class Spinner extends Component {
       this.#lastRender = now;
     }
 
-    if (this.#loop && this.root) {
-      //this.log(`Spinner: looping to a root.draw() call in ${timeout}ms`);
-      setTimeout(() => this.root.draw(), timeout);
+    if (!this.#timer && this.#loop && this.root) {
+      this.#timer = setTimeout(() => this.drawTimer(), timeout);
     }
     
     //this.log(`Spinner: returning result of ${lines.length} lines, skip ${(dirty ? 0 : lines.length)}, dirty ${dirty}`);

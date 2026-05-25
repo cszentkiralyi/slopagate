@@ -3,7 +3,7 @@ const { Logger } = require('../../util.js');
 class Component {
   #root;
   get root() { return this.#root; }
-  set root(r) { (r != this.#root) ? this.#root = r : null; }
+  set root(r) { if (r === this.#root) return; this.#root = r; }
   hidden;
   name = 'Component';
   constructor(props) { Object.assign(this, props); }
