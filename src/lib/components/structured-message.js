@@ -18,7 +18,7 @@ class StructuredMessage extends Container {
 
     this.spinner = new Spinner({ animation: 'blink-diamond-gray', message: '', loop: false });
     this.subjectText = new Text({ content: '' });
-    this.bodyText = new Text({ content: '' });
+    this.bodyText = new Text({ content: '', padding: { left: 2 } });
 
     this.#subject = subject ?? content;
     this.spinner.message = this.#subject;

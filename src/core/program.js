@@ -24,6 +24,7 @@ class Program {
   #currentMessageId = null;
   #modelTurnSpinner = null;
   #commandSpinner = null;
+  #aggregator = null
 
   static SPINNER_MESSAGES = [
     { present: 'Autofilling', past: 'Autofilled' },
@@ -42,7 +43,7 @@ class Program {
 
   #turn_start = Date.now();
   #pendingMessages = [];
-   #structuredMessages = new Map();
+  #structuredMessages = new Map();
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
   #exp_fileReadWhitelist = new Set();
