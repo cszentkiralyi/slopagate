@@ -169,6 +169,46 @@ class Agent {
     return this.normalizeResponse(responseObj);
   }
 
+  /**
+   * Parse XML-like tool call tags from model output text.
+   * Handles format: <function=toolName><parameter=arg>val</parameter></function>
+   * Returns array of {id, type, function: {name, arguments}} objects.
+   */
+  #parseXmlToolCalls(text) {
+    const results = [];
+    if (typeof text !== 'string') return results;
+
+    const tagRegex = /<function=(\w+)>([\s\S]*?)<\/function>/g;
+    let match;
+
+    while ((match = tagRegex.exec(text)) !== null) {
+      const name = match[1];
+      const inner = match[2].trim();
+
+      if (!name) continue;
+
+      const params = {};
+      const paramRegex = /<parameter=(\w+)>([\s\S]*?)<\/parameter>/g;
+      let pm;
+      while ((pm = paramRegex.exec(inner)) !== null) {
+        params[pm[1]] = pm[2].trim();
+      }
+
+      let argumentsObj = params;
+      if (Object.keys(params).length === 1 && params.arguments) {
+        try { argumentsObj = JSON.parse(params.arguments); } catch { /* keep as string */ }
+      }
+
+      results.push({
+        id: crypto.randomUUID(),
+        type: 'function',
+        function: { name, arguments: argumentsObj }
+      });
+    }
+
+    return results;
+  }
+
   normalizeResponse(response) {
     const provider = this.config.get('provider') || 'ollama';
     Logger.log(`Session.normalize: ${JSON.stringify(response)}`);
@@ -190,6 +230,20 @@ class Agent {
         if (endThink > -1 && endThink < message.reasoning_content.length - 1 - 7) {
           message.content = message.reasoning_content.slice(endThink + 8);
           message.reasoning_content = message.reasoning_content.slice(0, endThink);
+        }
+      }
+
+      // Sometimes the model embeds tool calls as XML in reasoning_content or content
+      // instead of having the inference engine parse them into tool_calls. Extract and convert.
+      if (!message.tool_calls) {
+        for (const field of ['reasoning_content', 'content']) {
+          if (message[field]) {
+            const xmlCalls = this.#parseXmlToolCalls(message[field]);
+            if (xmlCalls.length) {
+              message.tool_calls = xmlCalls;
+              break;
+            }
+          }
         }
       }
       
