@@ -36,7 +36,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
     await memory.init();
 
     const action = args.action || 'unknown';
-    tool.message({ state: 'spin', subject: `${this.name}(${action})` });
+    tool.message({ state: 'spin', subject: action });
 
     let result;
 
@@ -101,7 +101,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
       result = 'Error: Invalid action. Use read, write, list, search, or delete';
     }
 
-    tool.message({ state: 'done', subject: `${this.name}(${action})` });
+    tool.message({ state: 'done', subject: action });
     return result;
   }
 }

@@ -27,7 +27,7 @@ class LsTool extends Tool {
     
     directory = directory || '.';
     
-    tool.message({ state: 'spin', subject: `${this.name}(${this.simplifyPath(directory)}/)` });
+    tool.message({ state: 'spin', subject: `${this.simplifyPath(directory)}/` });
     
     let result;
     try {
@@ -40,7 +40,7 @@ class LsTool extends Tool {
       result = `Error: Cannot list ${directory}: ${err.message}`;
     }
     
-    tool.message({ state: 'done', subject: `${this.name}(${this.simplifyPath(directory)}/)` });
+    tool.message({ state: 'done', subject: `${this.simplifyPath(directory)}/` });
     return result;
   }
 }

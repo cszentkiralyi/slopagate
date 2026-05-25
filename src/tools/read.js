@@ -40,7 +40,7 @@ class ReadTool extends Tool {
     let message = '';
     if (start_line || end_line)
       message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
-    tool.message({ state: 'spin', subject: `${this.name}(${this.simplifyPath(file_path)}${message})` });
+    tool.message({ state: 'spin', subject: `${this.simplifyPath(file_path)}${message}` });
     
     let result;
     try {
@@ -57,7 +57,7 @@ class ReadTool extends Tool {
       result = `Error: file ${file_path} not found!`;
     }
     
-    tool.message({ state: 'done', subject: `${this.name}(${this.simplifyPath(file_path)}${message})` });
+    tool.message({ state: 'done', subject: `${this.simplifyPath(file_path)}${message}` });
     return result;
   }
 }
