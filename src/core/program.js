@@ -17,6 +17,7 @@ const Skills = require('../lib/skills.js');
 const { Logger, formatMs } = require('../util.js');
 const Timers = require('../lib/timers.js');
 const Permissions = require('../lib/permissions.js');
+const { MessageAggregator } = require('../lib/aggregator.js');
 
 class Program {
   
@@ -251,6 +252,8 @@ class Program {
       config: this.config,
       skills: this.skills
     });
+    this.#aggregator = new MessageAggregator(this.interface);
+
     Events.on('command:name', ({ name }) => this.interface.addMessage({
       role: 'command',
       content: ` /${name} `
@@ -426,6 +429,7 @@ class Program {
           content: this.md.toAnsi(event.content.trim())
         });
       }
+      this.#aggregator.reset();
       this.interface.draw();
     });
     Events.on('turn:model', (event) => {
@@ -446,20 +450,11 @@ class Program {
         this.#modelTurnSpinner = null;
       }
       this.#pendingMessages = [];
+      this.#aggregator.reset();
       this.interface.draw();
     });
-    Events.on('tool:message', (event) => {
-      let { callId, ...rest } = event;
-      let inst = this.#structuredMessages.get(callId);
-      if (!inst) {
-        inst = this.interface.addMessage({ role: 'tool', callId, subject: ANSI.fg(rest.subject || rest.content, 248), ...rest });
-        this.#structuredMessages.set(callId, inst);
-      } else {
-        if (rest.body !== undefined) inst.body = rest.body;
-        if (rest.subject !== undefined) inst.subject = ANSI.fg(rest.subject, 248);
-        if (rest.state !== undefined) inst.state = rest.state;
-      }
-      this.interface.draw();
+      Events.on('tool:message', (event) => {
+      this.#aggregator.message(event);
     });
 
     Events.on('metrics:tokens', (event) => {
