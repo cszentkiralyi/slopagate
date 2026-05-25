@@ -2,7 +2,7 @@
 const { exec } = require('node:child_process');
 
 const { Logger } = require('../util.js');
-const ANSI = require('../lib/ansi.js');
+
 const Tool = require('./tool.js');
 
 class BashTool extends Tool {
@@ -79,7 +79,7 @@ class BashTool extends Tool {
 
     let summary = command.replaceAll('\n', '\\n');
     if (summary.length > 40) summary = summary.substring(0, 40) + '...';
-    tool.message({ state: 'spin', subject: `${this.name}(${ANSI.fg(summary, 250)})` });
+    tool.message({ state: 'spin', subject: `${this.name}(${summary})` });
 
     let maxLines = this.config.get('tool_output_limit') || 50;
     let maxLineLen = this.config.get('tool_line_limit') || 256;
@@ -108,7 +108,7 @@ class BashTool extends Tool {
       });
     });
     let result = await p;
-    tool.message({ state: 'done', subject: `${this.name}(${ANSI.fg(summary, 250)})` });
+    tool.message({ state: 'done', subject: `${this.name}(${summary})` });
     return result;
   }
 

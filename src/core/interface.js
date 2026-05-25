@@ -145,7 +145,7 @@ class Interface {
       };
     } else if (role === 'tool') {
       let inst = new TUI.StructuredMessage({
-        subject: ANSI.fg(subject || content, 248),
+        subject: subject || content,
         body
       });
       this.#chat_history.appendChild(inst);

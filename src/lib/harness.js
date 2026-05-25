@@ -331,7 +331,7 @@ class Harness {
   async onUserMessage(event) {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
-    this.session.abort();
+    //this.session.abort();
     this.#userMessagesSinceRecap++;
 
     // Create fresh abort controller for this turn
@@ -340,14 +340,7 @@ class Harness {
     
     // Fork from our own active context and apply compaction layers
     this.#activeContext = await this.#activeContext.fork({
-      layers: [
-        'tool_age',
-        'tool_error',
-        'tool_length',
-        'tool_total',
-        'model_reasoning',
-        'chat_summary'
-      ],
+      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score', 'model_reasoning' ],
       summarize: async (transcript) => {
         let summaryContext = new Context({
           config: this.session.config,
@@ -365,7 +358,7 @@ class Harness {
         return result.content;
       }
     });
-    this.#activeContext.add(message);
+    //this.#activeContext.add(message);
     
     // Update statusline tokens when message is actually sent
     Events.emit('metrics:tokens', {

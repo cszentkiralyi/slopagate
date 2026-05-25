@@ -257,7 +257,7 @@ class Program {
     }));
     Events.on('command:message', ({ content }) => this.interface.addMessage({
       role: 'tool',
-      content: content
+      content: ANSI.fg(content, 248)
     }));
     Events.on('program:quit', () => this.dispose());
     
@@ -272,7 +272,7 @@ class Program {
               { label: 'No', value: 'no' },
             ];
         let result = await this.interface.getUserChoice(msg, choices);
-        this.interface.addMessage({ role: 'tool', content: `You chose "${result}"`});
+        this.interface.addMessage({ role: 'tool', content: ANSI.fg(`You chose "${result}"`, 248)});
       }
     });
     this.interface.commands = this.harness.getCommands();
@@ -438,7 +438,7 @@ class Program {
         const elapsed = Date.now() - this.#turn_start;
         const elapsedStr = formatMs(elapsed);
         let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
-        this.interface.addMessage({ role: 'tool', content: `${msg.past} for ${elapsedStr}` });
+        this.interface.addMessage({ role: 'tool', content: ANSI.fg(`${msg.past} for ${elapsedStr}`, 248) });
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
       } else if (this.#modelTurnSpinner) {
@@ -452,11 +452,11 @@ class Program {
       let { callId, ...rest } = event;
       let inst = this.#structuredMessages.get(callId);
       if (!inst) {
-        inst = this.interface.addMessage({ role: 'tool', callId, ...rest });
+        inst = this.interface.addMessage({ role: 'tool', callId, subject: ANSI.fg(rest.subject || rest.content, 248), ...rest });
         this.#structuredMessages.set(callId, inst);
       } else {
         if (rest.body !== undefined) inst.body = rest.body;
-        if (rest.subject !== undefined) inst.subject = rest.subject;
+        if (rest.subject !== undefined) inst.subject = ANSI.fg(rest.subject, 248);
         if (rest.state !== undefined) inst.state = rest.state;
       }
       this.interface.draw();
