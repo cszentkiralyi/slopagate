@@ -5,7 +5,6 @@ class Container extends Component {
   children = [];
   name = 'Container';
   #root = null;
-  #childrenDirty = true;
   
   get root() { return this.#root; }
   set root(r) {
@@ -23,7 +22,7 @@ class Container extends Component {
   render(width) {
     let lines = [],
         skip = 0,
-        dirty = this.#childrenDirty,
+        dirty = false,
         lastChild = this.children.length - 1,
         haveGap;
     //this.log(`${this.name}: starting render`);
@@ -39,13 +38,11 @@ class Container extends Component {
       lines.push(...result.lines);
       haveGap = this.gap && i < lastChild;
       if (haveGap) lines.push('');
-      if (!dirty && result.skip) skip += result.skip + (haveGap ? 1 : 0);
+      if (!dirty && result.skip) skip += result.skip + (haveGap && !result.dirty ? 1 : 0);
       dirty ||= result.dirty;
     });
-    this.#childrenDirty = false;
     //this.log(`${this.name}: done rendering, ${lines.length} lines, skip ${skip}, dirty ${dirty}`);
     this._lines = lines;
-    //if (this.name === 'SM') { this.log(`${this.name}: ${JSON.stringify({ lines, dirty, skip })}`)};
     return { lines, dirty, skip };
   }
   
@@ -55,7 +52,6 @@ class Container extends Component {
   }
   
   appendChild(c) {
-    this.#childrenDirty = true;
     //if (!this.root) this.log(`Missing root in ${this.name}!`);
     //if (this.root === this) this.log(`${this.name}.root is this.`);
     c.root = this.root || this;
@@ -66,7 +62,6 @@ class Container extends Component {
   }
   removeChild(c) {
     if (this.children.includes(c)) {
-      this.#childrenDirty = true;
       this.children = this.children.filter(cc => cc !== c);
       c.dispose();
       return true;
@@ -81,7 +76,6 @@ class Container extends Component {
   }
   removeAllChildren() {
     if (!this.children || !this.children.length) return;
-    this.#childrenDirty = true;
     this.children.forEach(c => c.dispose());
     this.children = [];
   }
