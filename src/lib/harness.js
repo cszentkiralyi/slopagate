@@ -29,6 +29,7 @@ class Harness {
   #inputTokens = 0;
   #outputTokens = 0;
   #timers = new Timers();
+  #toolStats = new Map();
   
  session = null;
   toolbox = null;
@@ -55,6 +56,7 @@ class Harness {
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
   get modelResponded() { return this.agent?.modelResponded ?? false; }
+  get toolStats() { return this.#toolStats; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
@@ -267,6 +269,35 @@ class Harness {
   
   #userMessagesSinceRecap = 0;
 
+  #updateToolStats(name, success) {
+    let stat = this.#toolStats.get(name);
+    if (!stat) {
+      stat = { calls: 0, errors: 0, successes: 0 };
+      this.#toolStats.set(name, stat);
+    }
+    stat.calls++;
+    if (success) stat.successes++;
+    else stat.errors++;
+  }
+
+  #logTurnStats() {
+    if (this.#toolStats.size === 0) return;
+    let totalCalls = 0, totalErrors = 0, totalSuccesses = 0;
+    let lines = [];
+    for (const [name, stat] of this.#toolStats) {
+      totalCalls += stat.calls;
+      totalErrors += stat.errors;
+      totalSuccesses += stat.successes;
+      let okPct = stat.calls > 0 ? Math.round((stat.successes / stat.calls) * 100) : 0;
+      lines.push(`  ${name}: ${stat.calls} calls, ${stat.successes} ok (${okPct}%), ${stat.errors} errors`);
+    }
+    let totalPct = totalCalls > 0 ? Math.round((totalSuccesses / totalCalls) * 100) : 0;
+    lines.unshift(`Turn stats: ${totalCalls} tool calls — ${totalSuccesses} ok (${totalPct}%), ${totalErrors} errors`);
+    Logger.log(lines.join('\n'));
+    // Reset for next turn
+    this.#toolStats.clear();
+  }
+
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
       this.emitCommandMessage('Usage: /config <key> [value]');
@@ -445,6 +476,7 @@ class Harness {
         // Tool calls handled by Agent via onToolCalls callback
       }
       if (done) {
+        this.#logTurnStats();
         Events.emit('turn:user');
         this.#serializeSession();
       }
@@ -627,6 +659,7 @@ class Harness {
           args: call.function.arguments,
           temppath: this.session.temppath
         });
+        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
       });
       await Promise.all(autoPromises);
     }
@@ -655,6 +688,7 @@ class Harness {
           args: call.function.arguments,
           temppath: this.session.temppath
         });
+        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
         continue;
       }
       
@@ -678,6 +712,7 @@ class Harness {
           args: call.function.arguments,
           temppath: this.session.temppath
         });
+        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
         continue;
       }
       
@@ -691,6 +726,7 @@ class Harness {
         args: call.function.arguments,
         temppath: this.session.temppath
       });
+      this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
     }
     
     results.forEach(msg => {
