@@ -24,8 +24,8 @@ class Toolbox {
         if (this._handledCalls.has(id)) return;
         this._handledCalls.add(id);
         try {
-          const message = ({ state, subject, body }) => {
-            Events.emit('tool:message', { callId: id, state, subject: `${name}(${subject})`, body });
+          const message = ({ state, summary, body }) => {
+            Events.emit('tool:message', { callId: id, group: name, state, summary, body });
           };
           content = await tool.run(args, { temppath, message });
         } catch (err) {

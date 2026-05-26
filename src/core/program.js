@@ -454,8 +454,15 @@ class Program {
       this.#aggregator.reset();
       this.interface.draw();
     });
-      Events.on('tool:message', (event) => {
-      this.#aggregator.message(event);
+    Events.on('tool:message', (event) => {
+      if (event.callId) {
+        this.#aggregator.message(event);
+      } else {
+        this.interface.addMessage({
+          role: 'tool',
+          content: event.content
+        });
+      }
     });
 
     Events.on('metrics:tokens', (event) => {

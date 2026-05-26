@@ -36,8 +36,8 @@ class ActivateSkillTool extends Tool {
     if (!skill) {
       return `Error: Skill "${args.name}" not found. Available skills: ${this.skills.names.join(', ')}`;
     }
-    tool.message({ state: 'spin', subject: `${this.name}(${args.name})` });
-    tool.message({ state: 'done', subject: `${this.name}(${args.name})` });
+    tool.message({ state: 'spin', summary: `${this.name}(${args.name})` });
+    tool.message({ state: 'done', summary: `${this.name}(${args.name})` });
     return skill.content;
   }
 }

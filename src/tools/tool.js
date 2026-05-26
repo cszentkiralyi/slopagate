@@ -38,9 +38,9 @@ class Tool {
     return await this.handler(args, tool);
   }
 
-  message({ state, subject, body } = {}) {
+  message({ state, summary, body } = {}) {
     if (this.#messageCallback) {
-      this.#messageCallback({ state, subject, body });
+      this.#messageCallback({ state, summary, body });
     }
   }
   

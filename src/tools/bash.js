@@ -79,7 +79,7 @@ class BashTool extends Tool {
 
     let summary = command.replaceAll('\n', '\\n');
     if (summary.length > 40) summary = summary.substring(0, 40) + '...';
-    tool.message({ state: 'spin', subject: summary });
+    tool.message({ state: 'spin', summary });
 
     let maxLines = this.config.get('tool_output_limit') || 50;
     let maxLineLen = this.config.get('tool_line_limit') || 256;
@@ -108,7 +108,7 @@ class BashTool extends Tool {
       });
     });
     let result = await p;
-    tool.message({ state: 'done', subject: summary });
+    tool.message({ state: 'done', summary });
     return result;
   }
 

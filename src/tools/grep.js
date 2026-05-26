@@ -28,7 +28,7 @@ class GrepTool extends Tool {
 
     let s = JSON.stringify(search_string);
     let subject = `${s.length > 17 ? s.substring(0, 14) + '..."' : s} in ${this.simplifyPath(file_path || '.')})`;
-    tool.message({ state: 'spin', subject });
+    tool.message({ state: 'spin', summary });
 
     try {
       const result = await new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ class GrepTool extends Tool {
       if (missing) sliced.push(`...and ${missing} more.`);
       return sliced.join('\n');
     } finally {
-      tool.message({ state: 'done', subject });
+      tool.message({ state: 'done', summary });
     }
   }
 }
