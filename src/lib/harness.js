@@ -55,6 +55,7 @@ class Harness {
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
+  set context(ctx) { this.#activeContext = ctx; }
   get modelResponded() { return this.agent?.modelResponded ?? false; }
   get toolStats() { return this.#toolStats; }
   get canAbort() { return this.#abortController !== null; }
@@ -455,7 +456,6 @@ class Harness {
       }
       if (message.content || message.tool_calls) {
         if (message.content) message.content = message.content.trim();
-        this.#activeContext.add(message);
       }
       if (message.content) {
         Events.emit('model:content', { done, content: message.content.trim() });

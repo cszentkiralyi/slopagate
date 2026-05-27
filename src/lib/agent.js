@@ -54,7 +54,7 @@ class Agent {
     this.hooks.emit('message', { role: 'user', content: userMessage });
     
     // Add user message to context
-    this.context.messages.push({ role: 'user', content: userMessage });
+    this.context.add({ role: 'user', content: userMessage });
     
     // Turn loop: send, parse, handle tools, repeat
     let response;
@@ -80,7 +80,7 @@ class Agent {
       // Add model's single message to context once
       this.callbacks.onModelContent?.(content);
       this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
-      this.context.messages.push({ role: 'assistant', content, tool_calls: toolCalls });
+      this.context.add({ role: 'assistant', content, tool_calls: toolCalls });
       
       // Mark that the model has responded — no longer safe to undo user message
       if (!this.#modelResponded) {
@@ -91,7 +91,7 @@ class Agent {
       if (toolCalls && toolCalls.length > 0) {
         toolResults = this.callbacks.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
         this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
-        this.context.messages.push({ role: 'tool', content: JSON.stringify(toolResults) });
+        this.context.add({ role: 'tool', content: JSON.stringify(toolResults) });
       }
       
       // Break on error, no more tool calls, or abort signal
