@@ -29,7 +29,7 @@ class StructuredMessage extends Container {
   }
 
   #updateChildren() {
-    this.log(`SM: ${this.#state} "${this.#subject || this.content}"`);
+    // this.log(`SM: ${this.#state} "${this.#subject || this.content}"`);
     this.removeAllChildren();
     if (this.#state === 'spin') {
       this.appendChild(this.spinner);

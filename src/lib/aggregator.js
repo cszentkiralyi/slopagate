@@ -38,8 +38,8 @@ class MessageAggregator {
     let display;
     if (summaries.length === 1 || uniqueSummaries.length === 1) {
       display = {
-        subject: ANSI.fg(`${group}(${summaries[0] || ''})`, 248),
-        body: lastBody,
+        subject: `${group}(${summaries[0] || ''})`,
+        body: lastBody ? ANSI.fg(lastBody, 248) : lastBody,
         state: finalState
       };
     } else {
@@ -48,9 +48,14 @@ class MessageAggregator {
         const match = (s ?? '').match(/^\w+\((.*)\)$/);
         return match ? match[1] : s ?? '';
       });
+      const bodyText = paths.map((p, i, arr) => {
+        const colored = ANSI.fg(p, 248);
+        if (i < arr.length - 1) return `├ ${colored}`;
+        return `└ ${colored}`;
+      }).join('\n');
       display = {
-        subject: ANSI.fg(`${group} ${summaries.length} operations`, 248),
-        body: paths.join('\n'),
+        subject: `${group} ${summaries.length} operations`,
+        body: bodyText ? ANSI.fg(bodyText, 248) : bodyText,
         state: finalState
       };
     }
