@@ -53,7 +53,7 @@ class TextInput extends Component {
           : null,
         prompt = (mode ? mode.prompt : this.prompt) || '',
         padding = this.padding || {},
-        bg = mode?.bg || this.bg || 236,
+        bg = mode?.bg || this.bg || 237,
         fg = mode?.fg || null,
         hint, value, lines, dirty;
     

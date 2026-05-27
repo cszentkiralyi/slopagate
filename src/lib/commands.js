@@ -68,7 +68,7 @@ const Commands = [
     name: 'context',
     hint: 'Display a context window usage visualizer',
     handler: async (harness) => {
-      let est = harness.session.context.estimates,
+      let est = harness.context.estimates,
           win = est.context_window,
           sysTok = est.system_prompt,
           upTok = est.messages,

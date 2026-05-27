@@ -24,24 +24,25 @@ class LsTool extends Tool {
   }
 
   async handler(args, tool) {
-    let { directory } = args;
+    let { glob: pattern } = args;
     
-    directory = directory || '.';
+    pattern = pattern || '.';
     
-    tool.message({ state: 'spin', summary: `${this.simplifyPath(directory)}/` });
+    tool.message({ state: 'spin', summary: `${this.simplifyPath(pattern)}/` });
     
     let result;
     try {
-      const files = await fs.readdir(directory, { withFileTypes: true });
+      const { glob } = require('node:fs/promises');
+      const matches = await glob(pattern, { withFileTypes: true });
       
-      result = files.map(file => {
-        return file.isDirectory() ? `${file.name}/` : file.name;
+      result = matches.map(entry => {
+        return entry.isDirectory() ? `${entry.name}/` : entry.name;
       }).join('\n');
     } catch (err) {
-      result = `Error: Cannot list ${directory}: ${err.message}`;
+      result = `Error: Cannot list ${pattern}: ${err.message}`;
     }
     
-    tool.message({ state: 'done', summary: `${this.simplifyPath(directory)}/` });
+    tool.message({ state: 'done', summary: `${this.simplifyPath(pattern)}/` });
     return result;
   }
 }

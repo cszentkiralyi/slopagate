@@ -24,7 +24,8 @@ class Program {
   #currentMessageId = null;
   #modelTurnSpinner = null;
   #commandSpinner = null;
-  #aggregator = null
+  #aggregator = null;
+  #currentSpinnerPhrase = null;
 
   static SPINNER_MESSAGES = [
     { present: 'Autofilling', past: 'Autofilled' },
@@ -56,6 +57,7 @@ class Program {
 
   get spinnerMessage() {
     let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
+    this.#currentSpinnerPhrase = msg;
     return msg.present + '...';
   }
 
@@ -439,13 +441,14 @@ class Program {
     });
     Events.on('turn:user', (event) => {
       this.#startAfkTimer();
-      if (this.#modelTurnSpinner && !event?.interrupted) {
+      if (this.#modelTurnSpinner && !event?.interrupted && this.#currentSpinnerPhrase) {
         const elapsed = Date.now() - this.#turn_start;
         const elapsedStr = formatMs(elapsed);
-        let msg = Program.SPINNER_MESSAGES[Math.floor(Math.random() * Program.SPINNER_MESSAGES.length)];
-        this.interface.addMessage({ role: 'tool', content: ANSI.fg(`${msg.past} for ${elapsedStr}`, 248) });
+        let msg = this.#currentSpinnerPhrase.past;
+        this.interface.addMessage({ role: 'tool', content: ANSI.fg(`${msg} for ${elapsedStr}`, 248) });
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
+        this.#currentSpinnerPhrase = null;
       } else if (this.#modelTurnSpinner) {
         this.interface.statusline.hide(this.#modelTurnSpinner);
         this.#modelTurnSpinner = null;
@@ -609,8 +612,8 @@ class Program {
     //   return { cancelled: true, error: `Error: operation not permitted` };
     }
 
-    //Logger.log(`Program: permission denied`);
-    return { cancelled: true, error: `Error: operation not permitted` };
+    Events.emit('user:abort');
+    throw new Error('operation not permitted');
   }
 
   async #suggestParent(toolName, perms) {

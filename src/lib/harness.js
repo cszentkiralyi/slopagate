@@ -96,6 +96,14 @@ class Harness {
     this.agent = new Agent({
       context: this.#activeContext,
       tools: this.toolbox.all(),
+      onTokens: ({ inputTokens, outputTokens }) => {
+        this.#inputTokens += inputTokens || 0;
+        this.#outputTokens += outputTokens || 0;
+        Events.emit('metrics:tokens', {
+          inputTokens: this.#inputTokens,
+          outputTokens: this.#outputTokens
+        });
+      },
       callbacks: {
         onToolCalls: async (toolCalls) => {
           // Emit tool:call events for logging
@@ -391,12 +399,6 @@ class Harness {
     });
     //this.#activeContext.add(message);
     
-    // Update statusline tokens when message is actually sent
-    Events.emit('metrics:tokens', {
-      inputTokens: this.#inputTokens,
-      outputTokens: this.#outputTokens
-    });
-    
     // Pass active context to Agent
     let response = await this.agent.startTurn(event.message, turnController, this.#activeContext);
     if (response.aborted) {
@@ -436,15 +438,6 @@ class Harness {
 
     let { message } = response;
     
-    let p = response.prompt_eval_count;
-    if (p !== null && p !== undefined && !Number.isNaN(p)) {
-      this.#inputTokens += p;
-    }
-    let e = response.eval_count;
-    if (e !== null && e !== undefined && !Number.isNaN(e)) {
-      this.#outputTokens += e;
-    }
-    
     // finish_reason: "stop" = natural end, "length" = hit output limit, "tool_calls" = intermediate
     // Ollama: response.message.finish_reason
     // OpenAI: response.choices[0].finish_reason
@@ -463,11 +456,6 @@ class Harness {
       if (message.content || message.tool_calls) {
         if (message.content) message.content = message.content.trim();
         this.#activeContext.add(message);
-        Events.emit('metrics:tokens', {
-          inputTokens: this.#inputTokens,
-          outputTokens: this.#outputTokens
-        });
-        Events.emit('metrics:tokens', {});
       }
       if (message.content) {
         Events.emit('model:content', { done, content: message.content.trim() });
@@ -666,6 +654,7 @@ class Harness {
     
     // Run pending tools sequentially (one permission prompt at a time)
     for (let call of tool_calls) {
+      if (this.#abortController?.signal.aborted) break;
       let tool = this.toolbox.get(call.function.name);
       let perms;
       try {

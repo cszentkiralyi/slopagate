@@ -18,6 +18,7 @@ class Agent {
     this.config = props.config;
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props.abortController || null;
+    this.onTokens = props.onTokens || null;
     this.hooks = new Hooks({ hooks: ['message'] });  // Own isolated hooks
     // Accept hooks prop but ignore it - use internal Hooks instance
     if (props.hooks) {
@@ -65,6 +66,7 @@ class Agent {
       // Send context to model endpoint
       try {
         response = await this.sendToEndpoint(this.context, abortController);
+        // Token counts handled by Harness.onModelResponse
       } catch (err) {
         hasError = true;
         Logger.log(`Agent.startTurn request error: ${err.message || JSON.stringify(err)}`);
@@ -166,7 +168,20 @@ class Agent {
       responseObj = { error: err.message || 'Request failed', message: null };
     }
     
-    return this.normalizeResponse(responseObj);
+    let normalized = this.normalizeResponse(responseObj);
+    
+    // Emit token counts to harness
+    let tokensUp = normalized.prompt_eval_count
+        ?? normalized.usage?.prompt_tokens
+        ?? responseObj?.usage?.prompt_tokens
+        ?? 0;
+    let tokensDown = normalized.eval_count
+        ?? normalized.usage?.completion_tokens
+        ?? responseObj?.usage?.completion_tokens
+        ?? 0;
+    this.onTokens?.({ inputTokens: tokensUp, outputTokens: tokensDown });
+    
+    return normalized;
   }
 
   /**
