@@ -25,7 +25,7 @@ class Toolbox {
         this._handledCalls.add(id);
         try {
           const message = ({ state, summary, body }) => {
-            Events.emit('tool:message', { callId: id, group: name, state, summary, body });
+            Events.emit('tool:message', { callId: id, group: name, state, summary, body, nounPlural: tool.nounPlural });
           };
           content = await tool.run(args, { temppath, message });
         } catch (err) {
