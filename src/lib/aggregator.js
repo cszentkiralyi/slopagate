@@ -45,16 +45,19 @@ class MessageAggregator {
         state: finalState
       };
     } else {
-      // Strip "Edit(...)" wrapper to just show "..."
-      const paths = uniqueSummaries.map(s => {
-        const match = (s ?? '').match(/^\w+\((.*)\)$/);
-        return match ? match[1] : s ?? '';
-      });
-      const bodyText = paths.map((p, i, arr) => {
-        const colored = ANSI.fg(p, 248);
+      const MAX_LINES = 10;
+      const truncated = uniqueSummaries.slice(0, MAX_LINES);
+      const extra = uniqueSummaries.length - truncated.length;
+
+      const bodyLines = truncated.map((s, i, arr) => {
+        const colored = ANSI.fg(s ?? '', 248);
         if (i < arr.length - 1) return `├ ${colored}`;
         return `└ ${colored}`;
-      }).join('\n');
+      });
+      if (extra > 0) {
+        bodyLines.unshift(`│ [+${extra} more]`);
+      }
+      const bodyText = bodyLines.join('\n');
       display = {
         subject: `${group} ${summaries.length} ${nounPlural || 'operations'}`,
         body: bodyText ? ANSI.fg(bodyText, 248) : bodyText,
