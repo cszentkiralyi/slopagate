@@ -9,8 +9,10 @@ class MessageAggregator {
     this.#callData = new Map();
   }
 
+  // TODO: clean up — this is a temporary hack using nounPlural from the event.
+  // The aggregator should get nounPlural from a proper toolbox reference, not via the event.
   message(event) {
-    let { callId, group, summary, body, state } = event;
+    let { callId, group, summary, body, state, nounPlural } = event;
 
     // Initialize group structures if needed
     if (!this.#callData.has(group)) {
@@ -54,7 +56,7 @@ class MessageAggregator {
         return `└ ${colored}`;
       }).join('\n');
       display = {
-        subject: `${group} ${summaries.length} operations`,
+        subject: `${group} ${summaries.length} ${nounPlural || 'operations'}`,
         body: bodyText ? ANSI.fg(bodyText, 248) : bodyText,
         state: finalState
       };

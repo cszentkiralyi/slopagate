@@ -4,7 +4,8 @@ const { Logger } = require('../util.js');
 const Tool = require('./tool.js');
 
 class GrepTool extends Tool {
-  name = 'StringSearch';
+  name = 'Search';
+  nounPlural = 'patterns';
   description = 'Search for a pattern in a file and return matching lines.';
   ttl = 3;
   readonly = true;

@@ -4,6 +4,7 @@ const { Logger } = require('../util.js');
 class Tool {
   static TRIM_MSG = '[...trimmed tool output...]';
   name;
+  nounPlural = 'operations';
   description;
   readonly = false;
   ttl = 5
@@ -38,9 +39,11 @@ class Tool {
     return await this.handler(args, tool);
   }
 
+  // TODO: clean up — this is a temporary hack to pass nounPlural through the event.
+  // The aggregator should get nounPlural from a proper toolbox reference, not via the event.
   message({ state, summary, body } = {}) {
     if (this.#messageCallback) {
-      this.#messageCallback({ state, summary, body });
+      this.#messageCallback({ state, summary, body, nounPlural: this.nounPlural });
     }
   }
   
@@ -53,6 +56,9 @@ class Tool {
     return (simplified && simplified.length) ? simplified : '.';
   }
   
+  aggregate(n) {
+    return `${this.name} ${n} ${this.nounPlural}`;
+  }
   log(x) { Logger.log(`Tool:${this.name} ${x}`); }
 }
 

@@ -10,6 +10,7 @@ class EditTool extends Tool {
   static REM_COLOR = 160;
 
   name = 'Edit';
+  nounPlural = 'files';
   description = 'Make edits to a text file by replacing old_str with new_str in a file. The strings must differ. If a file doesn\'t exist it will be created.';
   parameters = {
     type: 'object',
@@ -68,7 +69,7 @@ class EditTool extends Tool {
       }
     }
 
-    tool.message({ state: 'done', summary: `${file_path} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})` });
+    tool.message({ state: 'done', summary: `${file_path} ${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}` });
     return result;
   }
   

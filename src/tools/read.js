@@ -14,6 +14,7 @@ const addLineNumbers = (lines, start) => {
 
 class ReadTool extends Tool {
   name = 'Read';
+  nounPlural = 'files';
   description = 'Read a text file, either all at once or limited to a line range.';
   readonly = true;
   parameters = {

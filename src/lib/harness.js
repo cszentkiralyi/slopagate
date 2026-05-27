@@ -260,10 +260,9 @@ class Harness {
     Logger.log(`Harness: recap = ${content}`);
     Logger.log(`Harness: summaryContext.messages = ${JSON.stringify(summaryContext.messages)}`);
     
-    Events.emit('tool:message', {
+    Events.emit('recap:message', {
       done: true,
-      content: content,
-      padding: { left: 1, right: 1 }
+      content: content
     });
   }
   

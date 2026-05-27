@@ -6,14 +6,15 @@ const fs = require('node:fs/promises');
 const Tool = require('./tool.js');
 
 class LsTool extends Tool {
-  name = 'Ls';
-  description = 'List files and folders in a directory.';
+  name = 'Glob';
+  nounPlural = 'patterns';
+  description = 'List files and folders in a glob.';
   ttl = 2;
   readonly =  true;
   parameters =  {
     type:  'object',
     properties:  {
-      directory:  { type: 'string', default: '.' }
+      glob:  { type: 'string', default: '.' }
     }
   };
   

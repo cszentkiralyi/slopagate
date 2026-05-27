@@ -158,6 +158,12 @@ class Interface {
         id, role, content,
         fg: 'gray'
       };
+    } else if (role === 'recap') {
+      textProps = {
+        id, role, content,
+        fg: 242,
+        forceAlign: '🕮'
+      };
     } else if (role === 'shell') {
       textProps = {
         id, role, content,

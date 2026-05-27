@@ -454,6 +454,13 @@ class Program {
       this.#aggregator.reset();
       this.interface.draw();
     });
+    Events.on('recap:message', (event) => {
+      this.interface.addMessage({
+        role: 'recap',
+        content: event.content
+      });
+    });
+
     Events.on('tool:message', (event) => {
       if (event.callId) {
         this.#aggregator.message(event);

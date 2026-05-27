@@ -7,6 +7,7 @@ const Tool = require('./tool.js');
 
 class BashTool extends Tool {
   name = 'Bash';
+  nounPlural = 'commands';
   description = 'Execute a limited set of shell commands: ';
   readonly = false;
   parameters = {
