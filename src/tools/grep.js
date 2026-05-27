@@ -1,4 +1,4 @@
-const { exec } = require('node:child_process');
+const { execSync } = require('node:child_process');
 const { Logger } = require('../util.js');
 
 const Tool = require('./tool.js');
@@ -6,16 +6,16 @@ const Tool = require('./tool.js');
 class GrepTool extends Tool {
   name = 'Search';
   nounPlural = 'patterns';
-  description = 'Search for a pattern in a file and return matching lines.';
+  description = 'Search for a pattern in a file or directory and return matching lines.';
   ttl = 3;
   readonly = true;
   parameters = {
     type: 'object',
     properties: {
-      file_path: { type: 'string' },
-      search_string: { type: 'string' }
+      path: { type: 'string', description: 'File or directory to search. If a directory, searches recursively.' },
+      pattern: { type: 'string', description: 'The pattern to search for.' }
     },
-    required: [ 'file_path', 'search_string' ]
+    required: [ 'path', 'pattern' ]
   };
   
   constructor(props) {
@@ -25,37 +25,16 @@ class GrepTool extends Tool {
   }
 
   async handler(args, tool) {
-    let { file_path, search_string } = args;
+    let { path, pattern } = args;
 
-    let s = JSON.stringify(search_string);
-    let summary = `${s.length > 20 ? s.substring(0, 17) + '..."' : s} in ${this.simplifyPath(file_path || '.')}`;
+    let s = JSON.stringify(pattern);
+    let summary = `${s.length > 20 ? s.substring(0, 17) + '..."' : s} in ${this.simplifyPath(path || '.')}`;
     tool.message({ state: 'spin', summary });
 
     try {
-      const result = await new Promise((resolve, reject) => {
-        exec(`grep -nr ${JSON.stringify(search_string)} ${file_path}`, (error, stdout, stderr) => {
-          if (error) {
-            resolve({ error, stdout, stderr });
-          } else {
-            resolve({ error: null, stdout, stderr });
-          }
-        });
-      });
-
-      if (result.error && result.error.status === 1) {
-        return '';
-      }
-
-      if (result.error) {
-        if (result.error.code === 'ENOENT' || result.error.message?.includes('ENOENT')) {
-          return `Error: file ${file_path} not found`;
-        }
-        Logger.log(`Grep: ${JSON.stringify(result.error)}`);
-        return `Error: ${result.error.message}`;
-      }
-
-      if (!result.stdout.length) return '';
-      let output = result.stdout.split('\n');
+      const result = execSync(`grep -nr ${JSON.stringify(pattern)} ${path}`).toString();
+      if (!result.length) return '';
+      let output = result.split('\n');
       // Truncate each line to tool_line_limit chars
       let maxLineLen = this.config.get('tool_line_limit') || 256;
       output = output.map(line =>
@@ -68,6 +47,15 @@ class GrepTool extends Tool {
       let missing = output.length - sliced.length;
       if (missing) sliced.push(`...and ${missing} more.`);
       return sliced.join('\n');
+    } catch (err) {
+      if (err.message?.includes('ENOENT')) {
+        return `Error: ${path} not found`;
+      }
+      if (err.status === 1) {
+        return '';
+      }
+      Logger.log(`Grep: ${JSON.stringify(err)}`);
+      return `Error: ${err.message}`;
     } finally {
       tool.message({ state: 'done', summary });
     }
