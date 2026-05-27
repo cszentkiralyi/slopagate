@@ -57,6 +57,7 @@ class Harness {
   get context() { return this.#activeContext; }
   get modelResponded() { return this.agent?.modelResponded ?? false; }
   get toolStats() { return this.#toolStats; }
+  get canAbort() { return this.#abortController !== null; }
 
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));

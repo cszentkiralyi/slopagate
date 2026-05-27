@@ -310,9 +310,9 @@ class Program {
         return async (inst) => {
           if (stage == 0) {
             stage++;
-            if (inst.value?.length || !this.harness.session.canAbort) {
+            if (inst.value?.length || !this.harness.canAbort) {
               inst.clear();
-              if (!this.harness.session.canAbort) {
+              if (!this.harness.canAbort) {
                 this.#currentMessageId = this.interface.statusline.showMessage({
                   content: '^C again to exit.',
                   padding: { left: 1 },
@@ -325,7 +325,7 @@ class Program {
           }
           if (stage == 1) {
             stage++;
-            if (this.harness.session.canAbort) {
+            if (this.harness.canAbort) {
               Events.emit('user:abort');
               this.#currentMessageId = this.interface.statusline.showMessage({
                 content: '^C again to exit.',
