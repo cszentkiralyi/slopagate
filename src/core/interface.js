@@ -269,7 +269,7 @@ class Interface {
   
   getUserChoice(message, choices) {
     Logger.log(`Interface: received getUserChoice() call`);
-    const picker = new TUI.Picker({ message, choices });
+    const picker = new TUI.Picker({ message, choices, inactiveSymbol: ' ' });
     const prevFocus = this.#terminal.focused;
     return new Promise((resolve, reject) => {
       let select = (v) => {

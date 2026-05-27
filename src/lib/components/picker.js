@@ -8,7 +8,7 @@ class Picker extends Component {
 
   message;
   choices; // { label, value, default? }
-  symbols = { active: '◆', inactive: '◇' };
+  symbols;
 
   #active;
   #text;
@@ -17,6 +17,7 @@ class Picker extends Component {
   constructor(props) {
     super(props);
     Object.assign(this, props);
+    this.symbols = { active: '◆', inactive: this.inactiveSymbol || '◇' };
 
     this.symbols.alne = ANSI.measure(this.symbols.active),
     this.symbols.ilen = ANSI.measure(this.symbols.inactive);
