@@ -32,12 +32,11 @@ class LsTool extends Tool {
     
     let result;
     try {
-      const { glob } = require('node:fs/promises');
-      const matches = await glob(pattern, { withFileTypes: true });
-      
-      result = matches.map(entry => {
-        return entry.isDirectory() ? `${entry.name}/` : entry.name;
-      }).join('\n');
+      const matches = [];
+      for await (const match of fs.glob(pattern)) {
+        matches.push(match);
+      }
+      result = matches.join('\n');
     } catch (err) {
       result = `Error: Cannot list ${pattern}: ${err.message}`;
     }
