@@ -424,12 +424,12 @@ class Program {
       Events.emit('turn:user');
     });
     Events.on('model:content', (event) => {
-      if (event.content) {
-        this.interface.addMessage({
-          role: 'model',
-          content: this.md.toAnsi(event.content.trim())
-        });
-      }
+      if (!event.content?.trim()) return;
+
+      this.interface.addMessage({
+        role: 'model',
+        content: this.md.toAnsi(event.content.trim())
+      });
       this.#aggregator.reset();
       this.interface.draw();
     });
