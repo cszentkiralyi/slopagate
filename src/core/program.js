@@ -352,10 +352,7 @@ class Program {
       switch (inst.mode) {
         case 'shell':
           let shellMode = this.input_modes.find(m => m.name === inst.mode);
-          this.interface.addMessage({
-            role: 'user',
-            content: ANSI.fg(shellMode.prompt + input, shellMode.fg)
-          });
+          let shellPrompt = shellMode.prompt + input;
           inst.clear();
           this.interface.draw();
           let result = await new Promise((resolve) => {
@@ -363,12 +360,11 @@ class Program {
               resolve((stderr ? stderr.trim() : stdout.trim()) || '');
             });
           });
-          if (result) {
-            this.interface.addMessage({
-              role: 'shell',
-              content: result
-            });
-          }
+          this.interface.addMessage({
+            role: 'shell',
+            subject: shellPrompt,
+            body: result
+          });
           break;
       case 'normal':
           if (input[0] === '/') {

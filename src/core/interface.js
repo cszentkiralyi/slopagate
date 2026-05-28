@@ -165,11 +165,16 @@ class Interface {
         forceAlign: '🕮'
       };
     } else if (role === 'shell') {
-      textProps = {
-        id, role, content,
-        fg: 250,
-        padding: { left: 2, right: 2 }
-      };
+      let inst = new TUI.StructuredMessage({
+        subject,
+        body,
+      });
+      inst.subjectText.bg = 237;
+      inst.subjectText.fg = 117;
+      inst.bodyText.fg = 250;
+      this.#chat_history.appendChild(inst);
+      this.draw();
+      return inst;
     } else if (role === 'system') {
       textProps = { id, role, content };
     } else if (role === 'command') {
