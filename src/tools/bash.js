@@ -122,6 +122,17 @@ class BashTool extends Tool {
       };
     }
 
+    // Readonly commands skip permission prompts entirely
+    const isReadonly = BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
+      if (pattern.endsWith('*')) {
+        return command.startsWith(pattern.substring(0, pattern.length - 1)) && readonly;
+      }
+      return command === pattern && readonly;
+    });
+    if (isReadonly) {
+      return null;
+    }
+
     let [ cmd, second, ...rem ] = command.split(' ');
     let scope = second?.startsWith('-') ? cmd : (cmd + ' ' + second);
     let parents = second
