@@ -16,6 +16,7 @@ class Agent {
     this.context = props.context;
     this.callbacks = props.callbacks;
     this.config = props.config;
+    this.compact = props.compact || null;
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props.abortController || null;
     this.onTokens = props.onTokens || null;
@@ -92,6 +93,12 @@ class Agent {
         toolResults = this.callbacks.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
         this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
         this.context.add({ role: 'tool', content: JSON.stringify(toolResults) });
+        
+        // Compact after tool results to prevent context from filling up
+        // with large tool responses before the next model call
+        if (this.compact) {
+          this.context = await this.compact(this.context);
+        }
       }
       
       // Break on error, no more tool calls, or abort signal

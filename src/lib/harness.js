@@ -93,9 +93,18 @@ class Harness {
     // Active context starts as a reference to session's context
     this.#activeContext = this.session.context;
     
+    // Compact callback: Harness owns the layers, Agent calls this mid-turn
+    const compact = async (ctx) => {
+      return await ctx.fork({
+        layers: ['system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score', 'model_reasoning'],
+        summarize: async (transcript) => this.summarize(transcript)
+      });
+    };
+    
     // Agent instance — forks from our active context per-turn
     this.agent = new Agent({
       context: this.#activeContext,
+      compact: compact,
       tools: this.toolbox.all(),
       onTokens: ({ inputTokens, outputTokens }) => {
         this.#inputTokens += inputTokens || 0;
@@ -307,6 +316,23 @@ class Harness {
     this.#toolStats.clear();
   }
 
+  async summarize(transcript) {
+    let summaryContext = new Context({
+      config: this.config,
+      system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
+      messages: []
+    });
+    
+    let agent = new Agent({
+      context: summaryContext,
+      config: this.config,
+      abortController: null
+    });
+    
+    let result = await agent.startTurn(transcript, null);
+    return result.content;
+  }
+
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
       this.emitCommandMessage('Usage: /config <key> [value]');
@@ -381,22 +407,7 @@ class Harness {
     // Fork from our own active context and apply compaction layers
     this.#activeContext = await this.#activeContext.fork({
       layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score', 'model_reasoning' ],
-      summarize: async (transcript) => {
-        let summaryContext = new Context({
-          config: this.session.config,
-          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
-          messages: []
-        });
-        
-        let agent = new Agent({
-          context: summaryContext,
-          config: this.session.config,
-          abortController: turnController
-        });
-        
-        let result = await agent.startTurn(transcript, turnController);
-        return result.content;
-      }
+      summarize: async (transcript) => this.summarize(transcript)
     });
     //this.#activeContext.add(message);
     
