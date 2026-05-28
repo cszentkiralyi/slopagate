@@ -28,7 +28,7 @@ class Spinner extends Component {
       frames: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
     },
     'blink-diamond-gray': {
-      delay: 500,
+      delay: 300,
       frames: [
         ANSI.fg('◆', 242),
         ANSI.fg('◆', 255)

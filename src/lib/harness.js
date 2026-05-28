@@ -135,6 +135,10 @@ class Harness {
     
     // Register hook handler to add messages to session context
     this.agent.hooks.on('message', (message) => {
+      // Skip messages with falsy content
+      if (!message || !message.content || (typeof message.content === 'string' && !message.content.trim())) {
+        return;
+      }
       // Add to session context
       this.session.context.add(message);
     });

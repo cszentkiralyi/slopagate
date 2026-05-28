@@ -263,6 +263,8 @@ class Agent {
             const xmlCalls = this.#parseXmlToolCalls(message[field]);
             if (xmlCalls.length) {
               message.tool_calls = xmlCalls;
+              // Remove the XML tool calls from the text content to avoid duplication
+              message[field] = message[field].replace(/<function=\w+>[\s\S]*?<\/function>/g, '').trim();
               break;
             }
           }
