@@ -63,4 +63,7 @@ function formatMs(ms) {
   return `${sec}s`;
 }
 
-module.exports = { ID, lerp, louse, Logger, formatMs };
+const truncate = (s, max, suffix = '…') =>
+  s.length > max ? s.substring(0, max - suffix.length) + suffix : s;
+
+module.exports = { ID, lerp, louse, Logger, formatMs, truncate };

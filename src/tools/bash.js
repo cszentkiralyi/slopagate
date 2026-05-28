@@ -1,7 +1,7 @@
 /* Runs shell commands with permission checking */
 const { exec } = require('node:child_process');
 
-const { Logger } = require('../util.js');
+const { Logger, truncate } = require('../util.js');
 
 const Tool = require('./tool.js');
 
@@ -77,9 +77,7 @@ class BashTool extends Tool {
       //tool.message({ state: 'error', subject: `${this.name}("${command.split(' ')[0]}")` });
       return `Error: command "${command.split(' ')[0]}" not allowed.`;
     }
-
-    let summary = command.replaceAll('\n', '\\n');
-    if (summary.length > 40) summary = summary.substring(0, 40) + '...';
+    let summary = truncate(command.replaceAll('\n', '\\n'), 50);
     tool.message({ state: 'spin', summary });
 
     let maxLines = this.config.get('tool_output_limit') || 50;
@@ -96,11 +94,7 @@ class BashTool extends Tool {
               .trim()
               .split('\n');
           // Truncate each line to maxLineLen chars
-          output = output.map(line =>
-            line.length > maxLineLen
-              ? line.substring(0, maxLineLen) + '...'
-              : line
-          );
+          output = output.map(line => truncate(line, maxLineLen));
           let sliced = output.slice(0, maxLines);
           let missing = output.length - sliced.length;
           if (missing) sliced.push(`...and ${missing} more.`);

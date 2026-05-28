@@ -1,5 +1,5 @@
 const { execSync } = require('node:child_process');
-const { Logger } = require('../util.js');
+const { Logger, truncate } = require('../util.js');
 
 const Tool = require('./tool.js');
 
@@ -28,7 +28,7 @@ class GrepTool extends Tool {
     let { path, pattern } = args;
 
     let s = JSON.stringify(pattern);
-    let summary = `${s.length > 20 ? s.substring(0, 17) + '..."' : s} in ${this.simplifyPath(path || '.')}`;
+    let summary = `${truncate(s, 50)} in ${this.simplifyPath(path || '.')}`;
     tool.message({ state: 'spin', summary });
 
     try {
@@ -37,11 +37,7 @@ class GrepTool extends Tool {
       let output = result.split('\n');
       // Truncate each line to tool_line_limit chars
       let maxLineLen = this.config.get('tool_line_limit') || 256;
-      output = output.map(line =>
-        line.length > maxLineLen
-          ? line.substring(0, maxLineLen) + '...'
-          : line
-      );
+      output = output.map(line => truncate(line, maxLineLen));
       let maxLines = this.config.get('tool_output_limit') || 20;
       let sliced = output.slice(0, maxLines);
       let missing = output.length - sliced.length;
