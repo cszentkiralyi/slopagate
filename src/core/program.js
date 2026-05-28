@@ -423,7 +423,7 @@ class Program {
         this.interface.removeLastUserMessage();
       }
       chatInput.clear();
-      Events.emit('turn:user');
+      // turn:user is emitted by the harness with { interrupted: true }
     });
     Events.on('model:content', (event) => {
       if (!event.content?.trim()) return;
@@ -546,11 +546,11 @@ class Program {
       return { response: `Error: failed to parse arguments for "${toolCall.function.name}" — model returned malformed JSON` };
     }
     
-    //*
+    /*
     if ((tool.name === 'Search' || tool.name === 'Read')
         && args?.file_path) {
-      const file_path = args.file_path;
-      let last = path.basename(file_path);
+      const path = args.path;
+      let last = path.basename(path);
       if (Program.EXP_FILE_REGEX.test(last) && !this.#exp_fileReadWhitelist.has(last)) {
         switch (tool.name) {
           case 'Read':
