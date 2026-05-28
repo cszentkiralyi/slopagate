@@ -547,7 +547,7 @@ class Program {
     }
     
     //*
-    if ((tool.name === 'StringSearch' || tool.name === 'Read')
+    if ((tool.name === 'Search' || tool.name === 'Read')
         && args?.file_path) {
       const file_path = args.file_path;
       let last = path.basename(file_path);
@@ -556,12 +556,12 @@ class Program {
           case 'Read':
             Logger.log(`[Experiment] maybe steering ${args.start_line ?? 'none'}-${args.end_line ?? 'none'}`);
             if (!args.start_line || !args.end_line) {
-              Logger.log(`[Experiment] Steering from ${last} to StringSearch`);
-              return { cancelled: true, response: `Error: must use "StringSearch" tool before reading "${last}".` };
+              Logger.log(`[Experiment] Steering from ${last} to Search`);
+              return { cancelled: true, response: `Error: must use "Search" tool before reading "${last}".` };
             }
             break;
-          case 'StringSearch':
-            Logger.log(`[Experiment] Steering: registered word "${last}" from StringSearch`);
+          case 'Search':
+            Logger.log(`[Experiment] Steering: registered word "${last}" from Search`);
             this.#exp_fileReadWhitelist.add(last);
             break;
         }

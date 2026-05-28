@@ -402,6 +402,7 @@ class Harness {
     
     // Pass active context to Agent
     let response = await this.agent.startTurn(event.message, turnController, this.#activeContext);
+    this.#logTurnStats();
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
       Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 'red') });

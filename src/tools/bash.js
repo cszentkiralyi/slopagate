@@ -24,7 +24,7 @@ class BashTool extends Tool {
     { pattern: 'git log *', readonly: true },
     { pattern: 'git status*', readonly: true },
     { pattern: 'git diff*', readonly: true },
-    { pattern: 'git add *', readonly: true },
+    //{ pattern: 'git add *', readonly: true },
     { pattern: 'git reset *', readonly: false },
     { pattern: 'git commit *', readonly: false },
     { pattern: 'pwd', readonly: true },
@@ -40,7 +40,7 @@ class BashTool extends Tool {
     { pattern: 'tail *', hint: 'Read' },
     { pattern: 'ls*', hint: 'Ls' },
     { pattern: 'find *', hint: 'Ls' },
-    { pattern: 'grep *', hint: 'StringSearch' },
+    { pattern: 'grep *', hint: 'Search' },
   ];
 
   constructor(props) {
