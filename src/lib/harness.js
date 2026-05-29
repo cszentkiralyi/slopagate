@@ -102,6 +102,7 @@ class Harness {
           //'tool_age',
           //'tool_error',
           'tool_length',
+          'tool_total',
           //'chat_score',
           //'model_reasoning'
         ],
