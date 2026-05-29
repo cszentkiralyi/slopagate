@@ -3,6 +3,7 @@ const path = require('node:path');
 const ANSI = require('../lib/ansi.js');
 const Events = require('../events.js');
 const Session = require('./session.js');
+const SessionManager = require('./session-manager.js');
 const Context = require('./context.js');
 const Toolbox = require('./toolbox.js');
 const Timers = require('./timers.js');
@@ -68,6 +69,7 @@ class Harness {
 
     Object.assign(this, props);
     
+    this.sessionManager = new SessionManager();
     this.hooks = new Hooks({ hooks: ['tool-call'] });
     
     this.toolbox = new Toolbox(this, [
@@ -86,7 +88,6 @@ class Harness {
     ]);
     this.session = new Session({
       tools: this.toolbox.all(),
-      keep_alive: '10m',
       ...(props && props.session || null)
     });
     
@@ -96,7 +97,14 @@ class Harness {
     // Compact callback: Harness owns the layers, Agent calls this mid-turn
     const compact = async (ctx) => {
       return await ctx.fork({
-        layers: ['system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score', 'model_reasoning'],
+        layers: [
+          //'system_prompt',
+          //'tool_age',
+          //'tool_error',
+          'tool_length',
+          //'chat_score',
+          //'model_reasoning'
+        ],
         summarize: async (transcript) => this.summarize(transcript)
       });
     };
@@ -126,7 +134,7 @@ class Harness {
         onModelContent: (content) => Events.emit('model:content', { content }),
         onTurnEnd: () => {
           Events.emit('turn:user');
-          this.#serializeSession();
+          this.sessionManager.saveSession(this.session);
         }
       },
       config: this.config,
@@ -482,14 +490,14 @@ class Harness {
       if (done) {
         this.#logTurnStats();
         Events.emit('turn:user');
-        this.#serializeSession();
+        this.sessionManager.saveSession(this.session);
       }
     }
   }
   
   async onToolsResponse(messages) {
     // Agent loop handles the next sendToEndpoint call
-    this.#serializeSession();
+    this.sessionManager.saveSession(this.session);
   }
   
   async runToolCall(call) {

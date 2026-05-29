@@ -1,17 +1,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const Session = require('./session.js');
-
 class SessionManager {
   static HISTORY_INDEX = path.join(process.env.HOME, '.slopagate', 'history.jsonl');
   static HISTORY_DIR = path.join(process.env.HOME, '.slopagate', 'history');
-
-  constructor({ config, tools, promptDoc } = {}) {
-    this.config = config;
-    this.tools = tools;
-    this.promptDoc = promptDoc;
-  }
 
   // --- Index ---
 
@@ -107,28 +99,12 @@ class SessionManager {
   }
 
   /**
-   * Restore a session from disk.
-   * Creates a new Session object with the persisted messages.
+   * Load messages for a session from disk.
    * @param {string} id
-   * @returns {Session}
+   * @returns {{role: string, content: string}[]}
    */
-  restoreSession(id) {
-    const messages = this.readSession(id);
-
-    // Create a new session
-    const session = new Session({
-      id,
-      config: this.config,
-      tools: this.tools,
-      promptDoc: this.promptDoc
-    });
-
-    // Add persisted messages to the session context
-    for (const msg of messages) {
-      session.addToContext(msg);
-    }
-
-    return session;
+  loadSession(id) {
+    return this.readSession(id);
   }
 
   /**
