@@ -62,6 +62,11 @@ class Session {
       this.#promptDoc = props.promptDoc;
       this.#masterContext.system_prompt = this.#promptDoc.render(this.config);
     }
+
+    // Load initial messages (for resumed sessions)
+    if (props.messages && props.messages.length) {
+      this.#masterContext.add(...props.messages);
+    }
   }
 
   async dispose() {
