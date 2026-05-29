@@ -38,7 +38,7 @@ const CONTEXT_CONFIGS = {
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (1 / 10) },
       tool_total: { max: (1 / 2) },
-      model_reasoning: { user_turns: 0, ttl: 10 }
+      model_reasoning: { user_turns: 1, ttl: 0 }
     }
   },
   high: {
@@ -209,6 +209,16 @@ class Context {
     });
     if (opts.layers) await f.compact(opts);
     return f;
+  }
+  
+  clone() {
+    return new Context({
+      config: this.config,
+      system_prompt: this.system_prompt,
+      messages: [ ...(this.messages) ],
+      budget: this.budget,
+      layer_config: this.layer_config
+    });
   }
 
   getBudget(overrides) {
