@@ -15,6 +15,27 @@ const Slopdown = require('../lib/sd.js');
 const Skills = require('../lib/skills.js');
 
 const { Logger, formatMs } = require('../util.js');
+
+/**
+ * Find the cutoff index for the last `count` user messages.
+ * Walks backwards through messages, counting user-role messages
+ * until we hit `count`, then returns that index.
+ */
+function recentTurnsCutoff(messages, count = 5) {
+  let userCount = 0;
+  let cutoffIdx = 0;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'user') {
+      userCount++;
+      if (userCount === count) {
+        cutoffIdx = i;
+        break;
+      }
+    }
+  }
+  if (userCount < count) cutoffIdx = 0;
+  return cutoffIdx;
+}
 const Timers = require('../lib/timers.js');
 const Permissions = require('../lib/permissions.js');
 const { MessageAggregator } = require('../lib/aggregator.js');
@@ -61,7 +82,8 @@ class Program {
     return msg.present + '...';
   }
 
-  constructor({ banner }) {
+  constructor({ banner, session }) {
+    this.session = session;
     // Defaults
     const configData = {
       root_dir: process.env.PWD,
@@ -250,7 +272,9 @@ class Program {
     this.harness = new Harness({
       session: {
         config: this.config,
-        promptDoc: promptDoc
+        promptDoc: promptDoc,
+        id: this.session?.id,
+        ...(this.session?.messages && { messages: this.session.messages })
       },
       config: this.config,
       skills: this.skills
@@ -258,6 +282,24 @@ class Program {
     // Auto-clean old sessions on startup
     this.harness.sessionManager.cleanup({ maxAge: 7, maxCount: 20 });
     this.#aggregator = new MessageAggregator(this.interface);
+
+    // Render last 5 turns if we resumed a session
+    if (this.session?.messages && this.session.messages.length) {
+      const cutoff = recentTurnsCutoff(this.session.messages, 5);
+      for (const msg of this.session.messages.slice(cutoff)) {
+        if (msg.role === 'user') {
+          msg.content = Interface.CLI_PROMPT + msg.content;
+        }
+        // Only show user and model messages in the chat history —
+        // tool messages are ephemeral UI elements that get regenerated
+        if (msg.role !== 'user' && msg.role !== 'model' && msg.role !== 'assistant') continue;
+        // Map 'assistant' (API role) to 'model' (UI role)
+        const role = msg.role === 'assistant' ? 'model' : msg.role;
+        const content = role === 'model' ? this.md.toAnsi(msg.content.trim()) : msg.content;
+        this.interface.addMessage({ role, content });
+      }
+      this.interface.draw();
+    }
 
     Events.on('command:name', ({ name }) => this.interface.addMessage({
       role: 'command',
@@ -267,12 +309,7 @@ class Program {
       role: 'tool',
       content: ANSI.fg(content, 248)
     }));
-    Events.on('session:context', ({ content }) => {
-      this.interface.addMessage({
-        role: 'tool',
-        content: ANSI.fg(`\n── Last messages from session ──\n${content}\n───────────────────────────────`, 240)
-      });
-    });
+ 
     Events.on('program:quit', () => this.dispose());
     
     this.harness.commands.push({

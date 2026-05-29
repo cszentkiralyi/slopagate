@@ -54,7 +54,7 @@ const repl = async () => {
 
   let p = new Program({
     banner: (process.stdout.columns >= 102) ? BANNER_LARGE : BANNER_TINY,
-    session: session
+    session
   });
 }
 
