@@ -265,6 +265,12 @@ class Program {
       role: 'tool',
       content: ANSI.fg(content, 248)
     }));
+    Events.on('session:context', ({ content }) => {
+      this.interface.addMessage({
+        role: 'tool',
+        content: ANSI.fg(`\n── Last messages from session ──\n${content}\n───────────────────────────────`, 240)
+      });
+    });
     Events.on('program:quit', () => this.dispose());
     
     this.harness.commands.push({

@@ -114,6 +114,15 @@ class Context {
     return ret;
   }
   
+  static hash(arr) {
+    let h = 0;
+    const s = JSON.stringify(arr);
+    for (let i = 0; i < s.length; i++) {
+      h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return h;
+  }
+  
   constructor(options = {}) {
     this.config = options.config || new Config();
     let aggression = options.aggression_level || this.config.get('aggression_level');
@@ -158,7 +167,7 @@ class Context {
       if (arg.config.disable) continue;
       if (saturation < (arg.config.saturation || 0)) continue;
       if (arg.messages.length < (arg.config.min_messages || 0)) continue;
-      //Logger.log(`compact: running layer ${n_layer}`);
+      const beforeHash = Context.hash(arg.messages);
       verbatim = null, r = null;
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
@@ -184,6 +193,9 @@ class Context {
       } catch (ex) {
         Logger.log(`compact: layer ${n_layer} threw error ${JSON.stringify(ex)}`);
         r = null;
+      }
+      if (r && r.messages && Context.hash(r.messages) !== beforeHash) {
+        Logger.log(`compact: layer ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r.messages.length}`);
       }
       //Logger.log(`compact: layer ${n_layer} sent ${arg.messages.length}, kept ${verbatim ? verbatim.length : 0} verbatim, got ${r?.messages?.length ?? 0}`);
       if (verbatim) {

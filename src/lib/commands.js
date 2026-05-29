@@ -219,6 +219,74 @@ const Commands = [
       }
       harness.emitCommandMessage(`Bug logged: ${description}`);
     }
+  },
+
+  {
+    name: 'sessions',
+    hint: 'List all saved sessions',
+    handler: async (harness) => {
+      const sessions = harness.sessionManager.listSessions();
+      if (sessions.length === 0) {
+        harness.emitCommandMessage('No saved sessions.');
+        return;
+      }
+      const lines = sessions
+        .sort((a, b) => new Date(b.modified) - new Date(a.modified))
+        .map(s => `  ${s.id}  created: ${s.created}  modified: ${s.modified}`)
+        .join('\n');
+      harness.emitCommandMessage(`${sessions.length} session(s):\n${lines}`);
+    }
+  },
+
+  {
+    name: 'resume',
+    hint: 'Resume a saved session by id',
+    handler: async (harness, argstr) => {
+      if (!argstr || !argstr.length) {
+        harness.emitCommandMessage('Usage: /resume <session-id>');
+        return;
+      }
+      const id = argstr.trim();
+      const messages = harness.sessionManager.readSession(id);
+      if (messages.length === 0) {
+        harness.emitCommandMessage(`Session "${id}" not found or empty.`);
+        return;
+      }
+      const Session = require('./session.js');
+      const session = new Session({
+        id,
+        history: messages,
+        tools: harness.toolbox.all()
+      });
+      harness.session = session;
+      harness.context = session.context.clone();
+      harness.emitCommandMessage(`Resumed session "${id}" (${messages.length} messages).`);
+
+      // Show last 4 messages for context
+      const lastMessages = messages.slice(-4);
+      const contextLines = lastMessages.map(m => {
+        const role = m.role || 'unknown';
+        const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
+        return `  [${role}] ${content.trim().slice(0, 120)}`;
+      }).join('\n');
+      Events.emit('session:context', { content: contextLines });
+    }
+  },
+
+  {
+    name: 'clean-sessions',
+    hint: 'Clean up old sessions [maxAge] [maxCount]',
+    handler: async (harness, argstr) => {
+      const parts = (argstr || '').trim().split(/\s+/).filter(Boolean);
+      const maxAge = parts[0] ? parseInt(parts[0], 10) : 7;
+      const maxCount = parts[1] ? parseInt(parts[1], 10) : 20;
+      if (isNaN(maxAge) || isNaN(maxCount)) {
+        harness.emitCommandMessage('Usage: /clean-sessions [maxAge-days] [maxCount]\nDefaults: 7 days, 20 sessions');
+        return;
+      }
+      harness.sessionManager.cleanup({ maxAge, maxCount });
+      harness.emitCommandMessage(`Cleaned up sessions (maxAge: ${maxAge}d, maxCount: ${maxCount}).`);
+    }
   }
 
 ];

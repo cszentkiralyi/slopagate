@@ -40,7 +40,7 @@ class SessionManager {
     const updated = lines.map(line => {
       const entry = JSON.parse(line);
       if (entry.id === session.id) {
-        return { ...entry, modified: new Date().toISOString() };
+        return JSON.stringify({ ...entry, modified: new Date().toISOString() });
       }
       return line;
     });
@@ -50,12 +50,13 @@ class SessionManager {
 
   // --- Session persistence ---
 
+  #savedSessions = new Set();
+
   /**
    * Save a session to disk.
    * @param {Session} session - The session to save
-   * @param {boolean} isNew - Whether this is a new session (creates index entry)
    */
-  saveSession(session, isNew = true) {
+  saveSession(session) {
     // Ensure history directory exists
     fs.mkdirSync(SessionManager.HISTORY_DIR, { recursive: true });
 
@@ -74,10 +75,11 @@ class SessionManager {
       modified: new Date().toISOString()
     };
 
-    if (isNew) {
-      this.#appendIndex(indexEntry);
-    } else {
+    if (this.#savedSessions.has(session.id)) {
       this.#updateIndex(indexEntry);
+    } else {
+      this.#appendIndex(indexEntry);
+      this.#savedSessions.add(session.id);
     }
   }
 
