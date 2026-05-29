@@ -255,6 +255,8 @@ class Program {
       config: this.config,
       skills: this.skills
     });
+    // Auto-clean old sessions on startup
+    this.harness.sessionManager.cleanup({ maxAge: 7, maxCount: 20 });
     this.#aggregator = new MessageAggregator(this.interface);
 
     Events.on('command:name', ({ name }) => this.interface.addMessage({

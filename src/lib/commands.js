@@ -238,41 +238,6 @@ const Commands = [
   },
 
   {
-    name: 'resume',
-    hint: 'Resume a saved session by id',
-    handler: async (harness, argstr) => {
-      if (!argstr || !argstr.length) {
-        harness.emitCommandMessage('Usage: /resume <session-id>');
-        return;
-      }
-      const id = argstr.trim();
-      const messages = harness.sessionManager.readSession(id);
-      if (messages.length === 0) {
-        harness.emitCommandMessage(`Session "${id}" not found or empty.`);
-        return;
-      }
-      const Session = require('./session.js');
-      const session = new Session({
-        id,
-        history: messages,
-        tools: harness.toolbox.all()
-      });
-      harness.session = session;
-      harness.context = session.context.clone();
-      harness.emitCommandMessage(`Resumed session "${id}" (${messages.length} messages).`);
-
-      // Show last 4 messages for context
-      const lastMessages = messages.slice(-4);
-      const contextLines = lastMessages.map(m => {
-        const role = m.role || 'unknown';
-        const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
-        return `  [${role}] ${content.trim().slice(0, 120)}`;
-      }).join('\n');
-      Events.emit('session:context', { content: contextLines });
-    }
-  },
-
-  {
     name: 'clean-sessions',
     hint: 'Clean up old sessions [maxAge] [maxCount]',
     handler: async (harness, argstr) => {
