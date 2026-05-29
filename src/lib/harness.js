@@ -92,19 +92,20 @@ class Harness {
     });
     
     // Active context starts as a reference to session's context
-    this.#activeContext = this.session.context;
+    this.#activeContext = this.session.context.clone();
     
     // Compact callback: Harness owns the layers, Agent calls this mid-turn
     const compact = async (ctx) => {
-      return await ctx.fork({
+      return await this.#activeContext.fork({
+      //return await ctx.fork({
         layers: [
           //'system_prompt',
-          //'tool_age',
-          //'tool_error',
+          'tool_age',
+          'tool_error',
           'tool_length',
           'tool_total',
-          //'chat_score',
-          //'model_reasoning'
+          'chat_score',
+          'model_reasoning'
         ],
         summarize: async (transcript) => this.summarize(transcript)
       });
@@ -144,6 +145,8 @@ class Harness {
     
     // Register hook handler to add messages to session context
     this.agent.hooks.on('message', (message) => {
+      this.#activeContext.add(message);
+
       // Skip messages with falsy content
       if (!message || !message.content || (typeof message.content === 'string' && !message.content.trim())) {
         return;
@@ -418,14 +421,22 @@ class Harness {
     this.#abortController = turnController;
     
     // Fork from our own active context and apply compaction layers
-    this.#activeContext = await this.#activeContext.fork({
-      layers: [ 'system_prompt', 'tool_age', 'tool_error', 'tool_length', 'chat_score', 'model_reasoning' ],
+    let ctx = await this.#activeContext.fork({
+      layers: [
+          //'system_prompt',
+          'tool_age',
+          'tool_error',
+          'tool_length',
+          'tool_total',
+          'chat_score',
+          'model_reasoning'
+        ],
       summarize: async (transcript) => this.summarize(transcript)
     });
     //this.#activeContext.add(message);
     
     // Pass active context to Agent
-    let response = await this.agent.startTurn(event.message, turnController, this.#activeContext);
+    let response = await this.agent.startTurn(event.message, turnController, ctx);
     this.#logTurnStats();
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
