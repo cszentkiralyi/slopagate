@@ -96,9 +96,11 @@ class Agent {
         
         // Compact after tool results to prevent context from filling up
         // with large tool responses before the next model call
+        /*
         if (this.compact) {
           this.context = await this.compact(this.context);
         }
+        */
       }
       
       // Break on error, no more tool calls, or abort signal
