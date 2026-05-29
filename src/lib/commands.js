@@ -69,13 +69,12 @@ const Commands = [
     name: 'context',
     hint: 'Display a context window usage visualizer',
     handler: async (harness) => {
-      let est = harness.context.estimates,
+      let est = harness.agent?.context?.estimates ?? harness.context.estimates,
           win = est.context_window,
           sysTok = est.system_prompt,
           upTok = est.messages,
           genReserve = est.reserved,
-          used = est.total,
-          totalUsed = used,
+          used = sysTok + upTok + genReserve,
           free = win - used,
           barLen = 40,
           bar = '',
@@ -100,18 +99,18 @@ const Commands = [
       }
       bar += ANSI.fg('▌', 238);
       
-      let pct = ((totalUsed / win) * 100).toFixed(1);
-      let pctColor = totalUsed / win > 0.85 ? 1 : totalUsed / win > 0.7 ? 214 : null;
+      let pct = ((used / win) * 100).toFixed(1);
+      let pctColor = used / win > 0.85 ? 1 : used / win > 0.7 ? 214 : null;
       
       let lines = [
         ANSI.bold(`Context Window: ${pctColor ? ANSI.fg(pct + '%', pctColor) : pct + '%'} used`),
         bar,
         '',
-        `  ${ANSI.fg('█', 9)} system   ${sysTok.toFixed(0)} tokens`,
-        `  ${ANSI.fg('█', 11)} messages ${upTok.toFixed(0)} tokens`,
-        `  ${ANSI.fg('█', 5)} reserved ${genReserve.toFixed(0)} tokens`,
-        `  ${ANSI.fg('░', 238)} free     ${free.toFixed(0)} tokens`,
-        `  ${ANSI.fg('─', 238)} window   ${win.toFixed(0)} tokens total`
+        `  ${ANSI.fg('█', 9)} system   ${sysTok} tokens`,
+        `  ${ANSI.fg('█', 11)} messages ${upTok} tokens`,
+        `  ${ANSI.fg('█', 5)} reserved ${genReserve} tokens`,
+        `  ${ANSI.fg('░', 238)} free     ${free} tokens`,
+        `  ${ANSI.fg('─', 238)} window   ${win} tokens total`
       ];
       
       harness.emitCommandMessage(lines.join('\n'));

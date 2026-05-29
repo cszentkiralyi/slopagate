@@ -56,9 +56,6 @@ const repl = async () => {
     banner: (process.stdout.columns >= 102) ? BANNER_LARGE : BANNER_TINY,
     session: session
   });
-
-  await p.start();
-  await p.dispose();
 }
 
 repl();

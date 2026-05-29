@@ -517,7 +517,8 @@ class Program {
   }
   updateStatuslineTokens({ inputTokens, outputTokens }) {
     let txt = this.interface.statusline.right,
-        est = this.harness.context.estimates, s, pct, c;
+        s, pct, c;
+    const est = this.harness.agent?.context?.estimates ?? this.harness.context.estimates;
     let estUsed = est.system_prompt + est.messages + est.reserved;
     if (Number.isNaN(inputTokens) || inputTokens == null)
       inputTokens = txt.inputTokens ?? estUsed;
