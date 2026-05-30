@@ -440,7 +440,7 @@ class Harness {
     this.#logTurnStats();
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
-      Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 'red') });
+      Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 160) });
       Events.emit('turn:user', { interrupted: true });
       return;
     }

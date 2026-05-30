@@ -37,9 +37,9 @@ class StructuredMessage extends Container {
     } else {
       let icon = '';
       if (this.#state === 'done') {
-        icon = ANSI.fg('◆ ', 2);
+        icon = ANSI.fg('◆ ', 70);
       } else if (this.#state === 'error') {
-        icon = ANSI.fg('◆ ', 1);
+        icon = ANSI.fg('◆ ', 160);
       } else if (this.#state === 'static') {
         icon = '  ';
       }
