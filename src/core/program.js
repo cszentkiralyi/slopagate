@@ -668,7 +668,7 @@ class Program {
     let count = (this.#parentSuggestionCounts.get(firstParent) || 0) + 1;
     this.#parentSuggestionCounts.set(firstParent, count);
     
-    if (count < 3) {
+    if (count < 2) {
       Logger.log(`Program: suggestParent skipped (count ${count}/3 for ${firstParent})`);
       return;
     }
