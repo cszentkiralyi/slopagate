@@ -276,7 +276,7 @@ class Harness {
     // Use private session
     let summaryContext = new Context({
       config: this.config,
-      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap:`
+      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap. Focus on the high-level intent and what changed conceptually — not specific files, commands, or literal actions. Abstract away implementation details and capture the purpose of what was done.`
     });
     let summaryMessage = { role: 'user', content: transcript };
     

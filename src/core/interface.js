@@ -162,7 +162,7 @@ class Interface {
       textProps = {
         id, role, content,
         fg: 242,
-        forceAlign: '🕮'
+        padding: { left: 2 }
       };
     } else if (role === 'shell') {
       let inst = new TUI.StructuredMessage({
