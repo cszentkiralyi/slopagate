@@ -79,6 +79,7 @@ class Program {
   #turn_start = Date.now();
   #pendingMessages = [];
   #structuredMessages = new Map();
+  #commandMessages = new Map();
 
   static EXP_FILE_REGEX = /[a-zA-Z0-9_\-]{3,}\.[a-zA-Z0-9]{1,}$/;
   #exp_fileReadWhitelist = new Set();
@@ -318,14 +319,39 @@ class Program {
       this.interface.draw();
     }
 
-    Events.on('command:name', ({ name }) => this.interface.addMessage({
-      role: 'command',
-      content: ` /${name} `
-    }));
-    Events.on('command:message', ({ content }) => this.interface.addMessage({
-      role: 'tool',
-      content: ANSI.fg(content, 248)
-    }));
+    Events.on('command:start', ({ id, name }) => {
+      const msg = this.interface.addMessage({
+        role: 'command',
+        subject: `/${name}`,
+        state: 'spin'
+      });
+      this.#commandMessages.set(id, msg);
+    });
+    
+    Events.on('command:run', ({ id, name, content }) => {
+      if (id) {
+        const msg = this.#commandMessages.get(id);
+        if (msg && content) {
+          msg.body = (msg.body ? msg.body + '\n' : '') + ANSI.fg(content, 248);
+          this.interface.draw();
+        }
+      } else {
+        let subject = name ? `/${name}` : null;
+        let body = content ? ANSI.fg(content, 248) : null;
+        if (subject || body) {
+          this.interface.addMessage({ role: 'command', subject, body });
+        }
+      }
+    });
+    
+    Events.on('command:done', ({ id }) => {
+      const msg = this.#commandMessages.get(id);
+      if (msg) {
+        msg.state = 'done';
+        this.#commandMessages.delete(id);
+        this.interface.draw();
+      }
+    });
  
     Events.on('program:quit', () => this.dispose());
     
@@ -433,12 +459,8 @@ class Program {
             let parts = input.substring(1).split(' ');
             let cmd = parts[0];
             let argstr = parts.slice(1).join(' ');
-            this.#commandSpinner = this.interface.statusline.showSpinner(`Running /${cmd}...`);
             inst.clear();
-            this.interface.draw();
             await this.harness.command(cmd, argstr);
-            this.interface.statusline.hide(this.#commandSpinner);
-            this.#commandSpinner = null;
           } else {
             Events.emit('user:message', { message: input });
             this.interface.addMessage({

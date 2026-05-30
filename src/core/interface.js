@@ -175,16 +175,18 @@ class Interface {
       this.#chat_history.appendChild(inst);
       this.draw();
       return inst;
+    } else if (role === 'command') {
+      let subjectStr = subject || content;
+      let inst = new TUI.StructuredMessage({
+        subject: ANSI.bg(ANSI.fg(subjectStr, 232), 214),
+        body
+      });
+      this.#chat_history.appendChild(inst);
+      inst.state = state || 'static';
+      this.draw();
+      return inst;
     } else if (role === 'system') {
       textProps = { id, role, content };
-    } else if (role === 'command') {
-      textProps = {
-        id, role, content,
-        fill: false,
-        fg: 232,
-        bg: 214,
-        padding: { left: 1, right: 1 }
-      };
     }
     
     if (textProps) {

@@ -31,6 +31,7 @@ class Harness {
   #outputTokens = 0;
   #timers = new Timers();
   #toolStats = new Map();
+ 
   
  session = null;
   toolbox = null;
@@ -224,23 +225,37 @@ class Harness {
     return this.commands.find(c => c.name === name);
   }
   
+  #currentCommandId = null;
+
   emitCommandMessage(content) {
-    Events.emit('command:message', { content });
+    if (this.#currentCommandId) {
+      Events.emit('command:run', { id: this.#currentCommandId, content });
+    } else {
+      Events.emit('command:run', { name: null, content });
+    }
   }
 
   async command(name, args) {
     let cmd = this.commands.find(c => c.name === name);
     if (!cmd) {
-      Events.emit('command:name', { name });
-      this.emitCommandMessage(`Unknown command "${name}".`);
+      Events.emit('command:run', { name, content: `Unknown command "${name}".` });
       return null;
     }
     
     if (!cmd.silent) {
-      Events.emit('command:name', { name });
+      const cmdId = `cmd_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      this.#currentCommandId = cmdId;
+      Events.emit('command:start', { id: cmdId, name });
+      try {
+        await cmd.handler(this, args);
+      } finally {
+        this.#currentCommandId = null;
+        Events.emit('command:done', { id: cmdId });
+      }
+    } else {
+      await cmd.handler(this, args);
     }
     
-    await cmd.handler(this, args);
     return cmd;
   }
   
