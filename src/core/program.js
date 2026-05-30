@@ -543,7 +543,8 @@ class Program {
     await this.interface.dispose();
     // HACK: we can't await a draw
     setTimeout(() => {
-      console.log(`\nEnding session ${this.harness.session.id}`);
+      const scriptName = path.basename(process.argv[1]);
+      console.log(`\nEnding session\n${scriptName} --resume ${this.harness.session.id}`);
       process.exit(0);
     }, (1000 / 60) * 2);
   }
