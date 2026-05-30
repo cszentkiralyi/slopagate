@@ -34,7 +34,8 @@ class EditTool extends Tool {
 
     let linesNeg = old_str.split('\n').length;
     let linesPos = new_str.split('\n').length;
-    tool.message({ state: 'spin', summary: `${this.simplifyPath(file_path)} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})` });
+    let summary = `${this.simplifyPath(file_path)} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})`;
+    tool.message({ state: 'spin', summary });
 
     let result;
     try {
@@ -69,19 +70,22 @@ class EditTool extends Tool {
       }
     }
 
-    tool.message({ state: 'done', summary: `${this.simplifyPath(file_path)} ${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}` });
+    tool.message({
+      state: result.startsWith('Error:') ? 'error' : 'done',
+      summary });
     return result;
   }
   
   permissions(args) {
     const { file_path } = args;
+    let path = this.simplifyPath(file_path);
     // TODO: Should use node:path to split
-    let parents = file_path.split('/')
+    let parents = path.split('/')
       .map((_, i, parts) => parts.slice(0, i+1).join('/'))
-      .filter(p => p !== file_path)
+      .filter(p => p !== path)
       .map(p => p + '/*')
       .reverse(); // Check most-specific first, not last
-    return { scope: file_path, parents };
+    return { scope: path, parents };
   }
 }
 

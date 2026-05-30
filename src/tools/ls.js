@@ -28,7 +28,8 @@ class LsTool extends Tool {
     
     pattern = pattern || '.';
     
-    tool.message({ state: 'spin', summary: `${this.simplifyPath(pattern)}/` });
+    let summary = `${this.simplifyPath(pattern)}/`;
+    tool.message({ state: 'spin', summary });
     
     let result;
     try {
@@ -41,7 +42,7 @@ class LsTool extends Tool {
       result = `Error: Cannot list ${pattern}: ${err.message}`;
     }
     
-    tool.message({ state: 'done', summary: `${this.simplifyPath(pattern)}/` });
+    tool.message({ state: 'done', summary });
     return result;
   }
 }

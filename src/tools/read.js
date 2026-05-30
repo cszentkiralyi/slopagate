@@ -41,11 +41,12 @@ class ReadTool extends Tool {
     let message = '';
     if (start_line || end_line)
       message = ':' + (start_line || 1) + (end_line ? ('-' + end_line) : '+');
-    tool.message({ state: 'spin', summary: `${this.simplifyPath(file_path)}${message}` });
     
+    let summary = `${this.simplifyPath(file_path)}${message}`;
     let result;
     try {
       let content = await fs.readFile(file_path, { encoding: 'utf-8' });
+      tool.message({ state: 'spin', summary });
       content = content.split('\n');
       if (start_line) {
         content.splice(0, start_line);
@@ -58,7 +59,9 @@ class ReadTool extends Tool {
       result = `Error: file ${file_path} not found!`;
     }
     
-    tool.message({ state: 'done', summary: `${this.simplifyPath(file_path)}${message}` });
+    tool.message({
+      state: result.startsWith('Error:') ? 'error' : 'done',
+      summary });
     return result;
   }
 }
