@@ -52,9 +52,26 @@ class PromptDoc {
       }
     );
 
+    // 4. Resolve !shell commands — cached per PromptDoc instance
+    text = text.replace(/^!\s*(.+)$/gm, (_, cmd) => {
+      if (!this.#shellCache.has(cmd)) {
+        try {
+          this.#shellCache.set(
+            cmd,
+            require('child_process').execSync(cmd, { encoding: 'utf8' })
+          );
+        } catch (e) {
+          this.#shellCache.set(cmd, `[shell error: ${e.message.trim()}]`);
+        }
+      }
+      return this.#shellCache.get(cmd);
+    });
+
     //Logger.log(`[${this.id}] PromptDoc: done`);
     return text;
   }
+
+  #shellCache = new Map();
 
   #eval(cond, config) {
     // 1. config.key — look up in config Map
