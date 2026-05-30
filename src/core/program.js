@@ -305,15 +305,14 @@ class Program {
     if (this.session?.messages && this.session.messages.length) {
       const cutoff = recentTurnsCutoff(this.session.messages, 5);
       for (const msg of this.session.messages.slice(cutoff)) {
-        if (msg.role === 'user') {
-          msg.content = Interface.CLI_PROMPT + msg.content;
-        }
         // Only show user and model messages in the chat history —
         // tool messages are ephemeral UI elements that get regenerated
         if (msg.role !== 'user' && msg.role !== 'model' && msg.role !== 'assistant') continue;
         // Map 'assistant' (API role) to 'model' (UI role)
         const role = msg.role === 'assistant' ? 'model' : msg.role;
-        const content = role === 'model' ? this.md.toAnsi(msg.content.trim()) : msg.content;
+        const content = role === 'model'
+          ? this.md.toAnsi(msg.content.trim())
+          : Interface.CLI_PROMPT + msg.content;
         this.interface.addMessage({ role, content });
       }
       this.interface.draw();
@@ -553,10 +552,7 @@ class Program {
   
   async dispose() {
     this.timers.stop('afk');
-    let sessionPath = path.join(process.env.HOME, '.slopagate', 'history');
-    fsSync.mkdirSync(sessionPath, { recursive: true }, err => console.error(err));
-    let json = this.harness.session.serialize();
-    fsSync.writeFileSync(path.join(sessionPath, this.harness.session.id + '.json'), json);
+    this.harness.sessionManager.saveSession(this.harness.session);
     await this.harness.dispose();
     await this.interface.dispose();
     // HACK: we can't await a draw
