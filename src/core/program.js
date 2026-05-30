@@ -41,7 +41,20 @@ const Permissions = require('../lib/permissions.js');
 const { MessageAggregator } = require('../lib/aggregator.js');
 
 class Program {
-  
+  /**
+   * Resume a session from disk. Returns { id, messages } or null.
+   * @param {string} id
+   * @returns {{ id: string, messages: any[] } | null}
+   */
+  static resumeSession(id) {
+    if (!id) return null;
+    const SessionManager = require('../lib/session-manager.js');
+    const sm = new SessionManager();
+    const messages = sm.readSession(id);
+    if (!messages || messages.length === 0) return null;
+    return { id, messages };
+  }
+
   #currentMessageId = null;
   #modelTurnSpinner = null;
   #commandSpinner = null;
@@ -82,8 +95,13 @@ class Program {
     return msg.present + '...';
   }
 
-  constructor({ banner, session }) {
-    this.session = session;
+  constructor({ banner, session, resumeId }) {
+    // If resumeId provided, load session from disk
+    if (resumeId) {
+      this.session = Program.resumeSession(resumeId);
+    } else {
+      this.session = session || null;
+    }
     // Defaults
     const configData = {
       root_dir: process.env.PWD,

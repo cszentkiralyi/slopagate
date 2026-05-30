@@ -34,7 +34,7 @@ class EditTool extends Tool {
 
     let linesNeg = old_str.split('\n').length;
     let linesPos = new_str.split('\n').length;
-    let summary = `${this.simplifyPath(file_path)} (${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)})`;
+    let summary = `${this.simplifyPath(file_path)} ${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}`;
     tool.message({ state: 'spin', summary });
 
     let result;
