@@ -43,17 +43,6 @@ class Harness {
   #activeContext = null;
   #abortController = new AbortController();
   
-  #serializeSession() {
-    try {
-      let historyPath = path.join(process.env.HOME, '.slopagate', 'history');
-      fs.mkdirSync(historyPath, { recursive: true });
-      let json = this.session.serialize();
-      fs.writeFileSync(path.join(historyPath, this.session.id + '.json'), json);
-    } catch (err) {
-      Logger.log(`serialize error: ${err.message}`);
-    }
-  }
-
   get inputTokens() { return this.#inputTokens; }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
@@ -65,9 +54,6 @@ class Harness {
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
     Events.on('user:abort', (event) => this.onUserAbort(event));
-    Events.on('model:response', (event) => this.onModelResponse(event));
-    Events.on('tool_calls:response', (event) => this.onToolsResponse(event));
-
     Object.assign(this, props);
     
     this.sessionManager = new SessionManager();
@@ -177,12 +163,6 @@ class Harness {
     });
    
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
-    /*
-    this.commands.push({
-      name: 'bug', handler: async (args) => this.bugCommand(args),
-      hint: 'Record a brief bug into bugs.jsonl for later'
-    });
-    */
     this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
@@ -364,6 +344,30 @@ class Harness {
     return result.content;
   }
 
+  async compact() {
+    Events.emit('status:spinner', { message: 'Compacting...' });
+    
+    const oldEst = this.#activeContext.estimates;
+    const oldTok = oldEst.system_prompt + oldEst.messages + oldEst.reserved;
+
+    const newContext = await this.#activeContext.fork({
+      layers: ['tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning'],
+      summarize: async (transcript) => this.summarize(transcript)
+    });
+
+    this.#activeContext = newContext;
+    this.context = newContext;
+
+    const newEst = newContext.estimates;
+    const newTok = newEst.system_prompt + newEst.messages + newEst.reserved;
+    const deltaTok = (newTok - oldTok || 0).toFixed(0);
+    const pct = (100 * newTok / newEst.context_window).toFixed(0);
+
+    Events.emit('status:spinner', { hide: true });
+    this.emitCommandMessage(`Context compacted: ${deltaTok} → ${newTok} (now ${pct}%).`);
+    Events.emit('metrics:tokens', {});
+  }
+
   async configCommand(argstr) {
     if (!argstr || !argstr.length) {
       this.emitCommandMessage('Usage: /config <key> [value]');
@@ -459,72 +463,10 @@ class Harness {
       Events.emit('turn:user', { interrupted: true });
       return;
     }
-    Events.emit('model:response', { response });
   }
   
   onUserAbort(event) {
     this.#abortController.abort();
-  }
-  
-  async onModelResponse(event) {
-    let { response } = event;
-    /* TODO: cool shit in the response includes
-     * - prompt_eval_count (tokens up)
-     * - eval_count (tokens down)
-     * - prompt_eval_duration / eval_duration / total_duration
-     * - thinking
-     */
-    if (!response) {
-      Events.emit('turn:user');
-      return;
-    }
-    
-    if (response.error) {
-      Events.emit('model:content', { done: true, content: ANSI.fg(response.error, 'red') });
-      Events.emit('turn:user');
-      return;
-    } else if (!response.message) {
-      Events.emit('turn:user');
-      return;
-    }
-
-    let { message } = response;
-    
-    // finish_reason: "stop" = natural end, "length" = hit output limit, "tool_calls" = intermediate
-    // Ollama: response.message.finish_reason
-    // OpenAI: response.choices[0].finish_reason
-    let fr = response.message?.finish_reason
-          ?? response.choices?.[0]?.finish_reason
-          ?? response.finish_reason;
-    let done = fr === 'stop' || fr === 'length';
-    
-    if (done || message.content || message.tool_calls) {
-      if ((fr === 'length' || fr === 4) && !message.content) {
-        Events.emit('model:content', {
-          done: true,
-          content: ANSI.fg('(response was truncated)', 'yellow')
-        });
-      }
-      if (message.content || message.tool_calls) {
-        if (message.content) message.content = message.content.trim();
-      }
-      if (message.content) {
-        Events.emit('model:content', { done, content: message.content.trim() });
-      }
-      if (message.tool_calls) {
-        // Tool calls handled by Agent via onToolCalls callback
-      }
-      if (done) {
-        this.#logTurnStats();
-        Events.emit('turn:user');
-        this.sessionManager.saveSession(this.session);
-      }
-    }
-  }
-  
-  async onToolsResponse(messages) {
-    // Agent loop handles the next sendToEndpoint call
-    this.sessionManager.saveSession(this.session);
   }
   
   async runToolCall(call) {
@@ -644,7 +586,6 @@ class Harness {
     
     // Split tool calls into auto-run (approved) and pending (need user approval)
     let autoRun = [];
-    let pending = [];
     
     for (let call of tool_calls) {
       let tool = this.toolbox.get(call.function.name);
@@ -774,7 +715,6 @@ class Harness {
       msg.tool_name = msg.name;
       delete msg.name;
     });
-    Events.emit('tool_calls:response', results);
     return results;
   }
   

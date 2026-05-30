@@ -50,18 +50,7 @@ const Commands = [
   {
     name: 'compact',
     handler: async (harness) => {
-      Events.emit('status:spinner', { message: 'Compacting...' });
-      let old_est = harness.session.context.estimates,
-          old_tok = old_est.system_prompt + old_est.messages + old_est.reserved,
-          ctx = await harness.session.compact();
-          harness.context = ctx;
-          new_est = ctx.estimates,
-          new_tok = new_est.system_prompt + new_est.messages + new_est.reserved,
-          delta_tok = ((new_tok - old_tok || 0)).toFixed(0),
-          pct = (100 * new_tok / new_est.context_window).toFixed(0);
-      Events.emit('status:spinner', { hide: true });
-      harness.emitCommandMessage(`Context compacted: ${delta_tok} → ${new_tok} (now ${pct}%).`);
-      Events.emit('metrics:tokens', {});
+      await harness.compact();
     }
   },
   

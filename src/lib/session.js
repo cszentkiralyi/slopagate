@@ -74,20 +74,6 @@ class Session {
     Events.off('turn:user', this.#turnUserHandler);
     Events.off('turn:model', this.#turnModelHandler);
   }
-  abort() {
-    this.#abortController?.abort();
-    this.#abortController = new AbortController();
-  }
-  removeLastUserMessage() {
-    let msgs = this.#masterContext.messages;
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].role === 'user') {
-        msgs.splice(i, 1);
-        return true;
-      }
-    }
-    return false;
-  }
   
   async ensureTempDir() {
     if (this.#tempdir) return;
@@ -346,43 +332,6 @@ class Session {
     this.#masterContext.add(...messages);
   }
 
-  async compact() {
-    Logger.log(`Session: compact() called, forking context.`);
-    // Fork from master context with compaction layers
-    let newContext = await this.#masterContext.fork({
-      layers: [
-        //'system_prompt',
-        'tool_age',
-        'tool_error',
-        'tool_length',
-        'tool_total',
-        'model_reasoning',
-        'chat_summary'
-      ],
-      summarize: async (transcript) => {
-        let summaryContext = new Context({
-          config: this.config,
-          system_prompt: `Please summarize the following conversation history. Preserve all essential context, logic, decisions, and conclusions in a concise form. Output only the summary — no preamble, no extra text.`,
-          messages: [{ role: 'user', content: transcript }]
-        });
-        let summaryMessage = { role: 'user', content: 'Please summarize the above conversation.' };
-        let response = await this.private(summaryContext, summaryMessage);
-        if (response.message && response.message.content) {
-          return response.message.content;
-        } else if (response.message && response.message.tool_calls) {
-          let txt = response.message.tool_calls[0]?.function?.arguments ?? '';
-          if (typeof txt === 'string') {
-            try { let p = JSON.parse(txt); return p.summary || txt; } catch { return txt; }
-          }
-        }
-        return null;
-      }
-    });
-    Logger.log(`Session: fork completed.`);
-    return newContext;
-  }
-  
-  
   static serialize(session) {
     let data = {
       id: session.id,

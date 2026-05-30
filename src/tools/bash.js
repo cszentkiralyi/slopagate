@@ -22,6 +22,7 @@ class BashTool extends Tool {
     //{ pattern: 'npm run test', readonly: false },
     { pattern: 'node --test *', readonly: true },
     { pattern: 'git log *', readonly: true },
+    { pattern: 'git show*', readonly: true },
     { pattern: 'git status*', readonly: true },
     { pattern: 'git diff*', readonly: true },
     { pattern: 'git add *', readonly: false },
