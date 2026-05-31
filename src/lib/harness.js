@@ -113,10 +113,6 @@ class Harness {
       },
       callbacks: {
         onToolCalls: async (toolCalls) => {
-          // Emit tool:call events for logging
-          toolCalls.forEach(tc => {
-            Events.emit('tool:call', { id: tc.id, name: tc.name, args: tc.arguments, temppath: this.session.temppath });
-          });
           // Execute all tool calls via Harness's handleToolCalls
           return await this.handleToolCalls(toolCalls);
         },
@@ -474,7 +470,7 @@ class Harness {
     let id = call.id;
     let name = call.function.name;
     let args = call.function.arguments;
-    let temppath = this.session.temppath;
+    let temppath = this.session.tempdir;
     
     return new Promise(async (resolve) => {
       let resolved = false;
@@ -554,7 +550,7 @@ class Harness {
             content: overrideResponse
           });
         } else {
-          Events.emit('tool:call', { id, name, args: call.function.arguments, temppath: this.session.temppath });
+          Events.emit('tool:call', { id, name, args: call.function.arguments, temppath: this.session.tempdir });
         }
       } catch (err) {
         Logger.log(`tool-call hook error: ${err.message}`);
@@ -638,7 +634,7 @@ class Harness {
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
-          temppath: this.session.temppath
+          temppath: this.session.tempdir
         });
         this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
       });
@@ -668,7 +664,7 @@ class Harness {
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
-          temppath: this.session.temppath
+          temppath: this.session.tempdir
         });
         this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
         continue;
@@ -692,7 +688,7 @@ class Harness {
           id: call.id,
           name: call.function.name,
           args: call.function.arguments,
-          temppath: this.session.temppath
+          temppath: this.session.tempdir
         });
         this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
         continue;
@@ -706,7 +702,7 @@ class Harness {
         id: call.id,
         name: call.function.name,
         args: call.function.arguments,
-        temppath: this.session.temppath
+        temppath: this.session.tempdir
       });
       this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
     }
