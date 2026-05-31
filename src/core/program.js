@@ -374,7 +374,13 @@ class Program {
         this.interface.addMessage({ role: 'tool', content: ANSI.fg(`You chose "${result}"`, 248)});
       }
     });
-    this.interface.commands = this.harness.getCommands();
+    // Get commands and add current value resolvers before handing to interface
+    const cmds = this.harness.getCommands();
+    const aggressionCmd = cmds.find(c => c.name === 'aggression');
+    if (aggressionCmd && aggressionCmd.arguments?.[0]) {
+      aggressionCmd.arguments[0].current = () => this.config.get('aggression_level');
+    }
+    this.interface.commands = cmds;
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
 
 

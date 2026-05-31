@@ -236,10 +236,13 @@ class Interface {
             if (cmd.arguments && wordCount < cmd.arguments.length) {
               let arg = cmd.arguments[wordCount];
               if (arg) {
-                hints.push({
-                  hint: arg.possible ? arg.possible.join('|') : arg.name,
-                  completion: null
-                });
+                if (arg.possible) {
+                  let currentVal = typeof arg.current === 'function' ? arg.current() : null;
+                  let hint = arg.possible.map(v => v === currentVal ? `${v}*` : v).join('|');
+                  hints.push({ hint, completion: null });
+                } else {
+                  hints.push({ hint: arg.name, completion: null });
+                }
               }
             } else if (cmd.hint && slen === len) {
               hints.push({

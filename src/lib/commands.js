@@ -186,6 +186,7 @@ const Commands = [
   {
     name: 'aggression',
     hint: 'Set aggression level',
+    arguments: [{ name: 'level', possible: ['low', 'medium', 'high', 'xhigh'] }],
     handler: makeConfigSetCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
   },
   
