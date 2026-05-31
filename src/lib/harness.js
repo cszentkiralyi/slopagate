@@ -241,9 +241,6 @@ class Harness {
   
   // Command handlers
   async recap() {
-    // Don't recap if it's not the user's turn
-    if (this.session.turn !== 'user') return;
-    
     // Not enough user activity to summarize
     if (this.#userMessagesSinceRecap < 2) return;
     
@@ -426,7 +423,7 @@ class Harness {
 
   async dispose() {
     this.#timers.clearAll();
-    await this.session.dispose();
+    await this.session.removeTempDir();
   }
   
   async onUserMessage(event) {

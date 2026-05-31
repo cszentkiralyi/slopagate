@@ -1,7 +1,6 @@
 const fs = require('node:fs/promises');
 
 const { ID, Logger } = require('../util.js');
-const Events = require('../events.js');
 const Context = require('./context.js');
 
 class Session {
@@ -18,8 +17,6 @@ class Session {
 
   #abortController = null;
   #loggedSystemMessage = false;
-  #turnUserHandler;
-  #turnModelHandler;
 
   turn;
 
@@ -40,10 +37,6 @@ class Session {
   constructor(props) {
     this.#id = props.id || ID();
 
-    this.#turnUserHandler = () => { this.turn = 'user'; };
-    this.#turnModelHandler = () => { this.turn = 'model'; };
-    Events.on('turn:user', this.#turnUserHandler);
-    Events.on('turn:model', this.#turnModelHandler);
     this.config = props.config || new Map();
     this.tools = props.tools || [];
     
@@ -69,12 +62,6 @@ class Session {
     }
   }
 
-  async dispose() {
-    this.removeTempDir();
-    Events.off('turn:user', this.#turnUserHandler);
-    Events.off('turn:model', this.#turnModelHandler);
-  }
-  
   async ensureTempDir() {
     if (this.#tempdir) return;
     this.#tempdir = await this._tempdirPromise;
@@ -92,10 +79,6 @@ class Session {
     } catch { /* parent may not exist or may not be empty */ }
   }
   
-  serialize() {
-    return Session.serialize(this);
-  }
-
   async send_internal(messages, signal)  {
     messages.forEach((m, idx)=> {
       if (!m || !('content' in m))
@@ -328,26 +311,7 @@ class Session {
     ]);
   }
   
-  addToContext(...messages) {
-    this.#masterContext.add(...messages);
-  }
-
-  static serialize(session) {
-    let data = {
-      id: session.id,
-      model: session.model,
-      think: session.think,
-      connection: session.connection,
-      tools: session.tools.map(t => t.name),
-      history: session.#masterContext.messages
-    };
-    return JSON.stringify(data);
-  }
-  static deserialize(content, toolDefs) {
-    let data = JSON.parse(content);
-    data.tools = data.tools.map(name => toolDefs.find(t => t.name === name)).filter(t => t != null);
-    return new Session(data);
-  }
+  
 }
 
 module.exports = Session;
