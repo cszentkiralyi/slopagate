@@ -50,6 +50,7 @@ const Commands = [
   
   {
     name: 'compact',
+    hint: 'Compact the context window',
     handler: async (harness) => {
       await harness.compact();
     }
@@ -57,7 +58,7 @@ const Commands = [
   
   {
     name: 'context',
-    hint: 'Display a context window usage visualizer',
+    hint: 'Display context window usage',
     handler: async (harness) => {
       let est = harness.agent?.context?.estimates ?? harness.context.estimates,
           win = est.context_window,

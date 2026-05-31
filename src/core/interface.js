@@ -213,13 +213,19 @@ class Interface {
           // Partial command name: display suffix + hint, tab-completes to full name + space
           let suffix = cmd.name.substring(slen);
           let displaySuffix = suffix;
+          let sep = s.endsWith(' ') ? '' : ' ';
           if (cmd.arguments && cmd.arguments.length) {
             let arg = cmd.arguments[0];
             if (arg) {
-              displaySuffix += ' ' + (arg.possible ? arg.possible.join('|') : arg.name);
+              if (arg.possible) {
+                let currentVal = typeof arg.current === 'function' ? arg.current() : null;
+                displaySuffix += sep + arg.possible.map(v => v === currentVal ? `${v}*` : v).join('|');
+              } else {
+                displaySuffix += sep + arg.name;
+              }
             }
           } else if (cmd.hint) {
-            displaySuffix += ' ' + cmd.hint;
+            displaySuffix += sep + cmd.hint;
           }
           hints.push({
             hint: displaySuffix,
@@ -236,17 +242,19 @@ class Interface {
             if (cmd.arguments && wordCount < cmd.arguments.length) {
               let arg = cmd.arguments[wordCount];
               if (arg) {
+                let sep = astr.endsWith(' ') ? '' : ' ';
                 if (arg.possible) {
                   let currentVal = typeof arg.current === 'function' ? arg.current() : null;
-                  let hint = arg.possible.map(v => v === currentVal ? `${v}*` : v).join('|');
+                  let hint = sep + arg.possible.map(v => v === currentVal ? `${v}*` : v).join('|');
                   hints.push({ hint, completion: null });
                 } else {
-                  hints.push({ hint: arg.name, completion: null });
+                  hints.push({ hint: sep + arg.name, completion: null });
                 }
               }
             } else if (cmd.hint && slen === len) {
+              let sep = astr.endsWith(' ') ? '' : ' ';
               hints.push({
-                hint: ' ' + cmd.hint,
+                hint: sep + cmd.hint,
                 completion: null
               });
             }
