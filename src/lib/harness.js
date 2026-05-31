@@ -469,7 +469,7 @@ class Harness {
   async runToolCall(call) {
     let id = call.id;
     let name = call.function.name;
-    let args = call.function.arguments;
+    let args = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
     let temppath = this.session.tempdir;
     
     return new Promise(async (resolve) => {
@@ -550,7 +550,8 @@ class Harness {
             content: overrideResponse
           });
         } else {
-          Events.emit('tool:call', { id, name, args: call.function.arguments, temppath: this.session.tempdir });
+          let parsedArgs = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
+          Events.emit('tool:call', { id, name, args: parsedArgs, temppath: this.session.tempdir });
         }
       } catch (err) {
         Logger.log(`tool-call hook error: ${err.message}`);
