@@ -380,6 +380,11 @@ class Program {
     if (aggressionCmd && aggressionCmd.arguments?.[0]) {
       aggressionCmd.arguments[0].current = () => this.config.get('aggression_level');
     }
+    const effortCmd = cmds.find(c => c.name === 'effort');
+    if (effortCmd && effortCmd.arguments?.[0]) {
+      const reverse = { 256: 'minimal', 1024: 'low', 2048: 'medium', 4096: 'high', 8196: 'xhigh' };
+      effortCmd.arguments[0].current = () => reverse[this.config.get('reasoning_budget')] ?? this.config.get('reasoning_budget');
+    }
     this.interface.commands = cmds;
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
 

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const ANSI = require('./ansi.js');
 const Events = require('../events.js');
 
-function makeConfigSetCommand(key, allowedValues) {
+function makeConfigSetCommand(key, allowedValues, translateFn) {
   return async function handler(harness, bstr) {
     if (!bstr || !bstr.length) {
       harness.emitCommandMessage(`${key} = ${harness.config.get(key)}`);
@@ -20,6 +20,7 @@ function makeConfigSetCommand(key, allowedValues) {
     if (value === 'true') value = true;
     else if (value === 'false') value = false;
     else if (!isNaN(value) && value.length > 0) value = parseInt(value, 10);
+    if (translateFn) value = translateFn(value);
     harness.config.set(key, value);
     harness.emitCommandMessage(`${key} = ${harness.config.get(key)}`);
   };
@@ -188,6 +189,13 @@ const Commands = [
     hint: 'Set aggression level',
     arguments: [{ name: 'level', possible: ['low', 'medium', 'high', 'xhigh'] }],
     handler: makeConfigSetCommand('aggression_level', ['xhigh', 'high', 'medium', 'low'])
+  },
+  
+  {
+    name: 'effort',
+    hint: 'Set reasoning budget effort level',
+    arguments: [{ name: 'level', possible: ['minimal', 'low', 'medium', 'high', 'xhigh'] }],
+    handler: makeConfigSetCommand('reasoning_budget', ['minimal', 'low', 'medium', 'high', 'xhigh'], v => ({ minimal: 256, low: 1024, medium: 2048, high: 4096, xhigh: 8196 }[v]))
   },
   
   {
