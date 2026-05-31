@@ -71,7 +71,12 @@ class Program {
     { present: 'Going rogue', past: 'Went rogue' },
     { present: 'Gobbling tokens', past: 'Gobbled tokens' },
     { present: 'Nuking production', past: 'Nuked production' },
-    { present: 'Babbling', past: 'Babbled' }
+    { present: 'Babbling', past: 'Babbled' },
+    { present: 'Escaping sandbox', past: 'Escaped sandbox' },
+    { present: 'Burning water', past: 'Burned water' },
+    { present: 'Doubling power consumption', past: 'Doubled power consumption' },
+    { present: 'Defying voters', past: 'Defied voters' },
+    { present: 'Bribing officials', past: 'Bribed officials' }
   ];
 
   static AFK_TIMEOUT = 3 * 60 * 1000;
