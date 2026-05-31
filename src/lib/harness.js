@@ -265,14 +265,18 @@ class Harness {
     
     Logger.log(`Harness: transcript length = ${transcript.length}, content: ${JSON.stringify(transcript)}`);
     
-    // Use private session
+    // Use on-demand Agent for networking
     let summaryContext = new Context({
       config: this.config,
       system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a 1-sentence recap. Focus on the high-level intent and what changed conceptually — not specific files, commands, or literal actions. Abstract away implementation details and capture the purpose of what was done.`
     });
-    let summaryMessage = { role: 'user', content: transcript };
+    let summaryAgent = new Agent({
+      context: summaryContext,
+      config: this.config,
+      abortController: null
+    });
     
-    let summaryResponse = await this.session.private(summaryContext, summaryMessage);
+    let summaryResponse = await summaryAgent.startTurn(transcript, null);
     
     if (!summaryResponse || !summaryResponse.message
         || !summaryResponse.message.content
