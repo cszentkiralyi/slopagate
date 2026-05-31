@@ -110,6 +110,9 @@ class Agent {
       }
     } while (true);
     
+    // Fire turn-end callback so UI can hide spinners and handle post-turn logic
+    this.callbacks.onTurnEnd?.();
+    
     return { content, toolResults, aborted: !!this.#abortController?.signal.aborted, duration: Date.now() - startTime };
   }
 

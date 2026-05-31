@@ -51,6 +51,7 @@ class Statusline extends HContainer {
     if (!entry) {
       this.#setLeftChild(Statusline.BLANK);
       this.spinner.hide();
+      this.spinner.stop();
       return;
     }
     if (entry.kind === 'spinner') {
@@ -64,6 +65,7 @@ class Statusline extends HContainer {
       this.pendingTimer = setTimeout(() => this.draw(), 200);
     } else {
       this.spinner.hide();
+      this.spinner.stop();
       this.#setLeftChild(new Text(entry.text));
     }
   }
