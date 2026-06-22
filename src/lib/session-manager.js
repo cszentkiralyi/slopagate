@@ -61,7 +61,7 @@ class SessionManager {
     fs.mkdirSync(SessionManager.HISTORY_DIR, { recursive: true });
 
     // Write all messages as JSONL
-    const messages = session.history.map(m => JSON.stringify(m));
+    const messages = session.context.messages.map(m => JSON.stringify(m));
 
     fs.writeFileSync(
       path.join(SessionManager.HISTORY_DIR, `${session.id}.jsonl`),
