@@ -236,7 +236,7 @@ class Agent {
 
   normalizeResponse(response) {
     const provider = this.config.get('provider') || 'ollama';
-    Logger.log(`Session.normalize: ${JSON.stringify(response)}`);
+    Logger.log(`Agent.normalizeResponse: ${JSON.stringify(response)}`);
 
     if (provider === 'openai') {
       const usage = (response && response.usage) || {};
