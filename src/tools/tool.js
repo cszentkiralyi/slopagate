@@ -51,6 +51,11 @@ class Tool {
     return null;
   }
   
+  normalize(args) {
+    // Return canonical string for dedup — override in subclasses
+    return JSON.stringify(args);
+  }
+  
   simplifyPath(p) {
     let simplified = path.relative('.', p);
     return (simplified && simplified.length) ? simplified : '.';

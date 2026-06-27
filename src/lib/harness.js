@@ -13,6 +13,7 @@ const Config = require('../core/config.js');
 const Commands = require('./commands.js');
 
 const { Logger, formatMs } = require('../util.js');
+const { Hash } = require('../lib/hash.js');
 
 const ReadTool = require('../tools/read.js');
 const EditTool = require('../tools/edit.js');
@@ -42,8 +43,99 @@ class Harness {
 
   #activeContext = null;
   #abortController = new AbortController();
+  #dedupCalls = [];  // Per-turn: {toolName, normalized, signature, timestamp}
+  #dedupBands = new Map();  // toolName -> bandKey -> Map<sigKey, {id, timestamp}>
+  #dedupThreshold = 0.8;
   
   get inputTokens() { return this.#inputTokens; }
+  
+  /**
+   * Check for similar tool calls this turn (dedup/loop detection)
+   * @param {string} toolName 
+   * @param {object} args 
+   * @param {string} callId 
+   * @returns {object|null} Match info or null
+   */
+  checkDedup(toolName, args, callId) {
+    const tool = this.toolbox.get(toolName);
+    if (!tool) return null;
+    
+    let normalized, signature;
+    try {
+      normalized = tool.normalize(args);
+      signature = Hash.hash(normalized);
+    } catch (e) {
+      Logger.log(`Dedup error: ${e.message}`);
+      return null;
+    }
+    
+    const now = Date.now();
+    
+    // Hash each band (16 bands of 8 elements)
+    const bands = new Array(16);
+    for (let i = 0; i < 16; i++) {
+      const band = signature.slice(i * 8, i * 8 + 8);
+      bands[i] = band.join(':');
+    }
+    
+    // Look up candidates from all bands
+    const candidates = new Map();  // sigKey -> {id, timestamp, normalized}
+    const toolBands = this.#dedupBands.get(toolName);
+    if (!toolBands) return null;  // No history for this tool yet
+    
+    for (const bandKey of bands) {
+      const bandMap = toolBands.get(bandKey);
+      if (bandMap) {
+        for (const [sigKey, entry] of bandMap.entries()) {
+          candidates.set(sigKey, entry);
+        }
+      }
+    }
+    
+    // Compare each candidate, short-circuit if we find a strong match
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    for (const [sigKey, candidate] of candidates.entries()) {
+      let score;
+      try {
+        score = Hash.compare(signature, candidate.signature);
+      } catch (e) {
+        Logger.log(`Dedup compare error: ${e.message}`);
+        continue;
+      }
+      
+      if (score > this.#dedupThreshold) {
+        bestMatch = { ...candidate, score };
+        bestScore = score;
+      }
+    }
+    
+    // Store this call in dedup tracking
+    if (!this.#dedupBands.has(toolName)) {
+      this.#dedupBands.set(toolName, new Map());
+    }
+    const toolBandMap = this.#dedupBands.get(toolName);
+    for (const bandKey of bands) {
+      if (!toolBandMap.has(bandKey)) {
+        toolBandMap.set(bandKey, new Map());
+      }
+      const sigMap = toolBandMap.get(bandKey);
+      sigMap.set(JSON.stringify(signature), { id: callId, timestamp: now, normalized, signature });
+    }
+    
+    this.#dedupCalls.push({ toolName, normalized, signature, timestamp: now });
+    
+    return bestMatch;
+  }
+  
+  /**
+   * Reset dedup tracking for new turn
+   */
+  resetDedup() {
+    this.#dedupCalls = [];
+    this.#dedupBands = new Map();
+  }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
   set context(ctx) { this.#activeContext = ctx; }
@@ -427,6 +519,9 @@ class Harness {
   async onUserMessage(event) {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
+    
+    // Reset dedup tracking for new turn
+    this.resetDedup();
     //this.session.abort();
     this.#userMessagesSinceRecap++;
 
@@ -578,6 +673,18 @@ class Harness {
    */
   async handleToolCalls(tool_calls) {
     await this.session.ensureTempDir();
+    
+    // Check each tool call for duplicates
+    for (let call of tool_calls) {
+      let toolName = call.function.name;
+      let args = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
+      let match = this.checkDedup(toolName, args, call.id);
+      if (match) {
+        Logger.log(`[dedup] Detected similar tool call: ${toolName} (score: ${match.score.toFixed(2)})`);
+        Logger.log(`[dedup] Current: ${JSON.stringify(args)}`);
+        Logger.log(`[dedup] Similar to: ${JSON.stringify(JSON.parse(match.normalized))}`);
+      }
+    }
     
     // Split tool calls into auto-run (approved) and pending (need user approval)
     let autoRun = [];
