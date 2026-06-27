@@ -99,11 +99,12 @@ class Text extends Component {
           //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
         }
         if (fill) currentLine += ANSI.eraseLine();
-        if (leftPad) currentLine += ANSI.cursorHoriz(leftPad);
-        currentLen = currentLine.length
+        if (leftPad || alignX) currentLine += ANSI.cursorHoriz(leftPad + alignX);
+        currentLen = ANSI.measure(currentLine)
         line.split(' ').forEach((word, idx) => {
           let len = ANSI.measure(word);
-          if (currentLen + len + rightPad <= width) {
+          let spaceLen = idx ? 1 : 0;
+          if (currentLen + spaceLen + len + rightPad <= width) {
             if (idx) {
               currentLine += ' ';
               currentLen++;
@@ -115,8 +116,8 @@ class Text extends Component {
             currentLine = '';
             if (fill) currentLine += ANSI.eraseLine();
             if (leftPad || alignX) currentLine += ANSI.cursorHoriz(leftPad + alignX);
-            currentLen = currentLine.length + len;
             currentLine += word;
+            currentLen = ANSI.measure(currentLine);
           }
         });
         if (ANSI.measure(currentLine)) finishLine();
