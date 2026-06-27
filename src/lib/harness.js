@@ -274,9 +274,7 @@ class Harness {
     
     let summaryResponse = await summaryAgent.startTurn(transcript, null);
     
-    if (!summaryResponse || !summaryResponse.message
-        || !summaryResponse.message.content
-        || !summaryResponse.message.content.length) {
+    if (!summaryResponse || !summaryResponse.content || !summaryResponse.content.length) {
       Logger.log(`Harness: no recap summary.`);
       return;
     }
