@@ -24,6 +24,10 @@ class GrepTool extends Tool {
     Object.assign(this, props);
   }
 
+  normalize(args) {
+    return `${this.simplifyPath(args.path)} ${args.pattern}`;
+  }
+
   async handler(args, tool) {
     let { path, pattern } = args;
 

@@ -28,6 +28,10 @@ class EditTool extends Tool {
     Object.assign(this, props);
   }
 
+  normalize(args) {
+    return `${this.simplifyPath(args.file_path)}:${args.old_str}`;
+  }
+
   async handler(args, tool) {
     let { file_path, old_str, new_str } = args;
     let temp_path = path.join(tool.temppath, 'edit-' + ID());

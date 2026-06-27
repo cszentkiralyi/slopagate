@@ -28,6 +28,10 @@ class ActivateSkillTool extends Tool {
     Object.assign(this, props);
   }
 
+  normalize(args) {
+    return args.name.trim();
+  }
+
   async handler(args, tool) {
     if (!args.name) {
       return 'Error: Missing name argument';

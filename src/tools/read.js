@@ -33,6 +33,13 @@ class ReadTool extends Tool {
     Object.assign(this, props);
   }
 
+  normalize(args) {
+    let result = this.simplifyPath(args.file_path);
+    if (args.start_line && args.start_line !== 1) result += `:${args.start_line}`;
+    if (args.end_line !== undefined) result += args.end_line ? `-${args.end_line}` : '+';
+    return result;
+  }
+
   async handler(args, tool) {
     let { file_path, start_line, end_line } = args;
     try { start_line = parseInt(start_line, 10) } catch (e) { start_line = null; }

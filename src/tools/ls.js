@@ -23,6 +23,14 @@ class LsTool extends Tool {
     Object.assign(this, props);
   }
 
+  normalize(args) {
+    let pattern = args.glob || '.';
+    // Collapse // to /, trim trailing /, resolve ./
+    pattern = pattern.replace(/\/\/+/g, '/').replace(/\/$/, '').replace(/^\.\//, '');
+    if (!pattern) pattern = '.';
+    return pattern;
+  }
+
   async handler(args, tool) {
     let { glob: pattern } = args;
     
