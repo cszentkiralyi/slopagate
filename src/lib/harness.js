@@ -241,7 +241,7 @@ class Harness {
     if (this.#userMessagesSinceRecap < 2) return;
     
     // Filter to only 'user' and 'assistant' role messages with content
-    const filteredMessages = this.session.messages.filter(
+    const filteredMessages = this.session.context.messages.filter(
       m => (m.role === 'user' || m.role === 'assistant') && m.content?.length > 0
     );
     

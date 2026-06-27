@@ -14,7 +14,7 @@ class Session {
 
   get context() { return this.#masterContext; }
   get id() { return this.#id; }
-  get tempdir() { return this.#tempdir; }
+  get tempdir() { return this.#tempdir?.path; }
 
   constructor(props) {
     this.#id = props.id || ID();
