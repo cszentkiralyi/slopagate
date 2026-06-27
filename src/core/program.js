@@ -117,7 +117,6 @@ class Program {
       host: 'http://127.0.0.1',
       endpoint:'/api/chat',
 
-      model: 'qwen3.5:9b-65k',
       context_window: 65536,
       num_predict: 16384,
 
@@ -140,7 +139,6 @@ class Program {
     if (process.env.SLOP_PORT) configData.port = parseInt(process.env.SLOP_PORT, 10);
     if (process.env.SLOP_HOST) configData.host = process.env.SLOP_HOST;
     if (process.env.SLOP_ENDPOINT) configData.endpoint = process.env.SLOP_ENDPOINT;
-    if (process.env.SLOP_MODEL) configData.model = process.env.SLOP_MODEL;
     if (process.env.SLOP_CONTEXT_WINDOW) configData.context_window = parseInt(process.env.SLOP_CONTEXT_WINDOW, 10);
 
     configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
@@ -396,10 +394,6 @@ class Program {
     this.interface.addMessage({
       role: 'startup',
       content: `Connection: ${this.config.get('connection')}`
-    });
-    this.interface.addMessage({
-      role: 'startup',
-      content: `Model: ${this.config.get('model')}`
     });
     this.interface.addMessage({
       role: 'startup',

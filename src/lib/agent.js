@@ -126,7 +126,6 @@ class Agent {
   async sendToEndpoint(context, signal) {
     const provider = this.config.get('provider') || 'ollama';
     const connection = this.config.get('connection');
-    const model = this.config.get('model');
     const think = this.config.get('think') || false;
     const stream = this.config.get('stream') || false;
     const keep_alive = this.config.get('keep_alive') || '5m';
@@ -135,7 +134,6 @@ class Agent {
     const tools = (this.tools || []).map(t => t.spec);
     
     let payload = {
-      model: model,
       think: think,
       stream: stream,
       keep_alive: keep_alive,
@@ -171,7 +169,6 @@ class Agent {
         stack: err.stack,
         provider: provider,
         connection: connection,
-        model: model,
         errorType: err.constructor.name,
         isAbort: err.name === 'AbortError'
       };
