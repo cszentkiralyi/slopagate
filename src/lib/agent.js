@@ -79,7 +79,7 @@ class Agent {
       content = currentContent;
       
       // Add model's single message to context once
-      this.callbacks.onModelContent?.(content);
+      this.callbacks?.onModelContent?.(content);
       this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
       this.context.add({ role: 'assistant', content, tool_calls: toolCalls });
       
@@ -90,7 +90,7 @@ class Agent {
 
       // If tool calls, execute them and return results for next iteration
       if (toolCalls && toolCalls.length > 0) {
-        toolResults = this.callbacks.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
+        toolResults = this.callbacks?.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
         this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
         this.context.add({ role: 'tool', content: JSON.stringify(toolResults) });
         
@@ -111,7 +111,7 @@ class Agent {
     } while (true);
     
     // Fire turn-end callback so UI can hide spinners and handle post-turn logic
-    this.callbacks.onTurnEnd?.();
+    this.callbacks?.onTurnEnd?.();
     
     return { content, toolResults, aborted: !!this.#abortController?.signal.aborted, duration: Date.now() - startTime };
   }
