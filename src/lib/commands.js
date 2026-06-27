@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const ANSI = require('./ansi.js');
 const Events = require('../events.js');
+const { formatRelativeDate, formatDate, isRecent } = require('../util.js');
 
 function makeConfigSetCommand(key, allowedValues, translateFn) {
   return async function handler(harness, bstr) {
@@ -230,7 +231,11 @@ const Commands = [
       }
       const lines = sessions
         .sort((a, b) => new Date(b.modified) - new Date(a.modified))
-        .map(s => `  ${s.id}  created: ${s.created}  modified: ${s.modified}`)
+        .map(s => {
+          const created = isRecent(s.created) ? formatRelativeDate(s.created) : formatDate(s.created);
+          const modified = isRecent(s.modified) ? formatRelativeDate(s.modified) : formatDate(s.modified);
+          return `  ${s.id}  created: ${created}  modified: ${modified}`;
+        })
         .join('\n');
       harness.emitCommandMessage(`${sessions.length} session(s):\n${lines}`);
     }

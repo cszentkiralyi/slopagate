@@ -63,7 +63,57 @@ function formatMs(ms) {
   return `${sec}s`;
 }
 
+/* Returns true if date is within the last 24 hours. */
+function isRecent(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return diff < 24 * 60 * 60 * 1000;
+}
+
+/* Relative time string: "just now" (<5s), "5s ago", "3m ago", "2d ago", etc. */
+function formatRelativeDate(dateStr) {
+  const date = new Date(dateStr);
+  const now = Date.now();
+  const diff = now - date.getTime();
+  const absDiff = Math.abs(diff);
+  const suffix = diff >= 0 ? ' ago' : '';
+  if (absDiff < 5000) return 'just now';
+  // Convert to seconds first, then chain standard units
+  const seconds = Math.floor(absDiff / 1000);
+  const units = [
+    [60, 's'],
+    [60, 'm'],
+    [24, 'h'],
+    [7, 'd'],
+    [4.345, 'w'],
+    [12, 'mo'],
+    [Infinity, 'y'],
+  ];
+  let value = seconds;
+  let unitIdx = 0;
+  for (let i = 0; i < units.length; i++) {
+    const [divisor] = units[i];
+    if (value / divisor < 1) {
+      unitIdx = i;
+      break;
+    }
+    value /= divisor;
+    unitIdx = i + 1;
+  }
+  const [, label] = units[unitIdx];
+  return `${Math.floor(value)}${label}${suffix}`;
+}
+
+/* Compact absolute date, e.g. "Jun 21, 2026". */
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const mon = months[date.getMonth()];
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return `${mon} ${day}, ${year}`;
+}
+
 const truncate = (s, max, suffix = '…') =>
   s.length > max ? s.substring(0, max - suffix.length) + suffix : s;
 
-module.exports = { ID, lerp, louse, Logger, formatMs, truncate };
+module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate };
