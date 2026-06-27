@@ -27,7 +27,7 @@ class GrepTool extends Tool {
   async handler(args, tool) {
     let { path, pattern } = args;
 
-    let s = JSON.stringify(pattern);
+    let s = pattern;
     let summary = `${truncate(s, 50)} in ${this.simplifyPath(path || '.')}`;
     tool.message({ state: 'spin', summary });
 

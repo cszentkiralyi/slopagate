@@ -117,8 +117,8 @@ class Harness {
           return await this.handleToolCalls(toolCalls);
         },
         onModelContent: (content) => Events.emit('model:content', { content }),
-        onTurnEnd: () => {
-          Events.emit('turn:user');
+        onTurnEnd: (aborted) => {
+          Events.emit('turn:user', aborted ? { interrupted: true } : {});
           this.sessionManager.saveSession(this.session);
         }
       },
@@ -457,7 +457,6 @@ class Harness {
     if (response.aborted) {
       const elapsed = formatMs(response.duration);
       Events.emit('model:content', { done: true, content: ANSI.fg(`Interrupted after ${elapsed}`, 160) });
-      Events.emit('turn:user', { interrupted: true });
       return;
     }
   }

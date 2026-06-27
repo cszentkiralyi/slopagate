@@ -40,7 +40,7 @@ class Slopdown {
         if (inCode) {
           inCode = false;
           fmt = this.#fmtByKind['code'] || Slopdown.IDENTITY;
-          lines.push(fmt(ret));
+          lines.push(fmt(ret.replace(/\n$/, '')));
         } else {
           inCode = true;
           ret = '';
