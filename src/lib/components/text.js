@@ -98,9 +98,9 @@ class Text extends Component {
           alignX += ANSI.measure(m[1]);
           //Logger.log(`Text: list item detected ${JSON.stringify(alignStr)}`);
         }
+        if (leftPad) currentLine += ANSI.cursorHoriz(leftPad);
+        currentLen = ANSI.measure(currentLine);
         if (fill) currentLine += ANSI.eraseLine();
-        if (leftPad || alignX) currentLine += ANSI.cursorHoriz(leftPad + alignX);
-        currentLen = ANSI.measure(currentLine)
         line.split(' ').forEach((word, idx) => {
           let len = ANSI.measure(word);
           let spaceLen = idx ? 1 : 0;
