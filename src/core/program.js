@@ -548,6 +548,7 @@ class Program {
       this.interface.draw();
     });
     Events.on('recap:message', (event) => {
+      this.#stopAfkTimer();
       this.interface.addMessage({
         role: 'recap',
         content: event.content
