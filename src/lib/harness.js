@@ -370,7 +370,7 @@ class Harness {
       Logger.log(`Harness: no recap summary.`);
       return;
     }
-    let summaryContent = summaryResponse.message.content,
+    let summaryContent = summaryResponse.content,
         content = `🕮  ${summaryContent}`;
     this.#userMessagesSinceRecap = 0;
     
