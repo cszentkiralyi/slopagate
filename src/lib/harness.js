@@ -697,7 +697,7 @@ class Harness {
       if (match) {
         Logger.log(`[dedup] Detected similar tool call: ${toolName} (score: ${match.score.toFixed(2)})`);
         Logger.log(`[dedup] Current: ${JSON.stringify(args)}`);
-        Logger.log(`[dedup] Similar to: ${JSON.stringify(JSON.parse(match.normalized))}`);
+        Logger.log(`[dedup] Similar to: ${match.normalized}`);
       }
     }
     
