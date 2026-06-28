@@ -105,19 +105,6 @@ class Harness {
       Logger.log(`[dedup] Found ${candidates.size} unique candidates from ${totalHistory} total history entries`);
     }
     
-    let totalHistory = 0;
-    for (const bandKey of bands) {
-      const bandMap = toolBands.get(bandKey);
-      if (bandMap) {
-        for (const [sigKey, entry] of bandMap.entries()) {
-          candidates.set(sigKey, entry);
-          totalHistory++;
-        }
-      }
-    }
-    
-    Logger.log(`[dedup] Found ${candidates.size} unique candidates from ${totalHistory} total history entries`);
-    
     // Compare each candidate, short-circuit if we find a strong match
     let bestMatch = null;
     let bestScore = 0;
@@ -144,10 +131,6 @@ class Harness {
     }
     
     // Store this call in dedup tracking
-    if (!this.#dedupBands.has(toolName)) {
-      this.#dedupBands.set(toolName, new Map());
-    }
-    const toolBandMap = this.#dedupBands.get(toolName);
     for (const bandKey of bands) {
       if (!toolBandMap.has(bandKey)) {
         toolBandMap.set(bandKey, new Map());
