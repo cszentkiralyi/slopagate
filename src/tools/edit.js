@@ -29,7 +29,12 @@ class EditTool extends Tool {
   }
 
   normalize(args) {
-    return `${this.simplifyPath(args.file_path)}:${args.old_str}`;
+    if (!args || !args.file_path || !args.old_str || !args.new_str) return null;
+    return [
+      this.simplifyPath(args.file_path),
+      args.old_str,
+      args.new_str,
+    ];
   }
 
   async handler(args, tool) {

@@ -63,6 +63,7 @@ class Harness {
     let normalized, signature;
     try {
       normalized = tool.normalize(args);
+      if (!normalized) return null;  // Tool opted out of dedup
       signature = Hash.hash(normalized);
     } catch (e) {
       Logger.log(`Dedup error: ${e.message}`);
@@ -686,6 +687,34 @@ class Harness {
    * @param {Array} tool_calls - List of tool calls from model
    * @returns {Promise<Array>} Tool results
    */
+  #classifyToolCall(call) {
+    let tool = this.toolbox.get(call.function.name);
+    let perms;
+    try {
+      perms = tool?.permissions(call.function.arguments);
+    } catch (err) {
+      Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
+      return { skipPermsCheck: false, approved: false };
+    }
+    
+    // Skip calls without permission requirements
+    if (!perms || !perms.scope) {
+      return { skipPermsCheck: true, approved: false };
+    }
+    
+    // Check if already auto-approved
+    let scopes = [perms.scope, ...(perms.parents || [])];
+    let approved;
+    try {
+      approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
+    } catch (err) {
+      Logger.log(`permission check error (${call.function.name}): ${err.message}`);
+      approved = false;
+    }
+    
+    return { skipPermsCheck: false, approved };
+  }
+  
   async handleToolCalls(tool_calls) {
     await this.session.ensureTempDir();
     
@@ -701,40 +730,34 @@ class Harness {
       }
     }
     
-    // Split tool calls into auto-run (approved) and pending (need user approval)
+    // Classify each tool call
     let autoRun = [];
+    let pending = [];
     
     for (let call of tool_calls) {
-      let tool = this.toolbox.get(call.function.name);
-      let perms;
-      try {
-        perms = tool?.permissions(call.function.arguments);
-      } catch (err) {
-        Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
-      }
-      
-      // Skip calls without permission requirements (or if permissions check failed)
-      if (!perms || !perms.scope) {
-        autoRun.push({ call, skipPermsCheck: true });
+      let { skipPermsCheck, approved } = this.#classifyToolCall(call);
+      if (skipPermsCheck || approved) {
+        autoRun.push({ call, skipPermsCheck, approved });
       } else {
-        // Check if already auto-approved
-        let scopes = [perms.scope, ...(perms.parents || [])];
-        let approved;
-        try {
-          approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-        } catch (err) {
-          Logger.log(`permission check error (${call.function.name}): ${err.message}`);
-          approved = false;
-        }
-        if (approved) {
-          autoRun.push({ call, approved });
-        }
-        // If not approved, skip adding to autoRun and let it fall through to the pending phase
+        pending.push(call);
       }
     }
     
     let results = [];
     let eventsById = {};
+    
+    // Helper to record a result
+    const recordResult = (callResult, call) => {
+      results.push(callResult);
+      eventsById[call.id] ||= [];
+      eventsById[call.id].push({
+        id: call.id,
+        name: call.function.name,
+        args: call.function.arguments,
+        temppath: this.session.tempdir
+      });
+      this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
+    };
     
     // Run auto-approved tools in parallel
     if (autoRun.length) {
@@ -747,84 +770,18 @@ class Harness {
         } else {
           callResult = await this.handleToolCallWithHook(call);
         }
-        
-        results.push(callResult);
-        eventsById[call.id] ||= [];
-        eventsById[call.id].push({
-          id: call.id,
-          name: call.function.name,
-          args: call.function.arguments,
-          temppath: this.session.tempdir
-        });
-        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
+        recordResult(callResult, call);
       });
       await Promise.all(autoPromises);
     }
     
     // Run pending tools sequentially (one permission prompt at a time)
-    for (let call of tool_calls) {
+    for (let call of pending) {
       if (this.#abortController?.signal.aborted) break;
-      let tool = this.toolbox.get(call.function.name);
-      let perms;
-      try {
-        perms = tool?.permissions(call.function.arguments);
-      } catch (err) {
-        Logger.log(`tool permissions error (${call.function.name}): ${err.message}`);
-      }
-      
-      // Skip if already processed in auto-run
       if (eventsById[call.id]) continue;
       
-      // Skip calls without permission requirements (or if permissions check failed)
-      if (!perms || !perms.scope) {
-        let callResult = await this.handleToolCallWithHook(call);
-        results.push(callResult);
-        eventsById[call.id] ||= [];
-        eventsById[call.id].push({
-          id: call.id,
-          name: call.function.name,
-          args: call.function.arguments,
-          temppath: this.session.tempdir
-        });
-        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
-        continue;
-      }
-      
-      // Check if already auto-approved
-      let scopes = [perms.scope, ...(perms.parents || [])];
-      let approved;
-      try {
-        approved = scopes.some(s => this.permissions?.check(tool.name, s).allowed === true);
-      } catch (err) {
-        Logger.log(`permission check error (${call.function.name}): ${err.message}`);
-        approved = false;
-      }
-      
-      if (approved) {
-        let callResult = await this.runToolCall(call);
-        results.push(callResult);
-        eventsById[call.id] ||= [];
-        eventsById[call.id].push({
-          id: call.id,
-          name: call.function.name,
-          args: call.function.arguments,
-          temppath: this.session.tempdir
-        });
-        this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
-        continue;
-      }
-      
-      // Needs user approval — fire hook (will prompt user)
       let callResult = await this.handleToolCallWithHook(call);
-      results.push(callResult);
-      eventsById[call.id] ||= [];
-      eventsById[call.id].push({
-        id: call.id,
-        name: call.function.name,
-        args: call.function.arguments,
-        temppath: this.session.tempdir
-      });
-      this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
+      recordResult(callResult, call);
     }
     
     results.forEach(msg => {

@@ -31,6 +31,8 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
     Object.assign(this, props);
   }
 
+  normalize() { return null; }
+
   async handler(args, tool) {
     const memory = new Memory(this.config);
     await memory.init();

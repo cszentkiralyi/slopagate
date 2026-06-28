@@ -28,8 +28,8 @@ class ActivateSkillTool extends Tool {
     Object.assign(this, props);
   }
 
-  normalize(args) {
-    return args.name.trim();
+  normalize() {
+    return null;
   }
 
   async handler(args, tool) {

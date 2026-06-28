@@ -25,7 +25,11 @@ class GrepTool extends Tool {
   }
 
   normalize(args) {
-    return `${this.simplifyPath(args.path)} ${args.pattern}`;
+    if (!args || !args.path || !args.pattern) return null;
+    return [
+      this.simplifyPath(args.path),
+      args.pattern,
+    ];
   }
 
   async handler(args, tool) {

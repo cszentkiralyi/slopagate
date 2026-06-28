@@ -28,7 +28,7 @@ class LsTool extends Tool {
     // Collapse // to /, trim trailing /, resolve ./
     pattern = pattern.replace(/\/\/+/g, '/').replace(/\/$/, '').replace(/^\.\//, '');
     if (!pattern) pattern = '.';
-    return pattern;
+    return [pattern];
   }
 
   async handler(args, tool) {

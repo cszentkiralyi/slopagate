@@ -34,10 +34,12 @@ class ReadTool extends Tool {
   }
 
   normalize(args) {
-    let result = this.simplifyPath(args.file_path);
-    if (args.start_line && args.start_line !== 1) result += `:${args.start_line}`;
-    if (args.end_line !== undefined) result += args.end_line ? `-${args.end_line}` : '+';
-    return result;
+    if (!args || !args.file_path) return null;
+    return [
+      this.simplifyPath(args.file_path),
+      args.start_line ?? null,
+      args.end_line ?? null,
+    ];
   }
 
   async handler(args, tool) {

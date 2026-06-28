@@ -108,6 +108,11 @@ class BashTool extends Tool {
     return result;
   }
 
+  normalize(args) {
+    if (!args || !args.command) return null;
+    return [args.command];
+  }
+
   permissions(args) {
     const { command } = args;
 
