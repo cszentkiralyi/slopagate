@@ -78,28 +78,56 @@ class Harness {
       bands[i] = band.join(':');
     }
     
+    Logger.log(`[dedup] Checking ${toolName} call ${callId}, total previous calls: ${this.#dedupCalls.length}`);
+    
+    // Initialize bands for this tool if needed
+    if (!this.#dedupBands.has(toolName)) {
+      this.#dedupBands.set(toolName, new Map());
+    }
+    const toolBandMap = this.#dedupBands.get(toolName);
+    
     // Look up candidates from all bands
     const candidates = new Map();  // sigKey -> {id, timestamp, normalized}
-    const toolBands = this.#dedupBands.get(toolName);
-    if (!toolBands) return null;  // No history for this tool yet
+    let totalHistory = 0;
+    for (const bandKey of bands) {
+      const bandMap = toolBandMap.get(bandKey);
+      if (bandMap) {
+        for (const [sigKey, entry] of bandMap.entries()) {
+          candidates.set(sigKey, entry);
+          totalHistory++;
+        }
+      }
+    }
     
+    if (candidates.size === 0) {
+      Logger.log(`[dedup] No history for ${toolName}, no candidates`);
+    } else {
+      Logger.log(`[dedup] Found ${candidates.size} unique candidates from ${totalHistory} total history entries`);
+    }
+    
+    let totalHistory = 0;
     for (const bandKey of bands) {
       const bandMap = toolBands.get(bandKey);
       if (bandMap) {
         for (const [sigKey, entry] of bandMap.entries()) {
           candidates.set(sigKey, entry);
+          totalHistory++;
         }
       }
     }
     
+    Logger.log(`[dedup] Found ${candidates.size} unique candidates from ${totalHistory} total history entries`);
+    
     // Compare each candidate, short-circuit if we find a strong match
     let bestMatch = null;
     let bestScore = 0;
+    let comparedCount = 0;
     
     for (const [sigKey, candidate] of candidates.entries()) {
       let score;
       try {
         score = Hash.compare(signature, candidate.signature);
+        comparedCount++;
       } catch (e) {
         Logger.log(`Dedup compare error: ${e.message}`);
         continue;
@@ -109,6 +137,10 @@ class Harness {
         bestMatch = { ...candidate, score };
         bestScore = score;
       }
+    }
+    
+    if (comparedCount > 0) {
+      Logger.log(`[dedup] Compared ${comparedCount} candidates, best score: ${bestScore.toFixed(3)} (threshold: ${this.#dedupThreshold})`);
     }
     
     // Store this call in dedup tracking
