@@ -198,14 +198,80 @@ function parseCommand(raw) {
   return { raw, tokens, command, subcommand, flags, paths };
 }
 
+function splitByNewlines(raw) {
+  // Split on \n or literal \n only when outside quotes, preserving quoted
+  // content as a single unit.
+  const parts = [];
+  let current = '';
+  let i = 0;
+
+  while (i < raw.length) {
+    const ch = raw[i];
+
+    // Handle double quotes
+    if (ch === '"') {
+      current += ch;
+      i++;
+      while (i < raw.length && raw[i] !== '"') {
+        if (raw[i] === '\\' && i + 1 < raw.length) {
+          current += raw[i] + raw[i + 1];
+          i += 2;
+        } else {
+          current += raw[i];
+          i++;
+        }
+      }
+      if (i < raw.length) { current += raw[i]; i++; } // closing "
+      continue;
+    }
+
+    // Handle single quotes
+    if (ch === "'") {
+      current += ch;
+      i++;
+      while (i < raw.length && raw[i] !== "'") {
+        current += raw[i];
+        i++;
+      }
+      if (i < raw.length) { current += raw[i]; i++; } // closing '
+      continue;
+    }
+
+    // Handle literal \n (escaped)
+    if (ch === '\\' && raw[i + 1] === 'n') {
+      if (current.trim()) parts.push(current.trim());
+      current = '';
+      i += 2;
+      continue;
+    }
+
+    // Handle actual newline
+    if (ch === '\n') {
+      if (current.trim()) parts.push(current.trim());
+      current = '';
+      i++;
+      continue;
+    }
+
+    current += ch;
+    i++;
+  }
+
+  if (current.trim()) parts.push(current.trim());
+  return parts;
+}
+
 function parse(input) {
   const raw = input.trim();
   if (!raw) {
     return { raw: '', commands: [] };
   }
 
-  const normalized = raw.replace(/\\n|\n/g, ';');
-  const compoundParts = splitCompound(normalized);
+  const segments = splitByNewlines(raw);
+  const compoundParts = [];
+  for (const seg of segments) {
+    compoundParts.push(...splitCompound(seg));
+  }
   const commands = compoundParts.map(part => parseCommand(part));
 
   return { raw, commands };

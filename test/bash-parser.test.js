@@ -249,3 +249,21 @@ test('parses tar with flags and multiple paths', (t) => {
   assert.deepStrictEqual(result.commands[0].flags, ['-czvf', '--exclude']);
   assert.deepStrictEqual(result.commands[0].paths, ['archive.tar.gz', 'src/', 'lib/', '*.log']);
 });
+
+test('handles newlines inside double quotes (multiline commit message)', (t) => {
+  const result = parse('git commit -m "VIBE: refactor\n\nReplace inline regex"');
+  assert.strictEqual(result.commands.length, 1);
+  assert.strictEqual(result.commands[0].command, 'git');
+  assert.strictEqual(result.commands[0].subcommand, 'commit');
+  assert.deepStrictEqual(result.commands[0].flags, ['-m']);
+  assert.deepStrictEqual(result.commands[0].paths, ['VIBE: refactor\n\nReplace inline regex']);
+});
+
+test('handles newlines inside single quotes', (t) => {
+  const result = parse("git commit -m 'VIBE: fix\n\nSmall change'");
+  assert.strictEqual(result.commands.length, 1);
+  assert.strictEqual(result.commands[0].command, 'git');
+  assert.strictEqual(result.commands[0].subcommand, 'commit');
+  assert.deepStrictEqual(result.commands[0].flags, ['-m']);
+  assert.deepStrictEqual(result.commands[0].paths, ['VIBE: fix\n\nSmall change']);
+});
