@@ -119,13 +119,13 @@ class BashTool extends Tool {
     if (!this.permissionGate(command)) {
       let hintMatch = this.toolHint(command);
       if (hintMatch) {
-        return {
+        return [{
           message: `Error: command "${command.split(' ')[0]}" not allowed, use "${hintMatch.hint}" tool instead`
-        };
+        }];
       }
-      return {
+      return [{
         message: `Error: command "${command.split(' ')[0]}" not allowed.`
-      };
+      }];
     }
 
     // Readonly commands skip permission prompts entirely
@@ -145,10 +145,10 @@ class BashTool extends Tool {
       ? [ cmd + '*', cmd + ' ' + second + '*' ].reverse()
       : [ cmd + '*' ];
     
-    return {
+    return [{
       scope: command,
       parents: parents
-    };
+    }];
   }
 }
 

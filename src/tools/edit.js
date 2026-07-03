@@ -94,7 +94,7 @@ class EditTool extends Tool {
       .filter(p => p !== path)
       .map(p => p + '/*')
       .reverse(); // Check most-specific first, not last
-    return { scope: path, parents };
+    return [{ scope: path, parents }];
   }
 }
 

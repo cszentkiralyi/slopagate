@@ -660,50 +660,63 @@ class Program {
     //EXPERIMENT DISABLED
     //  */
     
-    const perms = tool.permissions(toolCall.function.arguments);
-    //Logger.log(`Program: tool ${tool.name} perms ${JSON.stringify(perms)}`);
-    if (!perms || !perms.scope) {
-      if (!perms) return null;
-      return { cancelled: true, error: perms.message || 'Error: operation not permitted' };
+    const rawPerms = tool.permissions(toolCall.function.arguments);
+    if (!rawPerms) return null;
+    if (!Array.isArray(rawPerms)) {
+      throw new Error(`Tool ${tool.name}.permissions() must return an array or null`);
     }
-    let scopes = [ perms.scope, ...(perms.parents || []) ],
-        permResult;
-    do {
-      //Logger.log(`Program: checking perm scopes ${JSON.stringify(scopes)}`);
-      permResult = this.permissions.check(tool.name, scopes.shift());
-      //Logger.log(`Program: perm result ${JSON.stringify(permResult)}`);
-      scopes.push(...(permResult.suggestions));
-    } while ((permResult.allowed != true) && scopes.length);
-    //Logger.log(`Program: done with do/while, final result ${JSON.stringify(permResult)}`);
+    const permArray = rawPerms;
     
-    if (permResult.allowed == true) {
-      return null;
-    } else if (permResult.scope === perms.scope && permResult.allowed == false) {
-      return { cancelled: true, error: 'Error: operation not permitted' };
+    // Check for immediate denials (message-only entries)
+    const denials = permArray.filter(p => p.message);
+    if (denials.length) {
+      return { cancelled: true, error: denials.map(d => d.message).join('\n') };
     }
     
-    let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
-        choices = [
-          { label: 'Yes', value: 'yes', default: true },
-          { label: 'Yes for this session', value: 'yes+' },
-          { label: 'No', value: 'no' },
-          // { label: 'No for this session', value: 'no+' },
-        ], result = await this.interface.getUserChoice(msg, choices);
-
-    //Logger.log(`Program: got user choice result = ${JSON.stringify(result)}`);
-    if (result === 'yes' || result === 'yes+') {
-      if (result === 'yes+') {
-        this.permissions.approve(tool.name, perms.scope);
-        await this.#suggestParent(tool.name, perms);
+    // Iterate through permission elements in order.
+    // Each approval updates the permissions map, so subsequent checks see it.
+    const seenParents = new Set();
+    for (const perms of permArray) {
+      let scopes = [ perms.scope, ...(perms.parents || []) ];
+      let permResult;
+      do {
+        permResult = this.permissions.check(tool.name, scopes.shift());
+        scopes.push(...(permResult.suggestions));
+      } while ((permResult.allowed != true) && scopes.length);
+      
+      if (permResult.allowed == true) continue;
+      if (permResult.scope === perms.scope && permResult.allowed == false) {
+        return { cancelled: true, error: 'Error: operation not permitted' };
       }
-      return null;
-    // } else if (result === 'no+') {
-    //   this.permissions.deny(tool.name, perms.scope);
-    //   return { cancelled: true, error: `Error: operation not permitted` };
+      
+      // Prompt user
+      let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
+          choices = [
+            { label: 'Yes', value: 'yes', default: true },
+            { label: 'Yes for this session', value: 'yes+', default: true },
+            { label: 'No', value: 'no' },
+          ], result = await this.interface.getUserChoice(msg, choices);
+      
+      if (result === 'yes' || result === 'yes+') {
+        if (result === 'yes+') {
+          this.permissions.approve(tool.name, perms.scope);
+          // Suggest parent approval (deduplicated across all perm elements)
+          if (perms.parents && perms.parents[0]) {
+            const parent = perms.parents[0];
+            if (!seenParents.has(parent) && parent.endsWith('*') && !this.permissions.has(tool.name, parent)) {
+              seenParents.add(parent);
+              await this.#suggestParent(tool.name, { scope: perms.scope, parents: perms.parents });
+            }
+          }
+        }
+        continue;
+      }
+      
+      Events.emit('user:abort');
+      throw new Error('operation not permitted');
     }
-
-    Events.emit('user:abort');
-    throw new Error('operation not permitted');
+    
+    return null;
   }
 
   async #suggestParent(toolName, perms) {
