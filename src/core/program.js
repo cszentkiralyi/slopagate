@@ -380,8 +380,16 @@ class Program {
     }
     const effortCmd = cmds.find(c => c.name === 'effort');
     if (effortCmd && effortCmd.arguments?.[0]) {
-      const reverse = { 256: 'minimal', 1024: 'low', 2048: 'medium', 4096: 'high', 8196: 'xhigh' };
-      effortCmd.arguments[0].current = () => reverse[this.config.get('reasoning_budget')] ?? this.config.get('reasoning_budget');
+      effortCmd.arguments[0].current = () => {
+        const budget = this.config.get('reasoning_budget');
+        const levels = { minimal: 256, low: 1024, medium: 2048, high: 4096, xhigh: 8196 };
+        if (typeof budget === 'number') {
+          const best = Object.entries(levels).find(([_, val]) => val >= budget)?.[0];
+          return best || 'minimal';
+        }
+        const reverse = Object.fromEntries(Object.entries(levels).map(([name, val]) => [val, name]));
+        return reverse[budget] ?? budget;
+      };
     }
     this.interface.commands = cmds;
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
