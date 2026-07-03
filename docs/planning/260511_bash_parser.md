@@ -30,22 +30,22 @@ Parse raw shell strings into structured command objects: split compound commands
 
 ## Plan
 
-- [ ] **1. Define module structure**
+- [x] **1. Define module structure**
   - `src/lib/bash-parser.js` — main parser
-  - `src/lib/bash-parser.test.js` — tests
+  - `test/bash-parser.test.js` — tests
 
-- [ ] **2. Implement state machine for compound split**
+- [x] **2. Implement state machine for compound split**
   - States: `normal`, `double-quote`, `single-quote`, `backtick`, `dollar-paren`
   - Track `$()` nesting depth
   - Recognize `&&`, `||`, `;`, `|`, newline as separators
   - Handle `\"`, `\\`, `\'` escapes inside quotes
 
-- [ ] **3. Implement tokenizer per command**
+- [x] **3. Implement tokenizer per command**
   - Split on whitespace, respecting quotes/escapes
   - Handle `$()` interpolation (capture raw, don't evaluate)
   - Handle backtick interpolation (capture raw, don't evaluate)
 
-- [ ] **4. Classify tokens into command/subcommand/flags/paths**
+- [x] **4. Classify tokens into command/subcommand/flags/paths**
   - `tokens[0]` → `command`
   - Known compound commands (git, npm, docker, kubectl, etc.) → `tokens[1]` → `subcommand`
   - `--flag`, `-f`, `--flag=value` → `flags`
@@ -62,7 +62,7 @@ Parse raw shell strings into structured command objects: split compound commands
   - Paths: `ls /tmp/foo`, `git reset HEAD`
   - Edge cases: empty string, just whitespace, only separators
 
-- [ ] **6. Integrate with BashTool**
+- [x] **6. Integrate with BashTool**
   - `BashTool.permissions()` calls the parser
   - Returns permission entries per sub-command
   - Each entry gets a `summary` with the parsed structure

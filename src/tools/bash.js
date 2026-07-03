@@ -1,6 +1,7 @@
 /* Runs shell commands with permission checking */
 const { exec } = require('node:child_process');
 
+const parseBash = require('../lib/bash-parser.js');
 const { Logger, truncate } = require('../util.js');
 
 const Tool = require('./tool.js');
@@ -73,11 +74,16 @@ class BashTool extends Tool {
 
   async handler(args, tool) {
     const { command } = args;
+    const parsed = parseBash(command);
+    if (parsed.commands.length === 0) return '';
 
-    if (!this.permissionGate(command)) {
-      //tool.message({ state: 'error', subject: `${this.name}("${command.split(' ')[0]}")` });
-      return `Error: command "${command.split(' ')[0]}" not allowed.`;
+    // Gate: reject if any sub-command fails
+    for (const cmd of parsed.commands) {
+      if (!this.permissionGate(cmd.raw)) {
+        return `Error: command "${cmd.raw.split(' ')[0]}" not allowed.`;
+      }
     }
+
     let summary = truncate(command.replaceAll('\n', '\\n'), 50);
     tool.message({ state: 'spin', summary });
 
@@ -115,40 +121,51 @@ class BashTool extends Tool {
 
   permissions(args) {
     const { command } = args;
+    const parsed = parseBash(command);
+    if (parsed.commands.length === 0) return null;
 
-    if (!this.permissionGate(command)) {
-      let hintMatch = this.toolHint(command);
-      if (hintMatch) {
-        return [{
-          message: `Error: command "${command.split(' ')[0]}" not allowed, use "${hintMatch.hint}" tool instead`
-        }];
+    const results = [];
+    for (const cmd of parsed.commands) {
+      const raw = cmd.raw;
+
+      if (!this.permissionGate(raw)) {
+        let hintMatch = this.toolHint(raw);
+        if (hintMatch) {
+          results.push({
+            message: `Error: command "${raw.split(' ')[0]}" not allowed, use "${hintMatch.hint}" tool instead`
+          });
+        } else {
+          results.push({
+            message: `Error: command "${raw.split(' ')[0]}" not allowed.`
+          });
+        }
+        continue;
       }
-      return [{
-        message: `Error: command "${command.split(' ')[0]}" not allowed.`
-      }];
+
+      // Readonly commands skip permission prompts entirely
+      const isReadonly = BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
+        if (pattern.endsWith('*')) {
+          return raw.startsWith(pattern.substring(0, pattern.length - 1)) && readonly;
+        }
+        return raw === pattern && readonly;
+      });
+      if (isReadonly) continue;
+
+      const tokens = cmd.tokens;
+      let [ cmdName, second, ...rem ] = tokens;
+      let scope = second?.startsWith('-') ? cmdName : (cmdName + ' ' + second);
+      let parents = second
+        ? [ cmdName + '*', cmdName + ' ' + second + '*' ].reverse()
+        : [ cmdName + '*' ];
+
+      results.push({
+        scope: raw,
+        parents: parents
+      });
     }
 
-    // Readonly commands skip permission prompts entirely
-    const isReadonly = BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
-      if (pattern.endsWith('*')) {
-        return command.startsWith(pattern.substring(0, pattern.length - 1)) && readonly;
-      }
-      return command === pattern && readonly;
-    });
-    if (isReadonly) {
-      return null;
-    }
-
-    let [ cmd, second, ...rem ] = command.split(' ');
-    let scope = second?.startsWith('-') ? cmd : (cmd + ' ' + second);
-    let parents = second
-      ? [ cmd + '*', cmd + ' ' + second + '*' ].reverse()
-      : [ cmd + '*' ];
-    
-    return [{
-      scope: command,
-      parents: parents
-    }];
+    if (results.length === 0) return null;
+    return results;
   }
 }
 
