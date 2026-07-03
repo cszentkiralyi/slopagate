@@ -217,7 +217,7 @@ class TextInput extends Component {
           return;
         }
       }
-      this.#caret++;
+      this.#caret += k.length;
     }
     /*
     else {
