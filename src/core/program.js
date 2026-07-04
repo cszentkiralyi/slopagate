@@ -765,7 +765,7 @@ class Program {
   }
 
   #resetAfkTimer() {
-    this.timers.stop('afk');
+    if (!this.timers.has('afk')) return;
     this.#startAfkTimer();
   }
 
