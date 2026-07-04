@@ -306,6 +306,14 @@ const Commands = [
       harness.sessionManager.cleanup({ maxAge, maxCount });
       harness.emitCommandMessage(`Cleaned up sessions (maxAge: ${maxAge}d, maxCount: ${maxCount}).`);
     }
+  },
+
+  {
+    name: 'reload',
+    hint: 'Reload skills from disk',
+    handler: async (harness) => {
+      await harness.reloadSkills();
+    }
   }
 
 ];

@@ -1,5 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const fsSync = require('node:fs');
+const sea = require('node:sea');
 const ANSI = require('../lib/ansi.js');
 const Events = require('../events.js');
 const Session = require('./session.js');
@@ -295,6 +297,43 @@ class Harness {
         });
       });
     }
+  }
+  
+  async reloadSkills() {
+    // Clear all existing skills
+    this.skills = new Skills();
+    
+    // Re-read user skills from disk
+    let skillsFiles = fsSync.globSync(path.join(this.config.get('slop_dir'), 'skills', '*', 'SKILL.md'));
+    if (skillsFiles.length > 0) {
+      let skillEntries = skillsFiles.map(skillPath => ({
+        text: fsSync.readFileSync(skillPath, 'utf-8'),
+        dirName: path.basename(path.dirname(skillPath))
+      }));
+      this.skills.addSkills(skillEntries);
+    }
+    
+    // Re-read SEA assets if bundled
+    if (sea.isSea()) {
+      try {
+        let assetKeys = sea.getAssetKeys();
+        let skillKeys = assetKeys.filter(k => k.startsWith('skills/'));
+        if (skillKeys.length > 0) {
+          let skillEntries = skillKeys.map(k => ({
+            text: sea.getAsset(k, 'utf-8'),
+            dirName: k.split('/')[1]
+          }));
+          this.skills.addSkills(skillEntries);
+        }
+      } catch (err) { /* no bundled skills */ }
+    }
+    
+    // Clear old skill commands and rebuild
+    let oldSkillNames = this.skills.names;
+    this.commands = this.commands.filter(c => !oldSkillNames.includes(c.name));
+    this.buildCommands();
+    
+    this.emitCommandMessage(`Skills reloaded: ${this.skills.names.length} loaded.`);
   }
   
   getCommands() {
