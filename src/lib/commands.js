@@ -27,6 +27,19 @@ function makeConfigSetCommand(key, allowedValues, translateFn) {
   };
 }
 
+function makeToggleCommand(key, hint) {
+  return {
+    name: key,
+    hint: `${hint} (currently: ${harness.config.get(key)})`,
+    handler: async (harness) => {
+      const current = harness.config.get(key);
+      const newValue = !current;
+      harness.config.set(key, newValue);
+      harness.emitCommandMessage(`${key} = ${newValue}`);
+    }
+  };
+}
+
 const Commands = [
   
   {
@@ -183,7 +196,45 @@ const Commands = [
   {
     name: 'think',
     hint: 'Toggle thinking mode',
-    handler: makeConfigSetCommand('think', ['true', 'false'])
+    arguments: [{ name: 'state', possible: ['true', 'false'] }],
+    handler: async (harness, bstr) => {
+      if (!bstr || !bstr.length) {
+        const newValue = !harness.config.get('think');
+        harness.config.set('think', newValue);
+        harness.emitCommandMessage(`think = ${newValue}`);
+        return;
+      }
+      const lower = bstr.toLowerCase();
+      const val = ['true', 'on'].includes(lower) ? true : ['false', 'off'].includes(lower) ? false : null;
+      if (val === null) {
+        harness.emitCommandMessage('Usage: /think [true|false]');
+        return;
+      }
+      harness.config.set('think', val);
+      harness.emitCommandMessage(`think = ${val}`);
+    }
+  },
+  
+  {
+    name: 'yolo',
+    hint: 'Toggle yolo mode (auto-approve all tool calls)',
+    arguments: [{ name: 'state', possible: ['true', 'false'] }],
+    handler: async (harness, bstr) => {
+      if (!bstr || !bstr.length) {
+        const newValue = !harness.config.get('yolo_mode');
+        harness.config.set('yolo_mode', newValue);
+        harness.emitCommandMessage(`yolo_mode = ${newValue}`);
+        return;
+      }
+      const lower = bstr.toLowerCase();
+      const val = ['true', 'on'].includes(lower) ? true : ['false', 'off'].includes(lower) ? false : null;
+      if (val === null) {
+        harness.emitCommandMessage('Usage: /yolo [true|false]');
+        return;
+      }
+      harness.config.set('yolo_mode', val);
+      harness.emitCommandMessage(`yolo_mode = ${val}`);
+    }
   },
   
   {

@@ -121,6 +121,7 @@ class Program {
       num_predict: 16384,
 
       think: false,
+      yolo_mode: false,
       stream: false
     };
     // User
@@ -390,6 +391,14 @@ class Program {
         const reverse = Object.fromEntries(Object.entries(levels).map(([name, val]) => [val, name]));
         return reverse[budget] ?? budget;
       };
+    }
+    const thinkCmd = cmds.find(c => c.name === 'think');
+    if (thinkCmd && thinkCmd.arguments?.[0]) {
+      thinkCmd.arguments[0].current = () => this.config.get('think') ? 'true' : 'false';
+    }
+    const yoloCmd = cmds.find(c => c.name === 'yolo');
+    if (yoloCmd && yoloCmd.arguments?.[0]) {
+      yoloCmd.arguments[0].current = () => this.config.get('yolo_mode') ? 'true' : 'false';
     }
     this.interface.commands = cmds;
     this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
@@ -679,6 +688,12 @@ class Program {
     const denials = permArray.filter(p => p.message);
     if (denials.length) {
       return { cancelled: true, error: denials.map(d => d.message).join('\n') };
+    }
+    
+    // Yolo mode: auto-approve all tool calls
+    if (this.config.get('yolo_mode')) {
+      Logger.log(`[Yolo] Auto-approved ${tool.name}`);
+      return null;
     }
     
     // Iterate through permission elements in order.
