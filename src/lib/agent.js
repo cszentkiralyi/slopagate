@@ -138,13 +138,16 @@ class Agent {
       stream: stream,
       keep_alive: keep_alive,
       num_predict: num_predict,
-      thinking_budget_tokens: reasoning_budget,
       messages: [
         { role: 'system', content: context.system_prompt },
         ...context.messages
       ],
       tools: tools
     };
+    
+    if (think) {
+      payload.thinking_budget_tokens = reasoning_budget;
+    }
     
     if (provider === 'openai') {
       if ('think' in payload) {
