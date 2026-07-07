@@ -358,6 +358,9 @@ class Program {
     });
  
     Events.on('program:quit', () => this.dispose());
+Events.on('yolo:toggle', ({ enabled }) => {
+  this.interface.statusline.setYoloBadge(enabled);
+});
     
     this.harness.commands.push({
       name: 'picker',

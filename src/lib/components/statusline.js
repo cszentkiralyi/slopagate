@@ -13,9 +13,11 @@ class Statusline extends HContainer {
   
   #left;
   #right;
+  #yoloBadge;
+  #tokenText;
   #nextId = 0;
   pendingTimer = null;
-  get right() { return this.#right; }
+  get right() { return this.#tokenText; }
 
   constructor(props) {
     super(props);
@@ -23,7 +25,16 @@ class Statusline extends HContainer {
     Object.assign(this, props);
     
     this.#left = new Container({ name: 'Container.statusline.left' });
-    this.#right = new Text({ justify: 'right' });
+    this.#right = new HContainer({ justify: 'right', gap: 1 });
+    this.#yoloBadge = new Text({ 
+      content: 'YOLO', 
+      bg: 214, 
+      fg: 232,
+      hidden: true 
+    });
+    this.#tokenText = new Text({ justify: 'right' });
+    this.#right.appendChild(this.#yoloBadge);
+    this.#right.appendChild(this.#tokenText);
     this.appendChild(this.#left);
     this.appendChild(this.#right);
     
@@ -141,6 +152,17 @@ class Statusline extends HContainer {
     clearTimeout(this.pendingTimer);
     this.leftSide = this.leftSide.filter(e => e.kind !== 'spinner');
     this.#renderTop();
+  }
+
+  setYoloBadge(visible) {
+    Logger.log(`Statusline.setYoloBadge: visible=${visible}, current hidden=${this.#yoloBadge.hidden}`);
+    if (this.#yoloBadge.hidden !== !visible) {
+      this.#yoloBadge.hidden = !visible;
+      Logger.log(`Statusline.setYoloBadge: updated hidden=${this.#yoloBadge.hidden}, drawing`);
+      this.draw();
+    } else {
+      Logger.log(`Statusline.setYoloBadge: no change needed`);
+    }
   }
 
 }

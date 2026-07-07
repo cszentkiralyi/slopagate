@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const ANSI = require('./ansi.js');
 const Events = require('../events.js');
-const { formatRelativeDate, formatDate, isRecent } = require('../util.js');
+const { Logger, formatRelativeDate, formatDate, isRecent } = require('../util.js');
 
 function makeConfigSetCommand(key, allowedValues, translateFn) {
   return async function handler(harness, bstr) {
@@ -224,6 +224,7 @@ const Commands = [
         const newValue = !harness.config.get('yolo_mode');
         harness.config.set('yolo_mode', newValue);
         harness.emitCommandMessage(`yolo_mode = ${newValue}`);
+        Events.emit('yolo:toggle', { enabled: newValue });
         return;
       }
       const lower = bstr.toLowerCase();
@@ -234,6 +235,7 @@ const Commands = [
       }
       harness.config.set('yolo_mode', val);
       harness.emitCommandMessage(`yolo_mode = ${val}`);
+      Events.emit('yolo:toggle', { enabled: val });
     }
   },
   
