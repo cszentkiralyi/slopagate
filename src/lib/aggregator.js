@@ -1,4 +1,5 @@
 const ANSI = require('./ansi.js');
+const { truncate } = require('../util.js');
 
 class MessageAggregator {
   constructor(ui) {
@@ -36,11 +37,17 @@ class MessageAggregator {
     const summaries = [...callMap.values()].map(c => c.summary);
     const uniqueSummaries = [...new Set(summaries)];
 
+    const MAX_LINE_LEN = 60;
+    
     // Determine display
     let display;
     if (summaries.length === 1 || uniqueSummaries.length === 1) {
+      const subject = `${group}(${summaries[0] || ''})`;
+      const wasTruncated = subject.length > MAX_LINE_LEN;
+      const truncated = truncate(subject, MAX_LINE_LEN);
+      const fixed = wasTruncated ? truncated + ')' : truncated;
       display = {
-        subject: `${group}(${summaries[0] || ''})`,
+        subject: fixed,
         body: lastBody ? ANSI.fg(lastBody, 248) : lastBody,
         state: finalState
       };
@@ -49,10 +56,14 @@ class MessageAggregator {
       const truncated = uniqueSummaries.slice(-MAX_LINES);
       const extra = uniqueSummaries.length - truncated.length;
 
+      const MAX_LINE_LEN = 60;
       const bodyLines = truncated.map((s, i, arr) => {
-        const colored = ANSI.fg(s ?? '', 248);
-        if (i < arr.length - 1) return `├ ${colored}`;
-        return `└ ${colored}`;
+        const prefix = i < arr.length - 1 ? '├ ' : '└ ';
+        const wasTruncated = s.length > MAX_LINE_LEN;
+        const truncated = truncate(s, MAX_LINE_LEN);
+        const fixed = truncated;
+        const colored = ANSI.fg(fixed, 248);
+        return `${prefix}${colored}`;
       });
       if (extra > 0) {
         bodyLines.unshift(`│ [+${extra} more]`);

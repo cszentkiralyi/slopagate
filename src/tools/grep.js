@@ -43,9 +43,6 @@ class GrepTool extends Tool {
       const result = execSync(`grep -nr ${JSON.stringify(pattern)} ${path}`).toString();
       if (!result.length) return '';
       let output = result.split('\n');
-      // Truncate each line to tool_line_limit chars
-      let maxLineLen = this.config.get('tool_line_limit') || 256;
-      output = output.map(line => truncate(line, maxLineLen));
       let maxLines = this.config.get('tool_output_limit') || 20;
       let sliced = output.slice(0, maxLines);
       let missing = output.length - sliced.length;

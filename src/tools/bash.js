@@ -102,8 +102,6 @@ class BashTool extends Tool {
           let output = (stdout || '')
               .trim()
               .split('\n');
-          // Truncate each line to maxLineLen chars
-          output = output.map(line => truncate(line, maxLineLen));
           let sliced = output.slice(0, maxLines);
           let missing = output.length - sliced.length;
           if (missing) sliced.push(`...and ${missing} more.`);
