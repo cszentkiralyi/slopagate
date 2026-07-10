@@ -53,16 +53,12 @@ class MessageAggregator {
       };
     } else {
       const MAX_LINES = 5;
-      const truncated = uniqueSummaries.slice(-MAX_LINES);
-      const extra = uniqueSummaries.length - truncated.length;
+      const shownSummaries = uniqueSummaries.slice(-MAX_LINES);
+      const extra = uniqueSummaries.length - shownSummaries.length;
 
-      const MAX_LINE_LEN = 60;
-      const bodyLines = truncated.map((s, i, arr) => {
+      const bodyLines = shownSummaries.map((s, i, arr) => {
         const prefix = i < arr.length - 1 ? '├ ' : '└ ';
-        const wasTruncated = s.length > MAX_LINE_LEN;
-        const truncated = truncate(s, MAX_LINE_LEN);
-        const fixed = truncated;
-        const colored = ANSI.fg(fixed, 248);
+        const colored = ANSI.fg(truncate(s, MAX_LINE_LEN), 248);
         return `${prefix}${colored}`;
       });
       if (extra > 0) {
