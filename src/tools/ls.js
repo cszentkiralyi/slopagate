@@ -36,7 +36,7 @@ class LsTool extends Tool {
     
     pattern = pattern || '.';
     
-    let summary = `${this.simplifyPath(pattern)}/`;
+    let summary = `${this.simplifyPath(pattern)}`;
     tool.message({ state: 'spin', summary });
     
     let result;

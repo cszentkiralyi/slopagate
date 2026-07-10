@@ -30,6 +30,8 @@ class BashTool extends Tool {
     { pattern: 'git reset *', readonly: false },
     { pattern: 'git commit *', readonly: false },
     { pattern: 'pwd', readonly: true },
+    { pattern: 'sqlite3 *', readonly: false },
+    { pattern: './*', readonly: false },
     //{ pattern: 'echo*', readonly: false },
     //{ pattern: 'awk*', readonly: false }
   ];

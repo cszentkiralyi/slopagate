@@ -45,8 +45,8 @@ class MessageAggregator {
         state: finalState
       };
     } else {
-      const MAX_LINES = 10;
-      const truncated = uniqueSummaries.slice(0, MAX_LINES);
+      const MAX_LINES = 5;
+      const truncated = uniqueSummaries.slice(-MAX_LINES);
       const extra = uniqueSummaries.length - truncated.length;
 
       const bodyLines = truncated.map((s, i, arr) => {
