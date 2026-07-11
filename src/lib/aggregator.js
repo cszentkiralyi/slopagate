@@ -3,6 +3,8 @@ const { truncate, truncateBody } = require('../util.js');
 
 const MAX_DISPLAY_LINES = 5;
 const MAX_LINE_LEN = 60;
+const BODY_GLYPH = '└ ';
+const BODY_INDENT = ' '.repeat(ANSI.measure(BODY_GLYPH));
 
 function countLines(body) {
   if (!body) return 0;
@@ -42,9 +44,11 @@ class MessageAggregator {
       const truncated = truncate(subject, MAX_LINE_LEN);
       const fixed = wasTruncated ? truncated + ')' : truncated;
       const displayBody = truncateBody(body, MAX_DISPLAY_LINES, MAX_LINE_LEN);
+      const bodyLines = displayBody ? displayBody.split('\n') : [];
+      const prefixedBody = bodyLines.map((l, i) => i === 0 ? `${BODY_GLYPH}${l}` : `${BODY_INDENT}${l}`).join('\n');
       display = {
         subject: fixed,
-        body: displayBody ? ANSI.fg(displayBody, 248) : null,
+        body: prefixedBody ? ANSI.fg(prefixedBody, 248) : null,
         state: finalState
       };
     } else {
