@@ -82,6 +82,7 @@ const CONTEXT_CONFIGS = {
 };
 
 class Context {
+  static BASE_GLOBAL_LAYER_CONFIG = { saturation: 0.5 };
   static BASE_LAYER_CONFIG = {
     system_prompt: { disable: false, user_turns: 0, soft: true },
     chat_score: { disable: false, user_turns: 3, min_messages: 20, threshold: 0 },
@@ -247,7 +248,7 @@ class Context {
   
   getLayerConfig(layerName) {
     let config = CONTEXT_CONFIGS[this.aggression_level],
-        layer_config = { ...(Context.BASE_LAYER_CONFIG[layerName]) };
+        layer_config = { ...(Context.BASE_GLOBAL_LAYER_CONFIG), ...(Context.BASE_LAYER_CONFIG[layerName]) };
     if (config.layers[layerName]) Object.assign(layer_config, config.layers[layerName]);
     if (this.layer_config && layerName in this.layer_config)
       Object.assign(layer_config, this.layer_config[layerName] || undefined);
