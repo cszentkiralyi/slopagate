@@ -23,7 +23,7 @@ class StructuredMessage extends Container {
     this.#subject = subject ?? content;
     this.spinner.message = this.#subject;
     this.subjectText.content = this.#subject || '';
-    if (body !== undefined) this.bodyText.content = body;
+    if (body !== undefined) this.bodyText.content = this.#stripBody(body);
     if (state !== undefined) this.#state = state;
     this.#updateChildren();
   }
@@ -62,7 +62,17 @@ class StructuredMessage extends Container {
 
   get subject() { return this.#subject; }
 
- set subject(v) {
+  #stripBody(v) {
+    if (typeof v !== 'string') return v;
+    const lines = v.split('\n');
+    let start = 0;
+    while (start < lines.length && lines[start].trim() === '') start++;
+    let end = lines.length;
+    while (end > start && lines[end - 1].trim() === '') end--;
+    return lines.slice(start, end).join('\n');
+  }
+
+  set subject(v) {
     if (this.#subject === v) return;
     this.#subject = v;
     this.spinner.message = v;
@@ -72,8 +82,9 @@ class StructuredMessage extends Container {
   }
   
   set body(v) {
-    if (this.bodyText.content === v) return;
-    this.bodyText.content = v;
+    const stripped = this.#stripBody(v);
+    if (this.bodyText.content === stripped) return;
+    this.bodyText.content = stripped;
     this.root?.draw();
   }
 }

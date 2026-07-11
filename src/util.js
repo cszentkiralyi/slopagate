@@ -114,8 +114,35 @@ function formatDate(dateStr) {
   return `${mon} ${day}, ${year}`;
 }
 
-const truncate = (s, max, suffix = '…') =>
-  s.length > max ? s.substring(0, max - suffix.length) + suffix : s;
+const truncate = (s, max, suffix = '…') => {
+  if (!s) return s;
+  
+  const ANSI_RESET = ANSI.RESET_ESCAPE;
+  const plainText = s.replaceAll(/\\x1B\\[[0-9;:]*[A-Za-z]/g, '');
+  
+  if (plainText.length <= max) return s;
+  
+  // Calculate how much of the original string we need
+  const targetLen = max - suffix.length;
+  let visualLen = 0;
+  let i = 0;
+  
+  // Walk through the string, counting visual characters
+  while (i < s.length && visualLen < targetLen) {
+    const char = s[i];
+    if (char === '\x1B' && s[i + 1] === '[') {
+      // Skip ANSI escape sequence
+      let j = i + 2;
+      while (j < s.length && /[0-9;:A-Za-z]/.test(s[j])) j++;
+      i = j;
+    } else {
+      visualLen++;
+      i++;
+    }
+  }
+  
+  return s.substring(0, i) + ANSI_RESET + suffix;
+};
 
 /* ANSI-aware body truncation: limits both line count and line width.
  * Returns text with at most `maxLines` lines, each no longer than `maxLineLen` visual chars.
