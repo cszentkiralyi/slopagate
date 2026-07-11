@@ -1,4 +1,5 @@
 const Component = require('./component.js');
+const ANSI = require('../ansi.js');
 
 class Container extends Component {
   _lines = []; // cache
@@ -25,17 +26,18 @@ class Container extends Component {
         dirty = false,
         lastChild = this.children.length - 1,
         haveGap;
-    //this.log(`${this.name}: starting render`);
+    let leftPad = this.padding?.left || 0,
+        rightPad = this.padding?.right || 0,
+        childWidth = width - leftPad - rightPad;
+    //this.log(`${this.name}: starting render, width=${width}, childWidth=${childWidth}, pl=${leftPad}, pr=${rightPad}`);
     this.children.forEach((child,  i) => {
       if (!child || child.hidden) return;
-      //this.log(`Container: rendering child`);
-      let result = child.render(width);
+      let result = child.render(childWidth);
       if (!result || !result.lines) {
         console.log(result);
         throw new Error();
       }
-      //this.log(`${this.name}: child ${child.name} returned ${result.lines.length} lines, skip ${result.skip}, dirty ${result.dirty}`);
-      lines.push(...result.lines);
+      lines.push(...result.lines.map(l => ANSI.cursorHoriz(leftPad) + l + ANSI.cursorHoriz(rightPad)));
       haveGap = this.gap && i < lastChild;
       if (haveGap) lines.push('');
       if (!dirty && result.skip) skip += result.skip + (haveGap && !result.dirty ? 1 : 0);
