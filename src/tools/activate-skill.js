@@ -36,13 +36,13 @@ class ActivateSkillTool extends Tool {
     if (!args.name) {
       return 'Error: Missing name argument';
     }
+    tool.message({ state: 'spin', summary: args.name });
     const skill = this.skills.get(args.name);
     if (!skill) {
+      tool.message({ state: 'error', summary: args.name });
       return `Error: Skill "${args.name}" not found. Available skills: ${this.skills.names.join(', ')}`;
     }
-    let summary = `${this.name}(${args.name})`;
-    tool.message({ state: 'spin', summary });
-    tool.message({ state: 'done', summary });
+    tool.message({ state: 'done', summary: args.name });
     return skill.content;
   }
 }

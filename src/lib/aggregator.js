@@ -5,10 +5,15 @@ const MAX_DISPLAY_LINES = 5;
 const MAX_LINE_LEN = 60;
 const BODY_GLYPH = '└ ';
 const BODY_INDENT = ' '.repeat(ANSI.measure(BODY_GLYPH));
+const TRUNC_PATTERN = /^\[\+\d+ more\]$/;
 
 function countLines(body) {
   if (!body) return 0;
-  return body.split('\n').length;
+  const lines = body.split('\n');
+  const lastLine = lines[lines.length - 1];
+  // Check for standardized truncation indicator "[+N more]"
+  const truncMatch = lastLine?.match(TRUNC_PATTERN);
+  return { count: lines.length, truncated: !!truncMatch };
 }
 
 class MessageAggregator {
@@ -61,8 +66,15 @@ class MessageAggregator {
       const bodyLines = shownSummaries.map((s, i, arr) => {
         const prefix = i < arr.length - 1 ? '├ ' : '└ ';
         const callForSummary = allCalls.find(c => c.summary === s);
-        const lineCount = countLines(callForSummary?.body);
-        const lineTag = lineCount > 0 ? ` [${lineCount} lines]` : '';
+        const lineCountInfo = countLines(callForSummary?.body);
+        let lineTag = '';
+        if (lineCountInfo.count > 0) {
+          if (lineCountInfo.truncated) {
+            lineTag = ` [${lineCountInfo.count}+ lines]`;
+          } else {
+            lineTag = ` [${lineCountInfo.count} lines]`;
+          }
+        }
         const colored = ANSI.fg(truncate(s, MAX_LINE_LEN) + lineTag, 248);
         return `${prefix}${colored}`;
       });

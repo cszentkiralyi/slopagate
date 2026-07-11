@@ -104,7 +104,7 @@ class BashTool extends Tool {
               .split('\n');
           let sliced = output.slice(0, maxLines);
           let missing = output.length - sliced.length;
-          if (missing) sliced.push(`...and ${missing} more.`);
+          if (missing) sliced.push(`[+${missing} more]`);
           resolve(sliced.join('\n'));
         }
       });

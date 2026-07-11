@@ -54,7 +54,7 @@ class GrepTool extends Tool {
       let maxLines = this.config.get('tool_output_limit') || 20;
       let sliced = output.slice(0, maxLines);
       let missing = output.length - sliced.length;
-      if (missing) sliced.push(`...and ${missing} more.`);
+      if (missing) sliced.push(`[+${missing} more]`);
       let fullResult = sliced.join('\n');
 
       tool.message({ state: 'done', summary, body: fullResult });
