@@ -564,6 +564,13 @@ class Program {
       this.#aggregator.reset();
       this.interface.draw();
     });
+    Events.on('status:spinner', (data) => {
+      if (data.hide) {
+        this.interface.statusline.clearSpinners();
+      } else {
+        this.interface.statusline.showSpinner(data.message);
+      }
+    });
     Events.on('recap:message', (event) => {
       this.#stopAfkTimer();
       this.interface.addMessage({
