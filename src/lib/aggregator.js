@@ -1,69 +1,63 @@
 const ANSI = require('./ansi.js');
-const { truncate, measure } = require('../util.js');
+const { truncate, truncateBody } = require('../util.js');
+
+const MAX_DISPLAY_LINES = 5;
+const MAX_LINE_LEN = 60;
+
+function countLines(body) {
+  if (!body) return 0;
+  return body.split('\n').length;
+}
 
 class MessageAggregator {
   constructor(ui) {
     this.interface = ui;
-    // group -> message instance
     this.#messageInstances = new Map();
-    // group -> Map<callId, {summary, body, state}>
     this.#callData = new Map();
   }
 
-  // TODO: clean up — this is a temporary hack using nounPlural from the event.
-  // The aggregator should get nounPlural from a proper toolbox reference, not via the event.
   message(event) {
     let { callId, group, summary, body, state, nounPlural } = event;
 
-    // Initialize group structures if needed
     if (!this.#callData.has(group)) {
       this.#callData.set(group, new Map());
     }
 
-    // Update or create per-call data
     const callMap = this.#callData.get(group);
     callMap.set(callId, { summary, body, state });
 
-    // Determine final state for the group
     const states = [...callMap.values()].map(c => c.state);
     const isSpinning = states.some(s => s === 'spinning');
     const finalState = isSpinning ? 'spinning' : (states[states.length - 1] || null);
 
-    // Get the last call's body (most recently inserted)
-    const lastCall = [...callMap.values()].pop();
-    const lastBody = lastCall?.body ?? null;
-
-    // Get all summaries with their body info
     const allCalls = [...callMap.values()];
     const summaries = allCalls.map(c => c.summary);
     const uniqueSummaries = [...new Set(summaries)];
 
-    const MAX_LINE_LEN = 60;
-    
-    // Determine display
     let display;
     if (summaries.length === 1 || uniqueSummaries.length === 1) {
+      // Single call: show subject + truncated body
       const subject = `${group}(${summaries[0] || ''})`;
-      const wasTruncated = subject.length > MAX_LINE_LEN;
+      const wasTruncated = ANSI.measure(subject) > MAX_LINE_LEN;
       const truncated = truncate(subject, MAX_LINE_LEN);
       const fixed = wasTruncated ? truncated + ')' : truncated;
+      const displayBody = truncateBody(body, MAX_DISPLAY_LINES, MAX_LINE_LEN);
       display = {
         subject: fixed,
-        body: lastBody ? ANSI.fg(lastBody, 248) : lastBody,
+        body: displayBody ? ANSI.fg(displayBody, 248) : null,
         state: finalState
       };
     } else {
-      const MAX_LINES = 5;
-      const shownSummaries = uniqueSummaries.slice(-MAX_LINES);
+      // Multiple calls: show subjects with line counts
+      const shownSummaries = uniqueSummaries.slice(-MAX_DISPLAY_LINES);
       const extra = uniqueSummaries.length - shownSummaries.length;
 
       const bodyLines = shownSummaries.map((s, i, arr) => {
         const prefix = i < arr.length - 1 ? '├ ' : '└ ';
-        // Find the original call data for this summary to check for body
         const callForSummary = allCalls.find(c => c.summary === s);
-        const hasBody = callForSummary?.body != null && callForSummary.body !== '';
-        const bodyTag = hasBody ? ' [5 lines]' : '';
-        const colored = ANSI.fg(truncate(s, MAX_LINE_LEN) + bodyTag, 248);
+        const lineCount = countLines(callForSummary?.body);
+        const lineTag = lineCount > 0 ? ` [${lineCount} lines]` : '';
+        const colored = ANSI.fg(truncate(s, MAX_LINE_LEN) + lineTag, 248);
         return `${prefix}${colored}`;
       });
       if (extra > 0) {
@@ -77,7 +71,6 @@ class MessageAggregator {
       };
     }
 
-    // Create or update the message instance
     if (!this.#messageInstances.has(group)) {
       this.#messageInstances.set(group, this.interface.addMessage({
         role: 'tool',

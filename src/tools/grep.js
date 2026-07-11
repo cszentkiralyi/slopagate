@@ -57,15 +57,7 @@ class GrepTool extends Tool {
       if (missing) sliced.push(`...and ${missing} more.`);
       let fullResult = sliced.join('\n');
 
-      // Format for display: 5 lines max
-      let displayLines = output.slice(0, 5);
-      let displayMissing = output.length - displayLines.length;
-      if (displayMissing > 0) {
-        displayLines.push(`[+${displayMissing} more]`);
-      }
-      let body = truncateBody(displayLines.join('\n'));
-
-      tool.message({ state: 'done', summary, body });
+      tool.message({ state: 'done', summary, body: fullResult });
       return fullResult;
     } catch (err) {
       if (err.message?.includes('ENOENT')) {

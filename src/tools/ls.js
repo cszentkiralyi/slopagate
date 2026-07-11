@@ -49,14 +49,7 @@ class LsTool extends Tool {
         matches.push(match);
       }
       result = matches.join('\n');
-      
-      // Format for display: first 5 results max
-      let displayLines = matches.slice(0, 5);
-      let displayMissing = matches.length - displayLines.length;
-      if (displayMissing > 0) {
-        displayLines.push(`[+${displayMissing} more]`);
-      }
-      body = truncateBody(displayLines.join('\n'));
+      body = result;
     } catch (err) {
       result = `Error: Cannot list ${pattern}: ${err.message}`;
     }

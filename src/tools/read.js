@@ -72,14 +72,7 @@ class ReadTool extends Tool {
       }
       let firstLine = start_line || 1;
       result = addLineNumbers(content, firstLine);
-      
-      // Format for display: first 5 lines max
-      let displayLines = content.slice(0, 5);
-      let displayMissing = content.length - displayLines.length;
-      if (displayMissing > 0) {
-        displayLines.push(`[+${displayMissing} more]`);
-      }
-      body = addLineNumbers(displayLines, firstLine);
+      body = result;
     } catch (err) {
       result = `Error: file ${file_path} not found!`;
     }

@@ -110,15 +110,7 @@ class BashTool extends Tool {
       });
     });
     let result = await p;
-    // Format output for display: 5 lines max, show first lines
-    let allLines = result.split('\n');
-    let displayLines = allLines.slice(0, 5);
-    let missing = allLines.length - displayLines.length;
-    if (missing > 0) {
-      displayLines.push(`[+${missing} more]`);
-    }
-    let body = truncateBody(displayLines.join('\n'));
-    tool.message({ state: 'done', summary, body });
+    tool.message({ state: 'done', summary, body: result });
     return result;
   }
 
