@@ -1,6 +1,10 @@
 class ANSI {
-  //static RESET_ESCAPE = '\x1B[0m';
-  static RESET_ESCAPE = '\u001b[0m';
+  static ESC = '\x1B';
+  static RESET_ESCAPE = `${ANSI.ESC}[0m`;
+  
+  static stripANSIRegex() {
+    return new RegExp(`${ANSI.ESC}\\[[0-9;:]*[A-Za-z]`, 'g');
+  }
   static COLORS = new Map([
     [ 'black', 0 ],
     [ 'red', 1 ],
@@ -98,14 +102,14 @@ class ANSI {
   
   static measure(s) {
     if (!s) return 0;
-    let stripped = s.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
+    let stripped = s.replaceAll(new RegExp(`${ANSI.ESC}\\[[0-9;:]*[A-Za-z]`, 'g'), '');
     // Sum forward horizontal movements (\x1B[nC)
-    let fwd = (s.match(/\x1B\[([0-9]+)C/g) || []).reduce((sum, m) => {
-      return sum + parseInt(m.match(/\x1B\[([0-9]+)C/)[1], 10);
+    let fwd = (s.match(new RegExp(`${ANSI.ESC}\\[([0-9]+)C`, 'g')) || []).reduce((sum, m) => {
+      return sum + parseInt(m.match(new RegExp(`${ANSI.ESC}\\[([0-9]+)C`))[1], 10);
     }, 0);
     // Subtract backward horizontal movements (\x1B[nD)
-    let back = (s.match(/\x1B\[([0-9]+)D/g) || []).reduce((sum, m) => {
-      return sum + parseInt(m.match(/\x1B\[([0-9]+)D/)[1], 10);
+    let back = (s.match(new RegExp(`${ANSI.ESC}\\[([0-9]+)D`, 'g')) || []).reduce((sum, m) => {
+      return sum + parseInt(m.match(new RegExp(`${ANSI.ESC}\\[([0-9]+)D`))[1], 10);
     }, 0);
     // Replace multi-byte Unicode characters (emojis, etc.) with _M
     let normalized = stripped.replaceAll(/[\u{2700}-\u{2757}\u{2795}-\u{27BF}\u{1F300}-\u{1F9FF}]/gu, '_M');

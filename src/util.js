@@ -118,7 +118,7 @@ const truncate = (s, max, suffix = '…') => {
   if (!s) return s;
   
   const ANSI_RESET = ANSI.RESET_ESCAPE;
-  const plainText = s.replaceAll(/\\x1B\\[[0-9;:]*[A-Za-z]/g, '');
+  const plainText = s.replaceAll(ANSI.stripANSIRegex(), '');
   
   if (plainText.length <= max) return s;
   
