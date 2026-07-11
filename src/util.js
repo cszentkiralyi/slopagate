@@ -149,13 +149,18 @@ const truncate = (s, max, suffix = '…') => {
  * Long lines are stripped of ANSI escapes, truncated, and appended with '…'.
  */
 function truncateBody(text, maxLines = 5, maxLineLen = 72) {
-  if (!text) return text;
+  if (!text) return { text, truncated: false };
   const lines = text.split('\n');
-  return lines.slice(0, maxLines).map(line => {
-    if (ANSI.measure(line) <= maxLineLen) return line;
-    const stripped = line.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
-    return truncate(stripped, maxLineLen);
-  }).join('\n');
+  const truncated = lines.length > maxLines;
+  return {
+    text: lines.slice(0, maxLines).map(line => {
+      if (ANSI.measure(line) <= maxLineLen) return line;
+      const stripped = line.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
+      return truncate(stripped, maxLineLen);
+    }).join('\n'),
+    truncated,
+    totalLines: lines.length,
+  };
 }
 
 module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate, truncateBody };

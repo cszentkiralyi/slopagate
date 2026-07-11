@@ -43,12 +43,14 @@ class MessageAggregator {
       const wasTruncated = ANSI.measure(subject) > MAX_LINE_LEN;
       const truncated = truncate(subject, MAX_LINE_LEN);
       const fixed = wasTruncated ? truncated + ')' : truncated;
-      const displayBody = truncateBody(body, MAX_DISPLAY_LINES, MAX_LINE_LEN);
+      const truncResult = truncateBody(body, MAX_DISPLAY_LINES, MAX_LINE_LEN);
+      const displayBody = truncResult.text;
       const bodyLines = displayBody ? displayBody.split('\n') : [];
       const prefixedBody = bodyLines.map((l, i) => i === 0 ? `${BODY_GLYPH}${l}` : `${BODY_INDENT}${l}`).join('\n');
+      const suffix = truncResult.truncated ? `\n${BODY_INDENT}[+${truncResult.totalLines - MAX_DISPLAY_LINES} more]` : '';
       display = {
         subject: fixed,
-        body: prefixedBody ? ANSI.fg(prefixedBody, 248) : null,
+        body: prefixedBody ? ANSI.fg(prefixedBody + suffix, 248) : null,
         state: finalState
       };
     } else {
