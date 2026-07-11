@@ -30,8 +30,13 @@ class EditTool extends Tool {
 
   normalize(args) {
     if (!args || !args.file_path || !args.old_str || !args.new_str) return null;
+    const path = this.simplifyPath(args.file_path);
+    const segments = path.split(/[\/\\]/).filter(Boolean);
+    const pathFields = segments.length > 1 
+      ? [...segments.slice(0, -1), segments[segments.length - 1]]
+      : [path];
     return [
-      this.simplifyPath(args.file_path),
+      ...pathFields,
       args.old_str,
       args.new_str,
     ];

@@ -26,8 +26,13 @@ class GrepTool extends Tool {
 
   normalize(args) {
     if (!args || !args.path || !args.pattern) return null;
+    const path = this.simplifyPath(args.path);
+    const segments = path.split(/[\/\\]/).filter(Boolean);
+    const pathFields = segments.length > 1 
+      ? [...segments.slice(0, -1), segments[segments.length - 1]]
+      : [path];
     return [
-      this.simplifyPath(args.path),
+      ...pathFields,
       args.pattern,
     ];
   }

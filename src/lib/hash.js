@@ -17,14 +17,20 @@ class Hash {
     return shingles;
   }
 
-  static hash(fields) {
+   static hash(fields) {
     const signature = new Array(Hash.#NUM_HASHES).fill(Infinity);
     
-    // Use consistent seeds across all fields so identical content produces identical hashes
-    for (let j = 0; j < Hash.#NUM_HASHES; j++) {
-      const seed = j + 1;
-      for (const field of fields) {
-        const shingles = Hash.#shingles(field);
+    // Each field gets an equal slice of the signature
+    const sliceSize = Math.ceil(Hash.#NUM_HASHES / fields.length);
+    
+    for (let f = 0; f < fields.length; f++) {
+      const sliceStart = f * sliceSize;
+      const sliceEnd = Math.min(sliceStart + sliceSize, Hash.#NUM_HASHES);
+      
+      // Hash this field into its slice
+      for (let j = sliceStart; j < sliceEnd; j++) {
+        const seed = j + 1;
+        const shingles = Hash.#shingles(fields[f]);
         for (const shingle of shingles) {
           const h = Hash.#hash(shingle, seed);
           if (h < signature[j]) signature[j] = h;

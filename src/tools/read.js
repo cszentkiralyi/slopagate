@@ -35,8 +35,14 @@ class ReadTool extends Tool {
 
   normalize(args) {
     if (!args || !args.file_path) return null;
+    const path = this.simplifyPath(args.file_path);
+    const segments = path.split(/[\/\\]/).filter(Boolean);
+    // Split path into segments for better similarity detection
+    const pathFields = segments.length > 1 
+      ? [...segments.slice(0, -1), segments[segments.length - 1]]
+      : [path];
     return [
-      this.simplifyPath(args.file_path),
+      ...pathFields,
       args.start_line ?? null,
       args.end_line ?? null,
     ];
