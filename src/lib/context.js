@@ -4,6 +4,7 @@ const Layers = require('./layers/layers.js');
 
 const CONTEXT_CONFIGS = {
   low: {
+    saturation: 0.7,
     max_context_window: null, // no upper limit — fallback
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -23,6 +24,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   medium: {
+    saturation: 0.5,
     max_context_window: 2 ** 16, // 65K
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -42,6 +44,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   high: {
+    saturation: 0.35,
     max_context_window: 2 ** 14, // 16K
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -61,6 +64,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   xhigh: {
+    saturation: 0.2,
     max_context_window: 2 ** 13, // 8K
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -82,7 +86,6 @@ const CONTEXT_CONFIGS = {
 };
 
 class Context {
-  static BASE_GLOBAL_LAYER_CONFIG = { saturation: 0.5 };
   static BASE_LAYER_CONFIG = {
     system_prompt: { disable: false, user_turns: 0, soft: true },
     chat_score: { disable: false, user_turns: 3, min_messages: 20, threshold: 0 },
@@ -248,7 +251,7 @@ class Context {
   
   getLayerConfig(layerName) {
     let config = CONTEXT_CONFIGS[this.aggression_level],
-        layer_config = { ...(Context.BASE_GLOBAL_LAYER_CONFIG), ...(Context.BASE_LAYER_CONFIG[layerName]) };
+        layer_config = { saturation: config.saturation, ...(Context.BASE_LAYER_CONFIG[layerName]) };
     if (config.layers[layerName]) Object.assign(layer_config, config.layers[layerName]);
     if (this.layer_config && layerName in this.layer_config)
       Object.assign(layer_config, this.layer_config[layerName] || undefined);
