@@ -1,5 +1,5 @@
 const ANSI = require('./ansi.js');
-const { truncate } = require('../util.js');
+const { truncate, measure } = require('../util.js');
 
 class MessageAggregator {
   constructor(ui) {
@@ -33,8 +33,9 @@ class MessageAggregator {
     const lastCall = [...callMap.values()].pop();
     const lastBody = lastCall?.body ?? null;
 
-    // Get all summaries
-    const summaries = [...callMap.values()].map(c => c.summary);
+    // Get all summaries with their body info
+    const allCalls = [...callMap.values()];
+    const summaries = allCalls.map(c => c.summary);
     const uniqueSummaries = [...new Set(summaries)];
 
     const MAX_LINE_LEN = 60;
@@ -58,7 +59,11 @@ class MessageAggregator {
 
       const bodyLines = shownSummaries.map((s, i, arr) => {
         const prefix = i < arr.length - 1 ? '├ ' : '└ ';
-        const colored = ANSI.fg(truncate(s, MAX_LINE_LEN), 248);
+        // Find the original call data for this summary to check for body
+        const callForSummary = allCalls.find(c => c.summary === s);
+        const hasBody = callForSummary?.body != null && callForSummary.body !== '';
+        const bodyTag = hasBody ? ' [5 lines]' : '';
+        const colored = ANSI.fg(truncate(s, MAX_LINE_LEN) + bodyTag, 248);
         return `${prefix}${colored}`;
       });
       if (extra > 0) {
