@@ -59,24 +59,36 @@ class ReadTool extends Tool {
     
     let summary = `${this.simplifyPath(file_path)}${message}`;
     let result;
+    let body = null;
     try {
       let content = await fs.readFile(file_path, { encoding: 'utf-8' });
       tool.message({ state: 'spin', summary });
       content = content.split('\n');
       if (start_line) {
-        content.splice(0, start_line);
+        content.splice(0, start_line - 1);
       }
       if (end_line) {
-        content.splice(end_line);
+        content.splice(end_line - (start_line || 1));
       }
-      result = addLineNumbers(content, start_line || 1);
+      let firstLine = start_line || 1;
+      result = addLineNumbers(content, firstLine);
+      
+      // Format for display: first 5 lines max
+      let displayLines = content.slice(0, 5);
+      let displayMissing = content.length - displayLines.length;
+      if (displayMissing > 0) {
+        displayLines.push(`[+${displayMissing} more]`);
+      }
+      body = addLineNumbers(displayLines, firstLine);
     } catch (err) {
       result = `Error: file ${file_path} not found!`;
     }
     
     tool.message({
       state: result.startsWith('Error:') ? 'error' : 'done',
-      summary });
+      summary,
+      body
+    });
     return result;
   }
 }

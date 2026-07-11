@@ -2,7 +2,7 @@
 const { exec } = require('node:child_process');
 
 const parseBash = require('../lib/bash-parser.js');
-const { Logger, truncate } = require('../util.js');
+const { Logger, truncate, truncateBody } = require('../util.js');
 
 const Tool = require('./tool.js');
 
@@ -110,7 +110,15 @@ class BashTool extends Tool {
       });
     });
     let result = await p;
-    tool.message({ state: 'done', summary });
+    // Format output for display: 5 lines max, show first lines
+    let allLines = result.split('\n');
+    let displayLines = allLines.slice(0, 5);
+    let missing = allLines.length - displayLines.length;
+    if (missing > 0) {
+      displayLines.push(`[+${missing} more]`);
+    }
+    let body = truncateBody(displayLines.join('\n'));
+    tool.message({ state: 'done', summary, body });
     return result;
   }
 

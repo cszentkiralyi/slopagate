@@ -3,6 +3,8 @@
  * to preserve spaces in names maybe. */
 const fs = require('node:fs/promises');
 
+const { truncateBody } = require('../util.js');
+
 const Tool = require('./tool.js');
 
 class LsTool extends Tool {
@@ -54,7 +56,7 @@ class LsTool extends Tool {
       if (displayMissing > 0) {
         displayLines.push(`[+${displayMissing} more]`);
       }
-      body = displayLines.join('\n');
+      body = truncateBody(displayLines.join('\n'));
     } catch (err) {
       result = `Error: Cannot list ${pattern}: ${err.message}`;
     }

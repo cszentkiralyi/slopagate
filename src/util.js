@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const crypto = require('node:crypto');
+const ANSI = require('./lib/ansi.js');
 
 const ID = () => crypto.randomBytes(8).toString('hex');
 
@@ -116,4 +117,18 @@ function formatDate(dateStr) {
 const truncate = (s, max, suffix = '…') =>
   s.length > max ? s.substring(0, max - suffix.length) + suffix : s;
 
-module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate };
+/* ANSI-aware body truncation: limits both line count and line width.
+ * Returns text with at most `maxLines` lines, each no longer than `maxLineLen` visual chars.
+ * Long lines are stripped of ANSI escapes, truncated, and appended with '…'.
+ */
+function truncateBody(text, maxLines = 5, maxLineLen = 72) {
+  if (!text) return text;
+  const lines = text.split('\n');
+  return lines.slice(0, maxLines).map(line => {
+    if (ANSI.measure(line) <= maxLineLen) return line;
+    const stripped = line.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
+    return truncate(stripped, maxLineLen) + '…';
+  }).join('\n');
+}
+
+module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate, truncateBody };

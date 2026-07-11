@@ -1,5 +1,5 @@
 const { execSync } = require('node:child_process');
-const { Logger, truncate } = require('../util.js');
+const { Logger, truncate, truncateBody } = require('../util.js');
 
 const Tool = require('./tool.js');
 
@@ -63,7 +63,7 @@ class GrepTool extends Tool {
       if (displayMissing > 0) {
         displayLines.push(`[+${displayMissing} more]`);
       }
-      let body = displayLines.join('\n');
+      let body = truncateBody(displayLines.join('\n'));
 
       tool.message({ state: 'done', summary, body });
       return fullResult;
