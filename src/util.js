@@ -154,7 +154,7 @@ function truncateBody(text, maxLines = 5, maxLineLen = 72) {
   return lines.slice(0, maxLines).map(line => {
     if (ANSI.measure(line) <= maxLineLen) return line;
     const stripped = line.replaceAll(/\x1B\[[0-9;:]*[A-Za-z]/g, '');
-    return truncate(stripped, maxLineLen) + '…';
+    return truncate(stripped, maxLineLen);
   }).join('\n');
 }
 
