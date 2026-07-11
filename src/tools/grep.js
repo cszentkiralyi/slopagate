@@ -46,24 +46,39 @@ class GrepTool extends Tool {
 
     try {
       const result = execSync(`grep -nr ${JSON.stringify(pattern)} ${path}`).toString();
-      if (!result.length) return '';
+      if (!result.length) {
+        tool.message({ state: 'done', summary });
+        return '';
+      }
       let output = result.split('\n');
       let maxLines = this.config.get('tool_output_limit') || 20;
       let sliced = output.slice(0, maxLines);
       let missing = output.length - sliced.length;
       if (missing) sliced.push(`...and ${missing} more.`);
-      return sliced.join('\n');
+      let fullResult = sliced.join('\n');
+
+      // Format for display: 5 lines max
+      let displayLines = output.slice(0, 5);
+      let displayMissing = output.length - displayLines.length;
+      if (displayMissing > 0) {
+        displayLines.push(`[+${displayMissing} more]`);
+      }
+      let body = displayLines.join('\n');
+
+      tool.message({ state: 'done', summary, body });
+      return fullResult;
     } catch (err) {
       if (err.message?.includes('ENOENT')) {
+        tool.message({ state: 'done', summary });
         return `Error: ${path} not found`;
       }
       if (err.status === 1) {
+        tool.message({ state: 'done', summary });
         return '';
       }
       Logger.log(`Grep: ${JSON.stringify(err)}`);
-      return `Error: ${err.message}`;
-    } finally {
       tool.message({ state: 'done', summary });
+      return `Error: ${err.message}`;
     }
   }
 }

@@ -40,17 +40,26 @@ class LsTool extends Tool {
     tool.message({ state: 'spin', summary });
     
     let result;
+    let body = null;
     try {
       const matches = [];
       for await (const match of fs.glob(pattern)) {
         matches.push(match);
       }
       result = matches.join('\n');
+      
+      // Format for display: first 5 results max
+      let displayLines = matches.slice(0, 5);
+      let displayMissing = matches.length - displayLines.length;
+      if (displayMissing > 0) {
+        displayLines.push(`[+${displayMissing} more]`);
+      }
+      body = displayLines.join('\n');
     } catch (err) {
       result = `Error: Cannot list ${pattern}: ${err.message}`;
     }
     
-    tool.message({ state: 'done', summary });
+    tool.message({ state: 'done', summary, body });
     return result;
   }
 }
