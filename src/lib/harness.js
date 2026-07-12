@@ -164,8 +164,15 @@ class Harness {
   constructor(props) {
     Events.on('user:message', (event) => this.onUserMessage(event));
     Events.on('user:abort', (event) => this.onUserAbort(event));
-    Object.assign(this, props);
     
+    // Capture promptDoc for reuse in clear() before Object.assign overwrites it
+    const sessionProps = props?.session;
+    if (sessionProps?.promptDoc) {
+      this.promptDoc = sessionProps.promptDoc;
+    }
+    
+    Object.assign(this, props);
+
     this.sessionManager = new SessionManager();
     this.hooks = new Hooks({ hooks: ['tool-call'] });
     
@@ -188,7 +195,7 @@ class Harness {
     this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),
-      ...(props && props.session || null)
+      ...(sessionProps || null)
     });
     
     // Active context starts as a reference to session's context
@@ -272,6 +279,7 @@ class Harness {
     });
    
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
+    this.commands.push({ name: 'clear', handler: async () => this.clear(), silent: true });
     this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
@@ -566,6 +574,48 @@ class Harness {
       Events.emit('status:spinner', { hide: true });
     };
     Events.on('turn:user', hideSpinner);
+  }
+
+  /**
+   * Clear state — new session, reset dedup/token tracking, but keep agent and config intact.
+   */
+  async clear() {
+    // Abort any in-flight turn
+    if (this.#abortController) {
+      this.#abortController.abort();
+    }
+
+    // Persist current session to disk
+    await this.sessionManager.saveSession(this.session);
+
+    // Clean up temp dir for old session
+    await this.session.removeTempDir();
+
+    // Reset dedup tracking
+    this.#dedupCalls = [];
+    this.#dedupBands = new Map();
+
+    // Reset token counters
+    this.#inputTokens = 0;
+    this.#outputTokens = 0;
+
+    // Create new Session, passing existing promptDoc if available
+    const sessionProps = { config: this.config };
+    if (this.promptDoc) {
+      sessionProps.promptDoc = this.promptDoc;
+    }
+    this.session = new Session({
+      tools: this.toolbox.all(),
+      ...sessionProps
+    });
+
+    // Create new Context and assign to both activeContext and context
+    const newContext = new Context({ config: this.config });
+    this.#activeContext = newContext;
+    this.context = newContext;
+
+    // Emit program:clear event so interface can re-print banner
+    Events.emit('program:clear');
   }
   
  

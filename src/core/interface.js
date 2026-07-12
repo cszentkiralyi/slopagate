@@ -1,5 +1,6 @@
 const TUI = require('../lib/tui.js');
 const ANSI = require('../lib/ansi.js');
+const Events = require('../events.js');
 const { Logger } = require('../util.js');
 
 class Interface {
@@ -50,6 +51,17 @@ class Interface {
     this.#lower_panel.appendChild(this.#chat_input);
 
     this.#chat_input.focus();
+    
+    // Subscribe to program:clear event
+    Events.on('program:clear', () => {
+      // Clear screen and reset cursor position
+      process.stdout.write('\x1b[2J\x1b[H');
+      
+      // Re-print banner if it exists
+      if (this.banner) {
+        this.#chat_history.appendChild(new TUI.Text(this.banner));
+      }
+    });
     
     this.registerId(this.#terminal);
     this.registerId(this.#chat_history);

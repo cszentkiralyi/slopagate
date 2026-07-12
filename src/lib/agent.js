@@ -18,13 +18,9 @@ class Agent {
     this.config = props.config;
     this.compact = props.compact || null;
     this.tools = props.tools || [];  // Tool specs to send to model
-    this.#abortController = props.abortController || null;
+    this.#abortController = props?.abortController ?? null;
     this.onTokens = props.onTokens || null;
     this.hooks = new Hooks({ hooks: ['message'] });  // Own isolated hooks
-    // Accept hooks prop but ignore it - use internal Hooks instance
-    if (props.hooks) {
-      // Can be extended later to support registering handlers
-    }
   }
   
   #abortController;
