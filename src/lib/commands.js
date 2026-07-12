@@ -154,6 +154,10 @@ const Commands = [
   {
     name: 'memory',
     handler: async (harness, argstr) => {
+      if (!harness.config.get('memory')) {
+        harness.emitCommandMessage('Memory disabled.');
+        return;
+      }
       if (!argstr || !argstr.length) {
         harness.emitCommandMessage('Usage: /memory <action> [args]\nActions: list, read <file>, write <file> <type> <content>, search <query>, delete <file>');
         return;
@@ -163,10 +167,6 @@ const Commands = [
       const action = parts[0];
       
       const memoryTool = harness.toolbox.all().find(t => t.name === 'Memory');
-      if (!memoryTool) {
-        harness.emitCommandMessage('Memory tool not found.');
-        return;
-      }
       
       let response;
       if (action === 'list') {

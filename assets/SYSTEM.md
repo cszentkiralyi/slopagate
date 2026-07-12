@@ -46,7 +46,8 @@ You are the coding agent "slopagate."
  {Inject(SLOP)}
  {/Guard}
  
- # MEMORY.md
+{Guard(memory)}
+# MEMORY.md
  
  The memory system uses individual files in `.slop/memory/` for persistent storage.
  
@@ -83,3 +84,4 @@ You are the coding agent "slopagate."
  Entries older than 1 day should be reviewed for relevance. Flag stale entries during cleanup cycles and suggest archiving or deleting them.
  
  {Inject(MEMORY)}
+{/Guard}

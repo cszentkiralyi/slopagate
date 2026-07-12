@@ -169,20 +169,23 @@ class Harness {
     this.sessionManager = new SessionManager();
     this.hooks = new Hooks({ hooks: ['tool-call'] });
     
-    this.toolbox = new Toolbox(this, [
+    const tools = [
       new ReadTool(this),
       new EditTool(this),
       new LsTool(this),
       new GrepTool(this),
       new BashTool(this),
-      new MemoryTool({
+    ];
+    if (this.config.get('memory')) {
+      tools.push(new MemoryTool({
         ...this.session,
         config: this.config
-      }),
-      new ActivateSkillTool({
-        skills: this.skills
-      })
-    ]);
+      }));
+    }
+    tools.push(new ActivateSkillTool({
+      skills: this.skills
+    }));
+    this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),
       ...(props && props.session || null)

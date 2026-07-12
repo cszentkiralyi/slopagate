@@ -122,7 +122,8 @@ class Program {
 
       think: false,
       yolo_mode: false,
-      stream: false
+      stream: false,
+      memory: true
     };
     // User
     const configPath = path.join(os.homedir(), '.slopagate', 'config.json');
@@ -746,7 +747,7 @@ class Program {
       }
       
       Events.emit('user:abort');
-      throw new Error('operation not permitted');
+      throw new Error('User denied this operation');
     }
     
     return null;
