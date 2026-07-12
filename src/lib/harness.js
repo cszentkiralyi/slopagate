@@ -540,8 +540,10 @@ class Harness {
     }
     
     // Build skill prompt (include marker so it appears in chat)
+    // const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
+    // const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
     const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
-    const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
+    const skillPrompt = `${skill.content}${argsStr}`;
     
     // Show spinner while skill runs
     Events.emit('status:spinner', { message: `Running ${skillName}...` });
