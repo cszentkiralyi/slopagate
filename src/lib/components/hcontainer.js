@@ -18,7 +18,7 @@ class HContainer extends Container {
           result;
       this.children.forEach((child, i, children) => {
         if (child.hidden) {
-          Logger.log(`HContainer: skipping hidden child ${child.name}`);
+          //Logger.log(`HContainer: skipping hidden child ${child.name}`);
           return;
         }
         if (rem <= 0) return;

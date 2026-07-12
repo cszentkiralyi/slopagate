@@ -61,6 +61,9 @@ class Interface {
       if (this.banner) {
         this.#chat_history.appendChild(new TUI.Text(this.banner));
       }
+
+      // Show /clear as a command in chat history, in 'done' state
+      this.addMessage({ role: 'command', subject: '/clear', state: 'done' });
     });
     
     this.registerId(this.#terminal);
