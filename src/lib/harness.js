@@ -539,18 +539,17 @@ class Harness {
       return;
     }
     
-    // Add the command message to chat history
-    Events.emit('model:content', {
-      done: true,
-      content: ` /${skillName} `
-    });
-    
     // Build skill prompt (include marker so it appears in chat)
     const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
     const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
     
     // Show spinner while skill runs
     Events.emit('status:spinner', { message: `Running ${skillName}...` });
+    
+    // Show skill description as feedback
+    if (skill.description) {
+      this.emitCommandMessage(skill.description);
+    }
     
     // Trigger normal model turn by emitting user:message event.
     // onUserMessage will add to context, fork, and send — piggybacking on the active session.
