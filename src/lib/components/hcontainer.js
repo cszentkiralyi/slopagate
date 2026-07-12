@@ -9,7 +9,7 @@ class HContainer extends Container {
   render(width) {
     let lines = [], dirty = false, rem;
     if (this.children && this.children.length) {
-      let dirty = false, parts = [],
+      let parts = [],
           visibleChildren = this.children.filter(c => !c.hidden),
           gap = (visibleChildren.length - 1) * (this.gap || 0),
           leftPad = (this.padding && this.padding.left) || 0,
@@ -34,7 +34,7 @@ class HContainer extends Container {
         const totalLen = ANSI.measure(line);
         const avail = width - leftPad - rightPad;
         if (totalLen < avail) {
-          line += ' '.repeat(avail - totalLen);
+          line = ANSI.cursorHoriz(avail - totalLen) + line;
         }
       }
       lines.push(line);

@@ -28,11 +28,11 @@ class Statusline extends HContainer {
     this.#right = new HContainer({ justify: 'right', gap: 1 });
     this.#yoloBadge = new Text({ 
       content: 'YOLO', 
-      bg: 214, 
+      bg: 198, 
       fg: 232,
       hidden: true 
     });
-    this.#tokenText = new Text({ justify: 'right' });
+    this.#tokenText = new Text();
     this.#right.appendChild(this.#yoloBadge);
     this.#right.appendChild(this.#tokenText);
     this.appendChild(this.#left);
