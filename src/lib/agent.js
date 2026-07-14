@@ -233,7 +233,7 @@ class Agent {
 
   normalizeResponse(response) {
     const provider = this.config.get('provider') || 'ollama';
-    Logger.log(`Agent.normalizeResponse: ${JSON.stringify(response)}`);
+    //Logger.log(`Agent.normalizeResponse: ${JSON.stringify(response)}`);
 
     if (provider === 'openai') {
       const usage = (response && response.usage) || {};
@@ -271,7 +271,7 @@ class Agent {
         }
       }
       
-      Logger.log(`Session: final message ${JSON.stringify(message)}`);
+      //Logger.log(`Session: final message ${JSON.stringify(message)}`);
       
       if (message) message.finish_reason = response.choices[0].finish_reason;
 
