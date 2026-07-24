@@ -13,7 +13,8 @@ function countLines(body) {
   const lastLine = lines[lines.length - 1];
   // Check for standardized truncation indicator "[+N more]"
   const truncMatch = lastLine?.match(TRUNC_PATTERN);
-  return { count: lines.length, truncated: !!truncMatch };
+  const count = truncMatch ? lines.length - 1 : lines.length;
+  return { count, truncated: !!truncMatch };
 }
 
 class MessageAggregator {
