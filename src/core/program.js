@@ -405,7 +405,8 @@ class Program {
       yoloCmd.arguments[0].current = () => this.config.get('yolo_mode') ? 'true' : 'false';
     }
     this.interface.commands = cmds;
-    this.harness.hooks.on('tool-call', this.hookToolCall.bind(this));
+    const Hooks = require('../lib/hooks.js');
+    Hooks.on('before_tool_call', this.hookToolCall.bind(this));
 
 
     this.interface.addMessage({

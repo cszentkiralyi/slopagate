@@ -9,7 +9,7 @@ const SessionManager = require('./session-manager.js');
 const Context = require('./context.js');
 const Toolbox = require('./toolbox.js');
 const Timers = require('./timers.js');
-const Hooks = require('./hooks.js');
+const Hooks = require('./hooks.js');  // global singleton
 const Skills = require('../lib/skills.js');
 const Config = require('../core/config.js');
 const Commands = require('./commands.js');
@@ -174,7 +174,7 @@ class Harness {
     Object.assign(this, props);
 
     this.sessionManager = new SessionManager();
-    this.hooks = new Hooks({ hooks: ['tool-call'] });
+    // No own hooks instance — uses global Hooks singleton
     
     const tools = [
       new ReadTool(this),
@@ -247,7 +247,7 @@ class Harness {
     });
     
     // Register hook handler to add messages to session context
-    this.agent.hooks.on('message', (message) => {
+    Hooks.on('before_message_add', (message) => {
       this.#activeContext.add(message);
 
       // Skip messages with falsy content
@@ -257,7 +257,7 @@ class Harness {
       // Add to session context
       this.session.context.add(message);
     });
-    
+
     // Build commands from skills
     this.buildCommands();
     
@@ -722,7 +722,7 @@ class Harness {
         let cancelError = null;
         let overrideResponse = null;
         
-        const results = await this.hooks.emitWithResultsAsync('tool-call', { toolCall: call });
+        const results = await Hooks.emitWithResultsAsync('before_tool_call', { toolCall: call });
         for (const result of results) {
           if (!result) continue;
           overrideResponse = result.response || null;
@@ -734,7 +734,7 @@ class Harness {
         }
 
         if (cancelled) {
-          Logger.log(`tool-call hook cancelled: ${cancelError?.message || cancelError}`);
+          Logger.log(`before_tool_call hook cancelled: ${cancelError?.message || cancelError}`);
           let content = cancelError?.message || cancelError
             || (overrideResponse && (typeof overrideResponse === 'string'
                 ? overrideResponse
@@ -755,7 +755,7 @@ class Harness {
           Events.emit('tool:call', { id, name, args: parsedArgs, temppath: this.session.tempdir, config: this.config });
         }
       } catch (err) {
-        Logger.log(`tool-call hook error: ${err.message}`);
+        Logger.log(`before_tool_call hook error: ${err.message}`);
         Events.emit('tool:response', {
           id,
           name,

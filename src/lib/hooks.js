@@ -1,134 +1,103 @@
 /**
- * Hooks class - a minimal event emitter for tool call interceptors
- * Maintains handlers keyed by hook names with strict insertion order
+ * Hooks - a global event emitter for cross-module communication.
+ *
+ * Design:
+ * - Single shared instance exported as a module.
+ * - No whitelist: any module can register or emit any hook name.
+ * - Handlers run in insertion order.
+ *
+ * Public API:
+ *   Hooks.on(name, fn)          — subscribe
+ *   Hooks.once(name, fn)        — subscribe, auto-remove after first call
+ *   Hooks.off(name, fn)         — unsubscribe
+ *   Hooks.emit(name, ...args)   — fire synchronously
+ *   Hooks.emitWithResults(name, ...args) -> any[]  — fire, collect sync results
+ *   Hooks.emitWithResultsAsync(name, ...args) -> Promise<any[]>  — fire, collect async results
  */
-class Hooks {
-  /**
-   * @private Map of hook names to arrays of handler functions
-   */
-  #handlers = new Map();
+const handlers = new Map();
 
-  /**
-   * @private Set of allowed hook names
-   */
-  #allowedHooks;
-
-  /**
-   * @private Check if hook name is allowed
-   * @param {string} name - Hook name to validate
-   * @returns {boolean}
-   */
-  #isValidHook(name) {
-    return this.#allowedHooks.has(name);
+function getHandlers(name) {
+  if (!handlers.has(name)) {
+    handlers.set(name, []);
   }
+  return handlers.get(name);
+}
 
+const Hooks = {
   /**
-   * Constructor
-   * @param {Object} options - Configuration options
-   * @param {string[]} options.hooks - Array of allowed hook names
-   */
-  constructor({ hooks }) {
-    this.#allowedHooks = new Set(hooks);
-  }
-
-  /**
-   * Register a handler for a hook
+   * Register a handler for a hook.
    * @param {string} name - Hook name
    * @param {function} fn - Handler function
    */
   on(name, fn) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name) || [];
-    handlers.push(fn);
-    this.#handlers.set(name, handlers);
-  }
+    getHandlers(name).push(fn);
+  },
 
   /**
-   * Register a single-use handler
+   * Register a single-use handler.
    * @param {string} name - Hook name
    * @param {function} fn - Handler function
    */
   once(name, fn) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name) || [];
     const onceFn = (...args) => {
       fn(...args);
-      const index = handlers.indexOf(onceFn);
-      if (index > -1) {
-        handlers.splice(index, 1);
-      }
+      const h = getHandlers(name);
+      const index = h.indexOf(onceFn);
+      if (index > -1) h.splice(index, 1);
     };
     onceFn.__once = true;
-    handlers.push(onceFn);
-    this.#handlers.set(name, handlers);
-  }
+    getHandlers(name).push(onceFn);
+  },
 
   /**
-   * Trigger all registered handlers for a hook in insertion order
+   * Unregister a handler by exact function reference.
+   * @param {string} name - Hook name
+   * @param {function} fn - Handler function to remove
+   */
+  off(name, fn) {
+    const h = getHandlers(name);
+    const index = h.indexOf(fn);
+    if (index > -1) h.splice(index, 1);
+  },
+
+  /**
+   * Trigger all registered handlers for a hook in insertion order.
    * @param {string} name - Hook name
    * @param {...any} args - Arguments to pass to handlers
    */
   emit(name, ...args) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name) || [];
-    for (const handler of handlers) {
+    for (const handler of getHandlers(name)) {
       handler(...args);
     }
-  }
+  },
 
   /**
-   * Trigger all registered handlers for a hook, collecting results
+   * Trigger all registered handlers for a hook, collecting results.
    * @param {string} name - Hook name
    * @param {...any} args - Arguments to pass to handlers
    * @returns {any[]} Array of handler return values
    */
   emitWithResults(name, ...args) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name) || [];
     const results = [];
-    for (const handler of handlers) {
+    for (const handler of getHandlers(name)) {
       results.push(handler(...args));
     }
     return results;
-  }
-  
+  },
+
+  /**
+   * Trigger all registered handlers for a hook, collecting results asynchronously.
+   * @param {string} name - Hook name
+   * @param {...any} args - Arguments to pass to handlers
+   * @returns {Promise<any[]>} Array of handler return values
+   */
   async emitWithResultsAsync(name, ...args) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name) || [];
     const results = [];
-    for (const handler of handlers) {
+    for (const handler of getHandlers(name)) {
       results.push(await handler(...args));
     }
     return results;
-  }
-
-  /**
-   * Unregister a handler by exact function reference
-   * @param {string} name - Hook name
-   * @param {function} fn - Handler function to remove
-   */
-  remove(name, fn) {
-    if (!this.#isValidHook(name)) {
-      throw new Error(`Invalid hook: ${name}`);
-    }
-    const handlers = this.#handlers.get(name);
-    if (handlers) {
-      const index = handlers.indexOf(fn);
-      if (index > -1) {
-        handlers.splice(index, 1);
-      }
-    }
-  }
-}
+  },
+};
 
 module.exports = Hooks;

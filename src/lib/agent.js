@@ -1,5 +1,5 @@
 const { Logger } = require('../util.js');
-const Hooks = require('./hooks.js');
+const Hooks = require('./hooks.js');  // global singleton
 
 /**
  * Agent - Pure turn loop orchestrator.
@@ -20,7 +20,7 @@ class Agent {
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props?.abortController ?? null;
     this.onTokens = props.onTokens || null;
-    this.hooks = new Hooks({ hooks: ['message'] });  // Own isolated hooks
+    // No own hooks instance — uses global Hooks singleton
   }
   
   #abortController;
@@ -47,8 +47,8 @@ class Agent {
     this.#abortController = abortController;
     const startTime = Date.now();
     
-    // Fire 'message' hook before adding to context
-    this.hooks.emit('message', { role: 'user', content: userMessage });
+    // Fire 'before_message_add' hook before adding to context
+    Hooks.emit('before_message_add', { role: 'user', content: userMessage });
     
     // Add user message to context
     this.context.add({ role: 'user', content: userMessage });
@@ -59,7 +59,12 @@ class Agent {
     let toolResults = null;
     let hasError = false;
     
+    let iteration = 0;
     do {
+      // Fire before_agent_iteration hook before each LLM call
+      Hooks.emit('before_agent_iteration', { context: this.context, iteration });
+      iteration++;
+
       // Send context to model endpoint
       try {
         response = await this.sendToEndpoint(this.context, abortController);
@@ -76,7 +81,7 @@ class Agent {
       
       // Add model's single message to context once
       this.callbacks?.onModelContent?.(content);
-      this.hooks.emit('message', { role: 'assistant', content, tool_calls: toolCalls });
+      Hooks.emit('before_message_add', { role: 'assistant', content, tool_calls: toolCalls });
       this.context.add({ role: 'assistant', content, tool_calls: toolCalls });
       
       // Mark that the model has responded — no longer safe to undo user message
@@ -87,7 +92,7 @@ class Agent {
       // If tool calls, execute them and return results for next iteration
       if (toolCalls && toolCalls.length > 0) {
         toolResults = this.callbacks?.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
-        this.hooks.emit('message', { role: 'tool', content: JSON.stringify(toolResults) });
+        Hooks.emit('before_message_add', { role: 'tool', content: JSON.stringify(toolResults) });
         this.context.add({ role: 'tool', content: JSON.stringify(toolResults) });
         
         // Compact after tool results to prevent context from filling up
