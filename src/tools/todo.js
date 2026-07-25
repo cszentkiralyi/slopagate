@@ -3,6 +3,8 @@ const { truncate } = require('../util.js');
 const Hooks = require('../lib/hooks.js');
 
 class TodoTool extends Tool {
+  static MIN_APPROVED_LENGTH = 5;
+
   name = 'Todo';
   nounPlural = 'todos';
   description = `# Todo System — Persistent Task Tracker
@@ -47,6 +49,21 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   }
 
   normalize() { return null; }
+
+  permissions(args) {
+    if (args.mode !== 'edit' || !args.content) {
+      return null;
+    }
+    // Only check permissions when there's no existing list
+    if (this.#todos.length > 0) {
+      return null;
+    }
+    const items = this.#parse(args.content);
+    if (items.length <= TodoTool.MIN_APPROVED_LENGTH) {
+      return null;
+    }
+    return { scope: `Todo:large_list:${items.length}` };
+  }
 
   #getCompactList() {
     if (this.#todos.length === 0) return '(empty)';
@@ -101,12 +118,10 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
 
   async handler(args, tool) {
     const mode = args.mode || 'unknown';
-    tool.message({ state: 'spin', summary: mode });
 
     if (mode === 'edit') {
       this.#todos = this.#parse(args.content);
       this.#mutationCount = 0;
-      tool.message({ state: 'done', summary: mode });
       this.harness.nudge(`Todo list updated:\n${this.#getCompactList()}`);
       this.#editNudgeGiven = 0;
       this.#nextEditNudgeThreshold = null;
@@ -121,11 +136,9 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
       const result = this.#todos.length > 0
         ? this.#todos.join('\n')
         : '(empty)';
-      tool.message({ state: 'done', summary: mode });
       return result;
     }
 
-    tool.message({ state: 'done', summary: mode });
     return 'Error: Invalid mode. Use "edit" or "view".';
   }
 
