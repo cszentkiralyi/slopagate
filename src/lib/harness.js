@@ -49,6 +49,7 @@ class Harness {
   #dedupBands = new Map();  // toolName -> bandKey -> Map<sigKey, {id, timestamp}>
   #dedupThreshold = 0.8;
   #pendingNudges = new Set();  // Deduped set of pending nudge messages
+  #pendingAmbientReminders = new Set();  // Deduped set of pending ambient reminder messages
   
   get inputTokens() { return this.#inputTokens; }
   
@@ -59,6 +60,36 @@ class Harness {
    */
   nudge(message) {
     this.#pendingNudges.add(message);
+  }
+  
+  /**
+   * Register an ambient reminder message. Tools call this during execution.
+   * Ambient reminders are amalgamated into one user message per submission,
+   * and added before the user's actual message.
+   * @param {string} message - The ambient reminder text
+   */
+  ambientReminder(message) {
+    this.#pendingAmbientReminders.add(message);
+  }
+  
+  /**
+   * Amalgamate pending ambient reminders into a single user message
+   * and add to both #activeContext and session.context.
+   */
+  #processAmbientReminders() {
+    if (this.#pendingAmbientReminders.size === 0) return;
+    
+    const amalgamated = Array.from(this.#pendingAmbientReminders).join('\n\n---\n\n');
+    const ambientMessage = { role: 'user', content: amalgamated };
+    
+    // Add to active context (so the fork includes it)
+    this.#activeContext.add(ambientMessage);
+    
+    // Add to session history
+    this.session.addMessage(ambientMessage);
+    
+    // Clear pending queue
+    this.#pendingAmbientReminders.clear();
   }
   
   /**
@@ -663,6 +694,12 @@ class Harness {
     // Create fresh abort controller for this turn
     const turnController = new AbortController();
     this.#abortController = turnController;
+    
+    // Fire before_user_message hook so tools can add ambient reminders
+    Hooks.emit('before_user_message', { message: event.message });
+    
+    // Amalgamate all pending reminders (including any added by hook listeners)
+    this.#processAmbientReminders();
     
     // Fork from our own active context and apply compaction layers
     let ctx = await this.#activeContext.fork({
