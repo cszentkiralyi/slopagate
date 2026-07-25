@@ -1,5 +1,6 @@
 const Tool = require('./tool.js');
 const { truncate } = require('../util.js');
+const Hooks = require('../lib/hooks.js');
 
 class TodoTool extends Tool {
   name = 'Todo';
@@ -24,6 +25,18 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   constructor(props) {
     super(props);
     Object.assign(this, props);
+    Hooks.on('before_user_message', () => {
+      if (this.#todos.length > 0) {
+        // Auto-clear if every item is checked off
+        const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
+        if (allDone) {
+          this.#todos = [];
+          return;
+        }
+        const compactList = this.#getCompactList();
+        this.ambientReminder(`[Todo]\n${compactList}`);
+      }
+    });
   }
 
   normalize() { return null; }
