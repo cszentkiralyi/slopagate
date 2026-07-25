@@ -17,7 +17,7 @@ class Toolbox {
 
     this._tools.set(tool.name, tool);
     
-    Events.on('tool:call', async ({ id, name, args, temppath }) => {
+    Events.on('tool:call', async ({ id, name, args, temppath, config }) => {
       //Logger.log(`tool: ${{ id, name, args, temppath }}`);
       let tool = this.get(name), content;
       if (tool) {
@@ -27,7 +27,7 @@ class Toolbox {
           const message = ({ state, summary, body }) => {
             Events.emit('tool:message', { callId: id, group: name, state, summary, body, nounPlural: tool.nounPlural });
           };
-          content = await tool.run(args, { temppath, message });
+          content = await tool.run(args, { temppath, message, config });
         } catch (err) {
           Logger.log(`tool.run error (${name}): ${err.message}`);
           content = `Error: ${err.message}`;

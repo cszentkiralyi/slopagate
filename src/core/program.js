@@ -2,7 +2,7 @@ const process = require('node:process');
 const path = require('node:path');
 const fsSync = require('node:fs');
 const os = require('node:os');
-const { exec } = require('node:child_process');
+const { spawnStream } = require('../lib/shell-stream.js');
 const sea = require('node:sea');
 
 const Events = require('../events.js');
@@ -469,22 +469,22 @@ class Program {
     };
     chatInput.onInput = async (input, inst) => {
       switch (inst.mode) {
-        case 'shell':
+        case 'shell': {
           let shellMode = this.input_modes.find(m => m.name === inst.mode);
           let shellPrompt = shellMode.prompt + input;
           inst.clear();
           this.interface.draw();
-          let result = await new Promise((resolve) => {
-            exec(input, (error, stdout, stderr) => {
-              resolve((stderr ? stderr.trim() : stdout.trim()) || '');
-            });
-          });
-          this.interface.addMessage({
-            role: 'shell',
-            subject: shellPrompt,
-            body: result
+          let sm = this.interface.addMessage({ role: 'shell', subject: shellPrompt, state: 'spin' });
+          spawnStream(input, {
+            onExit: (err, result) => {
+              const hasError = err || (result?.stderr && result.stderr.trim().length > 0);
+              sm.body = (result?.stdout?.trim() || '') + (result?.stderr?.trim() || '');
+              sm.state = hasError ? 'error' : 'done';
+              this.interface.draw();
+            }
           });
           break;
+        }
       case 'normal':
           if (input[0] === '/') {
             let parts = input.substring(1).split(' ');

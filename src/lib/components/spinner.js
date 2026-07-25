@@ -1,5 +1,6 @@
 const ANSI = require('../ansi.js');
 const Component = require('./component.js');
+const Text = require('./text.js');
 
 class Spinner extends Component {
   static ANIMATIONS = {
@@ -28,7 +29,7 @@ class Spinner extends Component {
       frames: [ '[    ]', '[=   ]', '[==  ]', '[=== ]', '[ ===]', '[  ==]', '[   =]' ]
     },
     'blink-diamond-gray': {
-      delay: 300,
+      delay: 600,
       frames: [
         ANSI.fg('◆', 242),
         ANSI.fg('◆', 255)
@@ -104,18 +105,20 @@ class Spinner extends Component {
       lines = this._lines;
     } else {
       //this.log(`Spinner: ${this.animation} rendering frame ${frame} after ${diff}ms`);
-      //this.log(`Spinner: rendering frame with padding ${JSON.stringify(this.padding)}`);
-      let leftPad = this.padding && this.padding.left ? ' '.repeat(this.padding.left) : '',
-          rightPad = this.padding && this.padding.right ? ' '.repeat(this.padding.right) : '',
-          topPad = this.padding && this.padding.top ?  new Array(this.padding.top) : [],
-          bottomPad = this.padding && this.padding.bottom ? new Array(this.padding.bottom) : [],
+      let leftPad = this.padding && this.padding.left ? this.padding.left : 0,
+          rightPad = this.padding && this.padding.right ? this.padding.right : 0,
+          topPad = this.padding && this.padding.top ? this.padding.top : 0,
+          bottomPad = this.padding && this.padding.bottom ? this.padding.bottom : 0,
           spin = `${frames[frame]} ${this.message || ''}`;
       timeout = delay;
-      lines = [
-        ...topPad,
-        `${leftPad}${spin}${rightPad}`,
-        ...bottomPad
-      ];
+      lines = [];
+      if (topPad) lines.push(...new Array(topPad).fill(ANSI.eraseLine()));
+      lines.push(...Text.fit(spin, width, {
+        padding: { left: leftPad, right: rightPad },
+        fill: this.fill ?? !!this.bg,
+        forceAlign: false
+      }));
+      if (bottomPad) lines.push(...new Array(bottomPad).fill(ANSI.eraseLine()));
       dirty = true;
       this._lines = lines;
       this.#lastRenderedFrame = frame;
@@ -126,6 +129,13 @@ class Spinner extends Component {
       this.#timer = setTimeout(() => this.drawTimer(), timeout);
     }
     
+    // Apply fg/bg via Text's mechanism
+    if (this.fg || this.bg) {
+      let applyFg = this.fg ? s => ANSI.esc(s, ANSI.fgEsc(ANSI.resolveColor(this.fg))) : s => s;
+      let applyBg = this.bg ? s => ANSI.esc(s, ANSI.bgEsc(ANSI.resolveColor(this.bg))) : s => s;
+      lines = lines.map(l => applyFg(applyBg(l)));
+    }
+
     //this.log(`Spinner: returning result of ${lines.length} lines, skip ${(dirty ? 0 : lines.length)}, dirty ${dirty}`);
 
     return {

@@ -1,4 +1,4 @@
-const { execSync } = require('node:child_process');
+const { spawnStream } = require('../lib/shell-stream.js');
 const { Logger, truncate, truncateBody } = require('../util.js');
 
 const Tool = require('./tool.js');
@@ -20,7 +20,6 @@ class GrepTool extends Tool {
   
   constructor(props) {
     super(props);
-    this.handler = this.handler;
     Object.assign(this, props);
   }
 
@@ -41,37 +40,52 @@ class GrepTool extends Tool {
     let { path, pattern } = args;
 
     let s = pattern;
-    let summary = `${truncate(s, 50)} in ${this.simplifyPath(path || '.')}`;
+    let summary = `${truncate(s, 50)} in ${tool.simplifyPath(path || '.')}`;
     tool.message({ state: 'spin', summary });
 
-    try {
-      const result = execSync(`grep -nr ${JSON.stringify(pattern)} ${path}`).toString();
-      if (!result.length) {
-        tool.message({ state: 'done', summary });
-        return '';
-      }
-      let output = result.split('\n');
-      let maxLines = this.config.get('tool_output_limit') || 20;
-      let sliced = output.slice(0, maxLines);
-      let missing = output.length - sliced.length;
-      if (missing) sliced.push(`[+${missing} more]`);
-      let fullResult = sliced.join('\n').trimEnd();
+    let resolve;
+    const promise = new Promise(r => { resolve = r; });
 
-      tool.message({ state: 'done', summary, body: fullResult });
-      return fullResult;
-    } catch (err) {
-      if (err.message?.includes('ENOENT')) {
-        tool.message({ state: 'done', summary });
-        return `Error: ${path} not found`;
+    const grepCmd = `grep -nr ${JSON.stringify(pattern)} ${path}`;
+
+    spawnStream(grepCmd, {
+      throttleMs: 33,
+      onStdout: (chunk) => {
+        tool.message({ state: 'spin', summary, body: chunk.toString() });
+      },
+      onExit: (err, result) => {
+        if (err) {
+          if (err.message?.includes('ENOENT')) {
+            tool.message({ state: 'done', summary });
+            resolve(`Error: ${path} not found`);
+          } else {
+            Logger.log(`Grep: ${JSON.stringify(err)}`);
+            tool.message({ state: 'done', summary });
+            resolve(`Error: ${err.message}`);
+          }
+          return;
+        }
+
+        if (!result.stdout.length) {
+          tool.message({ state: 'done', summary });
+          resolve('');
+          return;
+        }
+
+        let output = result.stdout;
+        let maxLines = tool.config.get('tool_output_limit') || 20;
+        let lines = output.split('\n');
+        let sliced = lines.slice(0, maxLines);
+        let missing = lines.length - sliced.length;
+        if (missing) sliced.push(`[+${missing} more]`);
+        let fullResult = sliced.join('\n').trimEnd();
+
+        tool.message({ state: 'done', summary, body: fullResult });
+        resolve(fullResult);
       }
-      if (err.status === 1) {
-        tool.message({ state: 'done', summary });
-        return '';
-      }
-      Logger.log(`Grep: ${JSON.stringify(err)}`);
-      tool.message({ state: 'done', summary });
-      return `Error: ${err.message}`;
-    }
+    });
+
+    return promise;
   }
 }
 

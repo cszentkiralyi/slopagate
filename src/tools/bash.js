@@ -1,5 +1,5 @@
 /* Runs shell commands with permission checking */
-const { exec } = require('node:child_process');
+const { spawnStream } = require('../lib/shell-stream.js');
 
 const parseBash = require('../lib/bash-parser.js');
 const { Logger, truncate, truncateBody } = require('../util.js');
@@ -89,29 +89,35 @@ class BashTool extends Tool {
     let summary = truncate(command.replaceAll('\n', '\\n'), 50);
     tool.message({ state: 'spin', summary });
 
-    let maxLines = this.config.get('tool_output_limit') || 50;
-    let maxLineLen = this.config.get('tool_line_limit') || 256;
+    let maxLines = tool.config.get('tool_output_limit') || 50;
 
-    let p = new Promise((resolve, reject) => {
-      exec(command, (error, stdout, stderr) => {
-        if (stderr) {
-          // Command ran but returned error output in stderr
-          Logger.log(`BashTool: Command "${command}" returned error: ${stderr.trim()}`);
-          resolve(stderr.trim());
-        } else {
-          let output = (stdout || '')
-              .trim()
-              .split('\n');
-          let sliced = output.slice(0, maxLines);
-          let missing = output.length - sliced.length;
-          if (missing) sliced.push(`[+${missing} more]`);
-          resolve(sliced.join('\n'));
+    let resolve;
+    const promise = new Promise(r => { resolve = r; });
+    
+    spawnStream(command, {
+      throttleMs: 33,
+      onStdout: (chunk) => {
+        tool.message({ state: 'spin', summary, body: chunk.toString() });
+      },
+      onExit: (err, result) => {
+        if (err) {
+          tool.message({ state: 'error', summary, body: err.message });
+          resolve(`Error: ${err.message}`);
+          return;
         }
-      });
+        let stdout = result.stdout.trim();
+        let stderr = result.stderr.trim();
+        // Prefer stderr when present (matches old exec semantics)
+        let output = stderr.length ? stderr : stdout;
+        let sliced = output.split('\n').slice(0, maxLines);
+        let missing = output.split('\n').length - sliced.length;
+        if (missing > 0) sliced.push(`[+${missing} more]`);
+        tool.message({ state: 'done', summary, body: sliced.join('\n') });
+        resolve(sliced.join('\n'));
+      }
     });
-    let result = await p;
-    tool.message({ state: 'done', summary, body: result });
-    return result;
+    
+    return promise;
   }
 
   normalize(args) {

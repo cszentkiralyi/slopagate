@@ -183,11 +183,12 @@ class Interface {
       let inst = new TUI.StructuredMessage({
         subject,
         body,
+        subjectBg: 237
       });
-      inst.subjectText.bg = 237;
       inst.subjectText.fg = 117;
       inst.bodyText.fg = 250;
       this.#chat_history.appendChild(inst);
+      inst.state = state || 'spin';
       this.draw();
       return inst;
     } else if (role === 'command') {

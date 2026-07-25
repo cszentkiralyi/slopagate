@@ -685,7 +685,7 @@ class Harness {
       Events.on('tool:response', onResponse);
 
       try {
-        Events.emit('tool:call', { id, name, args, temppath });
+        Events.emit('tool:call', { id, name, args, temppath, config: this.config });
       } catch (err) {
         Logger.log(`tool:call event error: ${err.message}`);
       }
@@ -752,7 +752,7 @@ class Harness {
           });
         } else {
           let parsedArgs = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
-          Events.emit('tool:call', { id, name, args: parsedArgs, temppath: this.session.tempdir });
+          Events.emit('tool:call', { id, name, args: parsedArgs, temppath: this.session.tempdir, config: this.config });
         }
       } catch (err) {
         Logger.log(`tool-call hook error: ${err.message}`);

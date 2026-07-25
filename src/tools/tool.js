@@ -30,11 +30,12 @@ class Tool {
   
   #messageCallback = null;
 
-  async run(args, { temppath, message } = {}) {
+  async run(args, { temppath, message, config } = {}) {
     this.#messageCallback = typeof message === 'function' ? message : null;
     let tool = {
       temppath,
       message: this.#messageCallback,
+      config,
     };
     return await this.handler(args, tool);
   }

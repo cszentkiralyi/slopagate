@@ -33,6 +33,9 @@ class StructuredMessage extends Container {
     this.removeAllChildren();
     if (this.#state === 'spin') {
       this.appendChild(this.spinner);
+      this.spinner.root = this.root;
+      this.spinner.bg = this.subjectBg;
+      this.spinner.fill = true;
       this.spinner.start();
     } else {
       let icon = '';
@@ -46,6 +49,8 @@ class StructuredMessage extends Container {
       this.spinner.stop();
       this.appendChild(this.subjectText);
       this.subjectText.content = `${icon}${this.#subject || ''}`;
+    this.subjectText.bg = this.subjectBg;
+    this.subjectText.fill = true;
     }
     this.bodyText.hidden = !(this.bodyText.content && this.bodyText.content.length)
     this.appendChild(this.bodyText);
@@ -86,6 +91,10 @@ class StructuredMessage extends Container {
     if (this.bodyText.content === stripped) return;
     this.bodyText.content = stripped;
     this.root?.draw();
+  }
+
+  render(width) {
+    return super.render(width);
   }
 }
 
