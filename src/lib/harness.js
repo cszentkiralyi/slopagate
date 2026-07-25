@@ -85,8 +85,8 @@ class Harness {
     // Add to active context (so the fork includes it)
     this.#activeContext.add(ambientMessage);
     
-    // Add to session history
-    this.session.addMessage(ambientMessage);
+    // Add to session context
+    this.session.context.add(ambientMessage);
     
     // Clear pending queue
     this.#pendingAmbientReminders.clear();
