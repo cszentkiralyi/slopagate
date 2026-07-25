@@ -24,6 +24,8 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   #mutationCount = 0;
   #nextNudgeThreshold = null;
   #nudgeGiven = 0;
+  #nextEditNudgeThreshold = null;
+  #editNudgeGiven = 0;
 
   constructor(props) {
     super(props);
@@ -106,6 +108,8 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
       this.#mutationCount = 0;
       tool.message({ state: 'done', summary: mode });
       this.harness.nudge(`Todo list updated:\n${this.#getCompactList()}`);
+      this.#editNudgeGiven = 0;
+      this.#nextEditNudgeThreshold = null;
       const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
       if (allDone && this.#todos.length > 0) {
         this.harness.nudge(`Todo list is fully completed. You can use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`);
@@ -136,15 +140,28 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   }
 
   beforeAgentIteration() {
-    if (this.#nudgeGiven >= 2) return;
-    if (this.#nextNudgeThreshold === null) {
-      this.#nextNudgeThreshold = this.config.get('todo_create_threshold');
-    }
-    if (this.#mutationCount >= this.#nextNudgeThreshold) {
-      this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Consider creating one to track your work.`);
-      this.#nudgeGiven++;
-      if (this.#nudgeGiven === 1) {
-        this.#nextNudgeThreshold *= 2;
+    if (this.#todos.length > 0) {
+      // Have a todo list — nudge to update it
+      if (this.#editNudgeGiven >= 2) return;
+      if (this.#nextEditNudgeThreshold === null) {
+        this.#nextEditNudgeThreshold = this.config.get('todo_edit_threshold');
+      }
+      if (this.#mutationCount >= this.#nextEditNudgeThreshold) {
+        this.harness.nudge(`You've made ${this.#mutationCount} write operations without updating your todo list. Consider editing it to reflect what's been done.`);
+        this.#editNudgeGiven++;
+        if (this.#editNudgeGiven === 1) {
+          this.#nextEditNudgeThreshold *= 2;
+        }
+      }
+    } else {
+      // No todo list — nudge to create one
+      if (this.#nudgeGiven >= 1) return;
+      if (this.#nextNudgeThreshold === null) {
+        this.#nextNudgeThreshold = this.config.get('todo_create_threshold');
+      }
+      if (this.#mutationCount >= this.#nextNudgeThreshold) {
+        this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Consider creating one to track your work.`);
+        this.#nudgeGiven++;
       }
     }
   }
