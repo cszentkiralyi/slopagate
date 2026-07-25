@@ -1,14 +1,46 @@
 const Todo = require('../src/tools/todo.js');
 const test = require('node:test');
 
-function createTool() {
-  return { message: () => {} };
+function createTool(nudge = () => {}) {
+  return { message: () => {}, harness: { nudge } };
 }
 
 function parseItems(viewResult) {
   if (viewResult === '(empty)') return [];
   return viewResult.split('\n');
 }
+
+test('todo: edit nudges with the updated compact list', async (t) => {
+  const nudges = [];
+  const todo = new Todo({ name: 'todo' });
+  const content = `- [ ] Buy groceries
+- [x] Call dentist`;
+  await todo.handler({ mode: 'edit', content }, createTool((msg) => nudges.push(msg)));
+  t.assert.equal(nudges.length, 1, 'should have 1 nudge');
+  t.assert.ok(nudges[0].includes('Todo list updated:'), 'nudge should start with updated message');
+  t.assert.ok(nudges[0].includes('- [ ] Buy groceries'), 'nudge should include unchecked item');
+  t.assert.ok(nudges[0].includes('- [x] Call dentist'), 'nudge should include checked item');
+});
+
+test('todo: edit with all items checked triggers both nudges', async (t) => {
+  const nudges = [];
+  const todo = new Todo({ name: 'todo' });
+  const content = '- [x] Item one\n- [x] Item two';
+  await todo.handler({ mode: 'edit', content }, createTool((msg) => nudges.push(msg)));
+  t.assert.equal(nudges.length, 2, 'should have 2 nudges');
+  t.assert.ok(nudges[0].includes('Todo list updated:'), 'first nudge is the updated list');
+  t.assert.ok(nudges[1].includes('Todo list is fully completed'), 'second nudge is completion message');
+});
+
+test('todo: edit with mixed items triggers only updated-list nudge', async (t) => {
+  const nudges = [];
+  const todo = new Todo({ name: 'todo' });
+  const content = '- [x] Done item\n- [ ] Pending item';
+  await todo.handler({ mode: 'edit', content }, createTool((msg) => nudges.push(msg)));
+  t.assert.equal(nudges.length, 1, 'should have 1 nudge');
+  t.assert.ok(nudges[0].includes('Todo list updated:'), 'nudge should be the updated list');
+  t.assert.ok(!nudges[0].includes('fully completed'), 'should not include completion nudge');
+});
 
 test('todo: parse ignores leading non-item lines', async (t) => {
   const todo = new Todo({ name: 'todo' });

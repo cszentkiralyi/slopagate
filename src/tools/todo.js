@@ -99,6 +99,11 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
     if (mode === 'edit') {
       this.#todos = this.#parse(args.content);
       tool.message({ state: 'done', summary: mode });
+      this.harness.nudge(`Todo list updated:\n${this.#getCompactList()}`);
+      const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
+      if (allDone && this.#todos.length > 0) {
+        this.harness.nudge(`Todo list is fully completed. You can use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`);
+      }
       return `Todo list updated (${this.#todos.length} items).`;
     }
 
