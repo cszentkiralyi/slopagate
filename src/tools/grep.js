@@ -40,7 +40,7 @@ class GrepTool extends Tool {
     let { path, pattern } = args;
 
     let s = pattern;
-    let summary = `${truncate(s, 50)} in ${tool.simplifyPath(path || '.')}`;
+    let summary = `${truncate(s, 50)} in ${this.simplifyPath(path || '.')}`;
     tool.message({ state: 'spin', summary });
 
     let resolve;
