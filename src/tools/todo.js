@@ -127,7 +127,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
       this.#nextEditNudgeThreshold = null;
       const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
       if (allDone && this.#todos.length > 0) {
-        this.harness.nudge(`Todo list is fully completed. You can use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`);
+        this.harness.nudge(`Todo list is fully completed. Use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`);
       }
       return `Todo list updated (${this.#todos.length} items).`;
     }
@@ -160,7 +160,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.#nextEditNudgeThreshold = this.config.get('todo_edit_threshold');
       }
       if (this.#mutationCount >= this.#nextEditNudgeThreshold) {
-        this.harness.nudge(`You've made ${this.#mutationCount} write operations without updating your todo list. Consider editing it to reflect what's been done.`);
+        this.harness.nudge(`You've made ${this.#mutationCount} write operations without updating your todo list. Use the ${this.name} tool to update it, then continue.`);
         this.#editNudgeGiven++;
         if (this.#editNudgeGiven === 1) {
           this.#nextEditNudgeThreshold *= 2;
@@ -173,7 +173,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.#nextNudgeThreshold = this.config.get('todo_create_threshold');
       }
       if (this.#mutationCount >= this.#nextNudgeThreshold) {
-        this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Consider creating one to track your work.`);
+        this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Use the ${this.name} tool to create one, then continue.`);
         this.#nudgeGiven++;
       }
     }
