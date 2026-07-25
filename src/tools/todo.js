@@ -1,4 +1,5 @@
 const Tool = require('./tool.js');
+const { truncate } = require('../util.js');
 
 class TodoTool extends Tool {
   name = 'Todo';
@@ -26,6 +27,20 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   }
 
   normalize() { return null; }
+
+  #getCompactList() {
+    if (this.#todos.length === 0) return '(empty)';
+    const LIMIT = 70;
+    let foundUnchecked = false;
+    return this.#todos.map(item => {
+      const isUnchecked = !/^- \[[xX]\]/.test(item);
+      if (isUnchecked && !foundUnchecked) {
+        foundUnchecked = true;
+        return item;
+      }
+      return truncate(item, LIMIT);
+    }).join('\n');
+  }
 
   #parse(content) {
     if (!content) return [];

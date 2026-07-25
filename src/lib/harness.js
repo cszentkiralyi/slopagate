@@ -24,6 +24,7 @@ const GrepTool = require('../tools/grep.js');
 const BashTool = require('../tools/bash.js');
 const MemoryTool = require('../tools/memory.js');
 const ActivateSkillTool = require('../tools/activate-skill.js');
+const TodoTool = require('../tools/todo.js');
 const Agent = require('../lib/agent.js');
 
 class Harness {
@@ -233,6 +234,7 @@ class Harness {
     tools.push(new ActivateSkillTool({
       skills: this.skills
     }));
+    tools.push(new TodoTool(this));
     this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),
