@@ -24,7 +24,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   medium: {
-    saturation: 0.5,
+    saturation: 0.6,
     max_context_window: 2 ** 16, // 65K
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -35,7 +35,7 @@ const CONTEXT_CONFIGS = {
     },
     layers: {
       system_prompt: { soft: true },
-      chat_score: { threshold: 0.25 },
+      chat_score: { threshold: 0.25, saturation: 0.7 },
       tool_error: { ttl: 0, hint_ttl: 3, user_turns: 1 }, // "hint"-type errors get more TTL
       tool_age: { ttl: 0, user_turns: 3 },
       tool_length: { user_turns: 2, max: (1 / 10) },
@@ -44,7 +44,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   high: {
-    saturation: 0.35,
+    saturation: 0.5,
     max_context_window: 2 ** 14, // 16K
     tool_output_limit: 20,
     tool_line_limit: 256,
@@ -64,7 +64,7 @@ const CONTEXT_CONFIGS = {
     }
   },
   xhigh: {
-    saturation: 0.2,
+    saturation: 0.4,
     max_context_window: 2 ** 13, // 8K
     tool_output_limit: 20,
     tool_line_limit: 256,
