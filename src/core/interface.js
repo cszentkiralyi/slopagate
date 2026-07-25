@@ -183,6 +183,8 @@ class Interface {
       let inst = new TUI.StructuredMessage({
         subject,
         body,
+        icon: '!',
+        animation: 'blink-exclamation-blue',
         subjectBg: 237
       });
       inst.subjectText.fg = 117;

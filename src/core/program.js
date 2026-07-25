@@ -471,10 +471,10 @@ class Program {
       switch (inst.mode) {
         case 'shell': {
           let shellMode = this.input_modes.find(m => m.name === inst.mode);
-          let shellPrompt = shellMode.prompt + input;
+          let shellPrompt = input;
           inst.clear();
           this.interface.draw();
-          let sm = this.interface.addMessage({ role: 'shell', subject: shellPrompt, state: 'spin' });
+          let sm = this.interface.addMessage({ role: 'shell', subject: shellPrompt, state: 'spin', fg: shellMode?.fg });
           spawnStream(input, {
             onExit: (err, result) => {
               const hasError = err || (result?.stderr && result.stderr.trim().length > 0);

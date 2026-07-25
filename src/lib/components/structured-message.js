@@ -16,12 +16,12 @@ class StructuredMessage extends Container {
     super(rest);
     Object.assign(this, rest);
 
-    this.spinner = new Spinner({ animation: 'blink-diamond-gray', message: '', loop: false });
+    this.spinner = new Spinner({ animation: props.animation || 'blink-diamond-gray', message: '', loop: false });
     this.subjectText = new Text({ content: '' });
     this.bodyText = new Text({ content: '', padding: { left: 2 } });
 
     this.#subject = subject ?? content;
-    this.spinner.message = this.#subject;
+    this.#setSpinnerMessage(this.#subject);
     this.subjectText.content = this.#subject || '';
     if (body !== undefined) this.bodyText.content = this.#stripBody(body);
     if (state !== undefined) this.#state = state;
@@ -40,9 +40,9 @@ class StructuredMessage extends Container {
     } else {
       let icon = '';
       if (this.#state === 'done') {
-        icon = ANSI.fg('◆ ', 70);
+        icon = ANSI.fg(`${this.icon || '◆'} `, 70);
       } else if (this.#state === 'error') {
-        icon = ANSI.fg('◆ ', 160);
+        icon = ANSI.fg(`${this.icon || '◆'} `, 160);
       } else if (this.#state === 'static') {
         icon = '  ';
       }
@@ -67,6 +67,14 @@ class StructuredMessage extends Container {
 
   get subject() { return this.#subject; }
 
+  #setSpinnerMessage(text) {
+    if (this.fg) {
+      this.spinner.message = ANSI.fg(text, this.fg);
+    } else {
+      this.spinner.message = text;
+    }
+  }
+
   #stripBody(v) {
     if (typeof v !== 'string') return v;
     const lines = v.split('\n');
@@ -80,7 +88,7 @@ class StructuredMessage extends Container {
   set subject(v) {
     if (this.#subject === v) return;
     this.#subject = v;
-    this.spinner.message = v;
+    this.#setSpinnerMessage(this.#subject);
     this.subjectText.content = v;
     this.#updateChildren();
     this.root?.draw();

@@ -34,6 +34,13 @@ class Spinner extends Component {
         ANSI.fg('◆', 242),
         ANSI.fg('◆', 255)
       ]
+    },
+    'blink-exclamation-blue': {
+      delay: 600,
+      frames: [
+        ANSI.fg('!', 242),
+        ANSI.fg('!', 117)
+      ]
     }
   }
   
