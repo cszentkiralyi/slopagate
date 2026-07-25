@@ -123,7 +123,9 @@ class Program {
       think: false,
       yolo_mode: false,
       stream: false,
-      memory: true
+      memory: true,
+
+      todo_create_threshold: 3,
     };
     // User
     const configPath = path.join(os.homedir(), '.slopagate', 'config.json');

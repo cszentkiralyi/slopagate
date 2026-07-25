@@ -21,6 +21,9 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   };
 
   #todos = [];
+  #mutationCount = 0;
+  #nextNudgeThreshold = null;
+  #nudgeGiven = 0;
 
   constructor(props) {
     super(props);
@@ -37,6 +40,8 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.ambientReminder(`[Todo]\n${compactList}`);
       }
     });
+    Hooks.on('before_tool_call', this.beforeToolCall.bind(this));
+    Hooks.on('before_agent_iteration', this.beforeAgentIteration.bind(this));
   }
 
   normalize() { return null; }
@@ -98,6 +103,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
 
     if (mode === 'edit') {
       this.#todos = this.#parse(args.content);
+      this.#mutationCount = 0;
       tool.message({ state: 'done', summary: mode });
       this.harness.nudge(`Todo list updated:\n${this.#getCompactList()}`);
       const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
@@ -117,6 +123,30 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
 
     tool.message({ state: 'done', summary: mode });
     return 'Error: Invalid mode. Use "edit" or "view".';
+  }
+
+  static NON_MUTATION_TOOLS = new Set([
+    'Read', 'Ls', 'Grep', 'Todo', 'Memory', 'ActivateSkill',
+  ]);
+
+  beforeToolCall({ toolCall }) {
+    if (!TodoTool.NON_MUTATION_TOOLS.has(toolCall.function.name)) {
+      this.#mutationCount++;
+    }
+  }
+
+  beforeAgentIteration() {
+    if (this.#nudgeGiven >= 2) return;
+    if (this.#nextNudgeThreshold === null) {
+      this.#nextNudgeThreshold = this.config.get('todo_create_threshold');
+    }
+    if (this.#mutationCount >= this.#nextNudgeThreshold) {
+      this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Consider creating one to track your work.`);
+      this.#nudgeGiven++;
+      if (this.#nudgeGiven === 1) {
+        this.#nextNudgeThreshold *= 2;
+      }
+    }
   }
 }
 
