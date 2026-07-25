@@ -48,8 +48,18 @@ class Harness {
   #dedupCalls = [];  // Per-turn: {toolName, normalized, signature, timestamp}
   #dedupBands = new Map();  // toolName -> bandKey -> Map<sigKey, {id, timestamp}>
   #dedupThreshold = 0.8;
+  #pendingNudges = new Set();  // Deduped set of pending nudge messages
   
   get inputTokens() { return this.#inputTokens; }
+  
+  /**
+   * Register a nudge message. Tools call this during execution.
+   * Nudges are amalgamated into one user message per iteration.
+   * @param {string} message - The nudge text
+   */
+  nudge(message) {
+    this.#pendingNudges.add(message);
+  }
   
   /**
    * Check for similar tool calls this turn (dedup/loop detection)
@@ -256,6 +266,22 @@ class Harness {
       }
       // Add to session context
       this.session.context.add(message);
+    });
+
+    // Register hook handler to amalgamate nudges before each agent iteration
+    Hooks.on('before_agent_iteration', ({ context, turnNumber }) => {
+      if (this.#pendingNudges.size > 0) {
+        const nudges = [...this.#pendingNudges];
+        this.#pendingNudges.clear();
+
+        const nudgeContent = nudges.map(n => `<system-reminder>${n}</system-reminder>`).join('\n');
+        const nudgeMessage = { role: 'user', content: nudgeContent };
+
+        // Add to active context
+        this.#activeContext.add(nudgeMessage);
+        // Add to session context
+        this.session.context.add(nudgeMessage);
+      }
     });
 
     // Build commands from skills
