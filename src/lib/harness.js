@@ -219,22 +219,17 @@ class Harness {
     // No own hooks instance — uses global Hooks singleton
     
     const tools = [
-      new ReadTool(this),
-      new EditTool(this),
-      new LsTool(this),
-      new GrepTool(this),
-      new BashTool(this),
+      new ReadTool({ harness: this }),
+      new EditTool({ harness: this }),
+      new LsTool({ harness: this }),
+      new GrepTool({ harness: this }),
+      new BashTool({ harness: this }),
     ];
     if (this.config.get('memory')) {
-      tools.push(new MemoryTool({
-        ...this.session,
-        config: this.config
-      }));
+      tools.push(new MemoryTool({ harness: this }));
     }
-    tools.push(new ActivateSkillTool({
-      skills: this.skills
-    }));
-    tools.push(new TodoTool(this));
+    tools.push(new ActivateSkillTool({ harness: this }));
+    tools.push(new TodoTool({ harness: this }));
     this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),

@@ -34,7 +34,7 @@ Best practices: call memory.list() first to avoid duplicates, use memory.read('<
   normalize() { return null; }
 
   async handler(args, tool) {
-    const memory = new Memory(tool.config);
+    const memory = new Memory(this.harness.config);
     await memory.init();
 
     const action = args.action || 'unknown';

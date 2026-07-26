@@ -11,11 +11,11 @@ class ActivateSkillTool extends Tool {
   };
 
   get description() {
-    if (!this.skills || !this.skills.names.length) {
+    if (!this.harness.skills || !this.harness.skills.names.length) {
       return 'Activate a skill to get its instructions. No skills loaded.';
     }
-    const skillList = this.skills.names.map(name => {
-      const skill = this.skills.get(name);
+    const skillList = this.harness.skills.names.map(name => {
+      const skill = this.harness.skills.get(name);
       const desc = skill?.description || 'No description';
       return `- ${name}: ${desc}`;
     }).join('\n');
@@ -37,10 +37,10 @@ class ActivateSkillTool extends Tool {
       return 'Error: Missing name argument';
     }
     tool.message({ state: 'spin', summary: args.name });
-    const skill = this.skills.get(args.name);
+    const skill = this.harness.skills.get(args.name);
     if (!skill) {
       tool.message({ state: 'error', summary: args.name });
-      return `Error: Skill "${args.name}" not found. Available skills: ${this.skills.names.join(', ')}`;
+      return `Error: Skill "${args.name}" not found. Available skills: ${this.harness.skills.names.join(', ')}`;
     }
     tool.message({ state: 'done', summary: args.name });
     return skill.content;

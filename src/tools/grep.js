@@ -73,7 +73,7 @@ class GrepTool extends Tool {
         }
 
         let output = result.stdout;
-        let maxLines = tool.config.get('tool_output_limit') || 20;
+        let maxLines = this.harness.config.get('tool_output_limit') || 20;
         let lines = output.split('\n');
         let sliced = lines.slice(0, maxLines);
         let missing = lines.length - sliced.length;

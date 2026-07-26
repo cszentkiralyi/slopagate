@@ -41,7 +41,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
           return;
         }
         const compactList = this.#getCompactList();
-        this.ambientReminder(`[Todo]\n${compactList}`);
+        this.harness.ambientReminder(`[Todo]\n${compactList}`);
       }
     });
     Hooks.on('before_tool_call', this.beforeToolCall.bind(this));
@@ -62,7 +62,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
     if (items.length <= TodoTool.MIN_APPROVED_LENGTH) {
       return null;
     }
-    return { scope: `Todo:large_list:${items.length}` };
+    return { scope: this.#getCompactList() };
   }
 
   #getCompactList() {
@@ -157,7 +157,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
       // Have a todo list — nudge to update it
       if (this.#editNudgeGiven >= 2) return;
       if (this.#nextEditNudgeThreshold === null) {
-        this.#nextEditNudgeThreshold = this.config.get('todo_edit_threshold');
+        this.#nextEditNudgeThreshold = this.harness.config.get('todo_edit_threshold');
       }
       if (this.#mutationCount >= this.#nextEditNudgeThreshold) {
         this.harness.nudge(`You've made ${this.#mutationCount} write operations without updating your todo list. Use the ${this.name} tool to update it, then continue.`);
@@ -170,7 +170,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
       // No todo list — nudge to create one
       if (this.#nudgeGiven >= 1) return;
       if (this.#nextNudgeThreshold === null) {
-        this.#nextNudgeThreshold = this.config.get('todo_create_threshold');
+        this.#nextNudgeThreshold = this.harness.config.get('todo_create_threshold');
       }
       if (this.#mutationCount >= this.#nextNudgeThreshold) {
         this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Use the ${this.name} tool to create one, then continue.`);
