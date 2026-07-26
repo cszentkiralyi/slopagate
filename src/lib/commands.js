@@ -316,6 +316,20 @@ const Commands = [
     handler: async (harness) => {
       await harness.reloadSkills();
     }
+  },
+
+  {
+    name: 'todo',
+    hint: 'View the current todo list',
+    handler: async (harness) => {
+      const todoTool = harness.toolbox.all().find(t => t.name === 'Todo');
+      if (!todoTool) {
+        harness.emitCommandMessage('Todo tool not available.');
+        return;
+      }
+      const result = await todoTool.handler({ mode: 'view' }, todoTool);
+      harness.emitCommandMessage(result);
+    }
   }
 
 ];
