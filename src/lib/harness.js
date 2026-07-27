@@ -81,7 +81,7 @@ class Harness {
     if (this.#pendingAmbientReminders.size === 0) return;
     
     const amalgamated = Array.from(this.#pendingAmbientReminders).join('\n\n---\n\n');
-    const ambientMessage = { role: 'user', content: amalgamated };
+    const ambientMessage = { role: 'user', content: amalgamated, ephemeral: true };
     
     // Add to active context (so the fork includes it)
     this.#activeContext.add(ambientMessage);
@@ -303,7 +303,7 @@ class Harness {
         this.#pendingNudges.clear();
 
         const nudgeContent = nudges.map(n => `<system-reminder>${n}</system-reminder>`).join('\n');
-        const nudgeMessage = { role: 'user', content: nudgeContent };
+        const nudgeMessage = { role: 'user', content: nudgeContent, ephemeral: true };
 
         // Add to active context
         this.#activeContext.add(nudgeMessage);

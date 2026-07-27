@@ -6,6 +6,7 @@ const chat_summary = require('./chat_summary.js');
 const tool_error = require('./tool_error.js');
 const model_reasoning = require('./model_reasoning.js');
 const tool_total = require('./tool_total.js');
+const ephemeral = require('./ephemeral.js');
 
 module.exports = {
   system_prompt,
@@ -15,5 +16,6 @@ module.exports = {
   chat_summary,
   tool_error,
   model_reasoning,
-  tool_total
+  tool_total,
+  ephemeral
 };

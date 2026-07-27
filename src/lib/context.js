@@ -93,7 +93,8 @@ class Context {
     tool_age: { disable: false, user_turns: 3, ttl: 0 },
     tool_length: { disable: false, user_turns: 0, max: 200 },
     tool_total: { disable: false, user_turns: 0, max: 0.05 },
-    model_reasoning: { disable: false, user_turns: 1, ttl: 0 }
+    model_reasoning: { disable: false, user_turns: 1, ttl: 0 },
+    ephemeral: { disable: false, user_turns: 1 }
   };
   
   config;
