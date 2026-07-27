@@ -1,5 +1,5 @@
 const Tool = require('./tool.js');
-const { truncate } = require('../util.js');
+const { Logger, truncate } = require('../util.js');
 const Hooks = require('../lib/hooks.js');
 
 class TodoTool extends Tool {
@@ -28,6 +28,26 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   #nudgeGiven = 0;
   #nextEditNudgeThreshold = null;
   #editNudgeGiven = 0;
+  #lastNudgeType = null;
+  #lastNudgeTodosSnapshot = null;
+  #nudgeHistory = [];
+
+  #snapshotTodos() {
+    return this.#todos.map(i => i.trim()).join('\n');
+  }
+
+  #logNudgeResponse(mutationCount) {
+    if (this.#lastNudgeTodosSnapshot === null) return;
+    const current = this.#snapshotTodos();
+    if (current !== this.#lastNudgeTodosSnapshot) {
+      Logger.log(`[Todo] nudge response: model acted on ${this.#lastNudgeType} nudge (todos changed, ${mutationCount} mutations since)`);
+      this.#nudgeHistory.push({ type: this.#lastNudgeType, responded: true, mutations: mutationCount });
+    } else {
+      Logger.log(`[Todo] nudge response: model ignored ${this.#lastNudgeType} nudge (${mutationCount} mutations, todos unchanged)`);
+      this.#nudgeHistory.push({ type: this.#lastNudgeType, responded: false, mutations: mutationCount });
+    }
+    this.#lastNudgeTodosSnapshot = null;
+  }
 
   constructor(props) {
     super(props);
@@ -40,8 +60,9 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
           this.#todos = [];
           return;
         }
-        const compactList = this.#getCompactList();
-        this.harness.ambientReminder(`[Todo]\n${compactList}`);
+        const incomplete = this.#todos.filter(item => !/^- \[[xX]\]/.test(item)).length;
+        Logger.log(`[Todo] ambient reminder: ${this.#todos.length} total, ${incomplete} incomplete`);
+        this.harness.ambientReminder(`[Todo]\n${this.#getCompactList()}`);
       }
     });
     Hooks.on('after_tool_call', this.afterToolCall.bind(this));
@@ -122,12 +143,16 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
     if (mode === 'edit') {
       this.#todos = this.#parse(args.content);
       this.#mutationCount = 0;
-      this.harness.nudge(`Todo list updated:\n${this.#getCompactList()}`);
+      const nudgeMsg = `Todo list updated:\n${this.#getCompactList()}`;
+      Logger.log(`[Todo] nudge: ${nudgeMsg.replace(/\n/g, ' | ')}`);
+      this.harness.nudge(nudgeMsg);
       this.#editNudgeGiven = 0;
       this.#nextEditNudgeThreshold = null;
       const allDone = this.#todos.every(item => /^- \[[xX]\]/.test(item));
       if (allDone && this.#todos.length > 0) {
-        this.harness.nudge(`Todo list is fully completed. Use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`);
+        const nudgeMsg2 = `Todo list is fully completed. Use the ${this.name} tool to uncheck any items that weren't actually finished, or add new items if needed. If accurate, continue.`;
+        Logger.log(`[Todo] nudge: ${nudgeMsg2}`);
+        this.harness.nudge(nudgeMsg2);
       }
       return `Todo list updated (${this.#todos.length} items).`;
     }
@@ -149,6 +174,9 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
   afterToolCall({ toolCall, success }) {
     if (success && !TodoTool.NON_MUTATION_TOOLS.has(toolCall.function.name)) {
       this.#mutationCount++;
+      if (this.#lastNudgeTodosSnapshot !== null) {
+        this.#logNudgeResponse(this.#mutationCount);
+      }
     }
   }
 
@@ -160,7 +188,11 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.#nextEditNudgeThreshold = this.harness.config.get('todo_edit_threshold');
       }
       if (this.#mutationCount >= this.#nextEditNudgeThreshold) {
-        this.harness.nudge(`You've made ${this.#mutationCount} write operations without updating your todo list. Use the ${this.name} tool to update it, then continue.`);
+        const nudgeMsg = `You've made ${this.#mutationCount} write operations without updating your todo list. Use the ${this.name} tool to update it, then continue.`;
+        this.#lastNudgeType = 'edit';
+        this.#lastNudgeTodosSnapshot = this.#snapshotTodos();
+        Logger.log(`[Todo] nudge: ${nudgeMsg}`);
+        this.harness.nudge(nudgeMsg);
         this.#editNudgeGiven++;
         if (this.#editNudgeGiven === 1) {
           this.#nextEditNudgeThreshold *= 2;
@@ -173,7 +205,11 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.#nextNudgeThreshold = this.harness.config.get('todo_create_threshold');
       }
       if (this.#mutationCount >= this.#nextNudgeThreshold) {
-        this.harness.nudge(`You've made ${this.#mutationCount} write operations without setting a todo list. Use the ${this.name} tool to create one, then continue.`);
+        const nudgeMsg = `You've made ${this.#mutationCount} write operations without setting a todo list. Use the ${this.name} tool to create one, then continue.`;
+        this.#lastNudgeType = 'create';
+        this.#lastNudgeTodosSnapshot = this.#snapshotTodos();
+        Logger.log(`[Todo] nudge: ${nudgeMsg}`);
+        this.harness.nudge(nudgeMsg);
         this.#nudgeGiven++;
       }
     }
