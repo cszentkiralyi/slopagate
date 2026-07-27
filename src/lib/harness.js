@@ -909,7 +909,9 @@ class Harness {
         args: call.function.arguments,
         temppath: this.session.tempdir
       });
-      this.#updateToolStats(call.function.name, callResult.content && !callResult.content.startsWith('Error'));
+      const success = callResult.content && !callResult.content.startsWith('Error');
+      this.#updateToolStats(call.function.name, success);
+      Hooks.emit('after_tool_call', { toolCall: call, success });
     };
     
     // Run auto-approved tools in parallel

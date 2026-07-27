@@ -44,7 +44,7 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.harness.ambientReminder(`[Todo]\n${compactList}`);
       }
     });
-    Hooks.on('before_tool_call', this.beforeToolCall.bind(this));
+    Hooks.on('after_tool_call', this.afterToolCall.bind(this));
     Hooks.on('before_agent_iteration', this.beforeAgentIteration.bind(this));
   }
 
@@ -146,8 +146,8 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
     'Read', 'Ls', 'Grep', 'Todo', 'Memory', 'ActivateSkill',
   ]);
 
-  beforeToolCall({ toolCall }) {
-    if (!TodoTool.NON_MUTATION_TOOLS.has(toolCall.function.name)) {
+  afterToolCall({ toolCall, success }) {
+    if (success && !TodoTool.NON_MUTATION_TOOLS.has(toolCall.function.name)) {
       this.#mutationCount++;
     }
   }
