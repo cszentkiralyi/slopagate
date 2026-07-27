@@ -939,8 +939,10 @@ class Harness {
     
     results.forEach(msg => {
       msg.role = 'tool';
+      msg.tool_call_id = msg.id;
       msg.tool_name = msg.name;
       delete msg.name;
+      delete msg.id;
     });
     return results;
   }

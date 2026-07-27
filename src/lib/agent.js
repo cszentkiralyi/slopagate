@@ -134,6 +134,15 @@ class Agent {
     const reasoning_budget = this.config.get('reasoning_budget') || 2 ** 18;
     const tools = (this.tools || []).map(t => t.spec);
     
+    const API_MESSAGE_KEYS = new Set(['role', 'content', 'tool_calls', 'tool_name', 'reasoning_content', 'tool_call_id']);
+    const filterMsg = (msg) => {
+      const filtered = {};
+      for (const key of API_MESSAGE_KEYS) {
+        if (key in msg) filtered[key] = msg[key];
+      }
+      return filtered;
+    };
+
     let payload = {
       think: think,
       stream: stream,
@@ -141,7 +150,7 @@ class Agent {
       num_predict: num_predict,
       messages: [
         { role: 'system', content: context.system_prompt },
-        ...context.messages
+        ...context.messages.map(filterMsg)
       ],
       tools: tools
     };

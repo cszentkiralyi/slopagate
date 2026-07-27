@@ -146,6 +146,10 @@ class Program {
     if (process.env.SLOP_CONTEXT_WINDOW) configData.context_window = parseInt(process.env.SLOP_CONTEXT_WINDOW, 10);
 
     configData.connection = `${configData.host}:${configData.port}${configData.endpoint}`;
+    // Defaults (from agent-todo-design.md)
+    configData.todo_create_threshold = configData.todo_create_threshold ?? 3;
+    configData.todo_edit_threshold = configData.todo_edit_threshold ?? 4;
+    configData.todo_confirm_threshold = configData.todo_confirm_threshold ?? 5;
     let config = this.config = new Config(configData);
     
     
