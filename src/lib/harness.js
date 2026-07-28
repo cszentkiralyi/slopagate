@@ -14,7 +14,7 @@ const Skills = require('../lib/skills.js');
 const Config = require('../core/config.js');
 const Commands = require('./commands.js');
 
-const { Logger, formatMs } = require('../util.js');
+const { Logger, formatMs, truncate } = require('../util.js');
 const { Hash } = require('../lib/hash.js');
 
 const ReadTool = require('../tools/read.js');
@@ -115,7 +115,8 @@ class Harness {
     const now = Date.now();
     const textA = normalized.join(' ');
     
-    Logger.log(`[dedup] Checking ${toolName} call ${callId}, total previous calls: ${this.#dedupCalls.length}`);
+    const category = textA.length <= 200 ? 'trigram' : 'minhash';
+    Logger.log(`[dedup] Checking ${toolName} call ${callId}, total previous calls: ${this.#dedupCalls.length}, text length: ${textA.length} (${category})`);
     
     // Look up candidates from history
     const candidates = new Map();  // id -> {id, timestamp, normalized, signature}
@@ -863,8 +864,8 @@ class Harness {
       let match = this.checkDedup(toolName, args, call.id);
       if (match) {
         Logger.log(`[dedup] Detected similar tool call: ${toolName} (score: ${match.score.toFixed(2)})`);
-        Logger.log(`[dedup] Current: ${JSON.stringify(args)}`);
-        Logger.log(`[dedup] Similar to: ${match.normalized}`);
+        Logger.log(`[dedup] Current: ${truncate(JSON.stringify(args), 200)}`);
+        Logger.log(`[dedup] Similar to: ${truncate(match.normalized.join(' '), 200)}`);
       }
     }
     

@@ -35,38 +35,11 @@ class Hash {
     return signature;
   }
 
-   static hash(fields) {
-    const signature = new Array(Hash.#NUM_HASHES).fill(Infinity);
-    
-    // Each field gets an equal slice of the signature
-    const sliceSize = Math.ceil(Hash.#NUM_HASHES / fields.length);
-    
-    for (let f = 0; f < fields.length; f++) {
-      const sliceStart = f * sliceSize;
-      const sliceEnd = Math.min(sliceStart + sliceSize, Hash.#NUM_HASHES);
-      
-      // Hash this field into its slice
-      for (let j = sliceStart; j < sliceEnd; j++) {
-        const seed = j + 1;
-        const shingles = Hash.#shingles(fields[f]);
-        for (const shingle of shingles) {
-          const h = Hash.#hash(shingle, seed);
-          if (h < signature[j]) signature[j] = h;
-        }
-      }
-    }
-
-    return signature;
-  }
-
   static compare(sig1, sig2) {
     if (!Array.isArray(sig1) || !Array.isArray(sig2)) return 0;
     const len = Math.min(sig1.length, sig2.length);
     if (len === 0) return 0;
-    
-    // Compare within each field's slice independently.
-    // This preserves the field-specific semantics of the hash.
-    // For now, treat all positions equally (single field per signature).
+
     let matches = 0;
     for (let i = 0; i < len; i++) {
       if (sig1[i] === sig2[i]) matches++;
@@ -74,9 +47,9 @@ class Hash {
     return matches / len;
   }
 
-  static jaccard(trigramsA, trigramsB) {
-    const setA = new Set(trigramsA);
-    const setB = new Set(trigramsB);
+  static jaccard(a, b) {
+    const setA = a instanceof Set ? a : new Set(a);
+    const setB = b instanceof Set ? b : new Set(b);
     let intersection = 0;
     for (const t of setA) {
       if (setB.has(t)) intersection++;
@@ -84,19 +57,6 @@ class Hash {
     const union = setA.size + setB.size - intersection;
     if (union === 0) return 0;
     return intersection / union;
-  }
-
-  static similarity(textA, textB) {
-    const trigramsA = Hash.trigrams(textA);
-    const trigramsB = Hash.trigrams(textB);
-
-    if (trigramsA.length <= TRIGRAM_CUTOFF && trigramsB.length <= TRIGRAM_CUTOFF) {
-      return Hash.jaccard(trigramsA, trigramsB);
-    }
-
-    const sigA = Hash.#buildSignature(trigramsA, Hash.#NUM_HASHES);
-    const sigB = Hash.#buildSignature(trigramsB, Hash.#NUM_HASHES);
-    return Hash.compare(sigA, sigB);
   }
 
   /**
@@ -124,7 +84,7 @@ class Hash {
   static cachedSimilarity(a, b) {
     if (!a || !b || a.type !== b.type) return 0;
     if (a.type === 'jaccard') {
-      return Hash.jaccard(Array.from(a.value), Array.from(b.value));
+      return Hash.jaccard(a.value, b.value);
     }
     if (a.type === 'minhash') {
       return Hash.compare(a.value, b.value);
