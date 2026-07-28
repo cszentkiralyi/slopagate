@@ -166,13 +166,14 @@ function classify(command, subcommand, flags, paths) {
 function parseCommand(raw) {
   const tokens = tokenize(raw);
   if (tokens.length === 0) {
-    return { raw, tokens: [], command: null, subcommand: null, flags: [], paths: [] };
+    return { raw, tokens: [], command: null, subcommand: null, flags: [], paths: [], redirects: [] };
   }
 
   let command = tokens[0];
   let subcommand = null;
   const flags = [];
   const paths = [];
+  const redirects = [];
 
   if (KNOWN_COMPOUNDS.has(command) && tokens.length > 1) {
     subcommand = tokens[1];
@@ -180,6 +181,8 @@ function parseCommand(raw) {
       const tok = tokens[i];
       if (tok.startsWith('--') || tok.startsWith('-')) {
         flags.push(tok);
+      } else if (isRedirect(tok)) {
+        redirects.push(tok);
       } else {
         paths.push(tok);
       }
@@ -189,13 +192,30 @@ function parseCommand(raw) {
       const tok = tokens[i];
       if (tok.startsWith('--') || tok.startsWith('-')) {
         flags.push(tok);
+      } else if (isRedirect(tok)) {
+        redirects.push(tok);
       } else {
         paths.push(tok);
       }
     }
   }
 
-  return { raw, tokens, command, subcommand, flags, paths };
+  return { raw, tokens, command, subcommand, flags, paths, redirects };
+}
+
+function isRedirect(tok) {
+  return tok === '>' || tok === '>>' || tok === '<' || tok === '<<'
+    || tok === '>&' || tok === '>>&' || tok === '<&' || tok === '<&-'
+    || tok.startsWith('>&') || tok.startsWith('>>&')
+    || tok.startsWith('<&') || tok.startsWith('<&-')
+    || tok.startsWith('>') || tok.startsWith('>>')
+    || tok.startsWith('<') || tok.startsWith('<<');
+}
+
+const WRITE_REDIRECT_RE = /^>>?>$/;
+
+function hasWriteRedirects(parsed) {
+  return parsed.redirects.some(r => WRITE_REDIRECT_RE.test(r));
 }
 
 function splitByNewlines(raw) {
@@ -277,4 +297,4 @@ function parse(input) {
   return { raw, commands };
 }
 
-module.exports = parse;
+module.exports = Object.assign(parse, { hasWriteRedirects });

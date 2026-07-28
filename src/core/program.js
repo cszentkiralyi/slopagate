@@ -731,7 +731,8 @@ class Program {
       }
       
       // Prompt user
-      let msg = `Allow tool use? ${tool.name}(${perms.scope})`,
+      let scopeDisplay = perms.scope.length > 200 ? perms.scope.slice(0, 200) + '…' : perms.scope;
+      let msg = `Allow tool use? ${tool.name}(${scopeDisplay})`,
           choices = [
             { label: 'Yes', value: 'yes', default: true },
             { label: 'Yes for this session', value: 'yes+', default: true },

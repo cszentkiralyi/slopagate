@@ -32,7 +32,7 @@ class BashTool extends Tool {
     { pattern: 'pwd', readonly: true },
     { pattern: 'sqlite3 *', readonly: false },
     { pattern: './*', readonly: false },
-    //{ pattern: 'echo*', readonly: false },
+    { pattern: 'echo*', readonly: true },
     //{ pattern: 'awk*', readonly: false }
   ];
   
@@ -148,14 +148,14 @@ class BashTool extends Tool {
         continue;
       }
 
-      // Readonly commands skip permission prompts entirely
+      // Readonly commands skip permission prompts entirely, unless they have write redirects
       const isReadonly = BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
         if (pattern.endsWith('*')) {
           return raw.startsWith(pattern.substring(0, pattern.length - 1)) && readonly;
         }
         return raw === pattern && readonly;
       });
-      if (isReadonly) continue;
+      if (isReadonly && !parseBash.hasWriteRedirects(cmd)) continue;
 
       const tokens = cmd.tokens;
       let [ cmdName, second, ...rem ] = tokens;
