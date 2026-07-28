@@ -20,6 +20,7 @@ class Agent {
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props?.abortController ?? null;
     this.onTokens = props.onTokens || null;
+    this.onContextChange = props.onContextChange || null;
     // No own hooks instance — uses global Hooks singleton
   }
   
@@ -54,6 +55,7 @@ class Agent {
     
     // Add user message to context
     this.context.add({ role: 'user', content: userMessage });
+    this.onContextChange?.();
     
     // Turn loop: send, parse, handle tools, repeat
     let response;
@@ -85,6 +87,7 @@ class Agent {
       this.callbacks?.onModelContent?.(content);
       Hooks.emit('before_message_add', { role: 'assistant', content, tool_calls: toolCalls });
       this.context.add({ role: 'assistant', content, tool_calls: toolCalls });
+      this.onContextChange?.();
       
       // Mark that the model has responded — no longer safe to undo user message
       if (!this.#modelResponded) {
@@ -96,6 +99,7 @@ class Agent {
         toolResults = this.callbacks?.onToolCalls ? await this.callbacks.onToolCalls(toolCalls) : [];
         Hooks.emit('before_message_add', { role: 'tool', content: JSON.stringify(toolResults) });
         this.context.add({ role: 'tool', content: JSON.stringify(toolResults) });
+        this.onContextChange?.();
         
         // Compact after tool results to prevent context from filling up
         // with large tool responses before the next model call

@@ -256,6 +256,12 @@ class Harness {
           outputTokens: this.#outputTokens
         });
       },
+      onContextChange: () => {
+        Events.emit('context:changed', {
+          inputTokens: this.#inputTokens,
+          outputTokens: this.#outputTokens
+        });
+      },
       callbacks: {
         onToolCalls: async (toolCalls) => {
           // Execute all tool calls via Harness's handleToolCalls

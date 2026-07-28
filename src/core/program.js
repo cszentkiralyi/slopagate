@@ -607,6 +607,10 @@ class Program {
       this.updateStatuslineTokens(event);
       this.interface.draw();
     });
+    Events.on('context:changed', (event) => {
+      this.updateStatuslineTokens(event);
+      this.interface.draw();
+    });
     this.updateStatuslineTokens({ inputTokens: 0, outputTokens: 0 });
 
     if (this.skills.names.length) {
