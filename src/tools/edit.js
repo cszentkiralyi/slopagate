@@ -48,48 +48,56 @@ class EditTool extends Tool {
 
     let linesNeg = old_str.split('\n').length;
     let linesPos = new_str.split('\n').length;
-    let summary = `${this.simplifyPath(file_path)} ${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}`;
+    let fileExists = false;
+    try {
+      await fs.access(file_path, fs.constants.F_OK);
+      fileExists = true;
+    } catch { /* doesn't exist */ }
+
+    let summary;
+    if (fileExists) {
+      summary = `${this.simplifyPath(file_path)} ${ANSI.fg('-' + linesNeg, EditTool.REM_COLOR)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}`;
+    } else {
+      summary = `${this.simplifyPath(file_path)} ${ANSI.fg('+' + linesPos, EditTool.ADD_COLOR)}`;
+    }
     tool.message({ state: 'spin', summary });
 
     let result;
     try {
-      await fs.copyFile(file_path, temp_path);
-      let content = await fs.readFile(temp_path);
-      if (content.includes(old_str)) {
-        content = content.toString().replace(old_str, new_str);
-        await fs.writeFile(temp_path, content);
-        await fs.rm(file_path);
+      if (fileExists) {
+        await fs.copyFile(file_path, temp_path);
+        let content = await fs.readFile(temp_path);
+        if (content.includes(old_str)) {
+          content = content.toString().replace(old_str, new_str);
+          await fs.writeFile(temp_path, content);
+          await fs.rm(file_path);
+          await fs.copyFile(temp_path, file_path);
+          await fs.rm(temp_path);
+          result = `Edited "${file_path}" successfully.`;
+        } else {
+          result = `Error: old_str not found in file, must match exactly`;
+        }
+      } else {
+        await fs.writeFile(temp_path, new_str);
         await fs.copyFile(temp_path, file_path);
         await fs.rm(temp_path);
-        result = `Edited "${file_path}" successfully.`;
-      } else {
-        result = `Error: old_str not found in file, must match exactly`;
+        result = `Created "${file_path}" successfully.`;
       }
     } catch (editErr) {
       if (editErr.code !== 'ENOENT') {
         result = `Error: something went wrong!`;
       } else {
-        try {
-          await fs.writeFile(temp_path, new_str);
-          await fs.copyFile(temp_path, file_path);
-          await fs.rm(temp_path);
-          result = `Created "${file_path}" successfully.`;
-        } catch (createErr) {
-          if (createErr.code !== 'ENOENT') {
-            result = `Error: something went wrong!`;
-          } else {
-            result = `Error: some or all of the path "${file_path}" doesn't exist!`;
-          }
-        }
+        result = `Error: some or all of the path "${file_path}" doesn't exist!`;
       }
     }
 
     tool.message({
       state: result.startsWith('Error:') ? 'error' : 'done',
-      summary });
+      summary
+    });
     return result;
   }
-  
+
   permissions(args) {
     const { file_path } = args;
     let path = this.simplifyPath(file_path);
