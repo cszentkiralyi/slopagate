@@ -14,3 +14,4 @@ slop
 *.jsonl
 json_log.json
 .sloptmp/
+specs/

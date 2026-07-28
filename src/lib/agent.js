@@ -47,6 +47,8 @@ class Agent {
     this.#abortController = abortController;
     const startTime = Date.now();
     
+    // Fire 'before_agent_turn' hook at the start of each agent turn
+    Hooks.emit('before_agent_turn');
     // Fire 'before_message_add' hook before adding to context
     Hooks.emit('before_message_add', { role: 'user', content: userMessage });
     

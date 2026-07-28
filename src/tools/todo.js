@@ -65,6 +65,13 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
         this.harness.ambientReminder(`[Todo]\n${this.#getCompactList()}`);
       }
     });
+    Hooks.on('before_agent_turn', () => {
+      // Reset create nudge so it can fire each turn when no list exists
+      if (this.#todos.length === 0) {
+        this.#nudgeGiven = 0;
+        this.#nextNudgeThreshold = null;
+      }
+    });
     Hooks.on('after_tool_call', this.afterToolCall.bind(this));
     Hooks.on('before_agent_iteration', this.beforeAgentIteration.bind(this));
   }
@@ -142,6 +149,11 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
 
     if (mode === 'edit') {
       this.#todos = this.#parse(args.content);
+      // Reset nudge state when list is created or cleared
+      if (this.#todos.length === 0) {
+        this.#nudgeGiven = 0;
+        this.#nextNudgeThreshold = null;
+      }
       this.#mutationCount = 0;
       const nudgeMsg = `Todo list updated:\n${this.#getCompactList()}`;
       Logger.log(`[Todo] nudge: ${nudgeMsg.replace(/\n/g, ' | ')}`);
