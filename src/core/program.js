@@ -14,7 +14,7 @@ const Interface = require('./interface.js');
 const Slopdown = require('../lib/sd.js');
 const Skills = require('../lib/skills.js');
 
-const { Logger, formatMs } = require('../util.js');
+const { Logger, formatMs, formatBodyGlyph } = require('../util.js');
 
 /**
  * Find the cutoff index for the last `count` user messages.
@@ -343,12 +343,12 @@ class Program {
       if (id) {
         const msg = this.#commandMessages.get(id);
         if (msg && content) {
-          msg.body = (msg.body ? msg.body + '\n' : '') + ANSI.fg(content, 248);
+          msg.body = (msg.body ? msg.body + '\n' : '') + ANSI.fg(formatBodyGlyph(content), 248);
           this.interface.draw();
         }
       } else {
         let subject = name ? `/${name}` : null;
-        let body = content ? ANSI.fg(content, 248) : null;
+        let body = content ? ANSI.fg(formatBodyGlyph(content), 248) : null;
         if (subject || body) {
           this.interface.addMessage({ role: 'command', subject, body });
         }
@@ -480,12 +480,13 @@ class Program {
           let shellMode = this.input_modes.find(m => m.name === inst.mode);
           let shellPrompt = input;
           inst.clear();
+          this.#aggregator.reset();
           this.interface.draw();
           let sm = this.interface.addMessage({ role: 'shell', subject: shellPrompt, state: 'spin', fg: shellMode?.fg });
           spawnStream(input, {
             onExit: (err, result) => {
               const hasError = err || (result?.stderr && result.stderr.trim().length > 0);
-              sm.body = (result?.stdout?.trim() || '') + (result?.stderr?.trim() || '');
+              sm.body = ANSI.fg(formatBodyGlyph((result?.stdout?.trim() || '') + (result?.stderr?.trim() || '')), 250);
               sm.state = hasError ? 'error' : 'done';
               this.interface.draw();
             }
@@ -498,6 +499,7 @@ class Program {
             let cmd = parts[0];
             let argstr = parts.slice(1).join(' ');
             inst.clear();
+            this.#aggregator.reset();
             await this.harness.command(cmd, argstr);
           } else {
             Events.emit('user:message', { message: input });

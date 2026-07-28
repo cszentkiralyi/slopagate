@@ -2,6 +2,16 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 const ANSI = require('./lib/ansi.js');
 
+/* Apply BODY_GLYPH + BODY_INDENT formatting to a body string.
+ * First line gets '└ ', subsequent lines get indented to match. */
+function formatBodyGlyph(text) {
+  if (!text) return text;
+  const BODY_GLYPH = '└ ';
+  const BODY_INDENT = ' '.repeat(ANSI.measure(BODY_GLYPH));
+  const lines = text.split('\n');
+  return lines.map((l, i) => i === 0 ? `${BODY_GLYPH}${l}` : `${BODY_INDENT}${l}`).join('\n');
+}
+
 const ID = () => crypto.randomBytes(8).toString('hex');
 
 const lerp = (pct, min, max) => min + (pct * (max - min));
@@ -163,4 +173,4 @@ function truncateBody(text, maxLines = 5, maxLineLen = 72) {
   };
 }
 
-module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate, truncateBody };
+module.exports = { ID, lerp, louse, Logger, formatMs, formatRelativeDate, formatDate, isRecent, truncate, truncateBody, formatBodyGlyph };
