@@ -3,6 +3,7 @@ const { Logger } = require('../util.js');
 
 class Tool {
   static TRIM_MSG = '[...trimmed tool output...]';
+  static RAW_OUTPUT_MAX_LINES = 300;
   name;
   nounPlural = 'operations';
   description;

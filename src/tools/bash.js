@@ -89,7 +89,7 @@ class BashTool extends Tool {
     let summary = truncate(command.replaceAll('\n', '\\n'), 50);
     tool.message({ state: 'spin', summary });
 
-    let maxLines = this.harness.config.get('tool_output_limit') || 50;
+    let maxLines = Tool.RAW_OUTPUT_MAX_LINES;
 
     let resolve;
     const promise = new Promise(r => { resolve = r; });

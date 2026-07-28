@@ -70,6 +70,13 @@ class ReadTool extends Tool {
       if (end_line) {
         content.splice(end_line - (start_line || 1));
       }
+      let readLimit = Math.floor(Tool.RAW_OUTPUT_MAX_LINES * 1.5);
+      if (content.length > readLimit) {
+        const sliced = content.slice(0, readLimit);
+        const missing = content.length - sliced.length;
+        sliced.push(`[+${missing} more]`);
+        content = sliced;
+      }
       let firstLine = start_line || 1;
       result = addLineNumbers(content, firstLine);
       body = result;
