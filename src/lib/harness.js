@@ -133,13 +133,11 @@ class Harness {
     
     // Look up candidates from all bands
     const candidates = new Map();  // sigKey -> {id, timestamp, normalized}
-    let totalHistory = 0;
     for (const bandKey of bands) {
       const bandMap = toolBandMap.get(bandKey);
       if (bandMap) {
         for (const [sigKey, entry] of bandMap.entries()) {
           candidates.set(sigKey, entry);
-          totalHistory++;
         }
       }
     }
@@ -147,7 +145,7 @@ class Harness {
     if (candidates.size === 0) {
       Logger.log(`[dedup] No history for ${toolName}, no candidates`);
     } else {
-      Logger.log(`[dedup] Found ${candidates.size} unique candidates from ${totalHistory} total history entries`);
+      Logger.log(`[dedup] Found ${candidates.size} unique candidates to compare`);
     }
     
     // Compare each candidate, short-circuit if we find a strong match
