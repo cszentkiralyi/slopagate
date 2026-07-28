@@ -1,3 +1,5 @@
+const TRIGRAM_CUTOFF = 200;
+
 class Hash {
   static #NUM_HASHES = 128;
 
@@ -15,6 +17,22 @@ class Hash {
       shingles.push(str.substring(i, i + size));
     }
     return shingles;
+  }
+
+  static trigrams(str) {
+    return Hash.#shingles(str);
+  }
+
+  static #buildSignature(shingles, numHashes) {
+    const signature = new Array(numHashes).fill(Infinity);
+    for (let j = 0; j < numHashes; j++) {
+      const seed = j + 1;
+      for (const shingle of shingles) {
+        const h = Hash.#hash(shingle, seed);
+        if (h < signature[j]) signature[j] = h;
+      }
+    }
+    return signature;
   }
 
    static hash(fields) {
@@ -54,6 +72,64 @@ class Hash {
       if (sig1[i] === sig2[i]) matches++;
     }
     return matches / len;
+  }
+
+  static jaccard(trigramsA, trigramsB) {
+    const setA = new Set(trigramsA);
+    const setB = new Set(trigramsB);
+    let intersection = 0;
+    for (const t of setA) {
+      if (setB.has(t)) intersection++;
+    }
+    const union = setA.size + setB.size - intersection;
+    if (union === 0) return 0;
+    return intersection / union;
+  }
+
+  static similarity(textA, textB) {
+    const trigramsA = Hash.trigrams(textA);
+    const trigramsB = Hash.trigrams(textB);
+
+    if (trigramsA.length <= TRIGRAM_CUTOFF && trigramsB.length <= TRIGRAM_CUTOFF) {
+      return Hash.jaccard(trigramsA, trigramsB);
+    }
+
+    const sigA = Hash.#buildSignature(trigramsA, Hash.#NUM_HASHES);
+    const sigB = Hash.#buildSignature(trigramsB, Hash.#NUM_HASHES);
+    return Hash.compare(sigA, sigB);
+  }
+
+  /**
+   * Cache the similarity representation of text: either trigrams (short)
+   * or MinHash signature (long). Callers store this on dedup entries
+   * to avoid recomputing per comparison.
+   * @param {string} text
+   * @returns {{type: 'jaccard', value: Set}|{type: 'minhash', value: number[]}}
+   */
+  static cache(text) {
+    const trigrams = Hash.trigrams(text);
+    if (trigrams.length <= TRIGRAM_CUTOFF) {
+      return { type: 'jaccard', value: new Set(trigrams) };
+    }
+    const sig = Hash.#buildSignature(trigrams, Hash.#NUM_HASHES);
+    return { type: 'minhash', value: sig };
+  }
+
+  /**
+   * Compare two cached representations (same type).
+   * @param {{type: string, value: any}} a
+   * @param {{type: string, value: any}} b
+   * @returns {number}
+   */
+  static cachedSimilarity(a, b) {
+    if (!a || !b || a.type !== b.type) return 0;
+    if (a.type === 'jaccard') {
+      return Hash.jaccard(Array.from(a.value), Array.from(b.value));
+    }
+    if (a.type === 'minhash') {
+      return Hash.compare(a.value, b.value);
+    }
+    return 0;
   }
 }
 

@@ -46,8 +46,7 @@ class Harness {
 
   #activeContext = null;
   #abortController = new AbortController();
-  #dedupCalls = [];  // Per-turn: {toolName, normalized, signature, timestamp}
-  #dedupBands = new Map();  // toolName -> bandKey -> Map<sigKey, {id, timestamp}>
+  #dedupCalls = [];  // Per-turn: {toolName, normalized, timestamp}
   #dedupThreshold = 0.8;
   #pendingNudges = new Set();  // Deduped set of pending nudge messages
   #pendingAmbientReminders = new Set();  // Deduped set of pending ambient reminder messages
@@ -104,41 +103,25 @@ class Harness {
     const tool = this.toolbox.get(toolName);
     if (!tool) return null;
     
-    let normalized, signature;
+    let normalized;
     try {
       normalized = tool.normalize(args);
       if (!normalized) return null;  // Tool opted out of dedup
-      signature = Hash.hash(normalized);
     } catch (e) {
       Logger.log(`Dedup error: ${e.message}`);
       return null;
     }
     
     const now = Date.now();
-    
-    // Hash each band (16 bands of 8 elements)
-    const bands = new Array(16);
-    for (let i = 0; i < 16; i++) {
-      const band = signature.slice(i * 8, i * 8 + 8);
-      bands[i] = band.join(':');
-    }
+    const textA = normalized.join(' ');
     
     Logger.log(`[dedup] Checking ${toolName} call ${callId}, total previous calls: ${this.#dedupCalls.length}`);
     
-    // Initialize bands for this tool if needed
-    if (!this.#dedupBands.has(toolName)) {
-      this.#dedupBands.set(toolName, new Map());
-    }
-    const toolBandMap = this.#dedupBands.get(toolName);
-    
-    // Look up candidates from all bands
-    const candidates = new Map();  // sigKey -> {id, timestamp, normalized}
-    for (const bandKey of bands) {
-      const bandMap = toolBandMap.get(bandKey);
-      if (bandMap) {
-        for (const [sigKey, entry] of bandMap.entries()) {
-          candidates.set(sigKey, entry);
-        }
+    // Look up candidates from history
+    const candidates = new Map();  // id -> {id, timestamp, normalized, signature}
+    for (const entry of this.#dedupCalls) {
+      if (entry.toolName === toolName) {
+        candidates.set(entry.id, entry);
       }
     }
     
@@ -148,15 +131,29 @@ class Harness {
       Logger.log(`[dedup] Found ${candidates.size} unique candidates to compare`);
     }
     
-    // Compare each candidate, short-circuit if we find a strong match
+    // Cache representation once for the current call
+    let cacheA = null;
+    try {
+      cacheA = Hash.cache(textA);
+    } catch (e) {
+      Logger.log(`Dedup cache error: ${e.message}`);
+    }
+    
+    // Compare each candidate
     let bestMatch = null;
     let bestScore = 0;
     let comparedCount = 0;
     
-    for (const [sigKey, candidate] of candidates.entries()) {
+    for (const [id, candidate] of candidates.entries()) {
       let score;
       try {
-        score = Hash.compare(signature, candidate.signature);
+        // Only compare same-type caches (short↔short or long↔long)
+        if (cacheA && candidate.cache && cacheA.type === candidate.cache.type) {
+          score = Hash.cachedSimilarity(cacheA, candidate.cache);
+        } else {
+          // Different types or missing cache — skip
+          continue;
+        }
         comparedCount++;
       } catch (e) {
         Logger.log(`Dedup compare error: ${e.message}`);
@@ -173,16 +170,8 @@ class Harness {
       Logger.log(`[dedup] Compared ${comparedCount} candidates, best score: ${bestScore.toFixed(3)} (threshold: ${this.#dedupThreshold})`);
     }
     
-    // Store this call in dedup tracking
-    for (const bandKey of bands) {
-      if (!toolBandMap.has(bandKey)) {
-        toolBandMap.set(bandKey, new Map());
-      }
-      const sigMap = toolBandMap.get(bandKey);
-      sigMap.set(JSON.stringify(signature), { id: callId, timestamp: now, normalized, signature });
-    }
-    
-    this.#dedupCalls.push({ toolName, normalized, signature, timestamp: now });
+    // Store this call with its cached representation
+    this.#dedupCalls.push({ toolName, normalized, cache: cacheA, timestamp: now });
     
     return bestMatch;
   }
@@ -192,7 +181,6 @@ class Harness {
    */
   resetDedup() {
     this.#dedupCalls = [];
-    this.#dedupBands = new Map();
   }
   get outputTokens() { return this.#outputTokens; }
   get context() { return this.#activeContext; }
@@ -645,7 +633,6 @@ class Harness {
 
     // Reset dedup tracking
     this.#dedupCalls = [];
-    this.#dedupBands = new Map();
 
     // Reset token counters
     this.#inputTokens = 0;
