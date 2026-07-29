@@ -8,9 +8,9 @@ You are building a high-level project map called `SLOP.md`. This isn't a compreh
 
 **How to build it**:
 
-1. **Start broad**: Read `README.md`, `package.json`, `PLAN.md`, and `TODO.md` (if they exist). Get the big picture — what does this project do? Who is it for?
+1. **Start broad**: Read overview files like `README.md`, `package.json`, `Makefile`, etc (if they exist). Get the big picture — what does this project do? Who is it for?
 
-2. **Browse the source tree**: Run `ls` on `src/` and its subdirectories. For each directory, read the **top ~20 lines** of key files — just enough to understand their purpose. You don't need to read every file, just enough to map the major modules and abstractions.
+3. **Browse the source tree**: Reading only the **top ~20 lines** of key files to keep your context clean, analyze the codebase from entry points to basic building blocks. You don't need to read every file, just enough to determine what the major abstractions are and how they fit together.
 
 3. **Identify key concepts**: As you browse, note:
    - What the project is (type, purpose)
@@ -21,17 +21,16 @@ You are building a high-level project map called `SLOP.md`. This isn't a compreh
 
 4. **Write `SLOP.md`** with these sections:
    - **Project Type**: One-line description of what the project is
-   - **Architecture**: How the main pieces fit together, with file paths
-   - **Source Directory**: What's in `src/` and its subdirectories, with brief descriptions
+   - **Architecture**: How the main pieces fit together, with file or folder paths
    - **Config Files**: Important config/build files and what they do
    - **Key Dependencies**: Notable packages and module system
    - **Rules**: Any project-specific conventions (commit message format, coding standards, etc.)
 
 **Guidelines**:
 - Keep it concise. Aim for ~20-30 lines total.
-- Use bullet points and file paths so it's scannable.
-- Focus on **navigation** — this should help someone find the right file when a user says "fix the context compaction" or "add a new tool."
-- Don't document implementation details. If you had to read more than the top 20 lines to understand what a file does, you've gone too deep.
+- Use bullet points so it's scannable.
+- Focus on **navigation** — this should help someone find the right code areas when a user says "fix the context compaction" or "add a new tool."
+- Don't document implementation details. Logic buried deep in files is not your focus.
 - Think about what a user might ask about and make sure the map lets an agent answer it by pointing to the right place.
 
 Write the file to the root of the repository.
