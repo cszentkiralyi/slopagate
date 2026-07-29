@@ -590,31 +590,59 @@ class Harness {
     }
   }
 
+  /**
+   * Resolve a skill's prompt, interpolating $ARGUMENTS placeholders or appending raw args.
+   * @param {object} skill - Skill object with .content property
+   * @param {string} [userArgs=''] - Raw argument string from slash command invocation
+   * @returns {string} Resolved prompt ready for model submission
+   */
+  static resolveSkillPrompt(skill, userArgs) {
+    if (!skill || !skill.content) return '';
+    const args = (typeof userArgs === 'string') ? userArgs : String(userArgs || '');
+    const hasPlaceholder = skill.content.includes('$ARGUMENTS');
+
+    if (!hasPlaceholder) {
+      // Non-interpolated skills: append raw args after separator so model can distinguish instructions from context
+      return `${skill.content}\n\n---\nContext from user:\n${args}`;
+    }
+
+    // Interpolated skills: resolve $ARGUMENTS and $ARGUMENTS[n] placeholders
+    const trimmed = args.trim();
+    const tokens = trimmed ? trimmed.split(/\s+/) : [];
+    let prompt = skill.content.replace(
+      /\$ARGUMENTS(?:\[(\d+)\])?/g,
+      (match, indexStr) => {
+        if (indexStr === undefined) {
+          return tokens.length > 0 ? tokens.join(' ') : '(not provided)';
+        }
+        const i = parseInt(indexStr, 10);
+        return i < tokens.length ? tokens[i] : '(nothing)';
+      }
+    );
+    return prompt;
+  }
+
   async handleSkill(skillName, args) {
     const skill = this.skills.get(skillName);
     if (!skill) {
       this.emitCommandMessage(`Skill "${skillName}" not found.`);
       return;
     }
-    
-    // Build skill prompt (include marker so it appears in chat)
-    // const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
-    // const skillPrompt = `/[Skill: ${skillName}]\nExecute this skill:\n${skill.content}${argsStr}`;
-    const argsStr = args && Object.keys(args).length ? `\n\nUser Args: ${JSON.stringify(args)}` : '';
-    const skillPrompt = `${skill.content}${argsStr}`;
-    
+
+    const skillPrompt = Harness.resolveSkillPrompt(skill, args);
+
     // Show spinner while skill runs
     Events.emit('status:spinner', { message: `Running ${skillName}...` });
-    
+
     // Show skill description as feedback
     if (skill.description) {
       this.emitCommandMessage(skill.description);
     }
-    
+
     // Trigger normal model turn by emitting user:message event.
     // onUserMessage will add to context, fork, and send — piggybacking on the active session.
     Events.emit('user:message', { message: skillPrompt });
-    
+
     // Spinner is hidden when the turn goes back to the user
     const hideSpinner = () => {
       Events.off('turn:user', hideSpinner);
