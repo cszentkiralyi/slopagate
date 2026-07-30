@@ -327,6 +327,7 @@ class Harness {
    
     this.commands.push({ name: 'recap', handler: async () => this.recap() });
     this.commands.push({ name: 'clear', handler: async () => this.clear(), silent: true });
+    this.commands.push({ name: 'system-prompt', handler: async () => this.systemPromptCommand() });
     this.commands.push({
       name: 'config',
       arguments: [{ name: 'key' }, { name: 'value', optional: true }],
@@ -441,6 +442,11 @@ class Harness {
   }
   
   // Command handlers
+  async systemPromptCommand() {
+    const prompt = this.session.context.system_prompt || '(no system prompt set)';
+    this.emitCommandMessage(prompt);
+  }
+
   async recap() {
     // Not enough user activity to summarize
     if (this.#userMessagesSinceRecap < 2) return;
