@@ -9,6 +9,7 @@
   "assets": {
     "SYSTEM.md": "assets/SYSTEM.md",
     "skills/init/SKILL.md": "assets/skills/init/SKILL.md",
-    "skills/plan/SKILL.md": "assets/skills/plan/SKILL.md"
+    "skills/plan/SKILL.md": "assets/skills/plan/SKILL.md",
+    "skills/code-review/SKILL.md": "assets/skills/code-review/SKILL.md"
   }
 }

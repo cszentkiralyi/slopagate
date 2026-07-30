@@ -229,8 +229,8 @@ class Harness {
     // Compact callback: Harness owns the layers, Agent calls this mid-turn
     const compact = async (ctx) => {
       return await this.#activeContext.fork({
-      //return await ctx.fork({
         layers: [
+          'ephemeral',
           //'system_prompt',
           'tool_age',
           'tool_error',
@@ -551,7 +551,7 @@ class Harness {
     const oldTok = oldEst.system_prompt + oldEst.messages + oldEst.reserved;
 
     const newContext = await this.#activeContext.fork({
-      layers: ['tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning'],
+      layers: ['ephemeral', 'tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning'],
       summarize: async (transcript) => this.summarize(transcript)
     });
 

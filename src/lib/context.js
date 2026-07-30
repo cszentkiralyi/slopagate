@@ -94,7 +94,7 @@ class Context {
     tool_length: { disable: false, user_turns: 0, max: 200 },
     tool_total: { disable: false, user_turns: 0, max: 0.05 },
     model_reasoning: { disable: false, user_turns: 1, ttl: 0 },
-    ephemeral: { disable: false, user_turns: 1 }
+    ephemeral: { disable: false, user_turns: 1, saturation: 0 }
   };
   
   config;
