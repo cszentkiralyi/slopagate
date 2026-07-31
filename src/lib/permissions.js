@@ -125,7 +125,9 @@ class Permissions {
     if (!toolMap) return new Map();
     const result = new Map();
     for (const [scope, verdict] of toolMap) {
-      result.set(scope, verdict);
+      if (verdict) {
+        result.set(scope, verdict);
+      }
     }
     return result;
   }
@@ -177,8 +179,11 @@ class Permissions {
       if (Array.isArray(entries)) {
         for (const entry of entries) {
           if (entry.scope != null) {
-            const scopeMap = p.#tree.get(tool) || new Map();
-            if (!p.#tree.has(tool)) p.#tree.set(tool, scopeMap);
+            let scopeMap = p.#tree.get(tool);
+            if (!scopeMap) {
+              scopeMap = new Map();
+              p.#tree.set(tool, scopeMap);
+            }
             scopeMap.set(entry.scope, entry.verdict);
           }
         }
