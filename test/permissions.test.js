@@ -6,17 +6,17 @@ test('all tool-scope combinations denied by default', (t) => {
   const perms = new Permissions();
 
   const result = perms.check('Bash', 'git status');
-  assert.strictEqual(result.allowed, false);
+  assert.ok(!result.allowed);
   assert.deepStrictEqual(result.suggestions, []);
   assert.strictEqual(result.scope, 'git status');
 
   const result2 = perms.check('Edit', 'README.md');
-  assert.strictEqual(result2.allowed, false);
+  assert.ok(!result2.allowed);
   assert.deepStrictEqual(result2.suggestions, []);
 
   // checkScope also denied with no approvals
   const result3 = perms.checkScope('Bash:ls -la');
-  assert.strictEqual(result3.allowed, false);
+  assert.ok(!result3.allowed);
 });
 
 test('approved scopes are not denied', (t) => {
@@ -45,14 +45,14 @@ test('approved scopes are per-context', (t) => {
   assert.strictEqual(perms.check('Bash', 'git status').allowed, true);
 
   // Same scope for a different tool is still denied
-  assert.strictEqual(perms.check('Edit', 'git status').allowed, false);
+  assert.ok(!perms.check('Edit', 'git status').allowed);
 
   // Different scope for the same tool is denied
-  assert.strictEqual(perms.check('Bash', 'ls -la').allowed, false);
+  assert.ok(!perms.check('Bash', 'ls -la').allowed);
 
   // serialize / deserialize preserves isolation
   const serialized = perms.serialize();
-  assert.deepStrictEqual(serialized, { Bash: ['git status'] });
+  assert.deepStrictEqual(serialized, { Bash: [{ scope: 'git status', verdict: true }] });
 
   const restored = Permissions.deserialize(serialized);
   assert.strictEqual(restored.size, 1);
@@ -77,15 +77,55 @@ test('unapproved scopes return suggestions', (t) => {
 
   // Approved exact-only scope does NOT match wildcard requests
   const result0 = perms.check('Bash', 'README/*');
-  assert.strictEqual(result0.allowed, false);
+  assert.ok(!result0.allowed);
   assert.deepStrictEqual(result0.suggestions, []);
 
   // Non-matching scope returns no suggestions
   const result2 = perms.check('Bash', 'other/path');
-  assert.strictEqual(result2.allowed, false);
+  assert.ok(!result2.allowed);
   assert.deepStrictEqual(result2.suggestions, []);
+});
 
-  // findParents works with wildcard-approved scopes
+test('getUserScopes returns empty Map when no scopes approved', () => {
+  const perms = new Permissions();
+  assert.deepStrictEqual(perms.getUserScopes('Bash').size, 0);
+});
+
+test('getUserScopes returns empty Map for unknown tool', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git status');
+  const result = perms.getUserScopes('Edit');
+  assert.ok(result instanceof Map);
+  assert.strictEqual(result.size, 0);
+});
+
+test('getUserScopes returns new Map instance each call', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git status');
+  const a = perms.getUserScopes('Bash');
+  const b = perms.getUserScopes('Bash');
+  assert.notStrictEqual(a, b);
+});
+
+test('getUserScopes excludes denied scopes', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git log *');
+  perms.deny('Bash', 'rm -rf /');
+  const result = perms.getUserScopes('Bash');
+  assert.strictEqual(result.get('git log *'), true);
+  assert.ok(!result.has('rm -rf /'));
+});
+
+test('getUserScopes includes approved wildcards with their wildcard form', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'src/lib/*');
+  const result = perms.getUserScopes('Bash');
+  assert.strictEqual(result.get('src/lib/*'), true);
+});
+
+test('findParents works with wildcard-approved scopes', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'src/lib/*');
   const parents = perms.findParents('Bash', 'src/lib/context.js');
   assert.deepStrictEqual(parents, ['src/lib/*']);
 
@@ -93,4 +133,38 @@ test('unapproved scopes return suggestions', (t) => {
   perms.approve('Bash', 'src/*');
   const parents2 = perms.findParents('Bash', 'src/lib/context.js');
   assert.deepStrictEqual(parents2, ['src/lib/*', 'src/*']);
+});
+
+test('getUserScopes returns only approved scopes for a tool', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git status');
+  perms.approve('Bash', 'git log *');
+  perms.deny('Bash', 'rm -rf /');
+
+  const userScopes = perms.getUserScopes('Bash');
+  assert.strictEqual(userScopes.size, 2);
+  assert.ok(userScopes.has('git status'));
+  assert.ok(userScopes.has('git log *'));
+  // Denied scope should not be included
+  assert.ok(!userScopes.has('rm -rf /'));
+});
+
+test('getUserScopes returns empty Map for unknown tool', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git status');
+
+  const userScopes = perms.getUserScopes('Edit');
+  assert.strictEqual(userScopes.size, 0);
+});
+
+test('getUserScopes returns new Map instance each call', () => {
+  const perms = new Permissions();
+  perms.approve('Bash', 'git status');
+
+  const scopes1 = perms.getUserScopes('Bash');
+  const scopes2 = perms.getUserScopes('Bash');
+  // Should be different instances
+  assert.notStrictEqual(scopes1, scopes2);
+  // But same content
+  assert.deepStrictEqual([...scopes1], [...scopes2]);
 });

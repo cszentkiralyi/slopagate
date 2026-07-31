@@ -27,8 +27,8 @@ class Tool {
   }
   get json() { return JSON.stringify(this.spec); }
   
-  constructor(props) {
-    this.harness = props.harness;
+  constructor(props = {}) {
+    this.harness = props?.harness || null;
   }
   
   #messageCallback = null;

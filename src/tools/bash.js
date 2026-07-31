@@ -11,6 +11,9 @@ class BashTool extends Tool {
   nounPlural = 'commands';
   description = 'Execute a limited set of shell commands: ';
   readonly = false;
+  #userScopes = new Map();
+  #userPatterns = [];
+
   parameters = {
     type: 'object',
     properties: {
@@ -48,7 +51,7 @@ class BashTool extends Tool {
   ];
 
   constructor(props) {
-    super(props);
+    super(props || {});
     Object.assign(this, props);
     
     let base_cmds = new Set();
@@ -56,7 +59,7 @@ class BashTool extends Tool {
     this.description += Array.from(base_cmds.values()).sort().join(', ');
     
     // Merge user-scoped patterns into the permission check
-    if (props.userScopes && props.userScopes.size > 0) {
+    if (props?.userScopes && props.userScopes.size > 0) {
       this.#userPatterns = [...props.userScopes.keys()].map(pattern => ({
         pattern, readonly: true  // user-approved commands default to read-only safety
       }));
