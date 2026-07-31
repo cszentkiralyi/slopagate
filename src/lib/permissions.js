@@ -115,6 +115,22 @@ class Permissions {
   }
 
   /**
+   * Get approved scopes as a Map<scope, true> for a tool.
+   * Used by tools to access their user-granted permissions.
+   * @param {string} tool - Tool name
+   * @returns {Map<string, boolean>} Map of approved scopes
+   */
+  getUserScopes(tool) {
+    const toolMap = this.#tree.get(tool);
+    if (!toolMap) return new Map();
+    const result = new Map();
+    for (const [scope, verdict] of toolMap) {
+      if (verdict) result.set(scope, true);
+    }
+    return result;
+  }
+
+  /**
    * Remove a scope (regardless of verdict).
    * @param {string} tool - Tool name
    * @param {string} scope - The scope to remove

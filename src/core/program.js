@@ -299,6 +299,11 @@ class Program {
       });
     }
 
+    const userScopes = {};
+    for (const toolName of ['Bash', 'Read', 'Edit', 'Ls', 'Grep']) {
+      userScopes[toolName] = this.permissions.getUserScopes(toolName);
+    }
+    
     this.harness = new Harness({
       session: {
         config: this.config,
@@ -307,7 +312,8 @@ class Program {
         ...(this.session?.messages && { messages: this.session.messages })
       },
       config: this.config,
-      skills: this.skills
+      skills: this.skills,
+      userScopes
     });
     // Auto-clean old sessions on startup
     this.harness.sessionManager.cleanup({ maxAge: 7, maxCount: 20 });

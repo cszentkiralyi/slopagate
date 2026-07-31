@@ -54,16 +54,29 @@ class BashTool extends Tool {
     let base_cmds = new Set();
     BashTool.SAFE_BASH_CMDS.map(c => c.pattern.split(' ')[0]).forEach(c => base_cmds.add(c));
     this.description += Array.from(base_cmds.values()).sort().join(', ');
+    
+    // Merge user-scoped patterns into the permission check
+    if (props.userScopes && props.userScopes.size > 0) {
+      this.#userPatterns = [...props.userScopes.keys()].map(pattern => ({
+        pattern, readonly: true  // user-approved commands default to read-only safety
+      }));
+    } else {
+      this.#userPatterns = [];
+    }
   }
 
   permissionGate(command) {
-    return BashTool.SAFE_BASH_CMDS.some(({ pattern, readonly }) => {
+    const matchesPattern = ({ pattern, readonly }) => {
       if (this.readonly && !readonly) return false;
       if (pattern.endsWith('*')) {
         return command.startsWith(pattern.substring(0, pattern.length - 1));
       }
       return command === pattern;
-    });
+    };
+
+    // Check user-scoped patterns first (more permissive), then built-in
+    if (this.#userPatterns.some(matchesPattern)) return true;
+    return BashTool.SAFE_BASH_CMDS.some(matchesPattern);
   }
   
   toolHint(command) {

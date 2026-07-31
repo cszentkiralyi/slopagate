@@ -206,17 +206,17 @@ class Harness {
     // No own hooks instance — uses global Hooks singleton
     
     const tools = [
-      new ReadTool({ harness: this }),
-      new EditTool({ harness: this }),
-      new LsTool({ harness: this }),
-      new GrepTool({ harness: this }),
-      new BashTool({ harness: this }),
+      new ReadTool({ harness: this, userScopes: props.userScopes }),
+      new EditTool({ harness: this, userScopes: props.userScopes }),
+      new LsTool({ harness: this, userScopes: props.userScopes }),
+      new GrepTool({ harness: this, userScopes: props.userScopes }),
+      new BashTool({ harness: this, userScopes: props.userScopes }),
     ];
     if (this.config.get('memory')) {
-      tools.push(new MemoryTool({ harness: this }));
+      tools.push(new MemoryTool({ harness: this, userScopes: props.userScopes }));
     }
-    tools.push(new ActivateSkillTool({ harness: this }));
-    tools.push(new TodoTool({ harness: this }));
+    tools.push(new ActivateSkillTool({ harness: this, userScopes: props.userScopes }));
+    tools.push(new TodoTool({ harness: this, userScopes: props.userScopes }));
     this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),
