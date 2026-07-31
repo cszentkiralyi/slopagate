@@ -61,6 +61,13 @@ Best practices: call with mode "edit" to set the full list, and "view" to check 
           return;
         }
         const incomplete = this.#todos.filter(item => !/^- \[[xX]\]/.test(item)).length;
+
+        // If mutations have occurred since last list edit but no formal update nudge fired, add a soft drift hint.
+        if (this.#mutationCount > 0 && this.#editNudgeGiven < 1) {
+          Logger.log(`[Todo] ambient drift: ${this.#mutationCount} changes since last list update`);
+          this.harness.ambientReminder(`You've made ${this.#mutationCount} change${this.#mutationCount === 1 ? '' : 's'} since your todo list was last updated.`);
+        }
+
         Logger.log(`[Todo] ambient reminder: ${this.#todos.length} total, ${incomplete} incomplete`);
         this.harness.ambientReminder(`[Todo]\n${this.#getCompactList()}`);
       }
