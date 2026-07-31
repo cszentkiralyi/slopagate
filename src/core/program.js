@@ -555,6 +555,17 @@ class Program {
       this.#aggregator.reset();
       this.interface.draw();
     });
+    Events.on('skill:start', ({ skillName }) => {
+      // Skill turns behave like real user turns from Program's perspective: stop AFK, reset turn timer, show spinner.
+      // The skill prompt is NOT surfaced as a user message bubble — we keep the slash-command visual treatment.
+      this.#stopAfkTimer();
+      this.#turn_start = Date.now();
+      this.#currentSpinnerPhrase = { present: `Running ${skillName}`, past: `Ran ${skillName}` };
+      if (!this.#modelTurnSpinner) {
+        this.#modelTurnSpinner = this.interface.statusline.showSpinner(`Running ${skillName}...`);
+      }
+      this.interface.draw();
+    });
     Events.on('turn:model', (event) => {
       this.#stopAfkTimer();
       this.interface.draw();

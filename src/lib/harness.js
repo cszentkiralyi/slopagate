@@ -637,8 +637,10 @@ class Harness {
 
     const skillPrompt = Harness.resolveSkillPrompt(skill, args);
 
-    // Show spinner while skill runs
-    Events.emit('status:spinner', { message: `Running ${skillName}...` });
+    // Notify Program that a model turn has started so it can mirror real-turn state:
+    // stop AFK timer, reset turn start, show spinner. The actual user message is NOT
+    // surfaced to the chat history — we want the slash-command visual treatment.
+    Events.emit('skill:start', { skillName });
 
     // Show skill description as feedback
     if (skill.description) {
