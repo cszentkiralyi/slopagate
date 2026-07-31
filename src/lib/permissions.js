@@ -30,7 +30,7 @@ class Permissions {
     // Sort by specificity: longer prefix = more specific = check first
     matchingWildcards.sort((a, b) => b.prefix.length - a.prefix.length);
     for (const { wildcard, verdict } of matchingWildcards) {
-      if (verdict) {
+      if (verdict === true) {
         return { allowed: true, suggestions: [], scope: wildcard };
       }
       // Denied glob: only blocks itself, not its children
@@ -96,7 +96,7 @@ class Permissions {
     if (toolMap.has(scope)) return [];
 
     return Array.from(toolMap)
-      .filter(([wildcard, verdict]) => verdict && wildcard.endsWith('*') && scope.startsWith(wildcard.slice(0, -1)))
+      .filter(([wildcard, verdict]) => verdict === true && wildcard.endsWith('*') && scope.startsWith(wildcard.slice(0, -1)))
       .slice(0, 5)
       .map(([wildcard]) => wildcard);
   }
@@ -110,7 +110,7 @@ class Permissions {
     const toolMap = this.#tree.get(tool);
     if (!toolMap) return [];
     return Array.from(toolMap)
-      .filter(([, verdict]) => verdict)
+      .filter(([, verdict]) => verdict === true)
       .map(([scope]) => scope);
   }
 
@@ -125,7 +125,7 @@ class Permissions {
     if (!toolMap) return new Map();
     const result = new Map();
     for (const [scope, verdict] of toolMap) {
-      if (verdict) result.set(scope, true);
+      result.set(scope, verdict);
     }
     return result;
   }
