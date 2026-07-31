@@ -24,7 +24,7 @@ class BashTool extends Tool {
 
   static SAFE_BASH_CMDS = [
     //{ pattern: 'npm run test', readonly: false },
-    { pattern: 'node --test *', readonly: false },
+    { pattern: 'node *', readonly: false },
     { pattern: 'git log *', readonly: true },
     { pattern: 'git show*', readonly: true },
     { pattern: 'git status*', readonly: true },

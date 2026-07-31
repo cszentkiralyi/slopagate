@@ -206,17 +206,17 @@ class Harness {
     // No own hooks instance — uses global Hooks singleton
     
     const tools = [
-      new ReadTool({ harness: this, userScopes: props.userScopes }),
-      new EditTool({ harness: this, userScopes: props.userScopes }),
-      new LsTool({ harness: this, userScopes: props.userScopes }),
-      new GrepTool({ harness: this, userScopes: props.userScopes }),
-      new BashTool({ harness: this, userScopes: props.userScopes }),
+      new ReadTool({ harness: this, userScopes: props.userScopes?.['Read'] || new Map() }),
+      new EditTool({ harness: this, userScopes: props.userScopes?.['Edit'] || new Map() }),
+      new LsTool({ harness: this, userScopes: props.userScopes?.['Ls'] || new Map() }),
+      new GrepTool({ harness: this, userScopes: props.userScopes?.['Grep'] || new Map() }),
+      new BashTool({ harness: this, userScopes: props.userScopes?.['Bash'] || new Map() }),
     ];
     if (this.config.get('memory')) {
-      tools.push(new MemoryTool({ harness: this, userScopes: props.userScopes }));
+      tools.push(new MemoryTool({ harness: this, userScopes: props.userScopes?.['Memory'] || new Map() }));
     }
-    tools.push(new ActivateSkillTool({ harness: this, userScopes: props.userScopes }));
-    tools.push(new TodoTool({ harness: this, userScopes: props.userScopes }));
+    tools.push(new ActivateSkillTool({ harness: this, userScopes: props.userScopes?.['ActivateSkill'] || new Map() }));
+    tools.push(new TodoTool({ harness: this, userScopes: props.userScopes?.['Todo'] || new Map() }));
     this.toolbox = new Toolbox(this, tools);
     this.session = new Session({
       tools: this.toolbox.all(),
