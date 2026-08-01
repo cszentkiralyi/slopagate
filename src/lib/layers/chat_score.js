@@ -1,9 +1,9 @@
-const { Logger, lerp, louse } = require('../../util.js');
+const { Logger, louse } = require('../../util.js');
 
 /**
- * Group messages into turns for scoring.
- * A turn consists of user message(s) + assistant responses/tool calls.
- * Each new user message after an assistant response starts a new turn.
+ * Group messages into turns per PLAN.md step 1.
+ * From oldest-to-newest: consecutive user messages start a turn; gather until
+ * next user message and add to that turn. Next user message(s) begin the next turn.
  */
 function groupIntoTurns(messages) {
   const turns = [];
@@ -11,24 +11,14 @@ function groupIntoTurns(messages) {
 
   for (const msg of messages) {
     if (msg.role === 'user') {
-      // If we already have assistant responses in the current turn,
-      // start a new turn for this user message
-      if (currentTurn && currentTurn.assistantMessages.length > 0) {
-        currentTurn = { userMessages: [], assistantMessages: [] };
-        turns.push(currentTurn);
-      } else if (!currentTurn) {
-        // First user message ever
-        currentTurn = { userMessages: [], assistantMessages: [] };
-        turns.push(currentTurn);
-      }
-      // If currentTurn exists but has no assistant messages, keep adding to it (consecutive user messages)
-      if (!currentTurn) {
+      // A new user message after assistant responses starts a new turn;
+      // otherwise it continues the current turn (consecutive users).
+      if (!currentTurn || currentTurn.assistantMessages.length > 0) {
         currentTurn = { userMessages: [], assistantMessages: [] };
         turns.push(currentTurn);
       }
       currentTurn.userMessages.push(msg);
     } else if (msg.role === 'assistant' || msg.role === 'tool') {
-      // Add assistant/tool messages to the current turn
       if (!currentTurn) continue;
       currentTurn.assistantMessages.push(msg);
     }
@@ -38,55 +28,24 @@ function groupIntoTurns(messages) {
 }
 
 /**
- * Score a single message based on importance and recency.
+ * Score a turn using v1's formula: louse(recency) with decay for older turns.
+ * All messages in a turn share the same position, so we compute one score per turn.
  */
-function scoreMessage(msg, totalMessages, index) {
-  const baseImportance = msg.importance || 0;
-  const recencyFactor = (index / totalMessages); // Newer messages (higher index) get higher scores
-  return baseImportance * 0.7 + recencyFactor * 0.3;
-}
+function scoreTurn(turn, allTurns, globalIndex) {
+  const normalizedPos = globalIndex / allTurns.length;
+  const baseScore = louse(normalizedPos);
 
-/**
- * Score a turn based on the highest-scoring message in it.
- */
-function scoreTurn(turn, index, totalTurns) {
-  const allMessages = [...turn.userMessages, ...turn.assistantMessages];
-  let maxScore = 0;
-
-  for (const msg of allMessages) {
-    const msgScore = scoreMessage(msg, totalTurns * 2, index); // Approximate position
-    if (msgScore > maxScore) {
-      maxScore = msgScore;
-    }
+  // Penalize older turns (position <= 0.5) using the same decay as v1:
+  //   g(x, t) = x > 0.5 ? f(x) : Math.max((1 - t/T) * f(x), 0)
+  if (normalizedPos <= 0.5) {
+    return Math.max(baseScore * (1 - normalizedPos), 0);
   }
 
-  return maxScore;
+  return baseScore;
 }
 
 /**
- * Inflate the budget across selected turns from newest to oldest.
- */
-function inflateBudget(selectedTurns, remainingBudget, totalBudget) {
-  let currentBudget = remainingBudget;
-
-  // Sort turns newest-to-oldest for inflation
-  const sortedTurns = [...selectedTurns].reverse();
-
-  for (const turn of sortedTurns) {
-    const turnSize = turn.userMessages.reduce((sum, m) => sum + (m.tokenCount || 0), 0) +
-                     turn.assistantMessages.reduce((sum, m) => sum + (m.tokenCount || 0), 0);
-
-    // Allocate a proportional share of the remaining budget
-    const allocation = Math.min(turnSize, currentBudget * 0.1); // Up to 10% of remaining per turn
-    turn.budgetAllocation = allocation;
-    currentBudget -= allocation;
-  }
-
-  return selectedTurns;
-}
-
-/**
- * Collapse adjacent user messages into synthetic messages.
+ * Collapse adjacent user messages into one synthetic message (PLAN.md step 5).
  */
 function collapseUserMessages(turn) {
   if (turn.userMessages.length <= 1) return turn.userMessages[0];
@@ -98,29 +57,28 @@ function collapseUserMessages(turn) {
     role: 'user',
     content: collapsedContent,
     tokenCount: collapsedTokenCount,
-    _collapsed: true // Mark as synthetic for debugging
+    _collapsed: true
   };
 }
 
 /**
- * chat_score compaction layer - v2.0
+ * chat_score compaction layer - v2.0 (per PLAN.md)
  */
 const chat_score = ({ messages, config, context_window, budget }) => {
   if (!messages || !messages.length) return { messages: [] };
 
-  // Calculate target saturation percentage
   const targetSaturation = budget.target_saturation || config.saturation || 0.55;
 
-  // Group messages into turns
+  // Step 1: Group into turns (oldest-to-newest)
   const turns = groupIntoTurns(messages);
 
-  // Score each turn
+  // Step 2: Score each turn; sort descending by score for selection
   const scoredTurns = turns.map((turn, index) => ({
     turn,
-    score: scoreTurn(turn, index, turns.length)
-  })).sort((a, b) => b.score - a.score); // Sort by score descending (newest first)
+    score: scoreTurn(turn, turns.length, index)
+  })).sort((a, b) => b.score - a.score);
 
-  // Identify the trailing user-only turn from original conversation order (last one with no assistant response)
+  // Find trailing user-only turn (no assistant response) — preserve at end per PLAN.md
   let trailingUserTurn = null;
   for (let i = turns.length - 1; i >= 0; i--) {
     if (turns[i].assistantMessages.length === 0) {
@@ -129,44 +87,48 @@ const chat_score = ({ messages, config, context_window, budget }) => {
     }
   }
 
-  // Separate stub turns (with assistant responses) from trailing user-only turns
-  const stubTurns = [];
-  for (const st of scoredTurns) {
-    if (trailingUserTurn && st.turn === trailingUserTurn) continue; // skip trailing turn
-    if (st.turn.assistantMessages.length > 0) {
-      stubTurns.push(st);
-    }
-  }
-
-  // Select stubs within 10% budget from highest-scoring turns
+  // Step 3: Select stubs greedily from highest-scoring turns.
+  // Stub budget is 10% of the available layer budget; only user message tokens count against it.
+  const stubBudget = budget.available * 0.1;
   const selectedStubs = [];
-  let usedBudget = 0;
-  const budgetThreshold = context_window * targetSaturation * 0.1; // 10% of available budget
+  let usedStubBudget = 0;
 
-  for (const scoredStub of stubTurns) {
-    const turnSize = scoredStub.turn.userMessages.reduce((sum, m) => sum + (m.tokenCount || 0), 0) +
-                     scoredStub.turn.assistantMessages.reduce((sum, m) => sum + (m.tokenCount || 0), 0);
-
-    if (usedBudget + turnSize <= budgetThreshold) {
-      selectedStubs.push(scoredStub.turn);
-      usedBudget += turnSize;
+  for (const { turn } of scoredTurns) {
+    if (turn === trailingUserTurn || turn.assistantMessages.length === 0) continue;
+    const userTokenCost = turn.userMessages.reduce(
+      (sum, m) => sum + (m.tokenCount || 0), 0
+    );
+    if (usedStubBudget + userTokenCost <= stubBudget) {
+      selectedStubs.push({ turn, isStub: true });
+      usedStubBudget += userTokenCost;
     } else {
-      break; // Stop when we exceed the threshold
+      break;
     }
   }
 
-  // Inflate remaining budget across selected stubs newest-to-oldest
-  inflateBudget(selectedStubs, budget.available - usedBudget, budget.available);
-
-  // Build final message list: selected stubs in score order (newest first), then trailing user turn
+  // Step 4: Iterate newest-to-oldest to assemble final list.
+  // Budget B = available - usedStubBudget; remaining capacity after all stubs.
+  const b = Math.max(0, budget.available - usedStubBudget);
+  let budgetLeft = b;
   const resultMessages = [];
-  for (const turn of selectedStubs) {
+
+  // Process selected stubs newest-to-oldest (reverse of selection order since
+  // scoredTurns was descending and we appended in that order)
+  for (const { turn } of [...selectedStubs].reverse()) {
     const collapsedUserMsg = collapseUserMessages(turn);
-    if (collapsedUserMsg) {
-      resultMessages.push(collapsedUserMsg);
-    }
-    for (const am of turn.assistantMessages) {
-      resultMessages.push(am);
+    resultMessages.push(collapsedUserMsg);
+
+    // Cost of the "rest" of the turn (non-user content) — PLAN.md step 4.ii
+    const restCost = turn.assistantMessages.reduce(
+      (sum, m) => sum + (m.tokenCount || 0), 0
+    );
+
+    if (restCost <= budgetLeft) {
+      // Inflate: add full assistant/tool messages and subtract from B
+      for (const am of turn.assistantMessages) {
+        resultMessages.push(am);
+      }
+      budgetLeft -= restCost;
     }
   }
 

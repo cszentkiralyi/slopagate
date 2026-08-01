@@ -710,7 +710,7 @@ class Harness {
   async onUserMessage(event) {
     // TODO: turns, right now the user can just send stuff whenever
     let message = { role: 'user', content: event.message };
-    
+
     // Reset dedup tracking for new turn
     this.resetDedup();
     //this.session.abort();
@@ -719,15 +719,15 @@ class Harness {
     // Create fresh abort controller for this turn
     const turnController = new AbortController();
     this.#abortController = turnController;
-    
+
     // Fire before_user_message hook so tools can add ambient reminders
     Hooks.emit('before_user_message', { message: event.message });
-    
+
     // Amalgamate all pending reminders (including any added by hook listeners)
     this.#processAmbientReminders();
-    
-    // Fork from our own active context and apply compaction layers
-    let ctx = await this.#activeContext.fork({
+
+    // Fork from master context (never compacted) to ensure all forks originate from master
+    let ctx = await this.session.context.fork({
       layers: [
           //'system_prompt',
           'tool_age',
@@ -737,10 +737,10 @@ class Harness {
           'chat_score',
           'model_reasoning'
         ],
-      summarize: async (transcript) => this.summarize(transcript)
+      summarize: async (transcript) => this.summarize(transcript),
+      config: this.config
     });
-    //this.#activeContext.add(message);
-    
+
     // Pass active context to Agent
     let response = await this.agent.startTurn(event.message, turnController, ctx);
     this.#logTurnStats();

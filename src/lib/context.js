@@ -146,6 +146,11 @@ class Context {
   }
 
   add(...messages) {
+    for (const msg of messages) {
+      if (!('tokenCount' in msg) && msg.content !== undefined) {
+        msg.tokenCount = Context.estimate(msg.content);
+      }
+    }
     this.#messageEstimate += Context.estimate(Context.transcript(messages));
     this.messages.push(...messages);
   }
@@ -243,10 +248,34 @@ class Context {
         ctx = this.config.get('context_window'),
         config = CONTEXT_CONFIGS[this.aggression_level],
         bname;
+    
+    // Calculate reserved tokens (system_prompt + generation_buffer + verbatim_messages)
+    const systemPromptTokens = Context.estimate(this.system_prompt);
+    const generationBuffer = this.aggression_level === 'medium' ? 256 : 
+                           (this.aggression_level === 'high' || this.aggression_level === 'xhigh') ? 512 : 0;
+    
+    // Sum tokenCount for verbatim messages
+    const verbatimTokens = Array.isArray(this.messages) 
+      ? this.messages.reduce((sum, msg) => sum + (msg.verbatim && msg.tokenCount ? msg.tokenCount : 0), 0)
+      : 0;
+    
+    const reserved = systemPromptTokens + generationBuffer + verbatimTokens;
+    
+    // Calculate target saturation percentage (55% for medium, lower for higher aggression)
+    const targetSaturation = config.saturation || 0.55;
+    
+    // Budget is the available tokens after reserving space for non-compactable items
+    budget.reserved = reserved;
+    budget.target_saturation = targetSaturation;
+    budget.available = Math.max(0, (ctx * targetSaturation) - reserved);
+    
+    // Keep existing budget fields for backward compatibility
     for (bname of Object.keys(config.budget)) {
-      if (bname in budget) continue;
-      budget[bname] = ctx * this.resolveValue(config.budget[bname]);
+      if (!(bname in budget)) {
+        budget[bname] = ctx * this.resolveValue(config.budget[bname]);
+      }
     }
+    
     return budget;
   }
   
