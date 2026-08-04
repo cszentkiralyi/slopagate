@@ -169,7 +169,7 @@ class Context {
       transcript: (s) => Context.transcript(s),
       summarize: opts?.summarize ?? (async () => 'Summary')
     }, saturation = this.estimates.saturation,
-      verbatim, n_layer, layer, i, u, m, r;
+      verbatim, n_layer, layer, i, u, m, r, s;
     //Logger.log(`compact: Starting with ${this.messages.length} messages`);
     for (n_layer of layers) {
       if (!(layer = Layers[n_layer])) continue;
@@ -182,10 +182,18 @@ class Context {
       // Need at least user + call + resp to bother
       if (arg.config.user_turns) {
         if (arg.messages.length >= arg.config.user_turns) {
-          u = 0;
+          u = 0, s = false;
           for (i = arg.messages.length - 1; i >= 0; i--) {
             if (!(m = arg.messages[i])) continue;
-            if (m.role === 'user') u++;
+            if (m.role === 'user') {
+              if (s) {
+                u++;
+                while (i && (m = arg.messages[i-1]) && m.role === 'user')
+                  i--;
+              }
+            } else {
+              s = true;
+            }
             if (u >= arg.config.user_turns) break;
           }
           if (u >= arg.config.user_turns) {

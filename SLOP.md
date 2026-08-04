@@ -8,19 +8,15 @@ Terminal-based AI coding assistant that uses a local LLM model to perform action
 
 ## Source Directory (`src/`)
 - `slopagate.js` - Main application, uses TUI (terminal UI) with banners and spinner
-- `core/` - Core modules of the application: interface, config, and logic
-- `lib/` - Various sub-modules like ANSI escape libraries, abstractions like `Context`, `Session`, and `Harness`
+- `core/` - Core modules of the application: interface, config, and program gluing logic to UI
+- `lib/` - Sub-modules like helper libraries; abstractions like `Context`, `Session`, and `Harness`
   - `components/` - TUI components
   - `layers/` - Compaction layers for context management
-- `tools/` - CLI tools: bash, edit, grep, ls, read, tool.js base
+- `tools/` - CLI tools: bash, edit, grep, ls, read, tool.js base class
 
-## Config Files
-- `package.json` - Node.js project, main: `src/slopagate.js`, scripts: dev, build, clean, test
-- `sea.json` - Node.js SEA configuration file for `slop` binary build
-
-## Key Dependencies
-- `esbuild` ^0.28.0 (devDependency)
-- CommonJS module system
+## Dev tools
+- Tests: `node --test` on files in `test/`, no external deps
+- Syntax checks: `node -e "require('./src/path/to/file.js')"`
 
 ## Rules
 You must preface all your commit messages with "VIBE:", and end with the line "Co-authored-by: Qwen <qwen@slopagate.fake>".
