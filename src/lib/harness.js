@@ -227,6 +227,7 @@ class Harness {
     const compact = async (ctx) => {
       return await ctx.fork({
         layers: [
+          'chat_summary',
           'ephemeral',
           //'system_prompt',
           'tool_age',
@@ -541,26 +542,54 @@ class Harness {
 
   async compact() {
     Events.emit('status:spinner', { message: 'Compacting...' });
-    
-    const oldEst = this.#activeContext.estimates;
-    const oldTok = oldEst.system_prompt + oldEst.messages + oldEst.reserved;
 
-    const newContext = await this.#activeContext.fork({
-      layers: ['ephemeral', 'tool_age', 'tool_error', 'tool_length', 'tool_total', 'chat_score', 'model_reasoning'],
-      summarize: async (transcript) => this.summarize(transcript)
+    // Fork with chat_summary + ephemeral layers to drop ephemeral messages and summarize older parts without mutating the session context
+    let compactContext = await this.session.context.fork({ layers: ['chat_summary', 'ephemeral'] });
+
+    // Filter to only 'user' and 'assistant' role messages with content
+    compactContext.messages = compactContext.messages.filter(
+      m => (m.role === 'user' || m.role === 'assistant') && m.content?.length > 0
+    );
+
+    // Not enough messages to be worth summarizing
+    if (compactContext.messages.length < 4) {
+      Events.emit('status:spinner', { hide: true });
+      return;
+    }
+
+    // Compact with chat_score layer to score and down-select turns
+    await compactContext.compact({ layers: ['chat_score'] });
+
+    let transcript = Context.transcript(compactContext.messages);
+    Logger.log(`Harness: compacting ${compactContext.messages.length} messages.`);
+
+    // Use subagent for summary
+    let summaryContext = new Context({
+      config: this.config,
+      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a concise summary. Focus on the high-level intent and what changed conceptually — not specific files, commands, or literal actions. Abstract away implementation details and capture the purpose of what was done.`
+    });
+    let summaryAgent = new Agent({
+      context: summaryContext,
+      config: this.config,
+      abortController: null
     });
 
-    this.#activeContext = newContext;
-    this.context = newContext;
+    let summaryResponse = await summaryAgent.startTurn(transcript, null);
 
-    const newEst = newContext.estimates;
-    const newTok = newEst.system_prompt + newEst.messages + newEst.reserved;
-    const deltaTok = (newTok - oldTok || 0).toFixed(0);
-    const pct = (100 * newTok / newEst.context_window).toFixed(0);
+    if (!summaryResponse || !summaryResponse.content || !summaryResponse.content.length) {
+      Logger.log(`Harness: no compact summary.`);
+      Events.emit('status:spinner', { hide: true });
+      return;
+    }
 
-    Events.emit('status:spinner', { hide: true });
-    this.emitCommandMessage(`Context compacted: ${deltaTok} → ${newTok} (now ${pct}%).`);
-    Events.emit('metrics:tokens', {});
+    let summaryContent = `🕮  ${summaryResponse.content}`;
+    Logger.log(`Harness: compact summary = ${summaryContent}`);
+
+    // Add to session context with role "summary" — hidden from UI, for agent awareness only
+    this.session.context.add({
+      role: 'summary',
+      content: summaryContent
+    });
   }
 
   async configCommand(argstr) {
@@ -719,6 +748,8 @@ class Harness {
     let ctx = await this.session.context.fork({
       layers: [
           //'system_prompt',
+          'chat_summary',
+          'ephemeral',
           'tool_age',
           'tool_error',
           'tool_length',

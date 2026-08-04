@@ -1,77 +1,51 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const chat_summary = require('../src/lib/layers/chat_summary');
+const chat_summary = require('../src/lib/layers/chat_summary.js');
 
-const messages = [
-  { role: 'user', content: 'Hello' },
-  { role: 'assistant', content: 'Hi there' },
-  { role: 'user', content: 'How are you?' },
-  { role: 'assistant', content: 'I am good' },
-  { role: 'user', content: 'What is the weather?' },
-  { role: 'assistant', content: 'I do not know' },
-];
-
-const summaryCallback = async (transcript) => `Summary of transcript: ${transcript}`;
-const toTranscript = (m) => `${m.role}: ${m.content}`;
-
-test('returns as-is if fewer than 4 messages', async (t) => {
-  const shortMessages = [
-    { role: 'user', content: 'A' },
-    { role: 'assistant', content: 'B' },
+test('returns as-is when no summary message exists', () => {
+  const messages = [
+    { role: 'user', content: 'Hello' },
+    { role: 'assistant', content: 'Hi there' },
   ];
-
-  const result = await chat_summary({
-    messages: shortMessages,
-    requestSummary: summaryCallback,
-    toTranscript: toTranscript,
-  });
-
-  t.assert.strictEqual(result.messages, shortMessages);
+  const result = chat_summary({ messages });
+  assert.deepStrictEqual(result.messages, messages);
 });
 
-test('skips 4 most recent and finds assistant in remaining', async (t) => {
-  const longMessages = [
-    { role: 'user', content: '1' },
-    { role: 'assistant', content: '2' },
-    { role: 'user', content: '3' },
-    { role: 'assistant', content: '4' },
-    { role: 'user', content: '5' },
-    { role: 'assistant', content: '6' },
-    { role: 'user', content: '7' },
-    { role: 'assistant', content: '8' },
-    { role: 'user', content: '9' },
-    { role: 'assistant', content: '10' },
+test('drops older messages and changes summary role to user', () => {
+  const messages = [
+    { role: 'user', content: 'Old Q1' },
+    { role: 'assistant', content: 'Old A1' },
+    { role: 'summary', content: 'Context summary here' },
+    { role: 'user', content: 'New Q2' },
+    { role: 'assistant', content: 'New A2' },
   ];
-
-  const result = await chat_summary({
-    messages: longMessages,
-    requestSummary: summaryCallback,
-    toTranscript: toTranscript,
-  });
-
-  // Should return compacted array with summary + replacement + last 4 messages
-  t.assert.strictEqual(result.messages.length, 6);
-  t.assert.strictEqual(result.messages[0].role, 'user');
-  t.assert.strictEqual(result.messages[1].role, 'assistant');
-  t.assert.strictEqual(result.messages[1].content, 'Thank you, now I have the context I need to continue.');
-  t.assert.strictEqual(result.messages[2].role, 'user');
-  t.assert.strictEqual(result.messages[2].content, '7');
+  const result = chat_summary({ messages });
+  assert.strictEqual(result.messages.length, 3);
+  assert.strictEqual(result.messages[0].role, 'user');
+  assert.strictEqual(result.messages[0].content, 'Context summary here');
+  assert.strictEqual(result.messages[1].role, 'user');
+  assert.strictEqual(result.messages[1].content, 'New Q2');
+  assert.strictEqual(result.messages[2].role, 'assistant');
+  assert.strictEqual(result.messages[2].content, 'New A2');
 });
 
-test('returns as-is if no assistant found in summarize range', async (t) => {
-  const noAssistantMessages = [
-    { role: 'user', content: '1' },
-    { role: 'user', content: '2' },
-    { role: 'user', content: '3' },
-    { role: 'user', content: '4' },
-    { role: 'user', content: '5' },
+test('keeps only from most-recent summary', () => {
+  const messages = [
+    { role: 'summary', content: 'Old summary' },
+    { role: 'user', content: 'Between' },
+    { role: 'assistant', content: 'Resp' },
+    { role: 'summary', content: 'New summary' },
+    { role: 'user', content: 'After' },
   ];
+  const result = chat_summary({ messages });
+  assert.strictEqual(result.messages.length, 2);
+  assert.strictEqual(result.messages[0].role, 'user');
+  assert.strictEqual(result.messages[0].content, 'New summary');
+  assert.strictEqual(result.messages[1].role, 'user');
+  assert.strictEqual(result.messages[1].content, 'After');
+});
 
-  const result = await chat_summary({
-    messages: noAssistantMessages,
-    requestSummary: summaryCallback,
-    toTranscript: toTranscript,
-  });
-
-  t.assert.strictEqual(result.messages, noAssistantMessages);
+test('returns as-is for empty messages', () => {
+  const result = chat_summary({ messages: [] });
+  assert.deepStrictEqual(result.messages, []);
 });

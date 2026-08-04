@@ -1,22 +1,29 @@
 const { Logger } = require('../../util.js');
 
-const chat_summary = async ({ messages, system_prompt, summarize, estimate, transcript }) => {
+const chat_summary = ({ messages }) => {
   Logger.log(`chat_summary: running, ${messages.length} messages`);
-  // Convert to transcript string
-  let tmessages = transcript(messages.filter(m => m.role !== 'tool'));
 
-  // Get summary
-  let summaryText = await summarize(tmessages);
+  // Find most-recent summary message
+  let summaryIndex = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'summary') {
+      summaryIndex = i;
+      break;
+    }
+  }
 
-  if (!summaryText) return;
+  // No summary found — return as-is
+  if (summaryIndex === -1) {
+    return { messages };
+  }
 
-  let ret = [
-    { role: 'user', content: summaryText },
-    { role: 'assistant', content: 'Thank you, now I have the context I need to continue.' }
-  ];
+  // Drop all older messages, change summary role to user
+  const ret = messages.slice(summaryIndex).map((m, i) =>
+    i === 0 ? { ...m, role: 'user' } : m
+  );
 
-  Logger.log(`chat_summary: compacted (replaced ${messages.length} messages with ${estimate(summaryText)}-token summary)`);
-  return { messages: ret, system_prompt };
+  Logger.log(`chat_summary: compacted (kept ${ret.length} messages from summary onwards)`);
+  return { messages: ret };
 };
 
 module.exports = chat_summary;
