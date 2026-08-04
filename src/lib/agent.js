@@ -15,6 +15,7 @@ class Agent {
   constructor(props) {
     this.callbacks = props.callbacks;
     this.config = props.config;
+    this.config = props.context;
     this.compact = props.compact || null;
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props?.abortController ?? null;
@@ -36,7 +37,7 @@ class Agent {
    * @returns {Promise<Object>} Final result (model content or tool results)
    */
   async startTurn(userMessage, abortController, context) {
-    this.context = context;
+    this.context = context || this.context;
 
     // Reset per-turn
     this.#modelResponded = false;
