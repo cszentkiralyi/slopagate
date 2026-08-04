@@ -13,7 +13,6 @@ const Hooks = require('./hooks.js');  // global singleton
  */
 class Agent {
   constructor(props) {
-    this.context = props.context;
     this.callbacks = props.callbacks;
     this.config = props.config;
     this.compact = props.compact || null;
@@ -33,14 +32,12 @@ class Agent {
    * Start a model turn with the given user message.
    * @param {string} userMessage - User's input
    * @param {AbortController} abortController - Optional abort controller
-   * @param {Object} context - Optional context (sets this.context if provided)
+   * @param {Object} context - Context to use for this turn (sets this.context)
    * @returns {Promise<Object>} Final result (model content or tool results)
    */
   async startTurn(userMessage, abortController, context) {
-    if (context !== null && context !== undefined) {
-      this.context = context;
-    }
-    
+    this.context = context;
+
     // Reset per-turn
     this.#modelResponded = false;
     

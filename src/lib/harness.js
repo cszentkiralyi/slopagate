@@ -74,20 +74,17 @@ class Harness {
   
   /**
    * Amalgamate pending ambient reminders into a single user message
-   * and add to both #activeContext and session.context.
+   * and add to session.context.
    */
   #processAmbientReminders() {
     if (this.#pendingAmbientReminders.size === 0) return;
-    
+
     const amalgamated = Array.from(this.#pendingAmbientReminders).join('\n\n---\n\n');
     const ambientMessage = { role: 'user', content: amalgamated, ephemeral: true };
-    
-    // Add to active context (so the fork includes it)
-    this.#activeContext.add(ambientMessage);
-    
-    // Add to session context
+
+    // Add to session context so the per-turn fork picks it up
     this.session.context.add(ambientMessage);
-    
+
     // Clear pending queue
     this.#pendingAmbientReminders.clear();
   }
@@ -228,7 +225,7 @@ class Harness {
     
     // Compact callback: Harness owns the layers, Agent calls this mid-turn
     const compact = async (ctx) => {
-      return await this.#activeContext.fork({
+      return await ctx.fork({
         layers: [
           'ephemeral',
           //'system_prompt',
@@ -243,9 +240,8 @@ class Harness {
       });
     };
     
-    // Agent instance — forks from our active context per-turn
+    // Agent instance — gets its context fresh each turn via startTurn
     this.agent = new Agent({
-      context: this.#activeContext,
       compact: compact,
       tools: this.toolbox.all(),
       onTokens: ({ inputTokens, outputTokens }) => {
@@ -277,15 +273,12 @@ class Harness {
       abortController: null
     });
     
-    // Register hook handler to add messages to session context
+    // Register hook handler to persist messages to session context
     Hooks.on('before_message_add', (message) => {
-      this.#activeContext.add(message);
-
       // Skip messages with falsy content
       if (!message || !message.content || (typeof message.content === 'string' && !message.content.trim())) {
         return;
       }
-      // Add to session context
       this.session.context.add(message);
     });
 
@@ -297,10 +290,6 @@ class Harness {
 
         const nudgeContent = nudges.map(n => `<system-reminder>${n}</system-reminder>`).join('\n');
         const nudgeMessage = { role: 'user', content: nudgeContent, ephemeral: true };
-
-        // Add to active context
-        this.#activeContext.add(nudgeMessage);
-        // Add to session context
         this.session.context.add(nudgeMessage);
       }
     });
@@ -902,7 +891,14 @@ class Harness {
     // Check each tool call for duplicates
     for (let call of tool_calls) {
       let toolName = call.function.name;
-      let args = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
+      let args;
+      try {
+        args = typeof call.function.arguments === 'string' ? JSON.parse(call.function.arguments) : call.function.arguments;
+      } catch (err) {
+        Logger.log(`[warn] malformed tool args for ${toolName}: ${(err.message || err).slice(0, 120)}`);
+        args = {};
+      }
+      if (args && typeof args !== 'object') args = {};
       let match = this.checkDedup(toolName, args, call.id);
       if (match) {
         Logger.log(`[dedup] Detected similar tool call: ${toolName} (score: ${match.score.toFixed(2)})`);
