@@ -541,8 +541,6 @@ class Harness {
   }
 
   async compact() {
-    Events.emit('status:spinner', { message: 'Compacting...' });
-
     // Fork with chat_summary + ephemeral layers to drop ephemeral messages and summarize older parts without mutating the session context
     let compactContext = await this.session.context.fork({ layers: ['chat_summary', 'ephemeral'] });
 
@@ -553,7 +551,6 @@ class Harness {
 
     // Not enough messages to be worth summarizing
     if (compactContext.messages.length < 4) {
-      Events.emit('status:spinner', { hide: true });
       return;
     }
 
@@ -566,7 +563,7 @@ class Harness {
     // Use subagent for summary
     let summaryContext = new Context({
       config: this.config,
-      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," summarize this transcript into a concise summary. Focus on the high-level intent and what changed conceptually — not specific files, commands, or literal actions. Abstract away implementation details and capture the purpose of what was done.`
+      system_prompt: `You are an assistant that's been interacting with a user. From your perspective, using terms like "we" and "I," produce a structured context-preserving summary of this transcript. Capture: findings, discoveries, decisions made, user requests or preferences stated, constraints learned, key facts established, open questions, and any state that must carry forward across context compaction. Do NOT abstract away implementation details — preserve specific files touched, paths, configurations, architectural choices, and exact requirements the user expressed. Output only the summary — no preamble, no extra text.`
     });
     let summaryAgent = new Agent({
       context: summaryContext,
@@ -578,11 +575,10 @@ class Harness {
 
     if (!summaryResponse || !summaryResponse.content || !summaryResponse.content.length) {
       Logger.log(`Harness: no compact summary.`);
-      Events.emit('status:spinner', { hide: true });
       return;
     }
 
-    let summaryContent = `🕮  ${summaryResponse.content}`;
+    let summaryContent = summaryResponse.content;
     Logger.log(`Harness: compact summary = ${summaryContent}`);
 
     // Add to session context with role "summary" — hidden from UI, for agent awareness only
