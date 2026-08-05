@@ -15,7 +15,7 @@ class Agent {
   constructor(props) {
     this.callbacks = props.callbacks;
     this.config = props.config;
-    this.config = props.context;
+    this.context = props.context;
     this.compact = props.compact || null;
     this.tools = props.tools || [];  // Tool specs to send to model
     this.#abortController = props?.abortController ?? null;
